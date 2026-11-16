@@ -1,0 +1,1686 @@
+
+/* =====================================================
+   TASK MATERIAL - GLOBAL
+===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+.tasks-material-page,
+.tasks-material-page * {
+    box-sizing: border-box;
+}
+
+.tasks-material-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 22px 18px;
+
+    background: #f3f5f7;
+    color: #263238;
+
+    font-family: 'Poppins', sans-serif;
+}
+
+
+/* =====================================================
+   1. HEADER
+===================================================== */
+
+.tasks-material-header {
+    width: 100%;
+    min-height: 66px;
+    margin-bottom: 18px;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.tasks-material-header-title h2 {
+    margin: 0;
+
+    color: #27333e;
+    font-size: 23px;
+    font-weight: 600;
+}
+
+.tasks-material-header-title p {
+    margin: 2px 0 0;
+
+    color: #89929b;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.tasks-material-header-title p span {
+    margin: 0 4px;
+}
+
+
+/* Admin profile */
+
+.tasks-material-admin-profile {
+    min-width: 150px;
+    min-height: 64px;
+    padding: 8px 12px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 7px;
+}
+
+.tasks-material-admin-avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #e8ecef;
+    border-radius: 50%;
+
+    color: #65717c;
+    font-size: 22px;
+}
+
+.tasks-material-admin-info h4 {
+    margin: 0;
+
+    color: #29343e;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tasks-material-admin-info p {
+    margin: 1px 0 0;
+
+    color: #929aa2;
+    font-size: 11px;
+}
+
+
+/* =====================================================
+   2. TOP NAVIGATION
+===================================================== */
+
+.tasks-material-top-navigation {
+    width: 100%;
+    min-height: 76px;
+    padding: 0 5px 17px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+
+/* Tabs */
+
+.tasks-material-tabs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tasks-material-tabs button {
+    min-width: 142px;
+    height: 44px;
+    padding: 0 20px;
+
+    border: 1px solid #e0e4e8;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: #53606c;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-material-tabs button:hover:not(.tasks-material-tab-active) {
+    border-color: #f47a13;
+    color: #f47a13;
+}
+
+.tasks-material-tabs button.tasks-material-tab-active {
+    background: #f47713;
+    border-color: #f47713;
+    color: #ffffff;
+
+    font-weight: 600;
+
+    box-shadow: 0 2px 5px rgba(244, 119, 19, 0.16);
+}
+
+
+/* Export */
+
+.tasks-material-export-btn {
+    min-width: 126px;
+    height: 43px;
+    padding: 0 17px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    background: #ffffff;
+    border: 1px solid #e0e4e8;
+    border-radius: 7px;
+
+    color: #53606c;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-material-export-btn svg {
+    font-size: 17px;
+}
+
+.tasks-material-export-btn:hover {
+    border-color: #f47713;
+    color: #f47713;
+}
+
+
+/* =====================================================
+   3. MATERIAL LIST CONTAINER
+===================================================== */
+
+.tasks-material-list-container {
+    width: 100%;
+    min-height: 480px;
+    padding: 28px 25px;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #ffffff;
+    border: 1px solid #edf0f2;
+    border-radius: 12px;
+
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.035);
+}
+
+
+/* =====================================================
+   4. SEARCH AND FILTER ROW
+===================================================== */
+
+.tasks-material-filter-row {
+    width: 100%;
+    margin-bottom: 24px;
+
+    display: grid;
+    grid-template-columns: minmax(180px, 2fr) repeat(3, minmax(130px, 1fr));
+
+    gap: 12px;
+    align-items: center;
+}
+
+
+/* Search */
+
+.tasks-material-search-box {
+    width: 100%;
+    height: 44px;
+    padding: 0 13px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    background: #ffffff;
+    border: 1px solid #e0e4e8;
+    border-radius: 6px;
+}
+
+.tasks-material-search-box > svg {
+    flex-shrink: 0;
+
+    color: #9aa4ad;
+    font-size: 20px;
+}
+
+.tasks-material-search-box input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+
+    border: none;
+    outline: none;
+    background: transparent;
+
+    color: #37434e;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.tasks-material-search-box input::placeholder {
+    color: #9ba4ad;
+}
+
+.tasks-material-search-box button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    background: transparent;
+
+    color: #8a949d;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+
+/* Filter selects */
+
+.tasks-material-filter-row > select {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+
+    background: #ffffff;
+    border: 1px solid #e0e4e8;
+    border-radius: 6px;
+
+    color: #68737d;
+    font-family: inherit;
+    font-size: 13px;
+
+    outline: none;
+    cursor: pointer;
+}
+
+.tasks-material-filter-row > select:focus {
+    border-color: #f47713;
+}
+
+
+/* =====================================================
+   5. TABLE
+===================================================== */
+
+.tasks-material-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+
+    border: 1px solid #e7eaed;
+    border-radius: 3px;
+}
+
+.tasks-material-table {
+    width: 100%;
+    min-width: 900px;
+
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+
+/* Table header */
+
+.tasks-material-table thead {
+    background: #fafbfc;
+}
+
+.tasks-material-table th {
+    height: 49px;
+    padding: 12px 16px;
+
+    text-align: left;
+    white-space: nowrap;
+
+    color: #7c8791;
+    font-size: 12px;
+    font-weight: 600;
+
+    border-bottom: 1px solid #e5e8eb;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+}
+
+
+/* Table rows */
+
+.tasks-material-table tbody tr {
+    min-height: 75px;
+
+    border-bottom: 1px solid #e8eaed;
+    transition: background 0.2s ease;
+}
+
+.tasks-material-table tbody tr:hover {
+    background: #fffaf5;
+}
+
+.tasks-material-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.tasks-material-table td {
+    min-height: 75px;
+    padding: 17px 16px;
+
+    color: #46515c;
+    font-size: 13px;
+    font-weight: 400;
+
+    vertical-align: middle;
+    line-height: 1.5;
+}
+
+.tasks-material-title-cell {
+    min-width: 150px;
+    color: #29343e !important;
+    font-weight: 600 !important;
+}
+
+
+/* =====================================================
+   6. BRANCH TAGS
+===================================================== */
+
+.tasks-material-branch-tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.tasks-material-branch-tags span {
+    padding: 4px 9px;
+
+    background: #fff6eb;
+    border: 1px solid #f3eadf;
+    border-radius: 20px;
+
+    color: #bd7737;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+
+/* =====================================================
+   7. AUDIENCE BADGE
+===================================================== */
+
+.tasks-material-audience-badge {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 5px 10px;
+
+    background: #e5efff;
+    border-radius: 20px;
+
+    color: #4169a5;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   8. ATTACHMENT ACTIONS
+===================================================== */
+
+.tasks-material-attachment-actions {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.tasks-material-attachment-actions button {
+    width: 23px;
+    height: 25px;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    background: transparent;
+
+    color: #39ae78;
+    font-size: 20px;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-material-attachment-actions button:last-child {
+    color: #4285e9;
+}
+
+.tasks-material-attachment-actions button:hover {
+    transform: scale(1.15);
+}
+
+
+/* =====================================================
+   9. TABLE ACTION BUTTONS
+===================================================== */
+
+.tasks-material-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.tasks-material-action-buttons button {
+    width: 22px;
+    height: 25px;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    background: transparent;
+
+    color: #4c8ce9;
+    font-size: 17px;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-material-action-buttons button:first-child {
+    color: #38ae79;
+}
+
+.tasks-material-action-buttons button:hover {
+    transform: scale(1.15);
+}
+
+.tasks-material-action-buttons button.tasks-material-delete-icon {
+    color: #ef5555;
+}
+
+
+/* =====================================================
+   10. EMPTY STATE
+===================================================== */
+
+.tasks-material-empty-state {
+    width: 100%;
+    min-height: 350px;
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+.tasks-material-empty-state p {
+    margin: 0;
+    padding: 15px;
+
+    color: #929ba3;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+/* Footer */
+
+.tasks-material-list-footer {
+    width: 100%;
+    min-height: 35px;
+    margin-top: auto;
+    padding-top: 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.tasks-material-list-footer span {
+    color: #6f7880;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   11. CREATE FORM CONTAINER
+===================================================== */
+
+.tasks-material-form-container,
+.tasks-material-detail-container {
+    width: 100%;
+    min-height: 490px;
+    padding: 32px 24px 24px;
+
+    background: #ffffff;
+    border: 1px solid #edf0f2;
+    border-radius: 12px;
+
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.045);
+}
+
+.tasks-material-form {
+    width: 100%;
+    min-height: 420px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =====================================================
+   12. DETAIL HEADER
+===================================================== */
+
+.tasks-material-detail-header {
+    width: 100%;
+    margin-bottom: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tasks-material-detail-header h2 {
+    margin: 0;
+
+    color: #26333e;
+    font-size: 22px;
+    font-weight: 600;
+
+    overflow-wrap: anywhere;
+}
+
+.tasks-material-back-btn {
+    height: 37px;
+    padding: 0 13px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    border: 1px solid #dce1e5;
+    border-radius: 6px;
+
+    background: #ffffff;
+    color: #45515c;
+
+    font-family: inherit;
+    font-size: 12px;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-material-back-btn svg {
+    font-size: 16px;
+}
+
+.tasks-material-back-btn:hover {
+    border-color: #f47713;
+    color: #f47713;
+}
+
+
+/* =====================================================
+   13. FORM SECTIONS
+===================================================== */
+
+.tasks-material-form-section {
+    width: 100%;
+}
+
+.tasks-material-form-section h3,
+.tasks-material-audience-section h3 {
+    margin: 0 0 9px;
+
+    color: #283540;
+    font-size: 19px;
+    font-weight: 600;
+}
+
+.tasks-material-section-divider {
+    width: 100%;
+    height: 1px;
+    margin-bottom: 19px;
+
+    background: #e6e9ec;
+}
+
+
+/* =====================================================
+   14. FORM GRID
+===================================================== */
+
+.tasks-material-form-grid {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 22px 24px;
+}
+
+.tasks-material-form-group {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.tasks-material-form-group > label {
+    margin-bottom: 7px;
+
+    color: #34414c;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.tasks-material-form-group > label span {
+    color: #f16d5f;
+    margin-left: 3px;
+}
+
+.tasks-material-form-group > label small {
+    margin-left: 5px;
+
+    color: #929ca5;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+
+/* Input and select */
+
+.tasks-material-form-group > input,
+.tasks-material-form-group > select,
+.tasks-material-form-group select,
+.tasks-material-form-group input:not([type="checkbox"]):not([type="file"]) {
+    width: 100%;
+    min-width: 0;
+    height: 41px;
+    padding: 0 12px;
+
+    background: #ffffff;
+    border: 1px solid #dfe3e7;
+    border-radius: 6px;
+
+    color: #414c56;
+    font-family: inherit;
+    font-size: 13px;
+
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.tasks-material-form-group input::placeholder {
+    color: #a1aab2;
+}
+
+.tasks-material-form-group input:focus,
+.tasks-material-form-group select:focus {
+    border-color: #f47713;
+    box-shadow: 0 0 0 2px rgba(244, 119, 19, 0.08);
+}
+
+
+/* =====================================================
+   15. FILE UPLOAD
+===================================================== */
+
+.tasks-material-upload-box {
+    width: 100%;
+    height: 41px;
+    padding: 0 12px;
+    margin: 0 !important;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    border: 1px solid #dfe3e7;
+    border-radius: 6px;
+
+    background: #ffffff;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.tasks-material-upload-box span {
+    min-width: 0;
+    flex: 1;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #929ba4;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.tasks-material-upload-box svg {
+    flex-shrink: 0;
+
+    color: #69747e;
+    font-size: 18px;
+}
+
+.tasks-material-upload-box:hover {
+    border-color: #f47713;
+}
+
+
+/* Attachment preview */
+
+.tasks-material-attachment-list {
+    width: 100%;
+    margin-top: 10px;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tasks-material-attachment-item {
+    max-width: 230px;
+    min-height: 31px;
+    padding: 5px 9px;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    background: #f0f1f2;
+    border: 1px solid #e0e2e4;
+    border-radius: 5px;
+}
+
+.tasks-material-attachment-item span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #525d67;
+    font-size: 11px;
+}
+
+.tasks-material-attachment-item button {
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    border: none;
+    background: transparent;
+
+    color: #ef5151;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+
+/* Readonly files */
+
+.tasks-material-readonly-files {
+    width: 100%;
+    min-height: 41px;
+    padding: 8px 11px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    background: #eeeeee;
+    border: 1px solid #d9dcdf;
+    border-radius: 6px;
+}
+
+.tasks-material-readonly-files > span {
+    color: #65717a;
+    font-size: 12px;
+}
+
+.tasks-material-readonly-files > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.tasks-material-readonly-files > div span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+}
+
+.tasks-material-readonly-files button {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #4285e9;
+    font-size: 19px;
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   16. DOWNLOAD PERMISSION
+===================================================== */
+
+.tasks-material-download-permission {
+    margin-top: 22px;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.tasks-material-download-permission input {
+    width: 19px;
+    height: 19px;
+    margin: 0;
+
+    accent-color: #1683e9;
+    cursor: pointer;
+}
+
+.tasks-material-download-permission label {
+    color: #46525d;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   17. AUDIENCE SELECTION
+===================================================== */
+
+.tasks-material-audience-section {
+    width: 100%;
+    margin-top: 30px;
+}
+
+.tasks-material-audience-grid {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 24px;
+}
+
+
+/* Disabled hint */
+
+.tasks-material-hint {
+    color: #df7777 !important;
+    font-size: 11px !important;
+}
+
+
+/* =====================================================
+   18. BRANCH MULTISELECT DROPDOWN
+===================================================== */
+
+.tasks-material-dropdown-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.tasks-material-dropdown-trigger {
+    width: 100%;
+    height: 41px;
+    padding: 0 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    background: #ffffff;
+    border: 1px solid #dfe3e7;
+    border-radius: 6px;
+
+    color: #58646e;
+    font-family: inherit;
+    font-size: 13px;
+
+    text-align: left;
+    cursor: pointer;
+}
+
+.tasks-material-dropdown-trigger > span {
+    min-width: 0;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tasks-material-dropdown-trigger svg {
+    flex-shrink: 0;
+    color: #8b969f;
+    font-size: 21px;
+}
+
+.tasks-material-dropdown-trigger:hover {
+    border-color: #f47713;
+}
+
+.tasks-material-dropdown-trigger:disabled {
+    background: #eeeeee;
+    color: #59636c;
+    cursor: not-allowed;
+}
+
+
+/* Dropdown menu */
+
+.tasks-material-dropdown-menu {
+    position: absolute;
+    z-index: 50;
+    top: calc(100% + 5px);
+    left: 0;
+
+    width: 100%;
+    max-height: 230px;
+    padding: 7px;
+
+    overflow-y: auto;
+
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+}
+
+
+/* Dropdown options */
+
+.tasks-material-dropdown-option {
+    width: 100%;
+    min-height: 36px;
+    padding: 7px 9px;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.tasks-material-dropdown-option:hover {
+    background: #fff4e9;
+}
+
+.tasks-material-dropdown-option input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+
+    accent-color: #f47713;
+}
+
+.tasks-material-dropdown-option span {
+    color: #46525d;
+    font-size: 12px;
+}
+
+
+/* Done */
+
+.tasks-material-dropdown-done {
+    width: 100%;
+    height: 31px;
+    margin-top: 5px;
+
+    border: none;
+    border-radius: 4px;
+
+    background: #f47713;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   19. AUDIENCE SELECTION DROPDOWN
+===================================================== */
+
+.tasks-material-audience-select-group {
+    grid-column: 1 / 2;
+}
+
+
+/* =====================================================
+   20. INTERN SEARCH
+===================================================== */
+
+.tasks-material-intern-search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.tasks-material-intern-search {
+    position: relative;
+    width: 100%;
+}
+
+.tasks-material-intern-search input {
+    width: 100%;
+    height: 41px;
+    padding: 0 38px 0 12px;
+
+    background: #ffffff;
+    border: 1px solid #dfe3e7;
+    border-radius: 6px;
+
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.tasks-material-intern-search input:focus {
+    border-color: #f47713;
+}
+
+.tasks-material-intern-search svg {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    color: #79848d;
+    font-size: 19px;
+    pointer-events: none;
+}
+
+
+/* Intern dropdown */
+
+.tasks-material-intern-results {
+    position: absolute;
+    z-index: 40;
+    top: calc(100% + 5px);
+    left: 0;
+
+    width: 100%;
+    max-height: 180px;
+    overflow-y: auto;
+
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.10);
+}
+
+.tasks-material-intern-results button {
+    width: 100%;
+    padding: 10px 12px;
+
+    display: block;
+    text-align: left;
+
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+
+    background: #ffffff;
+    color: #46525d;
+
+    font-family: inherit;
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+.tasks-material-intern-results button:hover {
+    background: #fff4e9;
+}
+
+.tasks-material-intern-results p {
+    padding: 10px;
+    color: #89939b;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   21. SELECTED AUDIENCE
+===================================================== */
+
+.tasks-material-selected-section {
+    width: 100%;
+    margin-top: 22px;
+}
+
+.tasks-material-selected-section h4 {
+    margin: 0 0 11px;
+
+    color: #34414c;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.tasks-material-selected-list {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+.tasks-material-selected-item {
+    width: 100%;
+    min-height: 36px;
+    padding: 7px 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+
+    background: #ededed;
+    border: 1px solid #dcdfe1;
+    border-radius: 5px;
+}
+
+.tasks-material-selected-item span {
+    min-width: 0;
+
+    color: #46515b;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+.tasks-material-selected-item button {
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    border: none;
+    background: transparent;
+
+    color: #ef5350;
+    font-size: 18px;
+
+    cursor: pointer;
+}
+
+.tasks-material-selected-item button:hover {
+    color: #c62828;
+}
+
+
+/* =====================================================
+   22. VIEW MODE
+===================================================== */
+
+.tasks-material-form input:disabled,
+.tasks-material-form select:disabled {
+    background: #eeeeee !important;
+    color: #515d67 !important;
+    border-color: #d6dadd !important;
+
+    opacity: 1;
+    -webkit-text-fill-color: #515d67;
+
+    cursor: not-allowed;
+}
+
+
+/* =====================================================
+   23. FORM BUTTONS
+===================================================== */
+
+.tasks-material-form-buttons {
+    width: 100%;
+    margin-top: auto;
+    padding-top: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+
+/* Cancel / Delete */
+
+.tasks-material-cancel-btn {
+    min-width: 100px;
+    height: 43px;
+    padding: 0 18px;
+
+    border: 1px solid #e5e5e5;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: #df5555;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: 0.2s ease;
+}
+
+.tasks-material-cancel-btn:hover {
+    border-color: #ef7777;
+    background: #fff5f5;
+}
+
+
+/* Add / Save / Edit */
+
+.tasks-material-primary-btn {
+    min-width: 145px;
+    height: 43px;
+    padding: 0 20px;
+
+    border: 1px solid #f47713;
+    border-radius: 7px;
+
+    background: #f47713;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(244, 119, 19, 0.15);
+    transition: 0.2s ease;
+}
+
+.tasks-material-primary-btn:hover {
+    background: #e86c0c;
+    border-color: #e86c0c;
+}
+
+
+/* =====================================================
+   24. TABLET RESPONSIVE
+===================================================== */
+
+@media screen and (max-width: 1000px) {
+
+    .tasks-material-page {
+        padding: 18px 14px;
+    }
+
+    .tasks-material-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tasks-material-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tasks-material-selected-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =====================================================
+   25. MOBILE RESPONSIVE
+===================================================== */
+
+@media screen and (max-width: 600px) {
+
+    .tasks-material-page {
+        padding: 13px 10px;
+    }
+
+
+    /* Header */
+
+    .tasks-material-header {
+        min-height: 52px;
+        margin-bottom: 12px;
+    }
+
+    .tasks-material-header-title h2 {
+        font-size: 19px;
+    }
+
+    .tasks-material-header-title p {
+        font-size: 10px;
+    }
+
+    .tasks-material-admin-profile {
+        min-width: 105px;
+        min-height: 45px;
+        padding: 5px 7px;
+        gap: 6px;
+    }
+
+    .tasks-material-admin-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 17px;
+    }
+
+    .tasks-material-admin-info h4 {
+        font-size: 11px;
+    }
+
+    .tasks-material-admin-info p {
+        font-size: 9px;
+    }
+
+
+    /* Navigation */
+
+    .tasks-material-top-navigation {
+        min-height: 62px;
+        padding: 0 0 12px;
+        gap: 8px;
+    }
+
+    .tasks-material-tabs {
+        flex: 1;
+        gap: 5px;
+    }
+
+    .tasks-material-tabs button {
+        min-width: 0;
+        flex: 1;
+        height: 38px;
+        padding: 0 6px;
+
+        font-size: 10px;
+    }
+
+    .tasks-material-export-btn {
+        min-width: 75px;
+        height: 38px;
+        padding: 0 8px;
+        gap: 4px;
+
+        font-size: 10px;
+    }
+
+    .tasks-material-export-btn svg {
+        font-size: 14px;
+    }
+
+
+    /* List */
+
+    .tasks-material-list-container {
+        min-height: 360px;
+        padding: 15px 10px;
+        border-radius: 9px;
+    }
+
+    .tasks-material-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+        margin-bottom: 15px;
+    }
+
+    .tasks-material-search-box {
+        grid-column: 1 / -1;
+        height: 39px;
+    }
+
+    .tasks-material-filter-row > select {
+        height: 39px;
+        padding: 0 7px;
+        font-size: 10px;
+    }
+
+    .tasks-material-search-box input {
+        font-size: 11px;
+    }
+
+    .tasks-material-table {
+        min-width: 900px;
+    }
+
+    .tasks-material-empty-state {
+        min-height: 260px;
+    }
+
+    .tasks-material-empty-state p {
+        font-size: 12px;
+    }
+
+
+    /* Form */
+
+    .tasks-material-form-container,
+    .tasks-material-detail-container {
+        min-height: 400px;
+        padding: 20px 13px;
+        border-radius: 9px;
+    }
+
+    .tasks-material-form {
+        min-height: 350px;
+    }
+
+    .tasks-material-form-section h3,
+    .tasks-material-audience-section h3 {
+        font-size: 16px;
+    }
+
+    .tasks-material-form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .tasks-material-audience-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .tasks-material-form-group > label {
+        font-size: 12px;
+    }
+
+    .tasks-material-form-group > input,
+    .tasks-material-form-group > select,
+    .tasks-material-form-group input:not([type="checkbox"]):not([type="file"]),
+    .tasks-material-upload-box,
+    .tasks-material-dropdown-trigger,
+    .tasks-material-intern-search input {
+        height: 40px;
+        font-size: 12px;
+    }
+
+    .tasks-material-upload-box span {
+        font-size: 11px;
+    }
+
+    .tasks-material-download-permission {
+        margin-top: 18px;
+    }
+
+    .tasks-material-download-permission label {
+        font-size: 11px;
+    }
+
+    .tasks-material-audience-section {
+        margin-top: 25px;
+    }
+
+    .tasks-material-selected-list {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .tasks-material-selected-item {
+        min-height: 35px;
+    }
+
+    .tasks-material-detail-header h2 {
+        font-size: 17px;
+    }
+
+    .tasks-material-back-btn {
+        height: 34px;
+        font-size: 10px;
+    }
+
+
+    /* Buttons */
+
+    .tasks-material-form-buttons {
+        padding-top: 25px;
+        gap: 8px;
+    }
+
+    .tasks-material-cancel-btn {
+        min-width: 0;
+        flex: 1;
+        height: 40px;
+        padding: 0 8px;
+        font-size: 11px;
+    }
+
+    .tasks-material-primary-btn {
+        min-width: 0;
+        flex: 1.3;
+        height: 40px;
+        padding: 0 8px;
+        font-size: 11px;
+    }
+
+}
+
+
+/* =====================================================
+   26. SMALL MOBILE
+===================================================== */
+
+@media screen and (max-width: 380px) {
+
+    .tasks-material-page {
+        padding: 10px 7px;
+    }
+
+    .tasks-material-header-title h2 {
+        font-size: 16px;
+    }
+
+    .tasks-material-admin-profile {
+        min-width: 90px;
+    }
+
+    .tasks-material-admin-avatar {
+        width: 27px;
+        height: 27px;
+    }
+
+    .tasks-material-tabs button {
+        font-size: 9px;
+    }
+
+    .tasks-material-export-btn {
+        min-width: 65px;
+        font-size: 9px;
+    }
+
+    .tasks-material-filter-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .tasks-material-form-container,
+    .tasks-material-detail-container {
+        padding: 16px 10px;
+    }
+
+    .tasks-material-form-buttons {
+        gap: 6px;
+    }
+
+}
+
+
+/* =====================================================
+   27. SCROLLBARS
+===================================================== */
+
+.tasks-material-table-wrapper::-webkit-scrollbar,
+.tasks-material-dropdown-menu::-webkit-scrollbar,
+.tasks-material-intern-results::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.tasks-material-table-wrapper::-webkit-scrollbar-thumb,
+.tasks-material-dropdown-menu::-webkit-scrollbar-thumb,
+.tasks-material-intern-results::-webkit-scrollbar-thumb {
+    background: #cbd1d6;
+    border-radius: 10px;
+}
+
+.tasks-material-table-wrapper::-webkit-scrollbar-track,
+.tasks-material-dropdown-menu::-webkit-scrollbar-track,
+.tasks-material-intern-results::-webkit-scrollbar-track {
+    background: #f5f6f7;
+}
+
+
+/* =====================================================
+   28. FOCUS
+===================================================== */
+
+.tasks-material-page button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tasks-material-page button:focus-visible {
+    outline: 2px solid #f47713;
+    outline-offset: 2px;
+}
