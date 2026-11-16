@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // =====================================
@@ -68,6 +67,8 @@ import { Intrentask } from "./pages/intern/interntask";
 
 import Internattendance from "./pages/intern/Internattendance";
 import Internmonthlycard from "./pages/intern/Internmonthlycard";
+import InternWeeklySchedule from "./pages/intern/InternWeeklySchedule";
+import WeeklyCard from "./pages/intern/WeeklyCard";
 
 // =====================================
 // APP COMPONENT
@@ -274,6 +275,24 @@ function App() {
                     element={
                         <Internlayout>
                             <Internattendance />
+                        </Internlayout>
+                    }
+                />
+
+                <Route
+                    path="/internweekly"
+                    element={
+                        <Internlayout>
+                            <InternWeeklySchedule />
+                        </Internlayout>
+                    }
+                />
+
+                <Route
+                    path="/internweeklycard"
+                    element={
+                        <Internlayout>
+                            <WeeklyCard />
                         </Internlayout>
                     }
                 />
