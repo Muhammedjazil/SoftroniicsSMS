@@ -1,50 +1,81 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+// =====================================
 // ADMIN LAYOUT
+// =====================================
+
 import Adminlayout from "./components/Layout/Adminlayout";
 
+// =====================================
 // INTERN LAYOUT
+// =====================================
+
 import { Internlayout } from "./components/Layout/Internlayout";
 
+// =====================================
 // ADMIN PAGES - ADMINISTRATION
+// =====================================
+
 import { Rolemanagement } from "./pages/admin/administration/Rolemanagement";
 import { Staffmanagement } from "./pages/admin/administration/Staffmanagement";
 import { Internmanagement } from "./pages/admin/administration/Internmanagement";
 
+// =====================================
 // ADMIN PAGES - SCHEDULE
+// =====================================
+
 import BatchManagement from "./pages/admin/schedule/BatchManagement";
 import MentorBatches from "./pages/admin/schedule/MentorBatches";
 import TimingsManagement from "./pages/admin/schedule/TimingsManagement";
 import WeeklySchedule from "./pages/admin/schedule/WeeklySchedule";
 
+// =====================================
 // ADMIN PAGES - SETTINGS
+// =====================================
+
 import { Branch } from "./pages/admin/settings/Settingsbranch";
 import { Notification } from "./pages/admin/settings/Setingsnotification";
+
+// =====================================
+// ADMIN PAGES - TASK MANAGEMENT
+// =====================================
 
 import Taskevaluation from "./pages/admin/Taskmanagement/Taskevaluation";
 import Taskmaterial from "./pages/admin/Taskmanagement/Taskmaterial";
 import Tasks from "./pages/admin/Taskmanagement/Tasks";
 
+// =====================================
+// ADMIN PAGES - ATTENDANCE
+// =====================================
+
 import Attendancestudent from "./pages/admin/Attendance/Attendancestudent";
 import Leaverequest from "./pages/admin/Attendance/Leaverequest";
+
+// =====================================
 // ADMIN PAGES - SYLLABUS
+// =====================================
+
 import ModuleManagement from "./pages/admin/syllabus/ModuleManagement";
 import TopicsManagement from "./pages/admin/syllabus/TopicsManagement";
 
+// =====================================
 // INTERN PAGES
+// =====================================
+
 import { Internnotification } from "./pages/intern/Internnotification";
 import { Intrentask } from "./pages/intern/interntask";
 
 import Internattendance from "./pages/intern/Internattendance";
 import Internmonthlycard from "./pages/intern/Internmonthlycard";
 
+// =====================================
+// APP COMPONENT
+// =====================================
 
 function App() {
-
     return (
-
         <BrowserRouter>
-
             <Routes>
 
                 {/* =================================
@@ -60,7 +91,8 @@ function App() {
                     }
                 />
 
-                {/* Administration */}
+                {/* ADMINISTRATION */}
+
                 <Route
                     path="/rolemanagement"
                     element={
@@ -88,7 +120,8 @@ function App() {
                     }
                 />
 
-                {/* Schedule */}
+                {/* SCHEDULE */}
+
                 <Route
                     path="/batchmanagement"
                     element={
@@ -125,7 +158,8 @@ function App() {
                     }
                 />
 
-                {/* Settings */}
+                {/* SETTINGS */}
+
                 <Route
                     path="/branch"
                     element={
@@ -144,12 +178,57 @@ function App() {
                     }
                 />
 
+                {/* TASK MANAGEMENT */}
+
                 <Route
-                    path="/Taskevaluation"
+                    path="/taskevaluation"
                     element={
                         <Adminlayout>
                             <Taskevaluation />
-                {/* Syllabus */}
+                        </Adminlayout>
+                    }
+                />
+
+                <Route
+                    path="/taskmaterial"
+                    element={
+                        <Adminlayout>
+                            <Taskmaterial />
+                        </Adminlayout>
+                    }
+                />
+
+                <Route
+                    path="/tasks"
+                    element={
+                        <Adminlayout>
+                            <Tasks />
+                        </Adminlayout>
+                    }
+                />
+
+                {/* ATTENDANCE */}
+
+                <Route
+                    path="/attendancestudent"
+                    element={
+                        <Adminlayout>
+                            <Attendancestudent />
+                        </Adminlayout>
+                    }
+                />
+
+                <Route
+                    path="/leaverequest"
+                    element={
+                        <Adminlayout>
+                            <Leaverequest />
+                        </Adminlayout>
+                    }
+                />
+
+                {/* SYLLABUS */}
+
                 <Route
                     path="/modulemanagement"
                     element={
@@ -160,41 +239,6 @@ function App() {
                 />
 
                 <Route
-                    path="/Taskmaterial"
-                    element={
-                        <Adminlayout>
-                            <Taskmaterial />
-                        </Adminlayout>
-                    }
-                />
-
-                <Route
-                    path="/Tasks"
-                    element={
-                        <Adminlayout>
-                            <Tasks />
-                        </Adminlayout>
-                    }
-                />
-
-                <Route
-                    path="/Attendancestudent"
-                    element={
-                        <Adminlayout>
-                            <Attendancestudent />
-                        </Adminlayout>
-                    }
-                />
-
-                <Route
-                    path="/Leaverequest"
-                    element={
-                        <Adminlayout>
-                            <Leaverequest />
-                        </Adminlayout>
-                    }
-                />
-
                     path="/topicsmanagement"
                     element={
                         <Adminlayout>
@@ -226,7 +270,7 @@ function App() {
                 />
 
                 <Route
-                    path="/Internattendance"
+                    path="/internattendance"
                     element={
                         <Internlayout>
                             <Internattendance />
@@ -235,7 +279,7 @@ function App() {
                 />
 
                 <Route
-                    path="/Internmonthlycard"
+                    path="/internmonthlycard"
                     element={
                         <Internlayout>
                             <Internmonthlycard />
@@ -244,11 +288,8 @@ function App() {
                 />
 
             </Routes>
-
         </BrowserRouter>
-
     );
-
 }
 
 export default App;

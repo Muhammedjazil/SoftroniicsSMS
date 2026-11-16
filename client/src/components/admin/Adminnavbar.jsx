@@ -1,19 +1,16 @@
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import {
     FiGrid,
     FiUsers,
-    FiUser,
-    FiShield,
     FiBook,
     FiFileText,
     FiEdit,
     FiCalendar,
-    FiClock,
-    FiGitBranch,
-    FiBell,
     FiCheckSquare,
+    FiShield,
     FiLogOut,
     FiChevronDown,
     FiChevronUp,
@@ -96,12 +93,16 @@ export const AdminNavbar = () => {
             icon: <FiEdit />,
             children: [
                 {
-                    title: "Syllabus",
-                    path: "/syllebus"
+                    title: "Task Evaluation",
+                    path: "/taskevaluation"
                 },
                 {
-                    title: "Material",
-                    path: "/meterial"
+                    title: "Materials",
+                    path: "/taskmaterial"
+                },
+                {
+                    title: "Tasks",
+                    path: "/tasks"
                 }
             ]
         },
@@ -135,7 +136,7 @@ export const AdminNavbar = () => {
             children: [
                 {
                     title: "Student Attendance",
-                    path: "/studentattendence"
+                    path: "/attendancestudent"
                 },
                 {
                     title: "Leave Request",
@@ -160,6 +161,25 @@ export const AdminNavbar = () => {
         }
     ];
 
+    // =====================================
+    // OPEN ACTIVE MENU AUTOMATICALLY
+    // =====================================
+
+    useEffect(() => {
+
+        const activeMenu = menuItems.find((item) =>
+            item.children?.some(
+                (child) => child.path === location.pathname
+            )
+        );
+
+        if (activeMenu) {
+            setOpenMenu(activeMenu.title);
+        }
+
+        setMobileOpen(false);
+
+    }, [location.pathname]);
 
     // =====================================
     // MENU TOGGLE
@@ -173,19 +193,17 @@ export const AdminNavbar = () => {
 
     };
 
-
     // =====================================
-    // ACTIVE MENU CHECK
+    // ACTIVE CHILD CHECK
     // =====================================
 
     const isChildActive = (children) => {
 
         return children?.some(
-            (item) => location.pathname === item.path
+            (item) => item.path === location.pathname
         );
 
     };
-
 
     // =====================================
     // LOGOUT
@@ -195,28 +213,56 @@ export const AdminNavbar = () => {
 
         localStorage.removeItem("token");
 
+        setMobileOpen(false);
+
         navigate("/login");
 
     };
 
+    // =====================================
+    // CLOSE MOBILE MENU
+    // =====================================
+
+    const closeMobileMenu = () => {
+        setMobileOpen(false);
+    };
+
+    // =====================================
+    // JSX
+    // =====================================
 
     return (
-
         <>
 
             {/* MOBILE MENU BUTTON */}
 
             <button
+                type="button"
                 className="adminmobilemenu"
-                onClick={() => setMobileOpen(!mobileOpen)}
+                onClick={() => setMobileOpen((prev) => !prev)}
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
             >
                 {mobileOpen ? <FiX /> : <FiMenu />}
             </button>
 
 
+            {/* MOBILE OVERLAY */}
+
+            {mobileOpen && (
+                <div
+                    className="adminnavoverlay"
+                    onClick={closeMobileMenu}
+                />
+            )}
+
+
             {/* SIDEBAR */}
 
-            <div className={`adminnavbar ${mobileOpen ? "adminnavopen" : ""}`}>
+            <aside
+                className={`adminnavbar ${
+                    mobileOpen ? "adminnavopen" : ""
+                }`}
+            >
 
                 {/* LOGO */}
 
@@ -233,28 +279,30 @@ export const AdminNavbar = () => {
 
                 <div className="adminnavitems">
 
-                    {menuItems.map((item, index) => (
+                    {menuItems.map((item) => (
 
                         <div
                             className="adminnavgroup"
-                            key={index}
+                            key={item.title}
                         >
 
-                            {/* MAIN MENU */}
+                            {/* PARENT MENU */}
 
                             {item.children ? (
 
                                 <>
 
-                                    <div
+                                    <button
+                                        type="button"
                                         className={`adminnavmain ${
                                             openMenu === item.title ||
                                             isChildActive(item.children)
                                                 ? "adminnavmainactive"
                                                 : ""
                                         }`}
-
-                                        onClick={() => handleMenu(item.title)}
+                                        onClick={() =>
+                                            handleMenu(item.title)
+                                        }
                                     >
 
                                         <span className="adminnavicon">
@@ -274,27 +322,26 @@ export const AdminNavbar = () => {
 
                                         </span>
 
-                                    </div>
+                                    </button>
 
 
-                                    {/* SUB MENU */}
+                                    {/* SUBMENU */}
 
                                     {openMenu === item.title && (
 
                                         <div className="adminnavsubmenu">
 
-                                            {item.children.map((child, childIndex) => (
+                                            {item.children.map((child) => (
 
                                                 <NavLink
-                                                    key={childIndex}
+                                                    key={child.path}
                                                     to={child.path}
                                                     className={({ isActive }) =>
                                                         isActive
                                                             ? "adminnavsubitem adminnavsubactive"
                                                             : "adminnavsubitem"
                                                     }
-
-                                                    onClick={() => setMobileOpen(false)}
+                                                    onClick={closeMobileMenu}
                                                 >
 
                                                     {child.title}
@@ -311,6 +358,8 @@ export const AdminNavbar = () => {
 
                             ) : (
 
+                                /* NORMAL MENU LINK */
+
                                 <NavLink
                                     to={item.path}
                                     className={({ isActive }) =>
@@ -318,8 +367,7 @@ export const AdminNavbar = () => {
                                             ? "adminnavmain adminnavmainactive"
                                             : "adminnavmain"
                                     }
-
-                                    onClick={() => setMobileOpen(false)}
+                                    onClick={closeMobileMenu}
                                 >
 
                                     <span className="adminnavicon">
@@ -345,7 +393,10 @@ export const AdminNavbar = () => {
 
                 <div className="adminnavlogout">
 
-                    <button onClick={handleLogout}>
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                    >
 
                         <FiLogOut />
 
@@ -355,24 +406,10 @@ export const AdminNavbar = () => {
 
                 </div>
 
-            </div>
-
-
-            {/* MOBILE OVERLAY */}
-
-            {mobileOpen && (
-
-                <div
-                    className="adminnavoverlay"
-                    onClick={() => setMobileOpen(false)}
-                />
-
-            )}
+            </aside>
 
         </>
-
     );
-
 };
 
 export default AdminNavbar;
