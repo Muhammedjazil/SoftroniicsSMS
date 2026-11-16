@@ -1,0 +1,1370 @@
+
+/* =====================================================
+   TASK MANAGEMENT - NEW UI
+===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+.tasks-page,
+.tasks-page * {
+    box-sizing: border-box;
+}
+
+.tasks-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 24px 20px;
+    background: #f3f5f7;
+    font-family: 'Poppins', sans-serif;
+    color: #263746;
+}
+
+
+/* =====================================================
+   1. HEADER
+===================================================== */
+
+.tasks-header {
+    width: 100%;
+    min-height: 75px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.tasks-header-title h2 {
+    margin: 0;
+    font-size: 23px;
+    font-weight: 600;
+    color: #263746;
+}
+
+.tasks-header-title p {
+    margin: 5px 0 0;
+    color: #7b8792;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.tasks-header-title p span {
+    margin: 0 5px;
+    color: #a0a0a0;
+}
+
+
+/* Admin Profile */
+
+.tasks-admin-profile {
+    min-width: 150px;
+    min-height: 62px;
+    padding: 8px 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: #ffffff;
+    border: 1px solid #e1e5e8;
+    border-radius: 9px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tasks-admin-icon {
+    font-size: 25px;
+    color: #263746;
+}
+
+.tasks-admin-info h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #263746;
+}
+
+.tasks-admin-info p {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: #78838c;
+}
+
+
+/* =====================================================
+   2. TOP NAVIGATION
+===================================================== */
+
+.tasks-top-navigation {
+    width: 100%;
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 17px;
+    gap: 15px;
+}
+
+
+/* Tabs */
+
+.tasks-tabs {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.tasks-tabs button {
+    min-width: 125px;
+    height: 44px;
+    padding: 0 20px;
+    border: 1px solid #e0e4e7;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #42515d;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tasks-tabs button:hover:not(.tasks-tab-active) {
+    border-color: #f58220;
+    color: #f58220;
+}
+
+.tasks-tabs button.tasks-tab-active {
+    background: #f58220;
+    color: #ffffff;
+    border: 1px solid #f58220;
+    box-shadow: 0 2px 5px rgba(245, 130, 32, 0.20);
+}
+
+
+/* Export */
+
+.tasks-export-btn {
+    min-width: 125px;
+    height: 44px;
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border: 1px solid #e0e4e7;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #42515d;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tasks-export-btn svg {
+    font-size: 19px;
+}
+
+.tasks-export-btn:hover {
+    border-color: #f58220;
+    color: #f58220;
+}
+
+
+/* =====================================================
+   3. TASK LIST CONTAINER
+===================================================== */
+
+.tasks-list-container {
+    width: 100%;
+    min-height: 245px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #e5e8eb;
+    border-radius: 13px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+}
+
+
+/* =====================================================
+   4. FILTER PANEL
+===================================================== */
+
+.tasks-filter-panel {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(120px, 0.8fr)) auto;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+
+/* Search */
+
+.tasks-search-box {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #e0e4e7;
+    border-radius: 7px;
+    background: #ffffff;
+    transition: 0.2s ease;
+}
+
+.tasks-search-box:focus-within {
+    border-color: #f58220;
+    box-shadow: 0 0 0 2px rgba(245, 130, 32, 0.08);
+}
+
+.tasks-search-box > svg {
+    flex-shrink: 0;
+    font-size: 21px;
+    color: #87939e;
+}
+
+.tasks-search-box input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #344452;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.tasks-search-box input::placeholder {
+    color: #9ba4ac;
+}
+
+.tasks-search-box button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: #78838c;
+    font-size: 19px;
+    cursor: pointer;
+}
+
+
+/* Filter Dropdowns */
+
+.tasks-filter-panel > select {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid #e0e4e7;
+    border-radius: 7px;
+    background: #ffffff;
+    outline: none;
+    color: #687580;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.tasks-filter-panel > select:focus {
+    border-color: #f58220;
+}
+
+
+/* Reset Filter */
+
+.tasks-reset-filter {
+    height: 40px;
+    padding: 0 12px;
+    border: none;
+    background: transparent;
+    color: #f58220;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.tasks-reset-filter:hover {
+    text-decoration: underline;
+}
+
+
+/* =====================================================
+   5. TABLE
+===================================================== */
+
+.tasks-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    border: 1px solid #e7eaed;
+    border-radius: 8px;
+}
+
+.tasks-table {
+    width: 100%;
+    min-width: 1100px;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+
+/* Table Head */
+
+.tasks-table thead {
+    background: #f8f9fa;
+}
+
+.tasks-table th {
+    height: 52px;
+    padding: 12px 14px;
+    text-align: left;
+    white-space: nowrap;
+    color: #42515d;
+    font-size: 12px;
+    font-weight: 600;
+    border-bottom: 1px solid #e5e8eb;
+}
+
+
+/* Table Body */
+
+.tasks-table tbody tr {
+    border-bottom: 1px solid #e8ebee;
+    transition: background 0.2s ease;
+}
+
+.tasks-table tbody tr:hover {
+    background: #fffaf5;
+}
+
+.tasks-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.tasks-table td {
+    height: 65px;
+    padding: 12px 14px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #53616c;
+    vertical-align: middle;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.tasks-title-cell {
+    min-width: 160px;
+    color: #344452 !important;
+    font-weight: 500 !important;
+}
+
+
+/* =====================================================
+   6. STATUS
+===================================================== */
+
+.tasks-status {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.tasks-status-active {
+    color: #159b59;
+}
+
+.tasks-status-pending {
+    color: #e99a25;
+}
+
+.tasks-status-inactive {
+    color: #89929b;
+}
+
+.tasks-status-complete {
+    color: #159b59;
+}
+
+
+/* =====================================================
+   7. TABLE ACTIONS
+===================================================== */
+
+.tasks-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tasks-action-buttons button {
+    width: 25px;
+    height: 27px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #586773;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-action-buttons button:hover {
+    color: #f58220;
+    transform: scale(1.1);
+}
+
+.tasks-action-buttons button.tasks-delete-icon {
+    color: #ef4444;
+}
+
+.tasks-action-buttons button.tasks-delete-icon:hover {
+    color: #c81e1e;
+}
+
+
+/* =====================================================
+   8. EMPTY STATE
+===================================================== */
+
+.tasks-empty-state {
+    width: 100%;
+    min-height: 175px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.tasks-empty-state p {
+    margin: 0;
+    padding: 20px;
+    color: #87919a;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+
+/* List Footer */
+
+.tasks-list-footer {
+    width: 100%;
+    min-height: 32px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.tasks-list-footer span {
+    font-size: 12px;
+    color: #78838c;
+}
+
+
+/* =====================================================
+   9. FORM CONTAINER
+===================================================== */
+
+.tasks-form-container {
+    width: 100%;
+    padding: 25px 28px;
+    background: #ffffff;
+    border: 1px solid #e5e8eb;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+}
+
+.tasks-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =====================================================
+   10. SECTION HEADINGS
+===================================================== */
+
+.tasks-section-heading {
+    margin: 0 0 23px;
+    color: #344452;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.tasks-audience-heading {
+    margin-top: 22px;
+    margin-bottom: 20px;
+}
+
+
+/* View Header */
+
+.tasks-detail-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 23px;
+}
+
+.tasks-detail-header h2 {
+    margin: 0;
+    color: #344452;
+    font-size: 22px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+
+/* Back Button */
+
+.tasks-back-btn {
+    min-width: 100px;
+    height: 40px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid #dce1e5;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #42515d;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-back-btn:hover {
+    color: #f58220;
+    border-color: #f58220;
+}
+
+
+/* =====================================================
+   11. FORM GRID
+===================================================== */
+
+.tasks-form-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 20px;
+    row-gap: 23px;
+}
+
+
+/* Default field occupies 4 columns */
+
+.tasks-form-grid > .tasks-form-group {
+    grid-column: span 4;
+    min-width: 0;
+}
+
+
+/* Full width description */
+
+.tasks-form-grid > .tasks-full-width {
+    grid-column: 1 / -1;
+}
+
+
+/* =====================================================
+   12. FORM INPUTS
+===================================================== */
+
+.tasks-form-group {
+    position: relative;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.tasks-form-group > label {
+    margin-bottom: 8px;
+    color: #42515d;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.tasks-required {
+    color: #ed4545;
+    font-weight: 600;
+}
+
+.tasks-optional {
+    color: #929ba3;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+
+/* Inputs */
+
+.tasks-form-group input,
+.tasks-form-group select,
+.tasks-form-group textarea {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid #dce1e5;
+    border-radius: 7px;
+    outline: none;
+    background: #ffffff;
+    color: #42515d;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tasks-form-group select {
+    cursor: pointer;
+}
+
+.tasks-form-group textarea {
+    height: auto;
+    min-height: 95px;
+    padding: 12px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+
+/* Focus */
+
+.tasks-form-group input:focus,
+.tasks-form-group select:focus,
+.tasks-form-group textarea:focus {
+    border-color: #f58220;
+    box-shadow: 0 0 0 2px rgba(245, 130, 32, 0.09);
+}
+
+
+/* Placeholder */
+
+.tasks-form-group input::placeholder,
+.tasks-form-group textarea::placeholder {
+    color: #a0a8af;
+    opacity: 1;
+}
+
+
+/* Description */
+
+.tasks-form-grid > .tasks-full-width textarea {
+    min-height: 95px;
+}
+
+
+/* =====================================================
+   13. ATTACHMENTS
+===================================================== */
+
+.tasks-upload-box {
+    width: 100%;
+    height: 44px;
+    padding: 0 13px;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 !important;
+    border: 1px solid #dce1e5;
+    border-radius: 7px;
+    background: #ffffff;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.tasks-upload-box span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #929ba3;
+    font-size: 12px;
+}
+
+.tasks-upload-box svg {
+    flex-shrink: 0;
+    color: #66737e;
+    font-size: 19px;
+}
+
+.tasks-upload-box:hover {
+    border-color: #f58220;
+}
+
+.tasks-readonly-file {
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 13px;
+    display: flex;
+    align-items: center;
+    overflow-wrap: anywhere;
+    background: #f1f3f5;
+    border: 1px solid #dce1e5;
+    border-radius: 7px;
+    color: #53616c;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   14. BRANCHES / AUDIENCE
+===================================================== */
+
+.tasks-section-divider {
+    width: 100%;
+    height: 1px;
+    margin-top: 25px;
+    background: #e8ebee;
+}
+
+.tasks-audience-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.tasks-audience-grid > .tasks-form-group {
+    width: 100%;
+    max-width: 600px;
+}
+
+
+/* Disabled Audience */
+
+.tasks-form-group select:disabled {
+    background: #f0f2f3;
+    color: #a0a8af;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.tasks-select-warning {
+    margin-left: 8px;
+    color: #e66b6b;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+
+/* Added Sections */
+
+.tasks-added-section {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.tasks-added-section h4 {
+    margin: 0 0 12px;
+    color: #42515d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tasks-selected-list {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.tasks-selected-item {
+    min-height: 42px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #f1f3f5;
+    border: 1px solid #dce1e5;
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.tasks-selected-item span {
+    min-width: 0;
+    color: #53616c;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+.tasks-selected-item button {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: #ef4444;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.tasks-branch-section {
+    margin-top: 14px;
+}
+
+
+/* =====================================================
+   15. INTERN SEARCH
+===================================================== */
+
+.tasks-intern-search {
+    width: 100%;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.tasks-intern-search input {
+    width: 100%;
+    height: 44px;
+    padding-right: 38px;
+}
+
+.tasks-intern-search svg {
+    position: absolute;
+    right: 12px;
+    color: #687580;
+    font-size: 18px;
+    pointer-events: none;
+}
+
+.tasks-intern-results {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% - 2px);
+    left: 0;
+    width: 100%;
+    max-height: 180px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #e0e4e7;
+    border-radius: 7px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+}
+
+.tasks-intern-results button {
+    width: 100%;
+    padding: 11px 13px;
+    display: block;
+    text-align: left;
+    background: #ffffff;
+    border: none;
+    border-bottom: 1px solid #eeeeee;
+    color: #42515d;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.tasks-intern-results button:hover {
+    background: #fff5e9;
+}
+
+.tasks-intern-results p {
+    padding: 10px 13px;
+    color: #87919a;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   16. VIEW MODE
+===================================================== */
+
+.tasks-view-mode .tasks-form-group input:disabled,
+.tasks-view-mode .tasks-form-group select:disabled,
+.tasks-view-mode .tasks-form-group textarea:disabled {
+    background: #e8eaec;
+    color: #53616c;
+    border-color: #d6dade;
+    opacity: 1;
+    -webkit-text-fill-color: #53616c;
+    cursor: not-allowed;
+}
+
+.tasks-view-mode .tasks-form-group textarea:disabled {
+    resize: none;
+}
+
+.tasks-view-mode .tasks-form-group select:disabled {
+    appearance: none;
+}
+
+
+/* =====================================================
+   17. FORM BUTTONS
+===================================================== */
+
+.tasks-form-buttons {
+    width: 100%;
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+
+/* Cancel / Delete */
+
+.tasks-cancel-btn {
+    min-width: 120px;
+    height: 44px;
+    padding: 0 20px;
+    border: 1px solid #dce1e5;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #53616c;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-cancel-btn:hover {
+    background: #fff2f0;
+    border-color: #ef5555;
+    color: #e04444;
+}
+
+
+/* Create / Save / Edit */
+
+.tasks-create-btn {
+    min-width: 135px;
+    height: 44px;
+    padding: 0 20px;
+    border: 1px solid #f58220;
+    border-radius: 7px;
+    background: #f58220;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-create-btn:hover {
+    background: #e87513;
+    border-color: #e87513;
+    box-shadow: 0 3px 8px rgba(245, 130, 32, 0.20);
+}
+
+
+/* =====================================================
+   18. RESPONSIVE - TABLET
+===================================================== */
+
+@media screen and (max-width: 1100px) {
+
+    .tasks-page {
+        padding: 18px 15px;
+    }
+
+    .tasks-filter-panel {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .tasks-search-box {
+        grid-column: span 2;
+    }
+
+    .tasks-reset-filter {
+        grid-column: 3;
+        justify-self: end;
+    }
+
+    .tasks-form-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .tasks-form-grid > .tasks-form-group {
+        grid-column: span 3;
+    }
+
+    .tasks-form-grid > .tasks-full-width {
+        grid-column: 1 / -1;
+    }
+
+    .tasks-selected-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =====================================================
+   19. RESPONSIVE - MOBILE
+===================================================== */
+
+@media screen and (max-width: 768px) {
+
+    .tasks-page {
+        padding: 14px 12px;
+    }
+
+    .tasks-header {
+        min-height: 60px;
+        margin-bottom: 12px;
+    }
+
+    .tasks-header-title h2 {
+        font-size: 19px;
+    }
+
+    .tasks-header-title p {
+        font-size: 11px;
+    }
+
+    .tasks-admin-profile {
+        min-width: auto;
+        min-height: 48px;
+        padding: 6px 9px;
+        gap: 7px;
+    }
+
+    .tasks-admin-icon {
+        font-size: 20px;
+    }
+
+    .tasks-admin-info h4 {
+        font-size: 12px;
+    }
+
+    .tasks-admin-info p {
+        font-size: 9px;
+    }
+
+    .tasks-top-navigation {
+        min-height: 50px;
+        margin-bottom: 12px;
+    }
+
+    .tasks-tabs {
+        gap: 6px;
+    }
+
+    .tasks-tabs button {
+        min-width: 95px;
+        height: 40px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
+
+    .tasks-export-btn {
+        min-width: 90px;
+        height: 40px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
+
+    .tasks-list-container {
+        padding: 15px;
+    }
+
+    .tasks-filter-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .tasks-search-box {
+        grid-column: 1 / -1;
+    }
+
+    .tasks-filter-panel > select {
+        height: 42px;
+        font-size: 11px;
+    }
+
+    .tasks-reset-filter {
+        grid-column: 1 / -1;
+        justify-self: end;
+    }
+
+    .tasks-table {
+        min-width: 1100px;
+    }
+
+    .tasks-table th,
+    .tasks-table td {
+        padding: 10px;
+    }
+
+    .tasks-empty-state {
+        min-height: 150px;
+    }
+
+    .tasks-empty-state p {
+        font-size: 13px;
+    }
+
+    .tasks-form-container {
+        padding: 18px 15px;
+    }
+
+    .tasks-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 17px 12px;
+    }
+
+    .tasks-form-grid > .tasks-form-group {
+        grid-column: span 1;
+    }
+
+    .tasks-form-grid > .tasks-full-width {
+        grid-column: 1 / -1;
+    }
+
+    .tasks-form-group > label {
+        font-size: 12px;
+    }
+
+    .tasks-form-group input,
+    .tasks-form-group select {
+        height: 42px;
+        font-size: 12px;
+    }
+
+    .tasks-audience-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .tasks-selected-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tasks-form-buttons {
+        margin-top: 25px;
+    }
+
+}
+
+
+/* =====================================================
+   20. SMALL MOBILE
+===================================================== */
+
+@media screen and (max-width: 480px) {
+
+    .tasks-page {
+        padding: 11px 9px;
+    }
+
+    .tasks-header-title h2 {
+        font-size: 16px;
+    }
+
+    .tasks-admin-profile {
+        min-height: 42px;
+        padding: 5px 7px;
+    }
+
+    .tasks-admin-info h4 {
+        font-size: 10px;
+    }
+
+    .tasks-admin-info p {
+        font-size: 8px;
+    }
+
+    .tasks-admin-icon {
+        font-size: 17px;
+    }
+
+    .tasks-tabs {
+        flex: 1;
+    }
+
+    .tasks-tabs button {
+        flex: 1;
+        min-width: 0;
+        padding: 0 5px;
+        font-size: 11px;
+    }
+
+    .tasks-export-btn {
+        min-width: 75px;
+        gap: 5px;
+        padding: 0 7px;
+        font-size: 10px;
+    }
+
+    .tasks-list-container {
+        padding: 11px;
+    }
+
+    .tasks-filter-panel {
+        gap: 8px;
+    }
+
+    .tasks-filter-panel > select {
+        padding: 0 7px;
+        font-size: 10px;
+    }
+
+    .tasks-search-box {
+        height: 40px;
+    }
+
+    .tasks-search-box input {
+        font-size: 11px;
+    }
+
+    .tasks-form-container {
+        padding: 15px 11px;
+    }
+
+    .tasks-section-heading {
+        font-size: 15px;
+        margin-bottom: 17px;
+    }
+
+    .tasks-detail-header h2 {
+        max-width: 70%;
+        font-size: 17px;
+    }
+
+    .tasks-back-btn {
+        min-width: 68px;
+        height: 35px;
+        font-size: 10px;
+    }
+
+    .tasks-form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .tasks-form-grid > .tasks-form-group,
+    .tasks-form-grid > .tasks-full-width {
+        grid-column: 1 / -1;
+    }
+
+    .tasks-audience-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tasks-selected-list {
+        grid-template-columns: 1fr;
+    }
+
+    .tasks-form-group > label {
+        font-size: 11px;
+    }
+
+    .tasks-form-group input,
+    .tasks-form-group select {
+        font-size: 11px;
+    }
+
+    .tasks-form-buttons {
+        gap: 8px;
+    }
+
+    .tasks-cancel-btn,
+    .tasks-create-btn {
+        flex: 1;
+        min-width: 0;
+        height: 41px;
+        padding: 0 8px;
+        font-size: 11px;
+    }
+
+}
+
+
+/* =====================================================
+   21. SCROLLBAR
+===================================================== */
+
+.tasks-table-wrapper::-webkit-scrollbar,
+.tasks-intern-results::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.tasks-table-wrapper::-webkit-scrollbar-thumb,
+.tasks-intern-results::-webkit-scrollbar-thumb {
+    background: #cbd1d6;
+    border-radius: 10px;
+}
+
+.tasks-table-wrapper::-webkit-scrollbar-track,
+.tasks-intern-results::-webkit-scrollbar-track {
+    background: #f5f6f7;
+}
+
+
+/* =====================================================
+   22. BUTTON FOCUS
+===================================================== */
+
+.tasks-page button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tasks-page button:focus-visible {
+    outline: 2px solid #f58220;
+    outline-offset: 2px;
+}
+
+
+/* =====================================================
+   23. PRINT
+===================================================== */
+
+@media print {
+
+    .tasks-header,
+    .tasks-top-navigation,
+    .tasks-filter-panel,
+    .tasks-form-buttons,
+    .tasks-action-buttons,
+    .tasks-list-footer {
+        display: none !important;
+    }
+
+    .tasks-list-container,
+    .tasks-form-container {
+        border: none;
+        box-shadow: none;
+    }
+
+    .tasks-table-wrapper {
+        overflow: visible;
+    }
+
+}

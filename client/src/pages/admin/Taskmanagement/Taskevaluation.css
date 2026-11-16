@@ -1,0 +1,885 @@
+
+/* =====================================================
+   TASK EVALUATION - GLOBAL
+===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+.tasks-evaluation-page,
+.tasks-evaluation-page * {
+    box-sizing: border-box;
+}
+
+.tasks-evaluation-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 22px 18px;
+
+    background: #f3f5f7;
+    color: #263238;
+
+    font-family: 'Poppins', sans-serif;
+}
+
+
+/* =====================================================
+   1. HEADER
+===================================================== */
+
+.tasks-evaluation-header {
+    width: 100%;
+    min-height: 76px;
+    margin-bottom: 15px;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.tasks-evaluation-header-title h2 {
+    margin: 0;
+
+    color: #27343f;
+    font-size: 23px;
+    font-weight: 600;
+}
+
+.tasks-evaluation-header-title p {
+    margin: 3px 0 0;
+
+    color: #89939c;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.tasks-evaluation-header-title p span {
+    margin: 0 4px;
+}
+
+
+/* Admin profile */
+
+.tasks-evaluation-admin-profile {
+    min-width: 150px;
+    min-height: 63px;
+    padding: 8px 12px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 7px;
+}
+
+.tasks-evaluation-admin-avatar {
+    width: 41px;
+    height: 41px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #e8ecef;
+    border-radius: 50%;
+
+    color: #65717c;
+    font-size: 22px;
+}
+
+.tasks-evaluation-admin-info h4 {
+    margin: 0;
+
+    color: #29343e;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tasks-evaluation-admin-info p {
+    margin: 2px 0 0;
+
+    color: #929aa2;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   2. TOP NAVIGATION
+===================================================== */
+
+.tasks-evaluation-top-navigation {
+    width: 100%;
+    min-height: 76px;
+    padding: 0 0 17px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+
+/* Submissions tab */
+
+.tasks-evaluation-tab-active {
+    min-width: 173px;
+    height: 43px;
+    padding: 0 20px;
+
+    border: 1px solid #f47713;
+    border-radius: 7px;
+
+    background: #f47713;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    box-shadow: 0 2px 5px rgba(244, 119, 19, 0.15);
+}
+
+
+/* Export */
+
+.tasks-evaluation-export-btn {
+    min-width: 125px;
+    height: 43px;
+    padding: 0 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    border: 1px solid #e0e4e8;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: #53606c;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-evaluation-export-btn svg {
+    font-size: 17px;
+}
+
+.tasks-evaluation-export-btn:hover:not(:disabled) {
+    border-color: #f47713;
+    color: #f47713;
+}
+
+.tasks-evaluation-export-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+
+/* =====================================================
+   3. MAIN CONTENT CONTAINER
+===================================================== */
+
+.tasks-evaluation-content-container {
+    width: 100%;
+    min-height: 410px;
+    padding: 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    background: #ffffff;
+    border: 1px solid #edf0f2;
+    border-radius: 12px;
+
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.045);
+}
+
+
+/* =====================================================
+   4. FILTER CONTAINER
+===================================================== */
+
+.tasks-evaluation-filter-container {
+    width: 100%;
+    min-height: 83px;
+    padding: 12px 25px;
+
+    display: grid;
+    grid-template-columns: minmax(0, 385px) minmax(0, 385px);
+    align-items: center;
+    gap: 18px;
+
+    background: #fafbfb;
+    border: 1px solid #e2e6e8;
+    border-radius: 8px;
+}
+
+
+/* Filter group */
+
+.tasks-evaluation-filter-group {
+    width: 100%;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tasks-evaluation-filter-group label {
+    color: #75818b;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
+
+
+/* Filter selects */
+
+.tasks-evaluation-filter-group select {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+
+    background: #ffffff;
+    border: 1px solid #e0e4e8;
+    border-radius: 6px;
+
+    color: #596570;
+    font-family: inherit;
+    font-size: 13px;
+
+    outline: none;
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.tasks-evaluation-filter-group select:focus {
+    border-color: #f47713;
+    box-shadow: 0 0 0 2px rgba(244, 119, 19, 0.08);
+}
+
+
+/* =====================================================
+   5. EMPTY STATE
+===================================================== */
+
+.tasks-evaluation-empty-container {
+    width: 100%;
+    min-height: 253px;
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ffffff;
+    border: 1px solid #e4e7e9;
+    border-radius: 12px;
+}
+
+.tasks-evaluation-empty-content {
+    width: 100%;
+    padding: 25px 15px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+
+/* Clipboard icon */
+
+.tasks-evaluation-empty-icon {
+    margin-bottom: 23px;
+
+    color: #a4adb5;
+    font-size: 47px;
+    font-weight: 400;
+}
+
+
+/* Empty heading */
+
+.tasks-evaluation-empty-content h3 {
+    margin: 0 0 5px;
+
+    color: #303b45;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* Empty description */
+
+.tasks-evaluation-empty-content p {
+    margin: 0;
+
+    color: #8c969e;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+
+/* =====================================================
+   6. SUBMISSIONS CONTAINER
+===================================================== */
+
+.tasks-evaluation-submissions-container {
+    width: 100%;
+    min-height: 250px;
+    padding: 20px;
+
+    background: #ffffff;
+    border: 1px solid #e4e7e9;
+    border-radius: 10px;
+}
+
+
+/* Submissions header */
+
+.tasks-evaluation-submissions-header {
+    width: 100%;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border-bottom: 1px solid #e8eaed;
+}
+
+.tasks-evaluation-submissions-header h3 {
+    margin: 0;
+
+    color: #303c47;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.tasks-evaluation-submissions-header p {
+    margin: 4px 0 0;
+
+    color: #929ba3;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   7. SEARCH
+===================================================== */
+
+.tasks-evaluation-search-container {
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.tasks-evaluation-search-box {
+    width: 100%;
+    max-width: 400px;
+    height: 41px;
+    padding: 0 12px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    border: 1px solid #e0e4e8;
+    border-radius: 6px;
+    background: #ffffff;
+}
+
+.tasks-evaluation-search-box > svg {
+    flex-shrink: 0;
+    color: #9aa4ad;
+    font-size: 19px;
+}
+
+.tasks-evaluation-search-box input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+
+    border: none;
+    outline: none;
+    background: transparent;
+
+    color: #46515b;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.tasks-evaluation-search-box input::placeholder {
+    color: #a0a9b1;
+}
+
+.tasks-evaluation-search-box button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    border: none;
+    background: transparent;
+
+    color: #89939c;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   8. SUBMISSION TABLE
+===================================================== */
+
+.tasks-evaluation-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+
+    border: 1px solid #e7eaed;
+    border-radius: 4px;
+}
+
+.tasks-evaluation-table {
+    width: 100%;
+    min-width: 750px;
+
+    border-collapse: collapse;
+}
+
+
+/* Table header */
+
+.tasks-evaluation-table thead {
+    background: #fafbfc;
+}
+
+.tasks-evaluation-table th {
+    height: 48px;
+    padding: 12px 15px;
+
+    text-align: left;
+    white-space: nowrap;
+
+    color: #7c8791;
+    font-size: 11px;
+    font-weight: 600;
+
+    border-bottom: 1px solid #e5e8eb;
+    text-transform: uppercase;
+}
+
+
+/* Table body */
+
+.tasks-evaluation-table tbody tr {
+    border-bottom: 1px solid #e8eaed;
+    transition: 0.2s ease;
+}
+
+.tasks-evaluation-table tbody tr:hover {
+    background: #fffaf5;
+}
+
+.tasks-evaluation-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.tasks-evaluation-table td {
+    padding: 16px 15px;
+
+    color: #515c66;
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+.tasks-evaluation-intern-name {
+    color: #303b45 !important;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   9. SUBMISSION STATUS
+===================================================== */
+
+.tasks-evaluation-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.tasks-evaluation-status-submitted {
+    background: #e5f5eb;
+    color: #29965b;
+}
+
+.tasks-evaluation-status-pending {
+    background: #fff3dc;
+    color: #bd812b;
+}
+
+.tasks-evaluation-status-evaluated {
+    background: #e5efff;
+    color: #4169a5;
+}
+
+
+/* =====================================================
+   10. VIEW BUTTON
+===================================================== */
+
+.tasks-evaluation-view-btn {
+    width: 27px;
+    height: 27px;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    background: transparent;
+
+    color: #39ae78;
+    font-size: 19px;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tasks-evaluation-view-btn:hover {
+    transform: scale(1.15);
+}
+
+
+/* =====================================================
+   11. NO SUBMISSIONS STATE
+===================================================== */
+
+.tasks-evaluation-no-submissions {
+    width: 100%;
+    min-height: 230px;
+    padding: 25px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+.tasks-evaluation-no-submissions > svg {
+    margin-bottom: 13px;
+
+    color: #a4adb5;
+    font-size: 38px;
+}
+
+.tasks-evaluation-no-submissions h3 {
+    margin: 0 0 6px;
+
+    color: #39444e;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tasks-evaluation-no-submissions p {
+    margin: 0;
+
+    color: #929ba3;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   12. TABLET RESPONSIVE
+===================================================== */
+
+@media screen and (max-width: 1000px) {
+
+    .tasks-evaluation-page {
+        padding: 18px 14px;
+    }
+
+    .tasks-evaluation-filter-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        padding: 12px 15px;
+    }
+
+    .tasks-evaluation-content-container {
+        padding: 18px;
+    }
+
+}
+
+
+/* =====================================================
+   13. MOBILE RESPONSIVE
+===================================================== */
+
+@media screen and (max-width: 600px) {
+
+    .tasks-evaluation-page {
+        padding: 13px 10px;
+    }
+
+
+    /* Header */
+
+    .tasks-evaluation-header {
+        min-height: 55px;
+        margin-bottom: 12px;
+    }
+
+    .tasks-evaluation-header-title h2 {
+        font-size: 18px;
+    }
+
+    .tasks-evaluation-header-title p {
+        font-size: 10px;
+    }
+
+    .tasks-evaluation-admin-profile {
+        min-width: 105px;
+        min-height: 44px;
+        padding: 5px 7px;
+        gap: 6px;
+    }
+
+    .tasks-evaluation-admin-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 17px;
+    }
+
+    .tasks-evaluation-admin-info h4 {
+        font-size: 11px;
+    }
+
+    .tasks-evaluation-admin-info p {
+        font-size: 9px;
+    }
+
+
+    /* Navigation */
+
+    .tasks-evaluation-top-navigation {
+        min-height: 60px;
+        padding-bottom: 12px;
+    }
+
+    .tasks-evaluation-tab-active {
+        min-width: 135px;
+        height: 38px;
+        padding: 0 10px;
+        font-size: 11px;
+    }
+
+    .tasks-evaluation-export-btn {
+        min-width: 78px;
+        height: 38px;
+        padding: 0 8px;
+        gap: 4px;
+        font-size: 10px;
+    }
+
+    .tasks-evaluation-export-btn svg {
+        font-size: 14px;
+    }
+
+
+    /* Main content */
+
+    .tasks-evaluation-content-container {
+        min-height: 370px;
+        padding: 13px 10px;
+        gap: 15px;
+        border-radius: 9px;
+    }
+
+
+    /* Filters */
+
+    .tasks-evaluation-filter-container {
+        grid-template-columns: 1fr;
+        gap: 13px;
+
+        padding: 14px 12px;
+    }
+
+    .tasks-evaluation-filter-group label {
+        font-size: 10px;
+    }
+
+    .tasks-evaluation-filter-group select {
+        height: 39px;
+        font-size: 12px;
+    }
+
+
+    /* Empty state */
+
+    .tasks-evaluation-empty-container {
+        min-height: 240px;
+        border-radius: 8px;
+    }
+
+    .tasks-evaluation-empty-icon {
+        margin-bottom: 17px;
+        font-size: 40px;
+    }
+
+    .tasks-evaluation-empty-content h3 {
+        font-size: 13px;
+    }
+
+    .tasks-evaluation-empty-content p {
+        max-width: 290px;
+        font-size: 11px;
+    }
+
+
+    /* Submissions */
+
+    .tasks-evaluation-submissions-container {
+        padding: 13px 10px;
+    }
+
+    .tasks-evaluation-submissions-header h3 {
+        font-size: 14px;
+    }
+
+    .tasks-evaluation-submissions-header p {
+        font-size: 10px;
+    }
+
+    .tasks-evaluation-search-box {
+        max-width: 100%;
+        height: 39px;
+    }
+
+    .tasks-evaluation-table {
+        min-width: 750px;
+    }
+
+    .tasks-evaluation-no-submissions {
+        min-height: 200px;
+        padding: 15px 5px;
+    }
+
+    .tasks-evaluation-no-submissions h3 {
+        font-size: 13px;
+    }
+
+    .tasks-evaluation-no-submissions p {
+        font-size: 11px;
+    }
+
+}
+
+
+/* =====================================================
+   14. SMALL MOBILE
+===================================================== */
+
+@media screen and (max-width: 380px) {
+
+    .tasks-evaluation-page {
+        padding: 10px 7px;
+    }
+
+    .tasks-evaluation-header-title h2 {
+        font-size: 16px;
+    }
+
+    .tasks-evaluation-admin-profile {
+        min-width: 90px;
+    }
+
+    .tasks-evaluation-admin-avatar {
+        width: 27px;
+        height: 27px;
+    }
+
+    .tasks-evaluation-tab-active {
+        min-width: 120px;
+        font-size: 10px;
+    }
+
+    .tasks-evaluation-export-btn {
+        min-width: 68px;
+        font-size: 9px;
+    }
+
+    .tasks-evaluation-content-container {
+        padding: 10px 8px;
+    }
+
+    .tasks-evaluation-filter-container {
+        padding: 11px 9px;
+    }
+
+}
+
+
+/* =====================================================
+   15. SCROLLBAR
+===================================================== */
+
+.tasks-evaluation-table-wrapper::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.tasks-evaluation-table-wrapper::-webkit-scrollbar-thumb {
+    background: #cbd1d6;
+    border-radius: 10px;
+}
+
+.tasks-evaluation-table-wrapper::-webkit-scrollbar-track {
+    background: #f5f6f7;
+}
+
+
+/* =====================================================
+   16. FOCUS
+===================================================== */
+
+.tasks-evaluation-page button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tasks-evaluation-page button:focus-visible {
+    outline: 2px solid #f47713;
+    outline-offset: 2px;
+}

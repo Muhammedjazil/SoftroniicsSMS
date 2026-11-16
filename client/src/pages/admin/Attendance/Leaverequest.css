@@ -1,0 +1,776 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* =========================================
+   MAIN PAGE
+========================================= */
+
+.leaverequest-page,
+.leaverequest-page * {
+    box-sizing: border-box;
+}
+
+.leaverequest-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 18px 16px 30px;
+    background: #f3f4f5;
+    color: #263746;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.leaverequest-header {
+    width: 100%;
+    min-height: 85px;
+    padding: 0 4px 15px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.leaverequest-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 4px;
+}
+
+.leaverequest-heading h2 {
+    margin: 0;
+    color: #263746;
+    font-size: 23px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.leaverequest-heading p {
+    margin: 3px 0 0;
+    color: #84909b;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.leaverequest-heading p span {
+    margin: 0 5px;
+}
+
+/* =========================================
+   ADMIN PROFILE
+========================================= */
+
+.leaverequest-admin-profile {
+    min-width: 150px;
+    height: 64px;
+    padding: 8px 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 9px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.leaverequest-admin-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    border-radius: 50%;
+    color: #64717c;
+    font-size: 23px;
+}
+
+.leaverequest-admin-info h4 {
+    margin: 0;
+    color: #263746;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.leaverequest-admin-info p {
+    margin: 2px 0 0;
+    color: #84909b;
+    font-size: 12px;
+}
+
+/* =========================================
+   MAIN CONTENT CARD
+========================================= */
+
+.leaverequest-main-card {
+    width: 100%;
+    min-height: 245px;
+    padding: 23px 24px;
+    background: #ffffff;
+    border: 1px solid #e6e8eb;
+    border-radius: 11px;
+    box-shadow: 0 3px 7px rgba(0,0,0,0.09);
+}
+
+/* =========================================
+   FILTER SECTION
+   Matches your actual JSX className
+========================================= */
+
+.leaverequest-filter-section {
+    width: 100%;
+    display: grid;
+    grid-template-columns:
+        minmax(250px, 2.1fr)
+        minmax(145px, 1fr)
+        minmax(145px, 1fr)
+        minmax(125px, 0.85fr)
+        minmax(100px, 0.6fr)
+        125px;
+    align-items: center;
+    gap: 16px;
+}
+
+/* =========================================
+   SEARCH BOX
+========================================= */
+
+.leaverequest-search-box {
+    width: 100%;
+    height: 43px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 1px solid #e0e3e6;
+    border-radius: 7px;
+    transition: border 0.2s ease;
+}
+
+.leaverequest-search-box:focus-within {
+    border-color: #e9951c;
+    box-shadow: 0 0 0 2px rgba(233,149,28,0.08);
+}
+
+.leaverequest-search-box svg {
+    flex-shrink: 0;
+    font-size: 21px;
+    color: #9ba5ae;
+}
+
+.leaverequest-search-box input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #333333;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.leaverequest-search-box input::placeholder {
+    color: #a0a9b2;
+}
+
+/* =========================================
+   ALL SELECT FILTERS
+   Using IDs from your JSX
+========================================= */
+
+.leaverequest-filter-section select,
+.leaverequest-filter-section input[type="date"] {
+    width: 100%;
+    min-width: 0;
+    height: 43px;
+    padding: 0 12px;
+    background: #ffffff;
+    border: 1px solid #e0e3e6;
+    border-radius: 7px;
+    outline: none;
+    color: #53616e;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.leaverequest-filter-section select:focus,
+.leaverequest-filter-section input[type="date"]:focus {
+    border-color: #e9951c;
+}
+
+/* Branch */
+
+#leaverequest-branch {
+    grid-column: auto;
+}
+
+/* Date */
+
+.leaverequest-filter-section .leaverequest-date-filter {
+    width: 100%;
+}
+
+/* Month */
+
+#leaverequest-month {
+    width: 100%;
+}
+
+/* Year */
+
+#leaverequest-year {
+    width: 100%;
+}
+
+/* =========================================
+   EXPORT BUTTON
+========================================= */
+
+.leaverequest-export-btn {
+    width: 125px;
+    min-width: 125px;
+    height: 43px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e0e3e6;
+    border-radius: 7px;
+    color: #53616e;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.leaverequest-export-btn svg {
+    font-size: 18px;
+}
+
+.leaverequest-export-btn:hover {
+    background: #fff8ed;
+    border-color: #e9951c;
+    color: #e9951c;
+}
+
+/* =========================================
+   EMPTY STATE
+========================================= */
+
+.leaverequest-empty-state {
+    width: 100%;
+    min-height: 155px;
+    margin-top: 0;
+    padding: 25px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.leaverequest-empty-state p {
+    margin: 0;
+    color: #77838e;
+    font-size: 17px;
+    font-weight: 400;
+}
+
+/* =========================================
+   TABLE
+========================================= */
+
+.leaverequest-table-wrapper {
+    width: 100%;
+    margin-top: 22px;
+    overflow-x: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 7px;
+}
+
+.leaverequest-table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+}
+
+.leaverequest-table thead {
+    background: #fafafa;
+}
+
+.leaverequest-table th {
+    height: 48px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e3e5e8;
+    color: #596673;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.leaverequest-table tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    transition: background 0.2s ease;
+}
+
+.leaverequest-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.leaverequest-table td {
+    padding: 15px 14px;
+    color: #3f4a54;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.leaverequest-batch-cell {
+    max-width: 200px;
+    overflow-wrap: anywhere;
+    line-height: 1.6;
+}
+
+.leaverequest-date-cell {
+    color: #e74c4c !important;
+    line-height: 1.6;
+}
+
+/* =========================================
+   STATUS
+========================================= */
+
+.leaverequest-status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.leaverequest-status-pending {
+    background: #eaf3ff;
+    color: #2376ce;
+}
+
+.leaverequest-status-approved {
+    background: #e9f8ef;
+    color: #15964e;
+}
+
+.leaverequest-status-rejected {
+    background: #fff0f0;
+    color: #e34444;
+}
+
+/* =========================================
+   ACTION BUTTONS
+========================================= */
+
+.leaverequest-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.leaverequest-actions button {
+    width: 25px;
+    height: 28px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: #399d69;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.leaverequest-actions button svg {
+    font-size: 18px;
+}
+
+.leaverequest-actions button:last-child {
+    color: #ed4444;
+}
+
+.leaverequest-actions button:hover {
+    transform: scale(1.15);
+}
+
+/* =========================================
+   PAGINATION
+========================================= */
+
+.leaverequest-pagination {
+    width: 100%;
+    min-height: 35px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+}
+
+.leaverequest-pagination span {
+    margin-right: 4px;
+    color: #263746;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.leaverequest-pagination button {
+    width: 30px;
+    height: 29px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid #e1e4e7;
+    border-radius: 6px;
+    color: #4e5b66;
+    font-size: 21px;
+    cursor: pointer;
+}
+
+.leaverequest-pagination button:disabled {
+    background: #e5e7e9;
+    color: #a2a8ae;
+    cursor: not-allowed;
+}
+
+.leaverequest-pagination button:not(:disabled):hover {
+    background: #ed941e;
+    border-color: #ed941e;
+    color: #ffffff;
+}
+
+/* =========================================
+   DETAILS PAGE
+========================================= */
+
+.leaverequest-details {
+    width: 100%;
+}
+
+.leaverequest-details-header {
+    width: 100%;
+    min-height: 35px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.leaverequest-details-header h2 {
+    margin: 0;
+    color: #202a35;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.leaverequest-back-btn {
+    min-width: 75px;
+    height: 35px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: #ffffff;
+    border: 1px solid #d8dce0;
+    border-radius: 6px;
+    color: #39434c;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.leaverequest-back-btn:hover {
+    border-color: #e9951c;
+    color: #e9951c;
+}
+
+/* =========================================
+   DETAILS FORM
+========================================= */
+
+.leaverequest-form {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 13px;
+    row-gap: 13px;
+}
+
+.leaverequest-form-group {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.leaverequest-form-group label {
+    color: #263746;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.leaverequest-form-group input,
+.leaverequest-form-group select,
+.leaverequest-form-group textarea {
+    width: 100%;
+    height: 39px;
+    padding: 0 10px;
+    background: #dddddd;
+    border: 1px solid #c8c8c8;
+    border-radius: 6px;
+    color: #303030;
+    font-family: inherit;
+    font-size: 11px;
+    outline: none;
+}
+
+.leaverequest-form-group input:disabled,
+.leaverequest-form-group textarea:disabled {
+    opacity: 1;
+    color: #303030;
+    -webkit-text-fill-color: #303030;
+    cursor: default;
+}
+
+.leaverequest-form-group textarea {
+    height: 70px;
+    padding: 9px 10px;
+    resize: none;
+    line-height: 1.5;
+}
+
+.leaverequest-form-group-full {
+    grid-column: 1 / -1;
+}
+
+.leaverequest-status-group {
+    width: 100%;
+    max-width: 250px;
+}
+
+.leaverequest-status-group select {
+    background: #ffffff;
+    cursor: pointer;
+}
+
+/* =========================================
+   SAVE BUTTON
+========================================= */
+
+.leaverequest-save-row {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.leaverequest-save-btn {
+    min-width: 105px;
+    height: 39px;
+    padding: 0 18px;
+    background: #ed941e;
+    border: 1px solid #ed941e;
+    border-radius: 6px;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.leaverequest-save-btn:hover {
+    background: #d98210;
+}
+
+/* =========================================
+   TABLET RESPONSIVE
+========================================= */
+
+@media (max-width: 1100px) {
+
+    .leaverequest-filter-section {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .leaverequest-search-box {
+        grid-column: span 2;
+    }
+
+    .leaverequest-export-btn {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+    .leaverequest-page {
+        padding: 12px;
+    }
+
+    .leaverequest-header {
+        min-height: 70px;
+    }
+
+    .leaverequest-heading h2 {
+        font-size: 20px;
+    }
+
+    .leaverequest-main-card {
+        padding: 17px;
+    }
+
+    .leaverequest-filter-section {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 11px;
+    }
+
+    .leaverequest-search-box {
+        grid-column: 1 / -1;
+    }
+
+    .leaverequest-filter-section select,
+    .leaverequest-filter-section input[type="date"] {
+        height: 40px;
+        font-size: 12px;
+    }
+
+    .leaverequest-export-btn {
+        width: 100%;
+        min-width: 0;
+        height: 40px;
+    }
+
+    .leaverequest-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 480px) {
+
+    .leaverequest-page {
+        padding: 10px;
+    }
+
+    .leaverequest-header {
+        min-height: 60px;
+        gap: 8px;
+    }
+
+    .leaverequest-heading h2 {
+        font-size: 16px;
+    }
+
+    .leaverequest-heading p {
+        font-size: 10px;
+    }
+
+    .leaverequest-admin-profile {
+        min-width: 105px;
+        height: 45px;
+        padding: 5px 7px;
+        gap: 6px;
+    }
+
+    .leaverequest-admin-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 17px;
+    }
+
+    .leaverequest-admin-info h4 {
+        font-size: 10px;
+    }
+
+    .leaverequest-admin-info p {
+        font-size: 8px;
+    }
+
+    .leaverequest-main-card {
+        padding: 14px 11px;
+    }
+
+    .leaverequest-filter-section {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+    }
+
+    .leaverequest-search-box {
+        height: 39px;
+    }
+
+    .leaverequest-filter-section select,
+    .leaverequest-filter-section input[type="date"] {
+        height: 38px;
+        padding: 0 7px;
+        font-size: 10px;
+    }
+
+    .leaverequest-export-btn {
+        height: 38px;
+        font-size: 11px;
+    }
+
+    .leaverequest-empty-state {
+        min-height: 145px;
+    }
+
+    .leaverequest-empty-state p {
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .leaverequest-table {
+        min-width: 850px;
+    }
+
+    .leaverequest-form {
+        grid-template-columns: 1fr;
+    }
+
+    .leaverequest-form-group-full {
+        grid-column: auto;
+    }
+
+    .leaverequest-status-group {
+        max-width: 100%;
+    }
+
+    .leaverequest-save-btn {
+        width: 100%;
+    }
+}
