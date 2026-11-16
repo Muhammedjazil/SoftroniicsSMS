@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
@@ -83,11 +82,11 @@ export const AdminNavbar = () => {
             children: [
                 {
                     title: "Module",
-                    path: "/module"
+                    path: "/modulemanagement"
                 },
                 {
                     title: "Topic",
-                    path: "/topic"
+                    path: "/topicsmanagement"
                 }
             ]
         },
@@ -113,19 +112,19 @@ export const AdminNavbar = () => {
             children: [
                 {
                     title: "Batches",
-                    path: "/batches"
+                    path: "/batchmanagement"
                 },
                 {
                     title: "Mentor Batches",
-                    path: "/metorbatches"
+                    path: "/mentorbatches"
                 },
                 {
                     title: "Timing",
-                    path: "/timing"
+                    path: "/timingsmanagement"
                 },
                 {
                     title: "Weekly Schedule",
-                    path: "/weeklyshedule"
+                    path: "/weeklyschedule"
                 }
             ]
         },

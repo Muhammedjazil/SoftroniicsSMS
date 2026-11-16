@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // ADMIN LAYOUT
@@ -7,11 +6,18 @@ import Adminlayout from "./components/Layout/Adminlayout";
 // INTERN LAYOUT
 import { Internlayout } from "./components/Layout/Internlayout";
 
-// ADMIN PAGES
+// ADMIN PAGES - ADMINISTRATION
 import { Rolemanagement } from "./pages/admin/administration/Rolemanagement";
 import { Staffmanagement } from "./pages/admin/administration/Staffmanagement";
 import { Internmanagement } from "./pages/admin/administration/Internmanagement";
 
+// ADMIN PAGES - SCHEDULE
+import BatchManagement from "./pages/admin/schedule/BatchManagement";
+import MentorBatches from "./pages/admin/schedule/MentorBatches";
+import TimingsManagement from "./pages/admin/schedule/TimingsManagement";
+import WeeklySchedule from "./pages/admin/schedule/WeeklySchedule";
+
+// ADMIN PAGES - SETTINGS
 import { Branch } from "./pages/admin/settings/Settingsbranch";
 import { Notification } from "./pages/admin/settings/Setingsnotification";
 
@@ -21,6 +27,9 @@ import Tasks from "./pages/admin/Taskmanagement/Tasks";
 
 import Attendancestudent from "./pages/admin/Attendance/Attendancestudent";
 import Leaverequest from "./pages/admin/Attendance/Leaverequest";
+// ADMIN PAGES - SYLLABUS
+import ModuleManagement from "./pages/admin/syllabus/ModuleManagement";
+import TopicsManagement from "./pages/admin/syllabus/TopicsManagement";
 
 // INTERN PAGES
 import { Internnotification } from "./pages/intern/Internnotification";
@@ -51,6 +60,7 @@ function App() {
                     }
                 />
 
+                {/* Administration */}
                 <Route
                     path="/rolemanagement"
                     element={
@@ -78,6 +88,44 @@ function App() {
                     }
                 />
 
+                {/* Schedule */}
+                <Route
+                    path="/batchmanagement"
+                    element={
+                        <Adminlayout>
+                            <BatchManagement />
+                        </Adminlayout>
+                    }
+                />
+
+                <Route
+                    path="/mentorbatches"
+                    element={
+                        <Adminlayout>
+                            <MentorBatches />
+                        </Adminlayout>
+                    }
+                />
+
+                <Route
+                    path="/timingsmanagement"
+                    element={
+                        <Adminlayout>
+                            <TimingsManagement />
+                        </Adminlayout>
+                    }
+                />
+
+                <Route
+                    path="/weeklyschedule"
+                    element={
+                        <Adminlayout>
+                            <WeeklySchedule />
+                        </Adminlayout>
+                    }
+                />
+
+                {/* Settings */}
                 <Route
                     path="/branch"
                     element={
@@ -101,6 +149,12 @@ function App() {
                     element={
                         <Adminlayout>
                             <Taskevaluation />
+                {/* Syllabus */}
+                <Route
+                    path="/modulemanagement"
+                    element={
+                        <Adminlayout>
+                            <ModuleManagement />
                         </Adminlayout>
                     }
                 />
@@ -141,6 +195,13 @@ function App() {
                     }
                 />
 
+                    path="/topicsmanagement"
+                    element={
+                        <Adminlayout>
+                            <TopicsManagement />
+                        </Adminlayout>
+                    }
+                />
 
                 {/* =================================
                     INTERN ROUTES
