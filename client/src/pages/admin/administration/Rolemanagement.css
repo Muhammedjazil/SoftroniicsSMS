@@ -1,0 +1,897 @@
+
+/* =========================================
+   MAIN CONTAINER
+========================================= */
+
+.Rolemanagement {
+    width: 100%;
+    min-height: 100vh;
+    padding: 28px;
+    background: #ffffff;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.Rolemanagement-role {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 28px;
+}
+
+.Rolemanagement-name h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: #171717;
+}
+
+.Rolemanagement-name p {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: #999999;
+    margin: 0;
+}
+
+
+/* =========================================
+   PROFILE
+========================================= */
+
+.Rolemanagement-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.Rolemanagement-profile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #f0f1f2;
+    font-size: 20px;
+    color: #555555;
+}
+
+.Rolemanagement-profiledetails h5 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+}
+
+.Rolemanagement-profiledetails p {
+    margin: 0;
+    font-size: 12px;
+    color: #888888;
+}
+
+
+/* =========================================
+   MAIN CARD
+========================================= */
+
+.Rolemanagement-hero {
+    width: 100%;
+    min-height: 650px;
+    padding: 24px 28px;
+    box-sizing: border-box;
+    border: 1px solid #eeeeee;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================================
+   TOP TABS
+========================================= */
+
+.Rolemanagement-hero0 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.Rolemanagement-hero1 {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.Rolemanagement-hero1 button {
+    min-width: 100px;
+    height: 40px;
+    padding: 0 18px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #333333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.Rolemanagement-hero1 button.active {
+    background: #ed8019;
+    border-color: #ed8019;
+    color: #ffffff;
+}
+
+.Rolemanagement-hero1 button:hover:not(.active) {
+    background: #fff7eb;
+    border-color: #ed8019;
+}
+
+
+/* =========================================
+   SEARCH, FILTER AND EXPORT
+========================================= */
+
+.Rolemanagement-table-controls {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) 194px 122px;
+    gap: 13px;
+    align-items: center;
+    width: 100%;
+    margin: 22px 0 19px;
+}
+
+
+/* SEARCH */
+
+.Rolemanagement-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    box-sizing: border-box;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #999999;
+}
+
+.Rolemanagement-search svg {
+    flex-shrink: 0;
+    font-size: 17px;
+}
+
+.Rolemanagement-search input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #333333;
+    font-size: 13px;
+}
+
+.Rolemanagement-search input::placeholder {
+    color: #999999;
+}
+
+
+/* STATUS FILTER */
+
+.Rolemanagement-filter {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    outline: none;
+    background: #ffffff;
+    color: #555555;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.Rolemanagement-filter:focus {
+    border-color: #ed8019;
+}
+
+
+/* EXPORT BUTTON */
+
+.Rolemanagement-export {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #555555;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.Rolemanagement-export svg {
+    font-size: 16px;
+}
+
+.Rolemanagement-export:hover {
+    background: #fff7eb;
+    border-color: #ed8019;
+}
+
+
+/* =========================================
+   TABLE CONTAINER
+========================================= */
+
+.Rolemanagement-hero-table {
+    width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   TABLE
+========================================= */
+
+.Rolemanagement-hero-table table {
+    width: 100%;
+    min-width: 650px;
+    border-collapse: collapse;
+    table-layout: auto;
+    background: #ffffff;
+}
+
+
+/* TABLE HEADER */
+
+.Rolemanagement-hero-table thead {
+    background: #f7f9f9;
+}
+
+.Rolemanagement-hero-table th {
+    height: 43px;
+    padding: 0 18px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #626b73;
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+
+/* TABLE BODY */
+
+.Rolemanagement-hero-table td {
+    height: 61px;
+    padding: 10px 18px;
+    text-align: left;
+    font-size: 12px;
+    color: #777777;
+    border-bottom: 1px solid #e7e8e9;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.Rolemanagement-hero-table tbody tr:hover {
+    background: #fcfcfc;
+}
+
+.Rolemanagement-hero-table tbody tr:last-child td {
+    border-bottom: 1px solid #e7e8e9;
+}
+
+
+/* ROLE NAME */
+
+.Rolemanagement-hero-table .role-name {
+    color: #252a30;
+    font-weight: 600;
+    text-transform: lowercase;
+}
+
+
+/* =========================================
+   STATUS
+========================================= */
+
+.Rolemanagement-status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.active-status {
+    background: #dcf8e6;
+    color: #29965a;
+}
+
+.inactive-status {
+    background: #ffe5e5;
+    color: #d94c4c;
+}
+
+
+/* =========================================
+   EMPTY TABLE
+========================================= */
+
+.Rolemanagement-empty {
+    height: 100px !important;
+    text-align: center !important;
+    color: #999999 !important;
+    font-size: 13px !important;
+}
+
+
+/* =========================================
+   PAGINATION
+========================================= */
+
+.Rolemanagement-pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 9px;
+    margin-top: 18px;
+}
+
+.Rolemanagement-pagination span {
+    margin-right: 5px;
+    color: #777777;
+    font-size: 12px;
+}
+
+.Rolemanagement-pagination button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #e3e5e8;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #777777;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.Rolemanagement-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+/* =========================================
+   NEW ROLE MAIN CONTAINER
+========================================= */
+
+.Rolemanagement-newtask {
+    width: 100%;
+    min-height: 550px;
+    padding-top: 12px;
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   ROLE AND DESCRIPTION
+========================================= */
+
+.Rolemanagement-newtask-details {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.Rolemanagement-newtask-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 250px;
+}
+
+.Rolemanagement-newtask-field label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+}
+
+.Rolemanagement-newtask-field select,
+.Rolemanagement-newtask-field input {
+    width: 100%;
+    height: 40px;
+    padding: 0 10px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    background: #ffffff;
+    outline: none;
+    font-size: 13px;
+    box-sizing: border-box;
+    transition: 0.2s ease;
+}
+
+.Rolemanagement-newtask-field select:focus,
+.Rolemanagement-newtask-field input:focus {
+    border-color: #e99319;
+    box-shadow: 0 0 3px rgba(233, 147, 25, 0.2);
+}
+
+
+/* =========================================
+   ALL PRIVILEGES HEADING
+========================================= */
+
+.Rolemanagement-newtask-heading {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 13px;
+    color: #222222;
+}
+
+
+/* =========================================
+   PRIVILEGE GRID
+========================================= */
+
+.Rolemanagement-newtask-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    width: 100%;
+}
+
+
+/* =========================================
+   PRIVILEGE CARD
+========================================= */
+
+.Rolemanagement-newtask-card {
+    min-height: 145px;
+    padding: 15px;
+    border: 1px solid #dddddd;
+    border-radius: 7px;
+    box-sizing: border-box;
+    background: #ffffff;
+    transition: box-shadow 0.2s ease;
+}
+
+.Rolemanagement-newtask-card:hover {
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =========================================
+   CARD HEADER
+========================================= */
+
+.Rolemanagement-newtask-cardheader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.Rolemanagement-newtask-cardheader h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #292929;
+    margin: 0;
+}
+
+
+/* =========================================
+   ORANGE SWITCH
+========================================= */
+
+.Rolemanagement-newtask-switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.Rolemanagement-newtask-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.Rolemanagement-newtask-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #ffffff;
+    border: 1px solid #e99319;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+.Rolemanagement-newtask-slider::before {
+    content: "";
+    position: absolute;
+    height: 12px;
+    width: 12px;
+    left: 2px;
+    bottom: 2px;
+    background: #e99319;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.Rolemanagement-newtask-switch input:checked
++ .Rolemanagement-newtask-slider {
+    background: #e99319;
+}
+
+.Rolemanagement-newtask-switch input:checked
++ .Rolemanagement-newtask-slider::before {
+    transform: translateX(16px);
+    background: #ffffff;
+}
+
+
+/* =========================================
+   CHECKBOX OPTIONS
+========================================= */
+
+.Rolemanagement-newtask-options {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.Rolemanagement-newtask-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    color: #444444;
+    cursor: pointer;
+}
+
+.Rolemanagement-newtask-option input {
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    border: 1.5px solid #f19a27;
+    border-radius: 3px;
+    background: #ffffff;
+    cursor: pointer;
+    margin: 0;
+}
+
+.Rolemanagement-newtask-option input:checked {
+    background: #e99319;
+    border-color: #e99319;
+}
+
+.Rolemanagement-newtask-option input:checked::after {
+    content: "✓";
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+
+/* =========================================
+   BOTTOM BUTTONS
+========================================= */
+
+.Rolemanagement-newtask-buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.Rolemanagement-newtask-buttons button {
+    min-width: 110px;
+    height: 38px;
+    padding: 0 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.Rolemanagement-newtask-cancel {
+    border: 1px solid #ff5050;
+    background: #ffffff;
+    color: #ff4040;
+}
+
+.Rolemanagement-newtask-cancel:hover {
+    background: #fff1f1;
+}
+
+.Rolemanagement-newtask-create {
+    border: 1px solid #e99319;
+    background: #e99319;
+    color: #ffffff;
+}
+
+.Rolemanagement-newtask-create:hover {
+    background: #d9820d;
+    border-color: #d9820d;
+}
+
+
+/* =========================================
+   FOCUS EFFECTS
+========================================= */
+
+.Rolemanagement-newtask-option input:focus-visible {
+    outline: 2px solid #e99319;
+    outline-offset: 2px;
+}
+
+.Rolemanagement-newtask-switch input:focus-visible
++ .Rolemanagement-newtask-slider {
+    outline: 2px solid #e99319;
+    outline-offset: 2px;
+}
+
+
+/* =========================================
+   TABLET RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+
+    .Rolemanagement-newtask-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .Rolemanagement-hero-table {
+        overflow-x: auto;
+    }
+
+}
+
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+    .Rolemanagement {
+        padding: 15px;
+    }
+
+    .Rolemanagement-role {
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .Rolemanagement-name h2 {
+        font-size: 19px;
+    }
+
+    .Rolemanagement-profile {
+        padding: 8px;
+        gap: 7px;
+    }
+
+    .Rolemanagement-profiledetails h5 {
+        font-size: 13px;
+    }
+
+    .Rolemanagement-profiledetails p {
+        font-size: 11px;
+    }
+
+    .Rolemanagement-hero {
+        padding: 15px;
+        min-height: 550px;
+    }
+
+    .Rolemanagement-hero1 button {
+        min-width: 90px;
+        height: 40px;
+        font-size: 13px;
+    }
+
+    .Rolemanagement-table-controls {
+        grid-template-columns: minmax(0, 1fr) 130px;
+        gap: 10px;
+    }
+
+    .Rolemanagement-search {
+        grid-column: 1 / -1;
+    }
+
+    .Rolemanagement-filter,
+    .Rolemanagement-export {
+        width: 100%;
+    }
+
+    .Rolemanagement-newtask-details {
+        gap: 12px;
+    }
+
+    .Rolemanagement-newtask-field {
+        width: 50%;
+    }
+
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 500px) {
+
+    .Rolemanagement {
+        padding: 12px;
+    }
+
+    .Rolemanagement-role {
+        flex-direction: column;
+    }
+
+    .Rolemanagement-hero {
+        padding: 12px;
+    }
+
+    .Rolemanagement-hero0 {
+        align-items: flex-start;
+    }
+
+    .Rolemanagement-hero1 button {
+        min-width: 85px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
+
+    .Rolemanagement-table-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .Rolemanagement-search {
+        grid-column: auto;
+    }
+
+    .Rolemanagement-newtask-details {
+        flex-direction: column;
+    }
+
+    .Rolemanagement-newtask-field {
+        width: 100%;
+    }
+
+    .Rolemanagement-newtask-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .Rolemanagement-newtask-card {
+        min-height: 140px;
+    }
+
+    .Rolemanagement-newtask-buttons {
+        flex-wrap: wrap;
+    }
+
+    .Rolemanagement-newtask-buttons button {
+        flex: 1;
+    }
+
+}
+/* ACTIONS */
+
+.Rolemanagement-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.Rolemanagement-actions button {
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.Rolemanagement-actions button {
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.view-action {
+    color: #5279c7;
+}
+
+.edit-action {
+    color: #ed7819;
+}
+
+.delete-action {
+    color: #d74a43;
+}
+
+.Rolemanagement-actions button:hover {
+    text-decoration: underline;
+}
+
+/* VIEW ROLE SECTION */
+
+.Rolemanagement-view-details {
+    display: flex;
+    align-items: center;
+    gap: 35px;
+    margin: 15px 0 22px;
+    font-size: 14px;
+    color: #444;
+}
+
+.Rolemanagement-view-details strong {
+    color: #222;
+    font-weight: 700;
+}
+
+/* VIEW INPUTS */
+
+.Rolemanagement-newtask-field input:read-only {
+    background-color: #f7f7f7;
+    color: #555;
+    cursor: default;
+}
+
+/* VIEW PERMISSIONS */
+
+.Rolemanagement-newtask-options input:disabled {
+    cursor: default;
+}
+
+/* VIEW RESPONSIVE */
+
+@media (max-width: 550px) {
+    .Rolemanagement-view-details {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}

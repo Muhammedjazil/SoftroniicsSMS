@@ -1,0 +1,1479 @@
+
+/* =========================================
+   GLOBAL MAIN CONTAINER
+========================================= */
+
+.staffmanagement {
+    width: 100%;
+    min-height: 100vh;
+    padding: 28px;
+    background: #fefcfc;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.stafffirst {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 28px;
+}
+
+.staffhead h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: #171717;
+}
+
+.staffhead p {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: #999;
+    margin: 0;
+}
+
+/* =========================================
+   ADMIN PROFILE
+========================================= */
+
+.staffadminprofile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.stafficon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #f0f1f2;
+    font-size: 20px;
+    color: #555;
+}
+
+.staffadminname h5 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.staffadminname p {
+    margin: 0;
+    font-size: 12px;
+    color: #888;
+}
+
+/* =========================================
+   TOP BUTTONS
+========================================= */
+
+.staffbuttons {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.staffbuttons button {
+    min-width: 100px;
+    height: 40px;
+    padding: 0 18px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    background: #fff;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.staffbuttons button.stafflistactive {
+    background: #e59120;
+    border-color: #e59120;
+    color: #fff;
+}
+
+.staffbuttons button:hover:not(.stafflistactive) {
+    background: #fff7eb;
+    border-color: #e59120;
+}
+
+/* =========================================
+   STAFF LIST CONTAINER
+========================================= */
+
+.stafffull {
+    width: 100%;
+    padding: 30px;
+    border: 1px solid #eaeaea;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+}
+
+/* =========================================
+   SEARCH AND FILTER SECTION
+========================================= */
+
+.staffherosection {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) 194px 194px 160px;
+    gap: 13px;
+    align-items: center;
+    width: 100%;
+    margin: 22px 0 19px;
+}
+
+.staffsearch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    box-sizing: border-box;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    background: #fff;
+    color: #999;
+}
+
+.staffsearch svg {
+    flex-shrink: 0;
+    font-size: 17px;
+}
+
+.staffsearch input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #333;
+    font-size: 13px;
+}
+
+.staffsearch input::placeholder {
+    color: #999;
+}
+
+/* FILTERS */
+
+.staffalldepartment,
+.staffbranch,
+.staffactive {
+    width: 100%;
+}
+
+.staffherosection select {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    outline: none;
+    background: #fff;
+    color: #555;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.staffherosection select:focus {
+    border-color: #ed8019;
+}
+
+/* EXPORT */
+
+.staffexport {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.staffexport button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    background: #fff;
+    color: #555;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.staffexport button:hover {
+    background: #fff7eb;
+    border-color: #ed8019;
+}
+
+/* =========================================
+   STAFF TABLE
+========================================= */
+
+.stafftable {
+    width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.stafftable table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+    table-layout: auto;
+    background: #fff;
+}
+
+.stafftable thead {
+    background: #f7f9f9;
+}
+
+.stafftable th {
+    height: 43px;
+    padding: 0 18px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #626b73;
+    white-space: nowrap;
+}
+
+.stafftable td {
+    height: 61px;
+    padding: 10px 18px;
+    text-align: left;
+    font-size: 12px;
+    color: #777;
+    border-bottom: 1px solid #e7e8e9;
+    line-height: 1.5;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.stafftable tbody tr:hover {
+    background: #fcfcfc;
+}
+
+/* STAFF NAME */
+
+.staffnamecell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 165px;
+}
+
+.staffavatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+    border-radius: 50%;
+    background: #fff0d9;
+    color: #f28a25;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.staffnamedetails h5 {
+    margin: 0 0 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #252a30;
+}
+
+.staffnamedetails p {
+    margin: 0;
+    font-size: 11px;
+    color: #999;
+}
+
+/* EMAIL */
+
+.staffemail {
+    min-width: 180px;
+}
+
+.staffemail p {
+    margin: 0 0 3px;
+    font-size: 12px;
+    color: #333;
+}
+
+.staffemail span {
+    font-size: 11px;
+    color: #999;
+}
+
+/* BRANCH */
+
+.staffbranchname {
+    color: #252a30 !important;
+    font-weight: 600;
+    text-transform: lowercase;
+}
+
+/* BATCH BUTTON */
+
+.staffbatches {
+    padding: 5px 11px;
+    border: 1px solid #dcefe3;
+    border-radius: 5px;
+    background: #f0fbf4;
+    color: #38936a;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.staffbatches:hover {
+    background: #dcf8e6;
+}
+
+/* =========================================
+   TABLE ACTION BUTTONS
+========================================= */
+
+.staffactions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.staffactions button {
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.staffactions .staffviewbtn {
+    color: #5279c7;
+}
+
+.staffactions .staffedit {
+    color: #ed7819;
+}
+
+.staffactions .staffdelete {
+    color: #d74a43;
+}
+
+.staffactions button:hover {
+    text-decoration: underline;
+}
+
+/* EMPTY DATA */
+
+.staffnodata {
+    height: 100px !important;
+    text-align: center !important;
+    color: #999 !important;
+    font-size: 13px !important;
+}
+
+/* =========================================
+   PAGINATION
+========================================= */
+
+.staffpageend {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 15px 18px;
+    box-sizing: border-box;
+    border-top: 1px solid #e7e8e9;
+    background: #fff;
+}
+
+.staffpageinfo p {
+    margin: 0;
+    color: #777;
+    font-size: 12px;
+}
+
+.staffprevnext {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 9px;
+}
+
+.staffprevnext span {
+    margin-right: 5px;
+    color: #777;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.staffprevnext button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    min-width: 90px;
+    height: 35px;
+    padding: 0 12px;
+    border: 1px solid #e3e5e8;
+    border-radius: 5px;
+    background: #fff;
+    color: #777;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.staffprevnext button:hover:not(:disabled) {
+    border-color: #ed8019;
+    color: #ed8019;
+}
+
+.staffprevnext button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   NEW STAFF MAIN CONTAINER
+========================================= */
+
+.newstaff {
+    width: 100%;
+    padding: 22px;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+.newstaff h2 {
+    margin: 0 0 25px;
+    font-size: 19px;
+    font-weight: 700;
+    color: #202b3c;
+}
+
+.newstaff h3 {
+    margin: 0 0 25px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #273449;
+}
+
+.newstaff form {
+    width: 100%;
+}
+
+/* BASIC DETAILS */
+
+.staff-newstaff {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 18px;
+    row-gap: 20px;
+    width: 100%;
+}
+
+.stafffield {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+}
+
+.stafffield label {
+    margin-bottom: 9px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #344054;
+}
+
+.stafffield label span:not(.optional) {
+    color: #e74c3c;
+}
+
+.stafffield .optional {
+    color: #98a0aa;
+    font-weight: 400;
+}
+
+/* FORM INPUTS */
+
+.newstaff input:not([type="checkbox"]),
+.newstaff select,
+.newstaff textarea {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    outline: none;
+    background: #fff;
+    color: #475467;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+.newstaff input::placeholder,
+.newstaff textarea::placeholder {
+    color: #a1a7b0;
+}
+
+.newstaff input:focus,
+.newstaff select:focus,
+.newstaff textarea:focus {
+    border-color: #8295b7;
+}
+
+.newstaff select {
+    cursor: pointer;
+}
+
+/* FILE UPLOAD */
+
+.newstaff input[type="file"] {
+    padding: 7px 10px;
+    color: #7b8490;
+    cursor: pointer;
+}
+
+.newstaff input[type="file"]::file-selector-button {
+    border: none;
+    background: transparent;
+    color: #687385;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* =========================================
+   PROFESSIONAL DETAILS
+========================================= */
+
+.staffpersonaldetails {
+    display: block;
+    width: 100%;
+    margin-top: 32px;
+    padding: 0;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.staffpersonaldetails h3 {
+    margin-bottom: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #273449;
+}
+
+.staffprofessionalgrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 20px;
+    row-gap: 22px;
+    width: 100%;
+}
+
+.staffprofessionalfield {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+}
+
+.staffprofessionalfield > label {
+    margin-bottom: 9px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #344054;
+}
+
+.staffprofessionalfield label span:not(.optional) {
+    color: #e74c3c;
+}
+
+.staffprofessionalfield .optional {
+    color: #98a0aa;
+    font-weight: 400;
+}
+
+.staffprofessionalfield input:not([type="checkbox"]),
+.staffprofessionalfield select {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    outline: none;
+    background: #fff;
+    color: #475467;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.staffprofessionalfield input:focus,
+.staffprofessionalfield select:focus {
+    border-color: #8295b7;
+}
+
+/* CHECKBOXES */
+
+.staffcheckbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 13px;
+}
+
+.staffcheckbox input,
+.staffpersonaldetails input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: #536da5;
+    cursor: pointer;
+}
+
+.staffcheckbox label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: #344054;
+    cursor: pointer;
+}
+
+.staffmentorcheck {
+    margin-top: 27px;
+}
+
+/* =========================================
+   LOGIN & ACCESS
+========================================= */
+
+.stafflogindetails {
+    width: 100%;
+    margin-top: 35px;
+}
+
+.stafflogindetails h3 {
+    margin-bottom: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #273449;
+}
+
+.stafflogin {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.stafflog {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+}
+
+.stafflog label {
+    margin-bottom: 9px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #344054;
+}
+
+.stafflog label span {
+    color: #e74c3c;
+}
+
+.stafflog input {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    outline: none;
+    background: #fff;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.stafflog input:focus {
+    border-color: #8295b7;
+}
+
+/* =========================================
+   FORM BUTTONS
+========================================= */
+
+.staffformbutton {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 35px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.staffformbutton button {
+    min-width: 120px;
+    height: 40px;
+    padding: 0 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.staffformbuttoncancel {
+    border: 1px solid #dedede;
+    background: #fff;
+    color: #555;
+}
+
+.staffformbuttoncancel:hover {
+    background: #f5f5f5;
+}
+
+.staffformbuttoncreate,
+.staffbtnupdate {
+    border: 1px solid #e59120;
+    background: #e59120;
+    color: #fff;
+}
+
+.staffformbuttoncreate:hover,
+.staffbtnupdate:hover {
+    background: #cf7910;
+}
+
+/* =========================================
+   STAFF VIEW PAGE
+========================================= */
+
+.staffmanagement > .staffview {
+    width: 100%;
+    padding: 25px;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+}
+
+/* VIEW HEADER */
+
+.staffviewheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 25px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #eee;
+}
+
+.staffviewheader h1 {
+    margin: 0;
+    color: #202b3c;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.staffviewback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 95px;
+    height: 38px;
+    padding: 0 14px;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    background: #fff;
+    color: #555;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.staffviewback:hover {
+    background: #fff7eb;
+    border-color: #e59120;
+    color: #d17b13;
+}
+
+/* VIEW SECTION */
+
+.staffbasicdetails,
+.staffprofessionalview {
+    width: 100%;
+    margin-bottom: 25px;
+    padding: 22px;
+    border: 1px solid #e9e9e9;
+    border-radius: 8px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.staffviewtitle {
+    margin: 0 0 22px;
+    padding-bottom: 13px;
+    border-bottom: 1px solid #eee;
+    color: #273449;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* PERSONAL DETAILS LAYOUT */
+
+.staffpersonal {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 25px;
+    width: 100%;
+}
+
+.staffviewdetailsgrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px 20px;
+    flex: 1;
+    min-width: 0;
+}
+
+.staffviewfield {
+    min-width: 0;
+}
+
+.staffviewfield h4 {
+    margin: 0 0 8px;
+    color: #89919d;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.staffviewfield p {
+    margin: 0;
+    color: #303846;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.staffviewfield h4 span {
+    color: #98a0aa;
+    font-weight: 400;
+}
+
+/* PROFILE IMAGE */
+
+.staffper3 {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 145px;
+    min-width: 145px;
+    height: 160px;
+    padding: 5px;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    background: #fafafa;
+    box-sizing: border-box;
+}
+
+.staffper3 img {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+/* STATUS */
+
+.staffviewfield .staffviewstatus {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: #eaf8ef;
+    color: #38936a;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* VIEW BOTTOM BUTTONS */
+
+.staffviewbuttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding-top: 5px;
+}
+
+.staffviewbuttons button {
+    min-width: 110px;
+    height: 39px;
+    padding: 0 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.staffviewedit {
+    border: 1px solid #e59120;
+    background: #e59120;
+    color: #fff;
+}
+
+.staffviewedit:hover {
+    background: #cf7910;
+}
+
+.staffviewprint {
+    border: 1px solid #dce1e8;
+    background: #fff;
+    color: #475467;
+}
+
+.staffviewprint:hover {
+    border-color: #8295b7;
+    background: #f7f9fc;
+}
+
+/* =========================================
+   TABLET RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+
+    .staffmanagement {
+        padding: 20px;
+    }
+
+    .staffherosection {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stafftable {
+        overflow-x: auto;
+    }
+
+    .stafftable table {
+        min-width: 850px;
+    }
+
+    .staffviewdetailsgrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* =========================================
+   MEDIUM SCREEN
+========================================= */
+
+@media (max-width: 900px) {
+
+    .staff-newstaff,
+    .staffprofessionalgrid,
+    .stafflogin {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+    .staffmanagement {
+        padding: 15px;
+    }
+
+    .stafffirst {
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .staffhead h2 {
+        font-size: 19px;
+    }
+
+    .staffadminprofile {
+        padding: 8px;
+        gap: 7px;
+    }
+
+    .staffadminname h5 {
+        font-size: 13px;
+    }
+
+    .staffadminname p {
+        font-size: 11px;
+    }
+
+    .staffbuttons button {
+        min-width: 90px;
+        height: 40px;
+        font-size: 13px;
+    }
+
+    .staffherosection {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .staffsearch {
+        grid-column: 1 / -1;
+    }
+
+    .staffpageend {
+        gap: 12px;
+    }
+
+    .newstaff {
+        padding: 20px;
+    }
+
+    .staffpersonal {
+        flex-direction: column-reverse;
+    }
+
+    .staffper3 {
+        width: 120px;
+        min-width: 120px;
+        height: 135px;
+    }
+
+    .staffmanagement > .staffview {
+        padding: 18px;
+    }
+
+    .staffbasicdetails,
+    .staffprofessionalview {
+        padding: 17px;
+    }
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .staff-newstaff,
+    .staffprofessionalgrid,
+    .stafflogin {
+        grid-template-columns: 1fr;
+        gap: 17px;
+    }
+
+    .staffpersonaldetails {
+        margin-top: 25px;
+    }
+
+    .staffformbutton {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .staffformbutton button {
+        width: 100%;
+    }
+
+    .staffviewdetailsgrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 14px;
+    }
+}
+
+/* =========================================
+   EXTRA SMALL MOBILE
+========================================= */
+
+@media (max-width: 500px) {
+
+    .staffmanagement {
+        padding: 12px;
+    }
+
+    .stafffirst {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .staffadminprofile {
+        align-self: flex-end;
+    }
+
+    .staffbuttons {
+        margin-bottom: 15px;
+    }
+
+    .staffherosection {
+        grid-template-columns: 1fr;
+    }
+
+    .staffsearch {
+        grid-column: auto;
+    }
+
+    .stafffull {
+        padding: 15px;
+    }
+
+    .staffpageend {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .staffprevnext {
+        width: 100%;
+        justify-content: space-between;
+        gap: 5px;
+    }
+
+    .staffprevnext button {
+        min-width: 75px;
+        padding: 0 7px;
+    }
+
+    .newstaff {
+        padding: 15px;
+    }
+
+    .newstaff h2 {
+        font-size: 17px;
+    }
+
+    .staffviewheader {
+        align-items: flex-start;
+    }
+
+    .staffviewheader h1 {
+        font-size: 18px;
+    }
+
+    .staffviewdetailsgrid {
+        grid-template-columns: 1fr;
+    }
+
+    .staffviewbuttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .staffviewbuttons button {
+        width: 100%;
+    }
+
+    .staffviewback {
+        min-width: 75px;
+        padding: 0 9px;
+    }
+}
+
+/* =========================================
+   PRINT
+========================================= */
+
+@media print {
+
+    .stafffirst,
+    .staffbuttons,
+    .staffviewback,
+    .staffviewbuttons,
+    .staffmanagement > .stafffull {
+        display: none !important;
+    }
+
+    .staffmanagement {
+        padding: 0;
+        background: #fff;
+    }
+
+    .staffmanagement > .staffview {
+        padding: 0;
+        border: none;
+        box-shadow: none;
+    }
+}
+
+/* =====================================
+   MENTOR ROLE SECTION
+===================================== */
+
+.staffmentor-section {
+    width: 100%;
+    margin-top: 25px;
+}
+
+.staffmentorcheck {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 20px;
+}
+
+.staffmentorcheck input {
+    width: 16px;
+    height: 16px;
+    accent-color: #2878e5;
+    cursor: pointer;
+}
+
+.staffmentorcheck label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+}
+
+/* =====================================
+   MENTOR TIMINGS CONTAINER
+===================================== */
+
+.staff-mentor-timings {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-sizing: border-box;
+    align-items: start;
+}
+
+/* =====================================
+   SELECT TIMINGS
+===================================== */
+
+.staff-timing-select,
+.staff-selected-timings {
+    width: 100%;
+    min-width: 0;
+}
+
+.staff-timing-select label,
+.staff-selected-timings label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 9px;
+}
+
+.staff-timing-select select {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 2px solid #e99a56;
+    border-radius: 7px;
+    background: #fff;
+    outline: none;
+    font-size: 13px;
+    color: #555;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+/* =====================================
+   SELECTED TIMING CHIPS
+===================================== */
+
+.staff-timing-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+}
+
+.staff-timing-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 11px;
+    border-radius: 20px;
+    background: #fff0d9;
+    color: #98602f;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.staff-timing-chip svg {
+    font-size: 13px;
+}
+
+.staff-timing-chip button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: #c47b42;
+    cursor: pointer;
+    padding: 0;
+}
+
+.staff-timing-chip button:hover {
+    color: #e53935;
+}
+
+.staff-no-timings {
+    font-size: 13px;
+    color: #999;
+}
+
+/* =====================================
+   MENTOR VIEW SECTION
+===================================== */
+
+.staff-view-mentor {
+    margin-top: 25px;
+    padding: 20px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.staff-view-mentor > p {
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media (max-width: 768px) {
+    .staff-mentor-timings {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .staff-timing-chips {
+        gap: 8px;
+    }
+
+    .staff-timing-chip {
+        font-size: 11px;
+    }
+}
+
+
+/* =====================================
+   ADDITIONAL BRANCHES
+===================================== */
+
+.staff-additional-branches {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 22px;
+    background: #fffdf8;
+    border: 1px solid #eee9df;
+    border-radius: 9px;
+    margin: 5px 0 15px;
+}
+
+.staff-additional-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.staff-additional-heading strong {
+    font-size: 14px;
+    color: #444;
+}
+
+.staff-additional-heading span {
+    font-size: 12px;
+    color: #888;
+}
+
+.staff-additional-options {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.staff-additional-option {
+    min-width: 170px;
+    min-height: 38px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+}
+
+.staff-additional-option input {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #1677e8;
+}
+
+.staff-additional-option span {
+    text-transform: lowercase;
+}

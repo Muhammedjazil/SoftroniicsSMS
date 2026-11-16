@@ -1,0 +1,559 @@
+
+/* =====================================
+   MAIN CONTAINER
+===================================== */
+
+.Branch {
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px 22px;
+    background: #ffffff;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+
+/* =====================================
+   HEADER
+===================================== */
+
+.branchheadsection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 22px;
+}
+
+.branchhead h2 {
+    font-size: 21px;
+    margin: 0 0 5px;
+    font-weight: 700;
+}
+
+.branchhead p {
+    color: #888;
+    font-size: 13px;
+    margin: 0;
+}
+
+.branchprofile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 15px;
+    border: 1px solid #e6e6e6;
+    border-radius: 9px;
+    box-shadow: 0 0 4px #ddd;
+}
+
+.branchproficon {
+    font-size: 21px;
+    display: flex;
+    align-items: center;
+}
+
+.branchprofdata h5 {
+    margin: 0 0 4px;
+    font-size: 15px;
+}
+
+.branchprofdata h6 {
+    margin: 0;
+    font-size: 11px;
+    color: #777;
+    font-weight: 400;
+}
+
+
+/* =====================================
+   MAIN HERO SECTION
+   TABS ALWAYS VISIBLE
+===================================== */
+
+.branchherosection {
+    width: 100%;
+    min-height: 570px;
+    padding: 20px 25px 14px;
+    border: 1px solid #e5e5e5;
+    border-radius: 15px;
+    box-shadow: 0 0 5px #ddd;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =====================================
+   STATIC TOP BUTTONS
+===================================== */
+
+
+.branchherobutton {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Equal spacing between tabs */
+    width: 100%;
+    min-height: 40px;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+}
+
+.branchherobutton button {
+    height: 40px;
+    padding: 0 25px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.branchherobutton .branchon {
+    background-color: #e9911d;
+    color: white;
+    border: 1px solid #e9911d;
+    border-radius: 7px;
+}
+
+.branchherobutton .branchoff {
+    background-color: white;
+    color: black;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    /* Remove margin-left */
+}
+
+.branchherobutton .branchexport {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid #bbb;
+    border-radius: 7px;
+    font-weight: 400;
+}
+
+/* =====================================
+   BRANCH TABLE SECTION
+===================================== */
+
+.branchbranch {
+    width: 100%;
+    height: 440px;
+    border: 1px solid #e5e5e5;
+    border-radius: 9px;
+    box-shadow: 0 0 4px #ddd;
+    padding: 0 13px;
+    box-sizing: border-box;
+    overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* TABLE */
+
+.branchtable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 550px;
+}
+
+.branchtable thead {
+    border-bottom: 2px solid #888;
+}
+
+.branchtable th {
+    padding: 16px 0;
+    text-align: left;
+    font-size: 14px;
+    height: 30px;
+    font-weight: 600;
+}
+
+.branchtable td {
+    padding: 18px 0;
+    font-size: 12px;
+    border-bottom: 1px solid #bbb;
+}
+
+
+/* TABLE COLUMN WIDTH */
+
+.branchtable th:first-child,
+.branchtable td:first-child {
+    width: 18%;
+}
+
+.branchtable th:nth-child(2),
+.branchtable td:nth-child(2) {
+    width: 37%;
+}
+
+.branchtable th:nth-child(3),
+.branchtable td:nth-child(3) {
+    width: 37%;
+}
+
+.branchtable th:last-child,
+.branchtable td:last-child {
+    text-align: center;
+    width: 12%;
+}
+
+
+/* =====================================
+   TABLE ACTION ICONS
+===================================== */
+
+.branchactions {
+    white-space: nowrap;
+}
+
+.branchactions svg {
+    font-size: 17px;
+    margin: 0 7px;
+    cursor: pointer;
+}
+
+.branchview {
+    color: #111;
+}
+
+.branchedit {
+    color: #111;
+}
+
+.branchdelete {
+    color: red;
+}
+
+.branchview:hover,
+.branchedit:hover {
+    color: #e9911d;
+}
+
+.branchdelete:hover {
+    color: darkred;
+}
+
+
+/* EMPTY TABLE */
+
+.branchnodata {
+    text-align: center !important;
+    padding: 30px !important;
+    color: #888;
+}
+
+
+/* =====================================
+   PAGINATION
+===================================== */
+
+.branchpagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 7px;
+    margin-top: auto;
+    padding: 12px 0;
+    flex-shrink: 0;
+}
+
+.branchpagination span {
+    font-size: 13px;
+    margin-right: 5px;
+}
+
+.branchpagination button {
+    width: 28px;
+    height: 27px;
+    border: none;
+    border-radius: 7px;
+    background: #bbb;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+
+/* =====================================
+   NEW / VIEW / EDIT FORM
+===================================== */
+
+.branchformsection {
+    width: 100%;
+    min-height: 500px;
+    flex: 1;
+    padding: 20px 0 0;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =====================================
+   FORM HEADER
+===================================== */
+
+.branchformhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.branchformhead h2 {
+    font-size: 27px;
+    font-weight: 700;
+    margin: 0;
+}
+
+
+/* BACK BUTTON */
+
+.branchback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 40px;
+    padding: 0 16px;
+    background: white;
+    border: 1px solid #bbb;
+    border-radius: 7px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.branchback:hover {
+    background: #f5f5f5;
+}
+
+
+/* =====================================
+   FORM INPUT FIELDS
+===================================== */
+
+.branchformfields {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    width: 65%;
+}
+
+.branchformgroup {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+}
+
+.branchformgroup label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+.branchformgroup input {
+    width: 100%;
+    height: 40px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    background: white;
+    border: 1px solid #bbb;
+    border-radius: 7px;
+    outline: none;
+    font-size: 12px;
+}
+
+.branchformgroup input:focus {
+    border-color: #e9911d;
+}
+
+.branchformgroup input::placeholder {
+    color: #999;
+}
+
+.branchformgroup input:disabled {
+    background: #dedede;
+    color: #222;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+
+/* =====================================
+   FORM BOTTOM BUTTONS
+===================================== */
+
+.branchformbuttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 7px;
+    margin-top: auto;
+    padding-bottom: 0;
+}
+
+.branchformbuttons button {
+    width: 135px;
+    height: 40px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+
+/* CANCEL BUTTON */
+
+.branchcancel {
+    background: white;
+    border: 1px solid red;
+    color: red;
+}
+
+.branchcancel:hover {
+    background: #fff4f4;
+}
+
+
+/* CREATE / EDIT / SAVE BUTTON */
+
+.branchcreate {
+    background: #e9911d;
+    border: 1px solid #e9911d;
+    color: white;
+}
+
+.branchcreate:hover {
+    background: #d98112;
+}
+
+
+/* =====================================
+   RESPONSIVE DESIGN
+===================================== */
+
+@media (max-width: 768px) {
+
+    .Branch {
+        padding: 12px;
+    }
+
+    .branchherosection {
+        padding: 15px;
+        min-height: 550px;
+    }
+
+    .branchformsection {
+        min-height: 500px;
+    }
+
+    .branchformhead h2 {
+        font-size: 21px;
+    }
+
+    .branchformfields {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .branchformgroup {
+        width: 100%;
+    }
+
+    .branchformbuttons button {
+        flex: 1;
+    }
+
+    .branchherobutton button {
+        padding: 0 14px;
+        font-size: 11px;
+    }
+
+    .branchbranch {
+        height: 420px;
+    }
+
+    .branchprofile {
+        gap: 7px;
+        padding: 7px;
+    }
+}
+
+
+/* =====================================
+   MOBILE SCREEN
+===================================== */
+
+@media (max-width: 480px) {
+
+    .Branch {
+        padding: 10px;
+    }
+
+    .branchhead h2 {
+        font-size: 18px;
+    }
+
+    .branchhead p {
+        font-size: 11px;
+    }
+
+    .branchprofile {
+        padding: 7px;
+        gap: 6px;
+    }
+
+    .branchprofdata h5 {
+        font-size: 12px;
+    }
+
+    .branchprofdata h6 {
+        font-size: 10px;
+    }
+
+    .branchherosection {
+        padding: 10px;
+    }
+
+    .branchherobutton button {
+        padding: 0 10px;
+        font-size: 10px;
+    }
+
+    .branchformhead h2 {
+        font-size: 19px;
+    }
+
+    .branchback {
+        padding: 0 10px;
+        font-size: 11px;
+    }
+
+    .branchformfields {
+        width: 100%;
+        gap: 15px;
+    }
+
+    .branchformbuttons button {
+        width: auto;
+        font-size: 11px;
+    }
+
+    .branchbranch {
+        height: 420px;
+        padding: 0 8px;
+    }
+
+    .branchactions svg {
+        margin: 0 4px;
+    }
+
+}

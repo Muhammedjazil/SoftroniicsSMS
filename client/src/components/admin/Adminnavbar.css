@@ -1,0 +1,429 @@
+
+/* =========================================
+   GLOBAL
+========================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* =========================================
+   MAIN LAYOUT
+========================================= */
+
+.adminlayout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* =========================================
+   MAIN NAVBAR
+========================================= */
+
+.adminnavbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    background: #ffffff;
+    border-right: 1px solid #e5e5e5;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+}
+
+/* =========================================
+   LOGO
+========================================= */
+
+.adminnavlogo {
+    width: 100%;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+    flex-shrink: 0;
+}
+
+.adminnavlogo h2 {
+    margin: 0;
+    font-size: 23px;
+    font-weight: 800;
+    color: #111111;
+    letter-spacing: -1px;
+}
+
+.adminnavlogo h2 span {
+    color: #f47721;
+}
+
+/* =========================================
+   MENU ITEMS CONTAINER
+========================================= */
+
+.adminnavitems {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px 12px 15px;
+}
+
+/* Hide scrollbar */
+
+.adminnavitems::-webkit-scrollbar {
+    width: 4px;
+}
+
+.adminnavitems::-webkit-scrollbar-thumb {
+    background: #dddddd;
+    border-radius: 10px;
+}
+
+.adminnavitems::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* =========================================
+   MAIN MENU GROUP
+========================================= */
+
+.adminnavgroup {
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+/* =========================================
+   MAIN MENU
+========================================= */
+
+.adminnavmain {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    gap: 13px;
+    text-decoration: none;
+    color: #4d5661;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: 0.2s ease;
+    text-align: left;
+}
+
+/* Main menu hover */
+
+.adminnavmain:hover {
+    background: #fff5e8;
+    color: #ed741c;
+}
+
+/* =========================================
+   MENU ICON
+========================================= */
+
+.adminnavicon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    min-width: 18px;
+    font-size: 17px;
+}
+
+.adminnavtitle {
+    flex: 1;
+    white-space: nowrap;
+}
+
+/* =========================================
+   DROPDOWN ARROW
+========================================= */
+
+.adminnavarrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    margin-left: auto;
+}
+
+/* =========================================
+   ACTIVE MAIN MENU
+========================================= */
+
+.adminnavmainactive {
+    color: #f47721;
+    background: transparent;
+}
+
+.adminnavmainactive .adminnavicon {
+    color: #f47721;
+}
+
+/* =========================================
+   SUBMENU
+========================================= */
+
+.adminnavsubmenu {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 3px 12px 5px 23px;
+    gap: 4px;
+    animation: submenuOpen 0.2s ease;
+}
+
+@keyframes submenuOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================
+   SUBMENU ITEMS
+========================================= */
+
+.adminnavsubitem {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 32px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #66707b;
+    font-size: 13px;
+    font-weight: 500;
+    transition: 0.2s ease;
+    white-space: nowrap;
+}
+
+/* Submenu hover */
+
+.adminnavsubitem:hover {
+    color: #ed741c;
+    background: #fff5e8;
+}
+
+/* =========================================
+   ACTIVE SUBMENU
+========================================= */
+
+.adminnavsubactive {
+    background: #fff0d8;
+    color: #ed741c;
+    font-weight: 600;
+}
+
+.adminnavsubactive:hover {
+    background: #fff0d8;
+    color: #ed741c;
+}
+
+/* =========================================
+   LOGOUT SECTION
+========================================= */
+
+.adminnavlogout {
+    width: 100%;
+    min-height: 65px;
+    padding: 10px 12px;
+    border-top: 1px solid #eeeeee;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.adminnavlogout button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    color: #e94c4c;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.adminnavlogout button svg {
+    font-size: 17px;
+}
+
+.adminnavlogout button:hover {
+    background: #fff1f1;
+    color: #d52c2c;
+}
+
+/* =========================================
+   MOBILE MENU BUTTON
+========================================= */
+
+.adminmobilemenu {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    color: #333333;
+    font-size: 21px;
+    cursor: pointer;
+    z-index: 1200;
+}
+
+/* =========================================
+   MOBILE OVERLAY
+========================================= */
+
+.adminnavoverlay {
+    display: none;
+}
+
+/* =========================================
+   MAIN CONTENT
+========================================= */
+
+.adminmaincontent {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    margin-left: 260px;
+    min-height: 100vh;
+    background: #f4f6f8;
+    overflow-x: auto;
+}
+
+/* =========================================
+   TABLET RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+
+    .adminnavbar {
+        width: 240px;
+    }
+
+    .adminmaincontent {
+        margin-left: 240px;
+    }
+
+    .adminnavlogo {
+        padding: 0 27px;
+    }
+}
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 650px) {
+
+    .adminmobilemenu {
+        display: flex;
+    }
+
+    .adminnavbar {
+        width: 240px;
+        left: -250px;
+        transition: left 0.3s ease;
+        z-index: 1300;
+    }
+
+    .adminnavbar.adminnavopen {
+        left: 0;
+    }
+
+    .adminmaincontent {
+        width: 100%;
+        margin-left: 0;
+        overflow-x: auto;
+    }
+
+    .adminnavoverlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        z-index: 1250;
+    }
+
+    .adminnavlogo {
+        padding-left: 65px;
+    }
+
+    .adminnavitems {
+        padding: 10px 12px;
+    }
+
+    .adminnavmain {
+        min-height: 44px;
+        font-size: 13px;
+    }
+
+    .adminnavsubitem {
+        min-height: 32px;
+    }
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 400px) {
+
+    .adminnavbar {
+        width: 220px;
+        left: -230px;
+    }
+
+    .adminnavbar.adminnavopen {
+        left: 0;
+    }
+
+    .adminnavlogo h2 {
+        font-size: 21px;
+    }
+}

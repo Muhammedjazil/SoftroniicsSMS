@@ -1,0 +1,844 @@
+
+/* =====================================
+   MAIN CONTAINER
+===================================== */
+
+.internmanagement {
+    width: 100%;
+    min-height: 100vh;
+    background: #f3f5f7;
+    font-family: Arial, sans-serif;
+    color: #243447;
+    box-sizing: border-box;
+    padding-bottom: 25px;
+}
+
+.internmanagement * {
+    box-sizing: border-box;
+}
+
+
+/* =====================================
+   HEADER
+===================================== */
+
+.intern-header {
+    width: 100%;
+    min-height: 72px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.intern-heading h2 {
+    font-size: 21px;
+    font-weight: 600;
+    margin: 2px 0 4px;
+    color: #203144;
+}
+
+.intern-heading p {
+    font-size: 12px;
+    color: #778391;
+    margin: 0;
+}
+
+.intern-admin {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid #e0e4e8;
+    border-radius: 6px;
+    background: #f6f7f8;
+    min-width: 123px;
+}
+
+.intern-admin-icon {
+    width: 34px;
+    height: 34px;
+    background: #dce0e3;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #344454;
+    font-size: 16px;
+}
+
+.intern-admin strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.intern-admin span {
+    display: block;
+    font-size: 12px;
+    color: #78838e;
+    margin-top: 3px;
+}
+
+
+/* =====================================
+   TABS
+===================================== */
+
+.intern-tabs {
+    display: flex;
+    gap: 7px;
+    padding: 10px 12px 16px;
+    border-bottom: 1px solid #e5e8eb;
+}
+
+.intern-tabs button {
+    min-width: 120px;
+    height: 36px;
+    padding: 0 20px;
+    background: #ffffff;
+    border: 1px solid #e0e4e8;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #35475a;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.intern-tabs button.active {
+    background: #ff790e;
+    color: #ffffff;
+    border: 1px solid #ff790e;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(255, 121, 14, 0.2);
+}
+
+.intern-tabs button:hover:not(.active) {
+    background: #fff3e9;
+    border-color: #ff790e;
+}
+
+
+/* =====================================
+   STUDENT LIST CONTAINER
+===================================== */
+
+.intern-list-container {
+    background: #ffffff;
+    margin: 10px 8px;
+    padding: 20px;
+    border: 1px solid #e8eaed;
+    border-radius: 8px;
+    min-height: 400px;
+}
+
+
+/* =====================================
+   SEARCH AND FILTER
+===================================== */
+
+.intern-filter {
+    display: grid;
+    grid-template-columns: minmax(180px, 2fr) repeat(3, minmax(110px, 0.65fr)) auto;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.intern-search {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    border: 1px solid #e0e3e7;
+    border-radius: 6px;
+    padding: 0 11px;
+    gap: 9px;
+    color: #8c96a1;
+}
+
+.intern-search svg {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.intern-search input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    color: #344454;
+    background: transparent;
+}
+
+.intern-search input::placeholder {
+    color: #9ba4ae;
+}
+
+.intern-filter select {
+    height: 36px;
+    width: 100%;
+    padding: 0 12px;
+    border: 1px solid #e0e3e7;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #536170;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+}
+
+.intern-export {
+    height: 36px;
+    min-width: 102px;
+    padding: 0 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    border: 1px solid #e0e3e7;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #435264;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.intern-export:hover {
+    background: #fff3e9;
+    border-color: #ff790e;
+}
+
+
+/* =====================================
+   TABLE
+===================================== */
+
+.intern-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.intern-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.intern-table thead {
+    background: #fafafa;
+}
+
+.intern-table th {
+    height: 42px;
+    padding: 10px 12px;
+    color: #6b7784;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    border-bottom: 1px solid #e5e8eb;
+}
+
+.intern-table td {
+    height: 74px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e8eaed;
+    font-size: 12px;
+    color: #293747;
+    white-space: nowrap;
+}
+
+.intern-table tbody tr:hover {
+    background: #fffdfb;
+}
+
+
+/* =====================================
+   STUDENT NAME AND AVATAR
+===================================== */
+
+.intern-student-name {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 215px;
+}
+
+.intern-avatar {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 50%;
+    background: #fff0d9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ed711a;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.intern-student-name strong {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #182536;
+    margin-bottom: 4px;
+}
+
+.intern-student-name span {
+    display: block;
+    font-size: 11px;
+    color: #87919b;
+}
+
+
+/* =====================================
+   STATUS
+===================================== */
+
+.intern-status {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    background: #e0f9e9;
+    color: #137b43;
+}
+
+.intern-status.completed {
+    background: #e5efff;
+    color: #2460c5;
+}
+
+.intern-status.dropped {
+    background: #ffe7e7;
+    color: #d13b3b;
+}
+
+
+/* =====================================
+   TABLE ACTIONS
+===================================== */
+
+.intern-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.intern-actions button,
+.intern-card-link {
+    border: none;
+    background: transparent;
+    padding: 3px 0;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.intern-view {
+    color: #2463d6;
+}
+
+.intern-edit {
+    color: #e65e19;
+}
+
+.intern-delete {
+    color: #d92d2d;
+}
+
+.intern-card-link {
+    color: #d9570c;
+    text-decoration: underline;
+}
+
+.intern-actions button:hover,
+.intern-card-link:hover {
+    text-decoration: underline;
+}
+
+.intern-empty {
+    text-align: center;
+    color: #8a949e !important;
+    height: 100px !important;
+}
+
+.intern-total {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #818c97;
+}
+
+
+/* =====================================
+   STUDENT FORM CONTAINER
+===================================== */
+
+.intern-form-container {
+    width: calc(100% - 16px);
+    margin: 0 8px;
+    padding: 12px 20px 20px;
+    background: #ffffff;
+    border: 1px solid #e6e8eb;
+    border-radius: 3px;
+}
+
+.intern-form-container h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 30px;
+    color: #203144;
+}
+
+.intern-form-container h4 {
+    font-size: 15px;
+    font-weight: 500;
+    color: #26384a;
+    margin: 28px 2px 25px;
+}
+
+.intern-form-container h3 + h4 {
+    margin-top: 0;
+}
+
+
+/* =====================================
+   FORM GRID
+===================================== */
+
+.intern-form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 20px;
+    row-gap: 22px;
+    width: 100%;
+}
+
+
+/* =====================================
+   INPUT FIELDS
+===================================== */
+
+.intern-field {
+    width: 100%;
+    min-width: 0;
+}
+
+.intern-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #344255;
+    margin-bottom: 8px;
+}
+
+.intern-required {
+    color: #e84c4c;
+}
+
+.intern-optional {
+    color: #9aa3ad;
+    font-weight: 400;
+}
+
+.intern-field input,
+.intern-field select {
+    width: 100%;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid #e0e3e7;
+    border-radius: 6px;
+    outline: none;
+    background: #ffffff;
+    font-size: 13px;
+    color: #273747;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.intern-field input::placeholder {
+    color: #a0a8b1;
+}
+
+.intern-field input:focus,
+.intern-field select:focus {
+    border-color: #ff790e;
+    box-shadow: 0 0 0 2px rgba(255, 121, 14, 0.08);
+}
+
+.intern-field input[type="date"] {
+    color: #222;
+    cursor: pointer;
+}
+
+
+/* =====================================
+   FILE UPLOAD
+===================================== */
+
+.intern-file-upload {
+    width: 100%;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid #e0e3e7;
+    border-radius: 6px;
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    color: #7d8995 !important;
+    margin: 0 !important;
+    overflow: hidden;
+}
+
+.intern-file-upload span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.intern-file-upload svg {
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.intern-file-upload input {
+    display: none;
+}
+
+
+/* =====================================
+   PASSWORD
+===================================== */
+
+.intern-password {
+    width: 100%;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #e0e3e7;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.intern-password:focus-within {
+    border-color: #ff790e;
+}
+
+.intern-password input {
+    flex: 1;
+    min-width: 0;
+    height: 34px;
+    border: none;
+    box-shadow: none !important;
+}
+
+.intern-password input:focus {
+    border: none;
+}
+
+.intern-password button {
+    height: 34px;
+    width: 38px;
+    flex-shrink: 0;
+    background: #ffffff;
+    border: none;
+    color: #8c969f;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* =====================================
+   FORM BUTTONS
+===================================== */
+
+.intern-form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 13px;
+    margin-top: 25px;
+    padding-top: 5px;
+}
+
+.intern-form-buttons button {
+    height: 36px;
+    padding: 0 22px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.intern-cancel {
+    border: 1px solid #e0e3e7;
+    background: #ffffff;
+    color: #465465;
+}
+
+.intern-cancel:hover {
+    background: #f4f5f6;
+}
+
+.intern-submit {
+    border: 1px solid #ff790e;
+    background: #ff790e;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(255, 121, 14, 0.2);
+}
+
+.intern-submit:hover {
+    background: #e96800;
+}
+
+
+/* =====================================
+   STUDENT DETAILS MODAL
+===================================== */
+
+.intern-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.intern-modal {
+    width: 100%;
+    max-width: 650px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 9px;
+    padding: 22px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.intern-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e8eaed;
+    padding-bottom: 14px;
+}
+
+.intern-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.intern-modal-header button {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.intern-modal-profile {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.intern-modal-avatar {
+    width: 55px;
+    height: 55px;
+    margin: auto;
+    border-radius: 50%;
+    background: #fff0d9;
+    color: #ed711a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+
+.intern-modal-profile h3 {
+    font-size: 16px;
+    margin: 10px 0 5px;
+}
+
+.intern-modal-profile p {
+    font-size: 12px;
+    color: #84909b;
+    margin: 0;
+}
+
+.intern-modal-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0 20px;
+}
+
+.intern-modal-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 5px;
+    border-bottom: 1px solid #edf0f2;
+}
+
+.intern-modal-row span {
+    font-size: 11px;
+    color: #8a949f;
+}
+
+.intern-modal-row strong {
+    font-size: 12px;
+    font-weight: 500;
+    color: #293747;
+    overflow-wrap: anywhere;
+}
+
+.intern-modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.intern-modal-buttons button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border: 1px solid #e0e3e7;
+    background: #ffffff;
+    border-radius: 5px;
+    color: #344454;
+    cursor: pointer;
+}
+
+.intern-modal-buttons button:last-child {
+    color: #d92d2d;
+}
+
+
+/* =====================================
+   RESPONSIVE DESIGN
+===================================== */
+
+@media (max-width: 900px) {
+
+    .intern-filter {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .intern-search {
+        grid-column: span 2;
+    }
+
+    .intern-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .intern-header {
+        align-items: center;
+        gap: 10px;
+    }
+
+    .intern-heading h2 {
+        font-size: 17px;
+    }
+
+    .intern-heading p {
+        font-size: 10px;
+    }
+
+    .intern-admin {
+        min-width: auto;
+        padding: 6px;
+        gap: 5px;
+    }
+
+    .intern-admin-icon {
+        width: 29px;
+        height: 29px;
+    }
+
+    .intern-admin strong,
+    .intern-admin span {
+        font-size: 10px;
+    }
+
+    .intern-tabs {
+        padding: 10px;
+    }
+
+    .intern-tabs button {
+        min-width: 0;
+        flex: 1;
+        padding: 0 8px;
+        font-size: 12px;
+    }
+
+    .intern-list-container {
+        margin: 8px;
+        padding: 12px;
+    }
+
+    .intern-filter {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .intern-search {
+        grid-column: auto;
+    }
+
+    .intern-filter select,
+    .intern-export {
+        width: 100%;
+    }
+
+    .intern-form-container {
+        padding: 15px 12px;
+    }
+
+    .intern-form-container h3 {
+        font-size: 16px;
+        margin-bottom: 25px;
+    }
+
+    .intern-form-grid {
+        grid-template-columns: 1fr;
+        row-gap: 17px;
+    }
+
+    .intern-form-container h4 {
+        margin-top: 25px;
+        margin-bottom: 20px;
+    }
+
+    .intern-form-buttons {
+        gap: 8px;
+    }
+
+    .intern-form-buttons button {
+        padding: 0 14px;
+        font-size: 12px;
+    }
+
+    .intern-modal {
+        padding: 15px;
+    }
+
+    .intern-modal-details {
+        grid-template-columns: 1fr;
+    }
+
+}

@@ -1,0 +1,725 @@
+
+/* =========================================
+   GLOBAL
+========================================= */
+
+.notification {
+    width: 100%;
+    min-height: 100vh;
+    padding: 18px 22px;
+    background: #ffffff;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+    color: #111111;
+}
+
+.notification * {
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.notificationsect1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.notificationsec2 h2 {
+    font-size: 21px;
+    font-weight: 700;
+    margin: 0 0 5px;
+}
+
+.notificationsec2 p {
+    font-size: 12px;
+    color: #888888;
+    margin: 0;
+}
+
+.notificationsec3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 15px;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.notificationicon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    margin-left: .3cm;
+}
+
+.notificationuserdetails h5 {
+    margin: 0 0 3px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.notificationuserdetails h6 {
+    margin: 0;
+    font-size: 11px;
+    color: #777777;
+    font-weight: 400;
+}
+
+
+/* =========================================
+   MAIN CONTAINER
+========================================= */
+
+.notificationherosection {
+    width: 100%;
+    min-height: 590px;
+    padding: 18px 25px;
+    border: 1px solid #e5e5e5;
+    border-radius: 13px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
+    background: #ffffff;
+}
+
+
+/* =========================================
+   TOP BUTTONS / TABS
+========================================= */
+
+.notificationtopbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+/* Notification and New Notification */
+
+.notfibutton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    border: none;
+    overflow: visible;
+}
+
+.notfibutton button {
+    min-width: 130px;
+    height: 39px;
+    padding: 0 17px;
+    background: #ffffff;
+    color: #111111;
+    border: 1px solid #c7c7c7;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.notfibutton button.active {
+    background: #ed941a;
+    color: #ffffff;
+    border-color: #ed941a;
+}
+
+.notfibutton button:hover {
+    background: #ed941a;
+    color: #ffffff;
+    border-color: #ed941a;
+}
+
+
+/* Export Button */
+
+.notificationexport {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 17px;
+    background: #ffffff;
+    border: 1px solid #c7c7c7;
+    border-radius: 7px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.notificationexport:hover {
+    background: #f8f8f8;
+}
+
+
+/* =========================================
+   TABLE
+========================================= */
+
+.notificationtable {
+    width: 100%;
+    min-height: 440px;
+    overflow-x: auto;
+    border: 1px solid #e9e9e9;
+    border-radius: 9px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.notificationtable table {
+    width: 100%;
+    min-width: 750px;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.notificationtable thead {
+    background: #ffffff;
+}
+
+.notificationtable th {
+    height: 61px;
+    padding: 12px 13px;
+    font-size: 14px;
+    font-weight: 600;
+    border-bottom: 1px solid #333333;
+    white-space: nowrap;
+}
+
+.notificationtable td {
+    padding: 20px 13px;
+    font-size: 12px;
+    border-bottom: 1px solid #d6d6d6;
+    vertical-align: middle;
+}
+
+.notificationtable tbody tr {
+    transition: 0.2s ease;
+}
+
+.notificationtable tbody tr:hover {
+    background: #fafafa;
+}
+
+.notificationtable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.notificationtable th:first-child,
+.notificationtable td:first-child {
+    width: 55px;
+}
+
+.notificationtable th:last-child,
+.notificationtable td:last-child {
+    width: 120px;
+}
+
+.notificationtable td.selectedaudience {
+    max-width: 190px;
+    overflow-wrap: anywhere;
+}
+
+.notificationempty {
+    height: 350px;
+    text-align: center !important;
+    color: #888888;
+}
+
+.notificationempty svg {
+    font-size: 27px;
+}
+
+.notificationempty p {
+    margin-top: 10px;
+}
+
+
+/* =========================================
+   ACTION ICONS
+========================================= */
+
+.notificationactions {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.notificationactions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    background: transparent;
+    border: none;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+.viewaction {
+    color: #111111;
+}
+
+.editaction {
+    color: #111111;
+}
+
+.deleteaction {
+    color: #ff1717;
+}
+
+.notificationactions button:hover {
+    transform: scale(1.15);
+}
+
+
+/* =========================================
+   PAGINATION
+========================================= */
+
+.notificationpagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.notificationpagination span {
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+.notificationpagination button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    border: none;
+    border-radius: 7px;
+    background: #e7e7e7;
+    color: #333333;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+.notificationpagination button:disabled {
+    background: #d0d0d0;
+    color: #999999;
+    cursor: not-allowed;
+}
+
+
+/* =========================================
+   NEW NOTIFICATION FORM
+========================================= */
+
+.Newnotification {
+    position: relative;
+    width: 100%;
+    min-height: 440px;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 65px;
+}
+
+
+/* =========================================
+   FORM HEADER
+========================================= */
+
+.Newnotificationsect1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 17px;
+}
+
+.Newnotificationsect2 h2 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.notificationback {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border: 1px solid #dddddd;
+    border-radius: 6px;
+    background: #ffffff;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+
+/* =========================================
+   FORM FIELDS
+========================================= */
+
+.notificationfield {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 13px;
+}
+
+.notificationfield label,
+.newnotifi1 label,
+.audienceinput label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #111111;
+}
+
+.notificationfield input,
+.notificationfield textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #c6c6c6;
+    border-radius: 6px;
+    outline: none;
+    background: #ffffff;
+    color: #111111;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    transition: 0.2s ease;
+}
+
+.notificationfield input {
+    height: 41px;
+}
+
+.notificationfield textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.notificationfield input:focus,
+.notificationfield textarea:focus,
+.newnotifi1 select:focus,
+.audienceSelect:focus {
+    border-color: #ed941a;
+}
+
+
+/* =========================================
+   TYPE / BRANCH / AUDIENCE
+========================================= */
+
+.newnotificationforminput {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    width: 100%;
+    margin-top: 1px;
+    margin-bottom: 16px;
+}
+
+.newnotifi1 {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.newnotifi1 select,
+.audienceSelect {
+    width: 100%;
+    height: 42px;
+    padding: 0 10px;
+    background: #ffffff;
+    border: 1px solid #c6c6c6;
+    border-radius: 6px;
+    outline: none;
+    font-size: 12px;
+    color: #222222;
+    cursor: pointer;
+}
+
+.newnotifi1 select:disabled,
+.audienceSelect:disabled {
+    background: #f8f8f8;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+
+/* =========================================
+   AUDIENCE SELECTION
+========================================= */
+
+.audienceinput {
+    width: 33.33%;
+    max-width: 420px;
+    margin-bottom: 15px;
+}
+
+.audienceSelect {
+    margin-bottom: 12px;
+}
+
+.addedAudience {
+    width: 100%;
+}
+
+.addedAudience h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 12px;
+}
+
+.audiencechips {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.audiencechip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 40px;
+    padding: 9px 12px;
+    background: #dedede;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.audiencechip span {
+    overflow-wrap: anywhere;
+}
+
+.audiencechip button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    background: transparent;
+    border: none;
+    color: #ff1717;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.audiencechip button:hover {
+    color: #b00000;
+}
+
+
+/* =========================================
+   PUSH NOTIFICATION
+========================================= */
+
+.pushnotification {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 3px;
+}
+
+.pushnotification input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: #ed941a;
+    cursor: pointer;
+}
+
+.pushnotification label {
+    font-size: 12px;
+    cursor: pointer;
+}
+
+
+/* =========================================
+   FORM BUTTONS
+========================================= */
+
+.newnotificationbutton {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100%;
+    padding-top: 12px;
+}
+
+.newnotificationbutton button {
+    width: 135px;
+    height: 41px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.notificationcancel {
+    background: #ffffff;
+    border: 1px solid #ff1717;
+    color: #ff1717;
+}
+
+.notificationcancel:hover {
+    background: #fff2f2;
+}
+
+.notificationpublish {
+    background: #ed941a;
+    border: 1px solid #ed941a;
+    color: #ffffff;
+}
+
+.notificationpublish:hover {
+    background: #d77d0b;
+    border-color: #d77d0b;
+}
+
+
+/* =========================================
+   VIEW MODE
+========================================= */
+
+.Newnotification input:read-only,
+.Newnotification textarea:read-only {
+    background: #fafafa;
+    cursor: default;
+}
+
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 900px) {
+
+    .notification {
+        padding: 15px;
+    }
+
+    .notificationherosection {
+        padding: 16px;
+    }
+
+    .newnotificationforminput {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .audienceinput {
+        width: 50%;
+    }
+
+}
+
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .notification {
+        padding: 12px;
+    }
+
+    .notificationsect1 {
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .notificationsec2 h2 {
+        font-size: 18px;
+    }
+
+    .notificationsec3 {
+        padding: 7px;
+    }
+
+    .notificationuserdetails h5 {
+        font-size: 12px;
+    }
+
+    .notificationuserdetails h6 {
+        font-size: 10px;
+    }
+
+    .notificationherosection {
+        min-height: 550px;
+        padding: 12px;
+    }
+
+    .notificationtopbar {
+        align-items: flex-start;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .notfibutton {
+        width: 100%;
+        gap: 8px;
+    }
+
+    .notfibutton button {
+        flex: 1;
+        min-width: 0;
+        padding: 0 7px;
+        font-size: 11px;
+    }
+
+    .notificationexport {
+        margin-left: auto;
+    }
+
+    .newnotificationforminput {
+        grid-template-columns: 1fr;
+        gap: 13px;
+    }
+
+    .audienceinput {
+        width: 100%;
+        max-width: none;
+    }
+
+    .Newnotification {
+        min-height: 450px;
+    }
+
+    .Newnotificationsect2 h2 {
+        font-size: 15px;
+    }
+
+    .notificationfield input {
+        height: 40px;
+    }
+
+    .newnotificationbutton button {
+        width: 50%;
+    }
+
+    .notificationtable {
+        overflow-x: auto;
+    }
+
+    .notificationtable table {
+        min-width: 750px;
+    }
+
+}
