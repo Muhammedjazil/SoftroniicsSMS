@@ -1,697 +1,109 @@
+@import './WeeklyCard.css';
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
-
-/* =========================================
-   MAIN PAGE
-========================================= */
-
-.Internmonthlycard-page,
-.Internmonthlycard-page * {
-    box-sizing: border-box;
+/* Student Initials Avatar - Original Color Gradient */
+.int-monthly-avatar-square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #5145e9, #9333ea);
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(100, 60, 220, 0.25);
 }
 
-.Internmonthlycard-page {
-    width: 100%;
-    min-height: 100vh;
-    background: #f3f4f6;
-    color: #152a40;
-    font-family: 'Poppins', sans-serif;
+/* Original Badge Colors */
+.int-monthly-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
-
-/* =========================================
-   PAGE HEADER
-========================================= */
-
-.Internmonthlycard-header {
-    width: 100%;
-    min-height: 110px;
-    padding: 18px 23px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    background: #f3f4f6;
-    border-bottom: 1px solid #e3e6eb;
+.int-monthly-badge--fulltime {
+  color: #4938ff;
+  background-color: #f0f2ff;
+  border: 1px solid #dce1f2;
 }
 
-.Internmonthlycard-heading h2 {
-    margin: 0;
-    color: #25394d;
-    font-size: 25px;
-    font-weight: 600;
+.int-monthly-badge--batch {
+  color: #009b91;
+  background-color: #effbf9;
+  border: 1px solid #d4eae7;
 }
 
-.Internmonthlycard-heading p {
-    margin: 2px 0 0;
-    color: #718096;
-    font-size: 14px;
-    font-weight: 400;
+.int-monthly-badge--id {
+  color: #36475e;
+  background-color: #f7f8fa;
+  border: 1px solid #e0e3e8;
 }
 
-.Internmonthlycard-heading p span {
-    margin: 0 7px;
+.int-monthly-badge--course {
+  color: #9228f5;
+  background-color: #faf3ff;
+  border: 1px solid #e9dff1;
 }
 
-
-/* =========================================
-   HEADER PROFILE
-========================================= */
-
-.Internmonthlycard-profile {
-    min-width: 158px;
-    min-height: 72px;
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    background: #f8f9fb;
-    border: 1px solid #dce1e7;
-    border-radius: 9px;
+/* Metrics Grid - 5 Columns with Original Border Colors */
+.int-monthly-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
 }
 
-.Internmonthlycard-profile-icon {
-    width: 47px;
-    height: 47px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #dfe3e8;
-    border-radius: 50%;
-    color: #354254;
-    font-size: 25px;
+.int-monthly-metric--technical {
+  border: 1.5px solid #655cff;
 }
 
-.Internmonthlycard-profile-details h4 {
-    margin: 0;
-    color: #1d3045;
-    font-size: 15px;
-    font-weight: 600;
+.int-monthly-metric--aptitude {
+  border: 1.5px solid #00c6b4;
 }
 
-.Internmonthlycard-profile-details p {
-    margin: 2px 0 0;
-    color: #7b8797;
-    font-size: 13px;
+.int-monthly-metric--logical {
+  border: 1.5px solid #b34cff;
 }
 
-
-/* =========================================
-   MAIN CONTENT
-========================================= */
-
-.Internmonthlycard-content {
-    width: 100%;
-    min-height: calc(100vh - 110px);
-    padding: 15px 26px 40px;
-    background: #f5f6f8;
+.int-monthly-metric--communication {
+  border: 1.5px solid #3985ff;
 }
 
-
-/* =========================================
-   STUDENT INFORMATION CARD
-========================================= */
-
-.Internmonthlycard-student-card {
-    width: 100%;
-    min-height: 152px;
-    padding: 24px 28px;
-    display: flex;
-    align-items: center;
-    gap: 28px;
-    background: #ffffff;
-    border: 1px solid #dce2e8;
-    border-radius: 19px;
-    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.08);
+.int-monthly-metric--attendance {
+  border: 1.5px solid #ff650d;
 }
 
-
-/* Student initials */
-
-.Internmonthlycard-avatar {
-    width: 94px;
-    height: 94px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #5145e9, #9333ea);
-    border-radius: 19px;
-    color: #ffffff;
-    font-size: 36px;
-    font-weight: 700;
-    box-shadow: 0 8px 15px rgba(100, 60, 220, 0.16);
+.int-monthly-score-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 5px;
+  background-color: #e5eaff;
+  color: #4138ed;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
-
-/* Student details */
-
-.Internmonthlycard-student-info {
-    min-width: 0;
+.int-monthly-mentor-note {
+  max-width: 200px;
+  white-space: normal;
+  word-break: break-word;
 }
 
-.Internmonthlycard-student-info h1 {
-    margin: 0 0 9px;
-    color: #101f31;
-    font-size: 35px;
-    font-weight: 700;
-    line-height: 1.3;
+@media screen and (max-width: 1200px) {
+  .int-monthly-metrics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-
-/* =========================================
-   STUDENT DETAIL TAGS
-========================================= */
-
-.Internmonthlycard-tags {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 9px;
-}
-
-.Internmonthlycard-tag {
-    min-height: 31px;
-    padding: 5px 14px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #e0e3e9;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.Internmonthlycard-tag-fulltime {
-    color: #4938ff;
-    background: #f0f2ff;
-    border-color: #dce1f2;
-}
-
-.Internmonthlycard-tag-batch {
-    color: #009b91;
-    background: #effbf9;
-    border-color: #d4eae7;
-}
-
-.Internmonthlycard-tag-id {
-    color: #36475e;
-    background: #f7f8fa;
-    border-color: #e0e3e8;
-}
-
-.Internmonthlycard-tag-course {
-    color: #9228f5;
-    background: #faf3ff;
-    border-color: #e9dff1;
-}
-
-
-/* =========================================
-   EVALUATION STATISTICS
-========================================= */
-
-.Internmonthlycard-stats {
-    width: 100%;
-    margin: 28px 0;
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 18px;
-}
-
-
-/* Common stat card */
-
-.Internmonthlycard-stat-card {
-    position: relative;
-    min-width: 0;
-    min-height: 128px;
-    padding: 16px 17px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background: #ffffff;
-    border: 1.5px solid;
-    border-bottom-width: 3px;
-    border-radius: 15px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.Internmonthlycard-stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.06);
-}
-
-
-/* Different card border colors */
-
-.Internmonthlycard-technical {
-    border-color: #655cff;
-}
-
-.Internmonthlycard-aptitude {
-    border-color: #00c6b4;
-}
-
-.Internmonthlycard-logical {
-    border-color: #b34cff;
-}
-
-.Internmonthlycard-communication {
-    border-color: #3985ff;
-}
-
-.Internmonthlycard-attendance {
-    border-color: #ff650d;
-}
-
-
-/* Stat top section */
-
-.Internmonthlycard-stat-top {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 5px;
-}
-
-.Internmonthlycard-stat-top p {
-    margin: 0;
-    color: #8996a8;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.Internmonthlycard-stat-top span {
-    padding: 4px 8px;
-    background: #e5eaff;
-    border-radius: 7px;
-    color: #4138ed;
-    font-size: 9px;
-    font-weight: 600;
-}
-
-
-/* Stat values */
-
-.Internmonthlycard-stat-value {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-    margin-top: 13px;
-}
-
-.Internmonthlycard-stat-value h2 {
-    margin: 0;
-    color: #101f31;
-    font-size: 34px;
-    font-weight: 700;
-    line-height: 1.2;
-}
-
-.Internmonthlycard-stat-value > span {
-    color: #8995a5;
-    font-size: 14px;
-    font-weight: 400;
-}
-
-
-/* Attendance card */
-
-.Internmonthlycard-attendance .Internmonthlycard-stat-top {
-    justify-content: flex-start;
-}
-
-.Internmonthlycard-attendance .Internmonthlycard-stat-value {
-    margin-top: 0;
-}
-
-.Internmonthlycard-attendance .Internmonthlycard-stat-value h2 {
-    font-size: 34px;
-}
-
-.Internmonthlycard-overall {
-    margin: 0;
-    color: #8995a5;
-    font-size: 11px;
-    font-style: italic;
-}
-
-
-/* =========================================
-   MONTHLY EVALUATION TABLE CARD
-========================================= */
-
-.Internmonthlycard-table-card {
-    width: 100%;
-    min-height: 194px;
-    overflow: hidden;
-    background: #ffffff;
-    border: 1px solid #dce2e8;
-    border-radius: 19px;
-    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.08);
-}
-
-.Internmonthlycard-table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-}
-
-
-/* =========================================
-   TABLE
-========================================= */
-
-.Internmonthlycard-table {
-    width: 100%;
-    min-width: 850px;
-    border-collapse: collapse;
-    table-layout: auto;
-}
-
-
-/* Table heading */
-
-.Internmonthlycard-table thead {
-    background: #fcfcfd;
-}
-
-.Internmonthlycard-table thead tr {
-    height: 74px;
-    border-bottom: 1px solid #e0e4e9;
-}
-
-.Internmonthlycard-table th {
-    padding: 15px 13px;
-    color: #8b98aa;
-    font-size: 12px;
-    font-weight: 600;
-    text-align: center;
-    white-space: nowrap;
-}
-
-
-/* Table body */
-
-.Internmonthlycard-table tbody tr:not(.Internmonthlycard-empty-row) {
-    height: 65px;
-    border-bottom: 1px solid #edf0f3;
-}
-
-.Internmonthlycard-table td {
-    padding: 14px 13px;
-    color: #526176;
-    font-size: 13px;
-    font-weight: 400;
-    text-align: center;
-}
-
-.Internmonthlycard-table tbody tr:last-child {
-    border-bottom: none;
-}
-
-
-/* Mentor note */
-
-.Internmonthlycard-mentor-note {
-    max-width: 230px;
-}
-
-
-/* =========================================
-   EMPTY STATE
-========================================= */
-
-.Internmonthlycard-empty-row {
-    height: 115px;
-}
-
-.Internmonthlycard-empty-row td {
-    padding: 0;
-}
-
-.Internmonthlycard-empty-state {
-    width: 100%;
-    min-height: 115px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    color: #718096;
-    font-size: 15px;
-    font-weight: 400;
-    text-align: center;
-}
-
-
-/* =========================================
-   RESPONSIVE - LARGE LAPTOP
-========================================= */
-
-@media (max-width: 1300px) {
-
-    .Internmonthlycard-content {
-        padding: 15px 20px 35px;
-    }
-
-    .Internmonthlycard-stats {
-        gap: 12px;
-    }
-
-    .Internmonthlycard-stat-card {
-        padding: 15px 12px;
-    }
-
-    .Internmonthlycard-stat-top p {
-        font-size: 10px;
-    }
-
-    .Internmonthlycard-stat-value h2 {
-        font-size: 29px;
-    }
-
-}
-
-
-/* =========================================
-   RESPONSIVE - TABLET
-========================================= */
-
-@media (max-width: 1000px) {
-
-    .Internmonthlycard-stats {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .Internmonthlycard-stat-card {
-        min-height: 120px;
-    }
-
-    .Internmonthlycard-student-card {
-        min-height: 135px;
-    }
-
-    .Internmonthlycard-student-info h1 {
-        font-size: 29px;
-    }
-
-}
-
-
-/* =========================================
-   RESPONSIVE - MOBILE
-========================================= */
-
-@media (max-width: 650px) {
-
-    .Internmonthlycard-header {
-        min-height: 85px;
-        padding: 13px 12px;
-    }
-
-    .Internmonthlycard-heading h2 {
-        font-size: 18px;
-    }
-
-    .Internmonthlycard-heading p {
-        font-size: 10px;
-    }
-
-    .Internmonthlycard-profile {
-        min-width: 105px;
-        min-height: 52px;
-        padding: 6px;
-        gap: 7px;
-    }
-
-    .Internmonthlycard-profile-icon {
-        width: 34px;
-        height: 34px;
-        font-size: 19px;
-    }
-
-    .Internmonthlycard-profile-details h4 {
-        font-size: 10px;
-    }
-
-    .Internmonthlycard-profile-details p {
-        font-size: 10px;
-    }
-
-    .Internmonthlycard-content {
-        padding: 14px 12px 25px;
-    }
-
-
-    /* Student card */
-
-    .Internmonthlycard-student-card {
-        min-height: auto;
-        padding: 18px 15px;
-        gap: 15px;
-        border-radius: 14px;
-    }
-
-    .Internmonthlycard-avatar {
-        width: 65px;
-        height: 65px;
-        border-radius: 13px;
-        font-size: 25px;
-    }
-
-    .Internmonthlycard-student-info h1 {
-        margin-bottom: 8px;
-        font-size: 22px;
-    }
-
-    .Internmonthlycard-tags {
-        gap: 6px;
-    }
-
-    .Internmonthlycard-tag {
-        min-height: 25px;
-        padding: 4px 9px;
-        font-size: 9px;
-    }
-
-
-    /* Statistics */
-
-    .Internmonthlycard-stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 11px;
-        margin: 18px 0;
-    }
-
-    .Internmonthlycard-stat-card {
-        min-height: 105px;
-        padding: 12px;
-        border-radius: 12px;
-    }
-
-    .Internmonthlycard-stat-top p {
-        font-size: 10px;
-    }
-
-    .Internmonthlycard-stat-top span {
-        padding: 3px 6px;
-        font-size: 8px;
-    }
-
-    .Internmonthlycard-stat-value {
-        margin-top: 8px;
-    }
-
-    .Internmonthlycard-stat-value h2 {
-        font-size: 27px;
-    }
-
-    .Internmonthlycard-stat-value > span {
-        font-size: 12px;
-    }
-
-    .Internmonthlycard-attendance .Internmonthlycard-stat-value h2 {
-        font-size: 27px;
-    }
-
-
-    /* Table */
-
-    .Internmonthlycard-table-card {
-        min-height: 175px;
-        border-radius: 13px;
-    }
-
-    .Internmonthlycard-table thead tr {
-        height: 55px;
-    }
-
-    .Internmonthlycard-table th {
-        padding: 12px;
-        font-size: 10px;
-    }
-
-    .Internmonthlycard-empty-state {
-        min-height: 105px;
-        font-size: 12px;
-    }
-
-}
-
-
-/* =========================================
-   RESPONSIVE - SMALL MOBILE
-========================================= */
-
-@media (max-width: 400px) {
-
-    .Internmonthlycard-header {
-        gap: 5px;
-    }
-
-    .Internmonthlycard-heading h2 {
-        font-size: 15px;
-    }
-
-    .Internmonthlycard-heading p {
-        font-size: 9px;
-    }
-
-    .Internmonthlycard-profile {
-        min-width: 95px;
-    }
-
-    .Internmonthlycard-student-card {
-        gap: 10px;
-        padding: 14px 10px;
-    }
-
-    .Internmonthlycard-avatar {
-        width: 55px;
-        height: 55px;
-        font-size: 21px;
-    }
-
-    .Internmonthlycard-student-info h1 {
-        font-size: 18px;
-    }
-
-    .Internmonthlycard-tag {
-        padding: 3px 7px;
-        font-size: 8px;
-    }
-
-    .Internmonthlycard-stat-card {
-        padding: 10px;
-    }
-
-    .Internmonthlycard-stat-top p {
-        font-size: 9px;
-    }
-
+@media screen and (max-width: 768px) {
+  .int-monthly-metrics-grid {
+    grid-template-columns: 1fr;
+  }
 }

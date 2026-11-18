@@ -6,9 +6,9 @@
 .staffmanagement {
     width: 100%;
     min-height: 100vh;
-    padding: 28px;
-    background: #fefcfc;
-    font-family: Arial, sans-serif;
+    padding: 24px 32px 32px 32px;
+    background: #f8f9fa;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     box-sizing: border-box;
 }
 
@@ -19,24 +19,25 @@
 .stafffirst {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
 }
 
 .staffhead h2 {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
-    margin: 0 0 8px;
-    color: #171717;
+    margin: 0 0 4px;
+    color: #1f2937;
+    letter-spacing: -0.02em;
 }
 
 .staffhead p {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     font-size: 13px;
-    color: #999;
+    color: #6b7280;
     margin: 0;
 }
 
@@ -48,35 +49,44 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 16px;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
-    background: #fff;
+    padding: 8px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    min-width: 155px;
+    height: 54px;
+    box-sizing: border-box;
 }
 
 .stafficon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 35px;
-    height: 35px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: #f0f1f2;
-    font-size: 20px;
-    color: #555;
+    background: #e5e7eb;
+    font-size: 18px;
+    color: #6b7280;
+    flex-shrink: 0;
 }
 
 .staffadminname h5 {
-    margin: 0 0 4px;
+    margin: 0;
     font-size: 14px;
     font-weight: 600;
-    color: #333;
+    color: #111827;
+    line-height: 1.2;
+    text-transform: capitalize;
 }
 
 .staffadminname p {
-    margin: 0;
+    margin: 2px 0 0 0;
     font-size: 12px;
-    color: #888;
+    color: #6b7280;
+    line-height: 1.2;
+    text-transform: capitalize;
 }
 
 /* =========================================
@@ -86,7 +96,7 @@
 .staffbuttons {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 10px;
     width: 100%;
     margin-bottom: 20px;
 }
@@ -94,26 +104,35 @@
 .staffbuttons button {
     min-width: 100px;
     height: 40px;
-    padding: 0 18px;
-    border: 1px solid #e5e5e5;
-    border-radius: 6px;
-    background: #fff;
-    color: #333;
+    padding: 0 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #374151;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: all 0.15s ease;
 }
 
 .staffbuttons button.stafflistactive {
     background: #e59120;
     border-color: #e59120;
-    color: #fff;
+    color: #ffffff;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #e59120;
+}
+
+.staffbuttons button.stafflistactive:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.94);
 }
 
 .staffbuttons button:hover:not(.stafflistactive) {
-    background: #fff7eb;
-    border-color: #e59120;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 /* =========================================
@@ -122,11 +141,11 @@
 
 .stafffull {
     width: 100%;
-    padding: 30px;
-    border: 1px solid #eaeaea;
-    border-radius: 10px;
-    background: #fff;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 24px 28px;
+    border: 1px solid #eef0f2;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     box-sizing: border-box;
 }
 
@@ -210,24 +229,29 @@
 }
 
 .staffexport button {
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
-    gap: 9px;
+    gap: 8px;
     width: 100%;
-    height: 42px;
-    padding: 0 12px;
-    border: 1px solid #e3e5e8;
-    border-radius: 6px;
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
     background: #fff;
-    color: #555;
-    font-size: 13px;
+    color: #374151;
+    font-size: 13.5px;
+    font-weight: 600;
     cursor: pointer;
+    transition: all 0.15s ease;
 }
 
 .staffexport button:hover {
-    background: #fff7eb;
-    border-color: #ed8019;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 /* =========================================
@@ -471,13 +495,13 @@
 
 .newstaff {
     width: 100%;
-    padding: 22px;
-    border: 1px solid #e8e8e8;
-    border-radius: 8px;
+    padding: 24px 28px;
+    border: 1px solid #eef0f2;
+    border-radius: 14px;
     background: #fff;
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: inherit;
 }
 
 .newstaff h2 {
@@ -792,11 +816,11 @@
 
 .staffmanagement > .staffview {
     width: 100%;
-    padding: 25px;
-    border: 1px solid #e8e8e8;
-    border-radius: 10px;
+    padding: 24px 28px;
+    border: 1px solid #eef0f2;
+    border-radius: 14px;
     background: #fff;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     box-sizing: border-box;
 }
 

@@ -1,344 +1,90 @@
+@import './WeeklyCard.css';
 
-/* =========================================
-   MAIN CONTAINER
-========================================= */
-
-.intrentask {
-    width: 100%;
-    min-height: 100vh;
-    background: #f4f5f7;
-    font-family: Arial, sans-serif;
-    box-sizing: border-box;
-    color: #172337;
+/* Tab Section */
+.int-task-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-
-/* =========================================
-   HEADER SECTION
-========================================= */
-
-.intrentask-header {
-    width: 100%;
-    min-height: 115px;
-    padding: 22px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    box-sizing: border-box;
-    border-bottom: 1px solid #e0e3e8;
+.int-task-tab-btn {
+  height: 42px;
+  padding: 0 20px;
+  border-radius: 10px;
+  background-color: #ffffff;
+  border: 1px solid #d9dee5;
+  color: #34445b;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.intrentask-heading h2 {
-    font-size: 28px;
-    font-weight: 600;
-    margin: 8px 0 5px;
-    color: #172337;
+.int-task-tab-btn:hover {
+  background-color: #fff4ec;
+  border-color: #ff7417;
+  color: #ff7417;
 }
 
-.intrentask-heading p {
-    font-size: 16px;
-    color: #64748b;
-    margin: 0;
+.int-task-tab-btn--active {
+  background-color: #ff6b0b;
+  border-color: #ff6b0b;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(255, 107, 11, 0.25);
 }
 
-.intrentask-heading p span {
-    margin: 0 4px;
+.int-task-tab-btn--active:hover {
+  background-color: #e55c04;
+  border-color: #e55c04;
+  color: #ffffff;
 }
 
-
-/* =========================================
-   PROFILE SECTION
-========================================= */
-
-.intrentask-profile {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 12px;
-    min-width: 280px;
-    border: 1px solid #d9dee5;
-    border-radius: 8px;
-    box-sizing: border-box;
+/* Content Card */
+.int-task-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  padding: 60px 24px;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
-.intrentask-profile-icon {
-    width: 50px;
-    height: 50px;
-    background: #d6d9df;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-shrink: 0;
+.int-task-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 400px;
 }
 
-.intrentask-profile-icon svg {
-    font-size: 20px;
-    color: #263445;
+.int-task-empty-icon-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background-color: #fff4ec;
+  color: #ff7417;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
-.intrentask-profile-details h3 {
-    font-size: 18px;
-    font-weight: 500;
-    margin: 0 0 5px;
-    color: #172337;
+.int-task-empty-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 6px 0;
 }
 
-.intrentask-profile-details p {
-    font-size: 16px;
-    margin: 0;
-    color: #64748b;
-}
-
-
-/* =========================================
-   TAB SECTION
-========================================= */
-
-.intrentask-tab-section {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 15px 22px 20px;
-    border-bottom: 1px solid #e0e3e8;
-    box-sizing: border-box;
-}
-
-.intrentask-tab {
-    min-width: 208px;
-    height: 54px;
-    padding: 0 25px;
-    border: 1px solid #d9dee5;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #34445b;
-    font-size: 18px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.intrentask-tab:hover {
-    background: #fff4ec;
-    border-color: #ff7417;
-}
-
-.intrentask-tab.intrentask-active {
-    background: #ff6b0b;
-    color: #ffffff;
-    border: 2px solid #ffffff;
-    outline: 2px solid #ff6b0b;
-    font-weight: 600;
-}
-
-
-/* =========================================
-   MAIN CONTENT
-========================================= */
-
-.intrentask-content {
-    width: calc(100% - 36px);
-    min-height: 347px;
-    margin: 30px 18px;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 22px 35px rgba(0, 0, 0, 0.13);
-    box-sizing: border-box;
-}
-
-
-/* =========================================
-   EMPTY STATE CONTAINER
-========================================= */
-
-.intrentask-empty-container {
-    width: 100%;
-    min-height: 307px;
-    border: 1px solid #d7dce3;
-    border-radius: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-sizing: border-box;
-    background: #fdfdfd;
-}
-
-.intrentask-empty-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-}
-
-.intrentask-empty-icon {
-    font-size: 50px;
-    color: #9ca3af;
-    stroke-width: 1.8;
-    margin-bottom: 35px;
-}
-
-.intrentask-empty-content h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #111827;
-    margin: 0 0 10px;
-}
-
-.intrentask-empty-content p {
-    font-size: 16px;
-    font-weight: 400;
-    color: #64748b;
-    margin: 0;
-    line-height: 1.5;
-}
-
-
-/* =========================================
-   RESPONSIVE DESIGN - TABLET
-========================================= */
-
-@media screen and (max-width: 768px) {
-
-    .intrentask-header {
-        padding: 18px;
-        gap: 15px;
-    }
-
-    .intrentask-heading h2 {
-        font-size: 24px;
-    }
-
-    .intrentask-profile {
-        min-width: auto;
-        padding: 8px;
-        gap: 8px;
-    }
-
-    .intrentask-profile-icon {
-        width: 40px;
-        height: 40px;
-    }
-
-    .intrentask-profile-details h3 {
-        font-size: 13px;
-    }
-
-    .intrentask-profile-details p {
-        font-size: 13px;
-    }
-
-    .intrentask-tab-section {
-        padding: 15px 18px;
-    }
-
-    .intrentask-tab {
-        min-width: 170px;
-        height: 48px;
-        font-size: 15px;
-        padding: 0 15px;
-    }
-
-    .intrentask-content {
-        width: calc(100% - 28px);
-        margin: 22px 14px;
-        padding: 15px;
-        min-height: 320px;
-    }
-
-    .intrentask-empty-container {
-        min-height: 285px;
-    }
-
-}
-
-
-/* =========================================
-   RESPONSIVE DESIGN - MOBILE
-========================================= */
-
-@media screen and (max-width: 480px) {
-
-    .intrentask-header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 15px;
-    }
-
-    .intrentask-heading h2 {
-        font-size: 23px;
-    }
-
-    .intrentask-heading p {
-        font-size: 14px;
-    }
-
-    .intrentask-profile {
-        width: 100%;
-        max-width: 100%;
-    }
-
-    .intrentask-tab-section {
-        padding: 15px;
-        gap: 10px;
-    }
-
-    .intrentask-tab {
-        min-width: 0;
-        flex: 1;
-        height: 45px;
-        padding: 0 8px;
-        font-size: 13px;
-    }
-
-    .intrentask-content {
-        width: calc(100% - 24px);
-        margin: 18px 12px;
-        padding: 12px;
-        min-height: 280px;
-        border-radius: 12px;
-    }
-
-    .intrentask-empty-container {
-        min-height: 255px;
-        padding: 15px;
-    }
-
-    .intrentask-empty-icon {
-        font-size: 42px;
-        margin-bottom: 25px;
-    }
-
-    .intrentask-empty-content h3 {
-        font-size: 16px;
-    }
-
-    .intrentask-empty-content p {
-        font-size: 13px;
-    }
-
-}
-
-
-/* =========================================
-   SMALL MOBILE
-========================================= */
-
-@media screen and (max-width: 350px) {
-
-    .intrentask-tab {
-        font-size: 11px;
-        padding: 0 5px;
-    }
-
-    .intrentask-profile-details h3 {
-        font-size: 12px;
-    }
-
-    .intrentask-empty-content p {
-        font-size: 12px;
-    }
-
+.int-task-empty-desc {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
 }
