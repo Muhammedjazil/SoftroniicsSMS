@@ -129,10 +129,10 @@
     height: 43px;
     padding: 0 20px;
 
-    border: 1px solid #f47713;
-    border-radius: 7px;
+    border: 1px solid #ff790e;
+    border-radius: 8px;
 
-    background: #f47713;
+    background: #ff790e;
     color: #ffffff;
 
     font-family: inherit;
@@ -141,7 +141,13 @@
 
     cursor: pointer;
 
-    box-shadow: 0 2px 5px rgba(244, 119, 19, 0.15);
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
+    transition: all 0.15s ease;
+}
+
+.tasks-evaluation-tab-active:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.94);
 }
 
 

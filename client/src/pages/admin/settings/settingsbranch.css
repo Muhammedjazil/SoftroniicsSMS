@@ -101,27 +101,42 @@
 }
 
 .branchherobutton button {
+    min-width: 100px;
     height: 40px;
-    padding: 0 25px;
-    font-size: 13px;
+    padding: 0 20px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     box-sizing: border-box;
+    transition: all 0.15s ease;
 }
 
 .branchherobutton .branchon {
-    background-color: #e9911d;
-    color: white;
-    border: 1px solid #e9911d;
-    border-radius: 7px;
+    background-color: #ff790e;
+    color: #ffffff;
+    border: 1px solid #ff790e;
+    border-radius: 8px;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
+}
+
+.branchherobutton .branchon:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.94);
 }
 
 .branchherobutton .branchoff {
-    background-color: white;
-    color: black;
-    border: 1px solid #bbb;
-    border-radius: 5px;
-    /* Remove margin-left */
+    background-color: #ffffff;
+    color: #374151;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+}
+
+.branchherobutton .branchoff:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .branchherobutton .branchexport {

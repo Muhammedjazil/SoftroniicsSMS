@@ -349,7 +349,7 @@ body, button, input, select, textarea {
   transform: translateY(0) !important;
 }
 
-/* Active Tab Double-Ring Glow & Hover Effect */
+/* Active Tab Double-Ring Glow & Uniform Color Effect */
 .btc-mgmt-tab-btn--active,
 .wk-sched-tab-btn--active,
 .tpc-mgmt-tab-btn--active,
@@ -357,20 +357,33 @@ body, button, input, select, textarea {
 .mnt-batches-tab-btn--active,
 .tmg-mgmt-tab-btn--active,
 .Rolemanagement-hero1 button.active,
+.staff-hero1 button.active,
 .stafflistactive,
 .staffbuttons button.active,
+.staffbuttons button.stafflistactive,
+.intern-hero0 button.active,
+.intern-hero1 button.active,
 .intern-tabs button.active,
+.attendance-student-tab-active,
 .attendance-student-tab-buttons button.active,
 .tasks-tab-active,
+.tasks-evaluation-tab-active,
 .tasks-evaluation-tab-btn--active,
+.tasks-material-tab-active,
 .tasks-material-tab-btn--active,
+.branchherobutton .branchon,
 .branchtabbutton button.active,
+.notfibutton button.active,
 .notificationtabs button.active,
 .int-task-tab-btn--active,
 .int-notif-tab-btn--active,
 .intrentask-tab.intrentask-active,
 .notificationbuttons button.notificationactive {
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px currentColor !important;
+  background: #ff790e !important;
+  background-color: #ff790e !important;
+  border-color: #ff790e !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e !important;
   transition: all 0.15s ease !important;
   cursor: pointer;
 }
@@ -382,14 +395,23 @@ body, button, input, select, textarea {
 .mnt-batches-tab-btn--active:hover,
 .tmg-mgmt-tab-btn--active:hover,
 .Rolemanagement-hero1 button.active:hover,
+.staff-hero1 button.active:hover,
 .stafflistactive:hover,
 .staffbuttons button.active:hover,
+.staffbuttons button.stafflistactive:hover,
+.intern-hero0 button.active:hover,
+.intern-hero1 button.active:hover,
 .intern-tabs button.active:hover,
+.attendance-student-tab-active:hover,
 .attendance-student-tab-buttons button.active:hover,
 .tasks-tab-active:hover,
+.tasks-evaluation-tab-active:hover,
 .tasks-evaluation-tab-btn--active:hover,
+.tasks-material-tab-active:hover,
 .tasks-material-tab-btn--active:hover,
+.branchherobutton .branchon:hover,
 .branchtabbutton button.active:hover,
+.notfibutton button.active:hover,
 .notificationtabs button.active:hover,
 .int-task-tab-btn--active:hover,
 .int-notif-tab-btn--active:hover,

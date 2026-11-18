@@ -162,16 +162,23 @@
 }
 
 .attendance-student-tab-active {
-    background: #f87913;
-    border-color: #f87913;
+    background: #ff790e;
+    border-color: #ff790e;
     color: #ffffff;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
+}
 
-    box-shadow: 0 2px 5px rgba(248, 121, 19, 0.18);
+.attendance-student-tab-active:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.94);
 }
 
 .attendance-student-tab:not(.attendance-student-tab-active):hover {
-    border-color: #f87913;
-    color: #f87913;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 
