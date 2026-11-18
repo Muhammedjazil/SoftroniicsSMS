@@ -1,0 +1,52 @@
+const mongoose = require("mongoose");
+
+const staffSchema = new mongoose.Schema({
+  // Basic Details
+  fullName: { type: String, required: true, trim: true },
+  dateOfBirth: { type: Date, required: true },
+  gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
+  email: { type: String, required: true, unique: true, lowercase: true },
+  staffPhoneNumber: { type: String, required: true },
+  staffWhatsAppNumber: { type: String },
+  staffPermanentAddress: { type: String },
+  district: { type: String },
+  state: { type: String },
+  photo: { type: String }, // store photo URL or file path
+  isMultipleBranch: { type: Boolean, default: false },
+  multipleBranches: [{ type: mongoose.Schema.Types.ObjectId, ref: "Branch" }],
+
+  // Professional Details
+  department: { type: String, required: true },
+  branch: { type: mongoose.Schema.Types.ObjectId, ref: "Branch" , required: true},
+  yearsOfExperience: { type: Number, min: 0 },
+  dateOfJoining: { type: Date, required: true },
+  employmentStatus: { type: String, enum: ["Active","Pause","Inactive"], required: true },
+  resignationDate: { type: Date }, // only if inactive
+  resume: { type: String }, // store resume file URL or path
+  remarks: { type: String },
+  role: { type: mongoose.Schema.Types.ObjectId, ref: "Role", required: true },
+
+  isMentor: { type: Boolean, default: false },
+  time: [{ type: mongoose.Schema.Types.ObjectId, ref: "Timing", default: [] }],
+
+  // Login & Access
+  officialEmail: { type: String, required: true, unique: true, lowercase: true },
+  password: { type: String, required: true }, // store hashed password
+  isActive: { type: Boolean, default: true },
+      isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+
+  deletedAt: {
+    type: Date,
+    default: null,
+  }
+},
+  { timestamps: true }
+);
+
+// module.exports = mongoose.model("Staff", staffSchema);
+module.exports = {
+  Staff: mongoose.model("Staff", staffSchema),
+};
