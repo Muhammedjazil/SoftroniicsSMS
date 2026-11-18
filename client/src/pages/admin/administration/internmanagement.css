@@ -96,8 +96,71 @@
 
 
 /* =====================================
-   TABS
+   MAIN CARD & TABS
 ========================================= */
+
+.intern-hero {
+    width: 100%;
+    min-height: 650px;
+    padding: 24px 28px;
+    box-sizing: border-box;
+    border: 1px solid #eef0f2;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.intern-hero0 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.intern-hero1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.intern-hero1 button,
+.intern-tabs button {
+    min-width: 100px;
+    height: 40px;
+    padding: 0 20px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.intern-hero1 button.active,
+.intern-tabs button.active {
+    background: #ff790e;
+    border-color: #ff790e;
+    color: #ffffff;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
+}
+
+.intern-hero1 button.active:hover,
+.intern-tabs button.active:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.94);
+}
+
+.intern-hero1 button:hover:not(.active),
+.intern-tabs button:hover:not(.active) {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
 
 .intern-tabs {
     display: flex;
@@ -108,41 +171,6 @@
     border-bottom: none;
 }
 
-.intern-tabs button {
-    min-width: 120px;
-    height: 40px;
-    padding: 0 20px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.intern-tabs button.active {
-    background: #ff790e;
-    color: #ffffff;
-    border: 1px solid #ff790e;
-    font-weight: 600;
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
-}
-
-.intern-tabs button.active:hover {
-    transform: translateY(-1px);
-    filter: brightness(0.94);
-}
-
-.intern-tabs button:hover:not(.active) {
-    background: #f9fafb;
-    border-color: #d1d5db;
-    color: #111827;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
 
 /* =====================================
    STUDENT LIST CONTAINER
@@ -151,10 +179,10 @@
 .intern-list-container {
     background: #ffffff;
     margin: 0;
-    padding: 24px 28px;
-    border: 1px solid #eef0f2;
-    border-radius: 14px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     min-height: 400px;
     box-sizing: border-box;
 }
@@ -166,52 +194,59 @@
 
 .intern-filter {
     display: grid;
-    grid-template-columns: minmax(180px, 2fr) repeat(3, minmax(110px, 0.65fr)) auto;
+    grid-template-columns: minmax(180px, 1.8fr) repeat(3, minmax(120px, 0.8fr)) auto;
     gap: 12px;
     align-items: center;
+    width: 100%;
     margin-bottom: 20px;
 }
 
 .intern-search {
     display: flex;
     align-items: center;
-    height: 36px;
-    border: 1px solid #e0e3e7;
+    height: 40px;
+    border: 1px solid #e3e5e8;
     border-radius: 6px;
-    padding: 0 11px;
-    gap: 9px;
-    color: #8c96a1;
+    padding: 0 12px;
+    gap: 10px;
+    color: #999999;
+    background: #ffffff;
 }
 
 .intern-search svg {
-    font-size: 16px;
+    font-size: 17px;
     flex-shrink: 0;
 }
 
 .intern-search input {
     width: 100%;
+    height: 100%;
     border: none;
     outline: none;
     font-size: 13px;
-    color: #344454;
+    color: #333333;
     background: transparent;
 }
 
 .intern-search input::placeholder {
-    color: #9ba4ae;
+    color: #999999;
 }
 
 .intern-filter select {
-    height: 36px;
+    height: 40px;
     width: 100%;
     padding: 0 12px;
-    border: 1px solid #e0e3e7;
+    border: 1px solid #e3e5e8;
     border-radius: 6px;
     background: #ffffff;
-    color: #536170;
+    color: #555555;
     font-size: 13px;
     outline: none;
     cursor: pointer;
+}
+
+.intern-filter select:focus {
+    border-color: #ff790e;
 }
 
 .intern-export {
@@ -248,41 +283,50 @@
 .intern-table-wrapper {
     width: 100%;
     overflow-x: auto;
+    box-sizing: border-box;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: #ffffff;
 }
 
 .intern-table {
     width: 100%;
-    min-width: 900px;
+    min-width: 850px;
     border-collapse: collapse;
-    text-align: left;
+    table-layout: auto;
+    background: #ffffff;
 }
 
 .intern-table thead {
-    background: #fafafa;
+    background: #f7f9f9;
 }
 
 .intern-table th {
-    height: 42px;
-    padding: 10px 12px;
-    color: #6b7784;
-    font-size: 10px;
+    height: 43px;
+    padding: 0 18px;
+    text-align: left;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.3px;
+    color: #626b73;
     white-space: nowrap;
-    border-bottom: 1px solid #e5e8eb;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e7e8e9;
 }
 
 .intern-table td {
-    height: 74px;
-    padding: 10px 12px;
-    border-bottom: 1px solid #e8eaed;
+    height: 61px;
+    padding: 10px 18px;
+    text-align: left;
     font-size: 12px;
-    color: #293747;
+    color: #777777;
+    border-bottom: 1px solid #e7e8e9;
+    line-height: 1.5;
+    vertical-align: middle;
     white-space: nowrap;
 }
 
 .intern-table tbody tr:hover {
-    background: #fffdfb;
+    background: #fcfcfc;
 }
 
 
@@ -293,30 +337,30 @@
 .intern-student-name {
     display: flex;
     align-items: center;
-    gap: 13px;
-    min-width: 215px;
+    gap: 12px;
+    min-width: 180px;
 }
 
 .intern-avatar {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
     border-radius: 50%;
     background: #fff0d9;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #ed711a;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .intern-student-name strong {
     display: block;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    color: #182536;
-    margin-bottom: 4px;
+    color: #252a30;
+    margin-bottom: 2px;
 }
 
 .intern-student-name span {
@@ -332,9 +376,11 @@
 
 .intern-status {
     display: inline-block;
-    padding: 4px 9px;
+    padding: 5px 10px;
     border-radius: 20px;
-    font-size: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
     background: #e0f9e9;
     color: #137b43;
 }
@@ -358,37 +404,51 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
 }
 
-.intern-actions button,
-.intern-card-link {
+.intern-actions button {
+    padding: 0;
     border: none;
     background: transparent;
-    padding: 3px 0;
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
+    transition: 0.15s ease;
 }
 
 .intern-view {
-    color: #2463d6;
+    color: #5279c7;
 }
 
 .intern-edit {
-    color: #e65e19;
+    color: #ed7819;
 }
 
 .intern-delete {
-    color: #d92d2d;
+    color: #d74a43;
+}
+
+.intern-actions button:hover {
+    text-decoration: underline;
 }
 
 .intern-card-link {
-    color: #d9570c;
-    text-decoration: underline;
+    display: inline-block;
+    padding: 5px 11px;
+    border: 1px solid #dcefe3;
+    border-radius: 5px;
+    background: #f0fbf4;
+    color: #38936a;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none !important;
 }
 
-.intern-actions button:hover,
 .intern-card-link:hover {
-    text-decoration: underline;
+    background: #dcf8e6;
+    text-decoration: none !important;
 }
 
 .intern-empty {
@@ -397,10 +457,47 @@
     height: 100px !important;
 }
 
-.intern-total {
-    margin-top: 15px;
+/* =====================================
+   PAGINATION
+===================================== */
+
+.intern-pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 9px;
+    margin-top: 18px;
+}
+
+.intern-pagination span {
+    margin-right: 5px;
+    color: #777777;
     font-size: 12px;
-    color: #818c97;
+}
+
+.intern-pagination button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #e3e5e8;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #777777;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+.intern-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.intern-pagination button:not(:disabled):hover {
+    border-color: #ff790e;
+    color: #ff790e;
 }
 
 
@@ -410,13 +507,30 @@
 
 .intern-form-container {
     width: 100%;
-    margin: 0;
-    padding: 24px 28px;
-    background: #ffffff;
-    border: 1px solid #eef0f2;
-    border-radius: 14px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    min-height: 550px;
+    padding-top: 12px;
     box-sizing: border-box;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+}
+
+.intern-create-heading {
+    margin-bottom: 24px;
+}
+
+.intern-create-heading h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 4px;
+}
+
+.intern-create-heading p {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
 }
 
 .intern-form-container h3 {
@@ -428,9 +542,9 @@
 
 .intern-form-container h4 {
     font-size: 15px;
-    font-weight: 500;
-    color: #26384a;
-    margin: 28px 2px 25px;
+    font-weight: 600;
+    color: #273449;
+    margin: 25px 0 20px;
 }
 
 .intern-form-container h3 + h4 {
@@ -480,7 +594,7 @@
 .intern-field input,
 .intern-field select {
     width: 100%;
-    height: 36px;
+    height: 40px;
     padding: 0 14px;
     border: 1px solid #e0e3e7;
     border-radius: 6px;
@@ -514,7 +628,7 @@
 
 .intern-file-upload {
     width: 100%;
-    height: 36px;
+    height: 40px;
     padding: 0 14px;
     border: 1px solid #e0e3e7;
     border-radius: 6px;
@@ -551,7 +665,7 @@
 
 .intern-password {
     width: 100%;
-    height: 36px;
+    height: 40px;
     display: flex;
     align-items: center;
     border: 1px solid #e0e3e7;
@@ -566,7 +680,7 @@
 .intern-password input {
     flex: 1;
     min-width: 0;
-    height: 34px;
+    height: 38px;
     border: none;
     box-shadow: none !important;
 }
@@ -576,7 +690,7 @@
 }
 
 .intern-password button {
-    height: 34px;
+    height: 38px;
     width: 38px;
     flex-shrink: 0;
     background: #ffffff;
@@ -596,40 +710,42 @@
 .intern-form-buttons {
     display: flex;
     justify-content: flex-end;
-    gap: 13px;
+    align-items: center;
+    gap: 10px;
     margin-top: 25px;
     padding-top: 5px;
 }
 
 .intern-form-buttons button {
-    height: 36px;
-    padding: 0 22px;
+    min-width: 110px;
+    height: 38px;
+    padding: 0 15px;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.2s ease;
 }
 
 .intern-cancel {
-    border: 1px solid #e0e3e7;
+    border: 1px solid #ff5050;
     background: #ffffff;
-    color: #465465;
+    color: #ff4040;
 }
 
 .intern-cancel:hover {
-    background: #f4f5f6;
+    background: #fff1f1;
 }
 
 .intern-submit {
     border: 1px solid #ff790e;
     background: #ff790e;
     color: #ffffff;
-    font-weight: 600;
-    box-shadow: 0 2px 5px rgba(255, 121, 14, 0.2);
 }
 
 .intern-submit:hover {
     background: #e96800;
+    border-color: #e96800;
 }
 
 

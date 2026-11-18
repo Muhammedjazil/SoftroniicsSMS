@@ -9,7 +9,9 @@ import {
   FiEdit,
   FiTrash2,
   FiX,
-  FiUpload
+  FiUpload,
+  FiChevronRight,
+  FiChevronLeft
 } from "react-icons/fi";
 
 import "./internmanagement.css";
@@ -501,8 +503,9 @@ export const Internmanagement = () => {
           <h2>Student Management</h2>
 
           <p>
-            Student Management &gt;{" "}
-            {activeTab === "list" ? "studentsList" : "newStudent"}
+            Student Management
+            <FiChevronRight />
+            {activeTab === "list" ? "Students List" : editingId ? "Edit Student" : "New Student"}
           </p>
         </div>
 
@@ -512,44 +515,52 @@ export const Internmanagement = () => {
           </div>
 
           <div>
-            <strong>vijitha</strong>
-            <span>super admin</span>
+            <strong>Vijitha</strong>
+            <span>Super Admin</span>
           </div>
         </div>
 
       </div>
 
-      {/* TABS */}
+      {/* MAIN CARD */}
 
-      <div className="intern-tabs">
+      <div className="intern-hero">
 
-        <button
-          type="button"
-          className={activeTab === "list" ? "active" : ""}
-          onClick={openStudentList}
-        >
-          Students List
-        </button>
+        {/* TOP TABS */}
 
-        <button
-          type="button"
-          className={activeTab === "new" ? "active" : ""}
-          onClick={openNewStudent}
-        >
-          New Student
-        </button>
+        <div className="intern-hero0">
 
-      </div>
+          <div className="intern-hero1">
 
-      {/* =====================================
-          STUDENT LIST
-      ===================================== */}
+            <button
+              type="button"
+              className={activeTab === "list" ? "active" : ""}
+              onClick={openStudentList}
+            >
+              Students List
+            </button>
 
-      {activeTab === "list" && (
+            <button
+              type="button"
+              className={activeTab === "new" ? "active" : ""}
+              onClick={openNewStudent}
+            >
+              {editingId ? "Edit Student" : "New Student"}
+            </button>
 
-        <div className="intern-list-container">
+          </div>
 
-          {/* FILTER */}
+        </div>
+
+        {/* =====================================
+            STUDENT LIST
+        ===================================== */}
+
+        {activeTab === "list" && (
+
+          <>
+
+            {/* FILTER */}
 
           <div className="intern-filter">
 
@@ -730,11 +741,26 @@ export const Internmanagement = () => {
 
           </div>
 
-          <div className="intern-total">
-            Showing {filteredStudents.length} of {students.length} students
+          {/* PAGINATION */}
+
+          <div className="intern-pagination">
+
+            <span>
+              {filteredStudents.length} Students
+            </span>
+
+            <button type="button" disabled>
+              <FiChevronLeft />
+            </button>
+
+            <button type="button" disabled>
+              <FiChevronRight />
+            </button>
+
           </div>
 
-        </div>
+        </>
+
       )}
 
       {/* =====================================
@@ -748,9 +774,15 @@ export const Internmanagement = () => {
           onSubmit={handleSubmit}
         >
 
-          <h3>
-            {editingId ? "Update Student" : "Create New Student"}
-          </h3>
+          <div className="intern-create-heading">
+
+            <h3>
+              {editingId ? "Edit Student" : "Create New Student"}
+            </h3>
+
+            <p>Fill in the student enrollment and personal details below</p>
+
+          </div>
 
           {/* BASIC DETAILS */}
 
@@ -1164,7 +1196,10 @@ export const Internmanagement = () => {
           </div>
 
         </form>
+
       )}
+
+      </div>
 
       {/* =====================================
           STUDENT DETAILS MODAL

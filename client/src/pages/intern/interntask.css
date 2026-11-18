@@ -21,23 +21,24 @@
   transition: all 0.15s ease;
 }
 
-.int-task-tab-btn:hover {
-  background-color: #fff4ec;
-  border-color: #ff7417;
-  color: #ff7417;
+.int-task-tab-btn:hover:not(.int-task-tab-btn--active) {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .int-task-tab-btn--active {
-  background-color: #ff6b0b;
-  border-color: #ff6b0b;
+  background-color: #ff790e;
+  border-color: #ff790e;
   color: #ffffff;
-  box-shadow: 0 2px 6px rgba(255, 107, 11, 0.25);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
 }
 
 .int-task-tab-btn--active:hover {
-  background-color: #e55c04;
-  border-color: #e55c04;
-  color: #ffffff;
+  transform: translateY(-1px);
+  filter: brightness(0.94);
 }
 
 /* Content Card */

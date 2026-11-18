@@ -121,10 +121,15 @@
 }
 
 .tmg-mgmt-tab-btn--active {
-  background-color: #f97316;
-  border-color: #f97316;
+  background-color: #ff790e;
+  border-color: #ff790e;
   color: #ffffff;
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #f97316;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
+}
+
+.tmg-mgmt-tab-btn--active:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.94);
 }
 
 /* Main White Card */

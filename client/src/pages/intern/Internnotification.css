@@ -33,23 +33,24 @@
   transition: all 0.15s ease;
 }
 
-.int-notif-tab-btn:hover {
-  background-color: #fff7ed;
-  border-color: #ff7014;
-  color: #ff7014;
+.int-notif-tab-btn:hover:not(.int-notif-tab-btn--active) {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .int-notif-tab-btn--active {
-  background-color: #ff7014;
-  border-color: #ff7014;
+  background-color: #ff790e;
+  border-color: #ff790e;
   color: #ffffff;
-  box-shadow: 0 2px 6px rgba(255, 112, 20, 0.25);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
 }
 
 .int-notif-tab-btn--active:hover {
-  background-color: #ed6108;
-  border-color: #ed6108;
-  color: #ffffff;
+  transform: translateY(-1px);
+  filter: brightness(0.94);
 }
 
 .int-notif-count-badge {

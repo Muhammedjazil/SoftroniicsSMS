@@ -644,45 +644,53 @@ export const Staffmanagement = () => {
 
       </div>
 
-      {/* TOP BUTTONS */}
+      {/* MAIN CARD */}
 
-      <div className="staffbuttons">
+      <div className="stafffull">
 
-        <button
-          type="button"
-          className={
-            activetap === "stafflist"
-              ? "stafflistactive active"
-              : "staffnew"
-          }
-          onClick={handlestafflist}
-        >
-          Staff List
-        </button>
+        {/* TOP TABS */}
 
-        <button
-          type="button"
-          className={
-            activetap === "newstaff"
-              ? "stafflistactive active"
-              : "staffnew"
-          }
-          onClick={handlenewstaff}
-        >
-          {editId !== null ? "Edit Staff" : "New Staff"}
-        </button>
+        <div className="staff-hero0">
 
-      </div>
+          <div className="staff-hero1">
 
-      {/* =====================================
-          STAFF LIST
-      ===================================== */}
+            <button
+              type="button"
+              className={
+                activetap === "stafflist"
+                  ? "active"
+                  : ""
+              }
+              onClick={handlestafflist}
+            >
+              Staff List
+            </button>
 
-      {activetap === "stafflist" && (
+            <button
+              type="button"
+              className={
+                activetap === "newstaff"
+                  ? "active"
+                  : ""
+              }
+              onClick={handlenewstaff}
+            >
+              {editId !== null ? "Edit Staff" : "New Staff"}
+            </button>
 
-        <div className="stafffull">
+          </div>
 
-          <div className="staffherosection">
+        </div>
+
+        {/* =====================================
+            STAFF LIST
+        ===================================== */}
+
+        {activetap === "stafflist" && (
+
+          <>
+
+            <div className="staffherosection">
 
             <div className="staffsearch">
 
@@ -897,38 +905,25 @@ export const Staffmanagement = () => {
 
             {/* PAGINATION */}
 
-            <div className="staffpageend">
+            <div className="staffpagination">
 
-              <div className="staffpageinfo">
+              <span>
+                {filteredStaff.length} Staff
+              </span>
 
-                <p>
-                  Showing 1 to {filteredStaff.length} of{" "}
-                  {filteredStaff.length} results
-                </p>
+              <button type="button" disabled>
+                <FiChevronLeft />
+              </button>
 
-              </div>
-
-              <div className="staffprevnext">
-
-                <button type="button" disabled>
-                  <FiChevronLeft />
-                  Previous
-                </button>
-
-                <span>Page 1 of 1</span>
-
-                <button type="button" disabled>
-                  Next
-                  <FiChevronRight />
-                </button>
-
-              </div>
+              <button type="button" disabled>
+                <FiChevronRight />
+              </button>
 
             </div>
 
           </div>
 
-        </div>
+        </>
 
       )}
 
@@ -940,11 +935,17 @@ export const Staffmanagement = () => {
 
         <div className="newstaff">
 
-          <h2>
-            {editId !== null
-              ? "Edit Staff"
-              : "Create New Staff"}
-          </h2>
+          <div className="staff-create-heading">
+
+            <h3>
+              {editId !== null
+                ? "Edit Staff"
+                : "Create New Staff"}
+            </h3>
+
+            <p>Fill in staff details and configure permissions</p>
+
+          </div>
 
           <form onSubmit={handleCreateStaff}>
 
@@ -1843,6 +1844,8 @@ export const Staffmanagement = () => {
         </div>
 
       )}
+
+      </div>
 
     </div>
 

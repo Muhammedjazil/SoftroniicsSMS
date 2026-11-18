@@ -127,15 +127,23 @@
 }
 
 .tasks-tabs button:hover:not(.tasks-tab-active) {
-    border-color: #f58220;
-    color: #f58220;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .tasks-tabs button.tasks-tab-active {
-    background: #f58220;
+    background: #ff790e;
     color: #ffffff;
-    border: 1px solid #f58220;
-    box-shadow: 0 2px 5px rgba(245, 130, 32, 0.20);
+    border: 1px solid #ff790e;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
+}
+
+.tasks-tabs button.tasks-tab-active:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.94);
 }
 
 
