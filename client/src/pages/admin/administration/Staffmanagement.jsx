@@ -8,7 +8,8 @@ import {
   FiSearch,
   FiArrowLeft,
   FiX,
-  FiClock
+  FiClock,
+  FiDownload
 } from "react-icons/fi";
 
 import react from "../../../assets/react.svg";
@@ -70,14 +71,159 @@ const initialForm = {
 };
 
 // =====================================
+// SAMPLE STAFF DATA
+// =====================================
+
+const sampleStaff = [
+  {
+    id: 1,
+    fullname: "Ananya Sharma",
+    dateofbirth: "1994-06-15",
+    gender: "Female",
+    email: "ananya.sharma@gmail.com",
+    officialemail: "ananya@softroniics.com",
+    phone: "9847123450",
+    whatsapp: "9847123450",
+    address: "Green Valley Apt 4B",
+    district: "Kozhikode",
+    state: "Kerala",
+    photo: null,
+    department: "uiux",
+    branch: "calicut",
+    allowAdditionalBranches: true,
+    additionalBranches: ["kochi"],
+    typeemply: "Senior UI/UX Mentor",
+    experience: "5 Years",
+    joindate: "2023-01-10",
+    status: "active",
+    resingnation: "",
+    resume: null,
+    remark: "Lead mentor for UI/UX batches",
+    mentorRole: true,
+    mentorTimings: ["09:30 AM - 12:00 PM", "02:00 PM - 05:00 PM"]
+  },
+  {
+    id: 2,
+    fullname: "Rahul Varma",
+    dateofbirth: "1992-09-22",
+    gender: "Male",
+    email: "rahul.varma@gmail.com",
+    officialemail: "rahul@softroniics.com",
+    phone: "9746234561",
+    whatsapp: "9746234561",
+    address: "Civil Station Road",
+    district: "Kozhikode",
+    state: "Kerala",
+    photo: null,
+    department: "mern",
+    branch: "calicut",
+    allowAdditionalBranches: false,
+    additionalBranches: [],
+    typeemply: "Full Stack Developer",
+    experience: "4 Years",
+    joindate: "2023-03-15",
+    status: "active",
+    resingnation: "",
+    resume: null,
+    remark: "MERN Stack instructor",
+    mentorRole: true,
+    mentorTimings: ["11:00 AM - 01:30 PM"]
+  },
+  {
+    id: 3,
+    fullname: "Priya Nair",
+    dateofbirth: "1995-12-05",
+    gender: "Female",
+    email: "priya.nair@gmail.com",
+    officialemail: "priya@softroniics.com",
+    phone: "9447345672",
+    whatsapp: "9447345672",
+    address: "Palakkad Town",
+    district: "Palakkad",
+    state: "Kerala",
+    photo: null,
+    department: "python",
+    branch: "palakkad",
+    allowAdditionalBranches: false,
+    additionalBranches: [],
+    typeemply: "Python Instructor",
+    experience: "3 Years",
+    joindate: "2023-06-01",
+    status: "active",
+    resingnation: "",
+    resume: null,
+    remark: "Django and Python lead",
+    mentorRole: false,
+    mentorTimings: []
+  },
+  {
+    id: 4,
+    fullname: "Mohammed Fazil",
+    dateofbirth: "1993-04-18",
+    gender: "Male",
+    email: "fazil.m@gmail.com",
+    officialemail: "fazil@softroniics.com",
+    phone: "9895456783",
+    whatsapp: "9895456783",
+    address: "Kochi Marine Drive",
+    district: "Ernakulam",
+    state: "Kerala",
+    photo: null,
+    department: "datascience",
+    branch: "kochi",
+    allowAdditionalBranches: false,
+    additionalBranches: [],
+    typeemply: "Data Science Mentor",
+    experience: "4 Years",
+    joindate: "2023-08-20",
+    status: "active",
+    resingnation: "",
+    resume: null,
+    remark: "AI & ML Specialist",
+    mentorRole: true,
+    mentorTimings: ["09:30 AM - 12:00 PM"]
+  },
+  {
+    id: 5,
+    fullname: "Sneha Menon",
+    dateofbirth: "1996-08-30",
+    gender: "Female",
+    email: "sneha.menon@gmail.com",
+    officialemail: "sneha@softroniics.com",
+    phone: "9633567894",
+    whatsapp: "9633567894",
+    address: "Thrissur Round",
+    district: "Thrissur",
+    state: "Kerala",
+    photo: null,
+    department: "uiux",
+    branch: "perinthalmanna",
+    allowAdditionalBranches: false,
+    additionalBranches: [],
+    typeemply: "Course Coordinator",
+    experience: "2 Years",
+    joindate: "2024-01-05",
+    status: "active",
+    resingnation: "",
+    resume: null,
+    remark: "Perinthalmanna branch coordinator",
+    mentorRole: false,
+    mentorTimings: []
+  }
+];
+
+// =====================================
 // MAIN COMPONENT
 // =====================================
 
 export const Staffmanagement = () => {
 
   const [search, setSearch] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("all");
+  const [branchFilter, setBranchFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  const [allData, setAlldata] = useState([]);
+  const [allData, setAlldata] = useState(sampleStaff);
 
   const [formData, setFormData] = useState({
     ...initialForm
@@ -95,11 +241,71 @@ export const Staffmanagement = () => {
   // FILTER STAFF
   // =====================================
 
-  const filteredStaff = allData.filter((value) =>
-    `${value.fullname} ${value.email} ${value.typeemply} ${value.branch}`
+  const filteredStaff = allData.filter((value) => {
+    const matchesSearch = `${value.fullname} ${value.email} ${value.typeemply} ${value.branch} ${value.phone}`
       .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+      .includes(search.toLowerCase());
+    const matchesDept =
+      departmentFilter === "all" ||
+      value.department?.toLowerCase() === departmentFilter.toLowerCase();
+    const matchesBranch =
+      branchFilter === "all" ||
+      value.branch?.toLowerCase() === branchFilter.toLowerCase();
+    const matchesStatus =
+      statusFilter === "all" ||
+      value.status?.toLowerCase() === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesDept && matchesBranch && matchesStatus;
+  });
+
+  // =====================================
+  // EXPORT CSV
+  // =====================================
+
+  const handleExport = () => {
+    if (filteredStaff.length === 0) {
+      alert("No staff available to export");
+      return;
+    }
+
+    const headers = [
+      "Name",
+      "Email",
+      "Official Email",
+      "Phone",
+      "Role",
+      "Department",
+      "Branch",
+      "Status"
+    ];
+
+    const rows = filteredStaff.map((s) => [
+      s.fullname,
+      s.email,
+      s.officialemail,
+      s.phone,
+      s.typeemply,
+      s.department,
+      s.branch,
+      s.status
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers, ...rows]
+        .map((e) =>
+          e.map((cell) => `"${String(cell || "").replace(/"/g, '""')}"`).join(",")
+        )
+        .join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "staff-list.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // =====================================
   // RESET FORM
@@ -412,12 +618,13 @@ export const Staffmanagement = () => {
           <h2>Staff Management</h2>
 
           <p>
-            Staff Management &gt;{" "}
+            Staff Management
+            <FiChevronRight />
             {activetap === "stafflist"
-              ? "staffList"
+              ? "Staff List"
               : activetap === "newstaff"
-              ? "newStaff"
-              : "staffView"}
+              ? (editId !== null ? "Edit Staff" : "New Staff")
+              : "Staff Details"}
           </p>
 
         </div>
@@ -429,8 +636,8 @@ export const Staffmanagement = () => {
           </div>
 
           <div className="staffadminname">
-            <h5>vijitha</h5>
-            <p>super admin</p>
+            <h5>Vijitha</h5>
+            <p>Super Admin</p>
           </div>
 
         </div>
@@ -445,7 +652,7 @@ export const Staffmanagement = () => {
           type="button"
           className={
             activetap === "stafflist"
-              ? "stafflistactive"
+              ? "stafflistactive active"
               : "staffnew"
           }
           onClick={handlestafflist}
@@ -457,7 +664,7 @@ export const Staffmanagement = () => {
           type="button"
           className={
             activetap === "newstaff"
-              ? "stafflistactive"
+              ? "stafflistactive active"
               : "staffnew"
           }
           onClick={handlenewstaff}
@@ -492,7 +699,10 @@ export const Staffmanagement = () => {
 
             <div className="staffalldepartment">
 
-              <select defaultValue="all">
+              <select
+                value={departmentFilter}
+                onChange={(e) => setDepartmentFilter(e.target.value)}
+              >
 
                 <option value="all">All Departments</option>
                 <option value="uiux">UI/UX</option>
@@ -506,13 +716,17 @@ export const Staffmanagement = () => {
 
             <div className="staffbranch">
 
-              <select defaultValue="all">
+              <select
+                value={branchFilter}
+                onChange={(e) => setBranchFilter(e.target.value)}
+              >
 
                 <option value="all">All Branches</option>
                 <option value="calicut">Calicut</option>
                 <option value="palakkad">Palakkad</option>
                 <option value="thrissur">Thrissur</option>
                 <option value="perinthalmanna">Perinthalmanna</option>
+                <option value="kochi">Kochi</option>
 
               </select>
 
@@ -520,13 +734,29 @@ export const Staffmanagement = () => {
 
             <div className="staffactive">
 
-              <select defaultValue="all">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
 
-                <option value="all">All Roles</option>
+                <option value="all">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
 
               </select>
+
+            </div>
+
+            <div className="staffexport">
+
+              <button
+                type="button"
+                className="staffexport-btn"
+                onClick={handleExport}
+              >
+                <FiDownload />
+                Export
+              </button>
 
             </div>
 

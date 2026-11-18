@@ -71,7 +71,7 @@ export const Internnavbar = () => {
             {/* LOGO SECTION */}
             <div className="internnavbar-logo">
                 <h2>
-                    Softronii<span>x</span>
+                    Softroni<span>ix</span>
                 </h2>
             </div>
 
