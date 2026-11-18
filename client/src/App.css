@@ -1,0 +1,533 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ========================================================
+   GLOBAL BASE & TYPOGRAPHY
+======================================================== */
+
+body, button, input, select, textarea {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ========================================================
+   STANDARDIZED ADMIN PAGE CONTAINERS (Schedule-Style Shape & Size)
+======================================================== */
+
+.Rolemanagement,
+.staffmanagement,
+.internmanagement,
+.attendance-student-page,
+.leaverequest-page,
+.tasks-page,
+.tasks-evaluation-page,
+.tasks-material-page,
+.Branch,
+.notification,
+.syl-mgmt-container,
+.tpc-mgmt-container,
+.btc-mgmt-container,
+.wk-sched-container,
+.mnt-batches-container,
+.tmg-mgmt-container {
+  background-color: #f8f9fa !important;
+  padding: 24px 32px 32px 32px !important;
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* ========================================================
+   STANDARDIZED ADMIN HEADERS
+======================================================== */
+
+.Rolemanagement-role,
+.stafffirst,
+.intern-header,
+.attendance-student-header,
+.leaverequest-header,
+.tasks-header,
+.tasks-evaluation-header,
+.tasks-material-header,
+.branchheadsection,
+.notificationsect1,
+.syl-mgmt-header,
+.tpc-mgmt-header,
+.btc-mgmt-header,
+.wk-sched-header,
+.mnt-batches-header,
+.tmg-mgmt-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  margin-bottom: 24px !important;
+  border-bottom: none !important;
+  padding: 0 !important;
+  min-height: unset !important;
+  background: transparent !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ========================================================
+   STANDARDIZED ADMIN HEADINGS
+======================================================== */
+
+.Rolemanagement-name h2,
+.staffhead h2,
+.intern-heading h2,
+.attendance-student-header-title h2,
+.leaverequest-heading h2,
+.tasks-header-title h2,
+.tasks-evaluation-header-title h2,
+.tasks-material-header-title h2,
+.branchhead h2,
+.notificationsec2 h2,
+.syl-mgmt-heading,
+.tpc-mgmt-heading,
+.btc-mgmt-heading,
+.wk-sched-heading,
+.mnt-batches-heading,
+.tmg-mgmt-heading {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  margin: 0 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.25 !important;
+}
+
+/* ========================================================
+   STANDARDIZED ADMIN BREADCRUMBS / PATHS
+======================================================== */
+
+.Rolemanagement-name p,
+.staffhead p,
+.intern-heading p,
+.attendance-student-header-title p,
+.leaverequest-heading p,
+.tasks-header-title p,
+.tasks-evaluation-header-title p,
+.tasks-material-header-title p,
+.branchhead p,
+.notificationsec2 p,
+.syl-mgmt-breadcrumb,
+.tpc-mgmt-breadcrumb,
+.btc-mgmt-breadcrumb,
+.wk-sched-breadcrumb,
+.mnt-batches-breadcrumb,
+.tmg-mgmt-breadcrumb {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 13px !important;
+  color: #6b7280 !important;
+  margin: 4px 0 0 0 !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+}
+
+/* ========================================================
+   STANDARDIZED ADMIN PROFILE / NAME CARDS
+======================================================== */
+
+.Rolemanagement-profile,
+.staffadminprofile,
+.intern-admin,
+.attendance-student-admin-profile,
+.leaverequest-admin-profile,
+.tasks-admin-profile,
+.tasks-evaluation-admin-profile,
+.tasks-material-admin-profile,
+.branchprofile,
+.notificationsec3,
+.syl-mgmt-profile-card,
+.tpc-mgmt-profile-card,
+.btc-mgmt-profile-card,
+.wk-sched-profile-card,
+.mnt-batches-profile-card,
+.tmg-mgmt-profile-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px 16px !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+  min-width: 155px !important;
+  height: 54px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+/* Profile Icons / Avatars */
+.Rolemanagement-profile-icon,
+.stafficon,
+.intern-admin-icon,
+.attendance-student-admin-icon,
+.leaverequest-admin-icon,
+.tasks-admin-icon,
+.tasks-admin-avatar,
+.tasks-evaluation-admin-avatar,
+.tasks-material-admin-avatar,
+.branchproficon,
+.notificationicon,
+.syl-mgmt-profile-avatar,
+.tpc-mgmt-profile-avatar,
+.btc-mgmt-profile-avatar,
+.wk-sched-profile-avatar,
+.mnt-batches-profile-avatar,
+.tmg-mgmt-profile-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background-color: #e5e7eb !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #6b7280 !important;
+  font-size: 18px !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Profile Usernames */
+.Rolemanagement-profiledetails h5,
+.staffadminname h5,
+.intern-admin strong,
+.attendance-student-admin-info h4,
+.leaverequest-admin-info h4,
+.tasks-admin-info h4,
+.tasks-evaluation-admin-name h5,
+.tasks-material-admin-name h5,
+.branchprofdata h5,
+.notificationuserdetails h5,
+.syl-mgmt-username,
+.tpc-mgmt-username,
+.btc-mgmt-username,
+.wk-sched-username,
+.mnt-batches-username,
+.tmg-mgmt-username {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  text-transform: capitalize !important;
+}
+
+/* Profile Roles */
+.Rolemanagement-profiledetails p,
+.staffadminname p,
+.intern-admin span,
+.attendance-student-admin-info p,
+.leaverequest-admin-info p,
+.tasks-admin-info p,
+.tasks-evaluation-admin-name p,
+.tasks-material-admin-name p,
+.branchprofdata h6,
+.notificationuserdetails h6,
+.syl-mgmt-role,
+.tpc-mgmt-role,
+.btc-mgmt-role,
+.wk-sched-role,
+.mnt-batches-role,
+.tmg-mgmt-role {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: #6b7280 !important;
+  line-height: 1.2 !important;
+  margin: 2px 0 0 0 !important;
+  text-transform: capitalize !important;
+}
+
+/* ========================================================
+   STANDARDIZED MAIN WHITE PANELS / CARDS
+======================================================== */
+
+.Rolemanagement-hero,
+.stafffull,
+.newstaff,
+.staffview,
+.intern-list-container,
+.intern-form-container,
+.attendance-student-table-card,
+.leaverequest-main-card,
+.tasks-list-container,
+.tasks-form-container,
+.tasks-evaluation-filter-card,
+.tasks-evaluation-table-container,
+.tasks-material-main-card,
+.tasks-material-form-card,
+.branchherosection,
+.notificationherosection,
+.syl-mgmt-panel,
+.tpc-mgmt-panel,
+.btc-mgmt-panel {
+  background-color: #ffffff;
+  border: 1px solid #eef0f2;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+}
+
+/* ========================================================
+   SCHEDULE-STYLE BUTTONS & HOVER EFFECTS (Across Admin & Intern Pages)
+======================================================== */
+
+/* 1. All Tab / Toggle Buttons */
+.btc-mgmt-tab-btn,
+.wk-sched-tab-btn,
+.tpc-mgmt-tab-btn,
+.syl-mgmt-tab-btn,
+.mnt-batches-tab-btn,
+.tmg-mgmt-tab-btn,
+.Rolemanagement-hero1 button,
+.staffbuttons button,
+.intern-tabs button,
+.attendance-student-tab-buttons button,
+.tasks-tabs button,
+.tasks-evaluation-tab-btn,
+.tasks-material-tab-btn,
+.branchtabbutton button,
+.notificationtabs button,
+.int-task-tab-btn,
+.int-notif-tab-btn,
+.intrentask-tab,
+.notificationbuttons button {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease !important;
+  box-sizing: border-box;
+}
+
+/* Inactive Tab Hover - Smooth lift & soft highlight from schedule pages */
+.btc-mgmt-tab-btn:hover:not(.btc-mgmt-tab-btn--active),
+.wk-sched-tab-btn:hover:not(.wk-sched-tab-btn--active),
+.tpc-mgmt-tab-btn:hover:not(.tpc-mgmt-tab-btn--active),
+.syl-mgmt-tab-btn:hover:not(.syl-mgmt-tab-btn--active),
+.mnt-batches-tab-btn:hover:not(.mnt-batches-tab-btn--active),
+.tmg-mgmt-tab-btn:hover:not(.tmg-mgmt-tab-btn--active),
+.Rolemanagement-hero1 button:hover:not(.active),
+.staffbuttons button:hover:not(.stafflistactive):not(.active),
+.intern-tabs button:hover:not(.active),
+.attendance-student-tab-buttons button:hover:not(.active),
+.tasks-tabs button:hover:not(.tasks-tab-active),
+.tasks-evaluation-tab-btn:hover:not(.tasks-evaluation-tab-btn--active),
+.tasks-material-tab-btn:hover:not(.tasks-material-tab-btn--active),
+.branchtabbutton button:hover:not(.active),
+.notificationtabs button:hover:not(.active),
+.int-task-tab-btn:hover:not(.int-task-tab-btn--active),
+.int-notif-tab-btn:hover:not(.int-notif-tab-btn--active),
+.intrentask-tab:hover:not(.intrentask-active),
+.notificationbuttons button:hover:not(.notificationactive) {
+  background-color: #f9fafb !important;
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+}
+
+.btc-mgmt-tab-btn:active,
+.Rolemanagement-hero1 button:active,
+.staffbuttons button:active,
+.intern-tabs button:active,
+.attendance-student-tab-buttons button:active,
+.tasks-tabs button:active,
+.branchtabbutton button:active,
+.notificationtabs button:active,
+.int-task-tab-btn:active,
+.int-notif-tab-btn:active {
+  transform: translateY(0) !important;
+}
+
+/* Active Tab Double-Ring Glow & Hover Effect */
+.btc-mgmt-tab-btn--active,
+.wk-sched-tab-btn--active,
+.tpc-mgmt-tab-btn--active,
+.syl-mgmt-tab-btn--active,
+.mnt-batches-tab-btn--active,
+.tmg-mgmt-tab-btn--active,
+.Rolemanagement-hero1 button.active,
+.stafflistactive,
+.staffbuttons button.active,
+.intern-tabs button.active,
+.attendance-student-tab-buttons button.active,
+.tasks-tab-active,
+.tasks-evaluation-tab-btn--active,
+.tasks-material-tab-btn--active,
+.branchtabbutton button.active,
+.notificationtabs button.active,
+.int-task-tab-btn--active,
+.int-notif-tab-btn--active,
+.intrentask-tab.intrentask-active,
+.notificationbuttons button.notificationactive {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px currentColor !important;
+  transition: all 0.15s ease !important;
+  cursor: pointer;
+}
+
+.btc-mgmt-tab-btn--active:hover,
+.wk-sched-tab-btn--active:hover,
+.tpc-mgmt-tab-btn--active:hover,
+.syl-mgmt-tab-btn--active:hover,
+.mnt-batches-tab-btn--active:hover,
+.tmg-mgmt-tab-btn--active:hover,
+.Rolemanagement-hero1 button.active:hover,
+.stafflistactive:hover,
+.staffbuttons button.active:hover,
+.intern-tabs button.active:hover,
+.attendance-student-tab-buttons button.active:hover,
+.tasks-tab-active:hover,
+.tasks-evaluation-tab-btn--active:hover,
+.tasks-material-tab-btn--active:hover,
+.branchtabbutton button.active:hover,
+.notificationtabs button.active:hover,
+.int-task-tab-btn--active:hover,
+.int-notif-tab-btn--active:hover,
+.intrentask-tab.intrentask-active:hover,
+.notificationbuttons button.notificationactive:hover {
+  transform: translateY(-1px) !important;
+  filter: brightness(0.94) !important;
+}
+
+/* 2. Export, Download & Secondary Outline Buttons */
+.btc-mgmt-export-btn,
+.tpc-mgmt-export-btn,
+.syl-mgmt-export-btn,
+.mnt-batches-export-btn,
+.tmg-mgmt-export-btn,
+.int-sched-download-btn,
+.Rolemanagement-export,
+.staffexport,
+.intern-export,
+.attendance-student-export-btn,
+.leaverequest-export-btn,
+.tasks-export-btn,
+.tasks-evaluation-export-btn,
+.tasks-material-export-btn,
+.branchexport,
+.notificationexport,
+.int-notif-refresh-btn,
+.internattendance-calendar-controls button {
+  height: 40px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease !important;
+  box-sizing: border-box;
+}
+
+.btc-mgmt-export-btn:hover,
+.tpc-mgmt-export-btn:hover,
+.syl-mgmt-export-btn:hover,
+.mnt-batches-export-btn:hover,
+.tmg-mgmt-export-btn:hover,
+.int-sched-download-btn:hover,
+.Rolemanagement-export:hover,
+.staffexport:hover,
+.intern-export:hover,
+.attendance-student-export-btn:hover,
+.leaverequest-export-btn:hover,
+.tasks-export-btn:hover,
+.tasks-evaluation-export-btn:hover,
+.tasks-material-export-btn:hover,
+.branchexport:hover,
+.notificationexport:hover,
+.int-notif-refresh-btn:hover,
+.internattendance-calendar-controls button:hover {
+  background-color: #f9fafb !important;
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+}
+
+.btc-mgmt-export-btn:active,
+.int-sched-download-btn:active,
+.leaverequest-export-btn:active,
+.tasks-export-btn:active,
+.int-notif-refresh-btn:active {
+  transform: translateY(0) !important;
+}
+
+/* 3. Primary CTA / Submit / Save / Create Buttons */
+.int-notif-main-btn,
+.internnotificationtopbutton button,
+.btc-mgmt-create-btn,
+.tpc-mgmt-create-btn,
+.syl-mgmt-create-btn,
+.Rolemanagement-submit,
+.staffsubmit,
+.intern-submit,
+.tasks-submit-btn,
+.branchsubmit,
+.notificationsubmit {
+  height: 40px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease !important;
+}
+
+.int-notif-main-btn:hover,
+.internnotificationtopbutton button:hover,
+.btc-mgmt-create-btn:hover,
+.tpc-mgmt-create-btn:hover,
+.syl-mgmt-create-btn:hover,
+.Rolemanagement-submit:hover,
+.staffsubmit:hover,
+.intern-submit:hover,
+.tasks-submit-btn:hover,
+.branchsubmit:hover,
+.notificationsubmit:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+  filter: brightness(0.94) !important;
+}
+
+.int-notif-main-btn:active,
+.internnotificationtopbutton button:active,
+.Rolemanagement-submit:active,
+.staffsubmit:active,
+.intern-submit:active,
+.tasks-submit-btn:active {
+  transform: translateY(0) !important;
+}
+
+/* 4. Table Row Action Icons / Buttons */
+.action-icon,
+.action-btn,
+.action-button,
+.table-action-btn,
+.btc-mgmt-action-btn,
+.tpc-mgmt-action-btn,
+.syl-mgmt-action-btn,
+.internattendance-month-item,
+.internattendance-day-cell {
+  transition: all 0.15s ease !important;
+}
+
+.action-icon:hover,
+.action-btn:hover,
+.action-button:hover,
+.table-action-btn:hover,
+.btc-mgmt-action-btn:hover,
+.tpc-mgmt-action-btn:hover,
+.syl-mgmt-action-btn:hover {
+  transform: scale(1.08) !important;
+}

@@ -1,1066 +1,482 @@
+@import './WeeklyCard.css';
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
-/* =========================================
-   MAIN PAGE
-========================================= */
-
-.internattendance-page,
-.internattendance-page * {
-    box-sizing: border-box;
+/* Metrics Grid - 4 Columns */
+.int-att-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
 }
 
-.internattendance-page {
-    width: 100%;
-    min-height: 100vh;
-    padding: 15px 16px 25px;
-    background: #f3f4f6;
-    color: #263746;
-    font-family: 'Poppins', sans-serif;
+.wk-card-metric-box--total {
+  border: 1.5px solid #3180ff;
 }
 
-/* =========================================
-   HEADER
-========================================= */
-
-.internattendance-header {
-    width: 100%;
-    min-height: 100px;
-    padding: 4px 4px 17px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 15px;
-    border-bottom: 1px solid #e2e5e9;
-    margin-bottom: 26px;
+.wk-card-metric-box--present {
+  border: 1.5px solid #06b987;
 }
 
-.internattendance-heading {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+.wk-card-metric-box--absent {
+  border: 1.5px solid #ff4564;
 }
 
-.internattendance-heading h2 {
-    margin: 5px 0 0;
-    color: #263746;
-    font-size: 25px;
-    font-weight: 600;
+.wk-card-metric-box--percentage {
+  border: 1.5px solid #f5a000;
 }
 
-.internattendance-heading p {
-    margin: 3px 0 0;
-    color: #7b8794;
-    font-size: 14px;
-    font-weight: 400;
+.wk-card-score-tag--total {
+  background-color: #3180ff;
 }
 
-.internattendance-heading p span {
-    margin: 0 6px;
+.wk-card-score-tag--present {
+  background-color: #06b987;
 }
 
-/* =========================================
-   INTERN PROFILE
-========================================= */
-
-.internattendance-profile {
-    min-width: 155px;
-    height: 65px;
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #ffffff;
-    border: 1px solid #e0e4e9;
-    border-radius: 9px;
+.wk-card-score-tag--absent {
+  background-color: #ff4564;
 }
 
-.internattendance-profile-icon {
-    width: 45px;
-    height: 45px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #e5e9ee;
-    border-radius: 50%;
-    color: #536171;
-    font-size: 24px;
-}
-
-.internattendance-profile-info h4 {
-    margin: 0;
-    color: #263746;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.internattendance-profile-info p {
-    margin: 2px 0 0;
-    color: #83909c;
-    font-size: 12px;
-}
-
-/* =========================================
-   STATISTICS CARDS
-========================================= */
-
-.internattendance-stats {
-    width: 100%;
-    margin-bottom: 28px;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 18px;
-}
-
-.internattendance-stat-card {
-    min-width: 0;
-    min-height: 117px;
-    padding: 18px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: #ffffff;
-    border: 1px solid #e0e5eb;
-    border-radius: 19px;
-    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.08);
-}
-
-.internattendance-stat-icon {
-    width: 53px;
-    height: 53px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 15px;
-    font-size: 26px;
-}
-
-.internattendance-total-icon {
-    color: #3180ff;
-    background: #edf3ff;
-}
-
-.internattendance-present-icon {
-    color: #06b987;
-    background: #eafbf3;
-}
-
-.internattendance-absent-icon {
-    color: #ff4564;
-    background: #fff0f1;
-}
-
-.internattendance-percentage-icon {
-    color: #f5a000;
-    background: #fff8e8;
-}
-
-.internattendance-stat-info {
-    min-width: 0;
-}
-
-.internattendance-stat-info p {
-    margin: 0 0 4px;
-    color: #65758a;
-    font-size: 13px;
-    font-weight: 400;
-}
-
-.internattendance-stat-info h3 {
-    margin: 0;
-    color: #071c36;
-    font-size: 25px;
-    font-weight: 700;
-    line-height: 1.3;
-}
-
-.internattendance-stat-info span {
-    display: block;
-    margin-top: 3px;
-    color: #8794a5;
-    font-size: 11px;
-}
-
-/* =========================================
-   MAIN CALENDAR CARD
-========================================= */
-
+/* Main Calendar Card */
 .internattendance-calendar-card {
-    width: 100%;
-    min-height: 520px;
-    padding: 35px 38px;
-    background: #ffffff;
-    border: 1px solid #e0e5eb;
-    border-radius: 27px;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.07);
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  padding: 24px 28px;
+  box-sizing: border-box;
 }
 
-/* =========================================
-   CALENDAR HEADER
-========================================= */
-
+/* Calendar Header */
 .internattendance-calendar-header {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 22% minmax(0, 1fr) auto 22%;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.internattendance-calendar-header > h3 {
-    margin: 0;
-    color: #101d2c;
-    font-size: 19px;
-    font-weight: 600;
+.internattendance-cal-title-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
 }
 
-.internattendance-calendar-header > h2 {
-    margin: 0;
-    color: #101d2c;
-    font-size: 25px;
-    font-weight: 700;
-    text-align: center;
+.internattendance-cal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #101d2c;
+  margin: 0;
 }
 
-/* =========================================
-   CALENDAR NAVIGATION
-========================================= */
+.internattendance-cal-month-year {
+  font-size: 18px;
+  font-weight: 700;
+  color: #101d2c;
+  margin: 0;
+}
 
+/* Calendar Controls */
 .internattendance-calendar-controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .internattendance-calendar-controls button {
-    min-width: 39px;
-    height: 39px;
-    padding: 0 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #ffffff;
-    border: 1px solid #dce2e9;
-    border-radius: 10px;
-    color: #43546a;
-    font-family: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border: 1px solid #dce2e9;
+  border-radius: 10px;
+  color: #43546a;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .internattendance-calendar-controls button svg {
-    font-size: 21px;
+  font-size: 20px;
 }
 
 .internattendance-calendar-controls button:hover {
-    background: #f0f5ff;
-    border-color: #3478f6;
-    color: #3478f6;
+  background-color: #f0f5ff;
+  border-color: #3478f6;
+  color: #3478f6;
 }
 
 .internattendance-calendar-controls .internattendance-today-btn {
-    min-width: 73px;
-    font-weight: 500;
+  padding: 0 16px;
+  background-color: #ffffff;
+  border-color: #dce2e9;
+  color: #43546a;
 }
 
-/* =========================================
-   MENTOR FILTER
-========================================= */
+.internattendance-calendar-controls .internattendance-today-btn:hover {
+  background-color: #f0f5ff;
+  border-color: #3478f6;
+  color: #3478f6;
+}
 
+/* Mentor Filter */
 .internattendance-mentor-filter {
-    width: 100%;
-    height: 47px;
-    padding: 0 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #ffffff;
-    border: 1px solid #dce2e9;
-    border-radius: 13px;
+  height: 38px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  border: 1px solid #dce2e9;
+  border-radius: 10px;
 }
 
 .internattendance-mentor-filter svg {
-    flex-shrink: 0;
-    color: #758397;
-    font-size: 20px;
+  flex-shrink: 0;
+  color: #758397;
+  font-size: 18px;
 }
 
 .internattendance-mentor-filter select {
-    width: 100%;
-    min-width: 0;
-    height: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #25364c;
-    font-family: inherit;
-    font-size: 13px;
-    cursor: pointer;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #25364c;
+  cursor: pointer;
 }
 
-/* =========================================
-   CALENDAR BODY
-========================================= */
-
+/* Calendar Body Layout */
 .internattendance-calendar-body {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 22% minmax(0, 1fr) 22%;
-    gap: 30px;
-    align-items: start;
+  display: grid;
+  grid-template-columns: 210px 1fr 240px;
+  gap: 24px;
+  align-items: start;
 }
 
-/* =========================================
-   LEFT MONTH SIDEBAR
-========================================= */
-
+/* Month Sidebar */
 .internattendance-month-sidebar {
-    width: 100%;
-    min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-
-/* Year navigation */
 
 .internattendance-year-navigation {
-    width: 100%;
-    height: 45px;
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background-color: #f8fafc;
+  border: 1px solid #dce2e9;
+  border-radius: 10px;
 }
 
 .internattendance-year-navigation h3 {
-    margin: 0;
-    color: #172b43;
-    font-size: 18px;
-    font-weight: 600;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #101d2c;
 }
 
 .internattendance-year-navigation button {
-    width: 34px;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    border-radius: 50%;
-    color: #95a2b2;
-    font-size: 23px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 18px;
+  transition: all 0.15s ease;
 }
 
 .internattendance-year-navigation button:hover {
-    background: #eef3ff;
-    color: #2563eb;
+  background-color: #f0f5ff;
+  color: #3478f6;
 }
 
-/* Month list */
-
 .internattendance-month-list {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .internattendance-month-item {
-    width: 100%;
-    min-height: 48px;
-    padding: 0 18px 0 26px;
-    display: flex;
-    align-items: center;
-    gap: 17px;
-    background: transparent;
-    border: none;
-    border-radius: 13px;
-    color: #66758a;
-    font-family: inherit;
-    font-size: 14px;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #64748b;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.internattendance-month-item:hover:not(.internattendance-month-active) {
-    background: #f3f6fc;
-}
-
-.internattendance-month-dot {
-    width: 12px;
-    height: 12px;
-    flex-shrink: 0;
-    border: 2px solid #d2d9e2;
-    border-radius: 50%;
-}
-
-.internattendance-month-name {
-    flex: 1;
-    white-space: nowrap;
-}
-
-.internattendance-month-arrow {
-    font-size: 21px;
+.internattendance-month-item:hover {
+  border-color: #3478f6;
+  background-color: #f0f5ff;
+  color: #3478f6;
 }
 
 .internattendance-month-active {
-    background: #2863ef;
-    color: #ffffff;
-    font-weight: 600;
-    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  background-color: #edf3ff !important;
+  border-color: #d2e1ff !important;
+  color: #3478f6 !important;
+}
+
+.internattendance-month-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  margin-right: 8px;
 }
 
 .internattendance-month-active .internattendance-month-dot {
-    background: #ffffff;
-    border-color: #ffffff;
+  background-color: #3478f6;
 }
 
-.internattendance-month-active:hover {
-    background: #1e57dd;
+.internattendance-month-name {
+  flex: 1;
+  text-align: left;
 }
 
-/* =========================================
-   CALENDAR GRID SECTION
-========================================= */
+.internattendance-month-arrow {
+  font-size: 16px;
+  color: #3478f6;
+}
 
+/* Calendar Grid */
 .internattendance-calendar-grid-section {
-    width: 100%;
-    min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-
-/* Weekdays */
 
 .internattendance-weekdays {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 9px;
-    margin-bottom: 15px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
 }
 
 .internattendance-weekday {
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #24364c;
-    font-size: 13px;
-    font-weight: 600;
+  padding: 8px 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #8392a5;
+  letter-spacing: 0.04em;
 }
 
 .internattendance-sunday {
-    color: #ff3f63;
+  color: #ff4564;
 }
-
-.internattendance-saturday {
-    color: #2563eb;
-}
-
-/* =========================================
-   CALENDAR DAYS
-========================================= */
 
 .internattendance-days-grid {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 9px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
 }
 
 .internattendance-day-cell {
-    position: relative;
-    width: 100%;
-    min-width: 0;
-    min-height: 75px;
-    padding: 10px 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #ffffff;
-    border: 1px solid #dce2e9;
-    border-radius: 15px;
-    color: #172c46;
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  position: relative;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e0e5eb;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #101d2c;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .internattendance-day-cell:hover {
-    background: #f4f7ff;
-    border-color: #6c9bfa;
-    transform: translateY(-2px);
+  border-color: #3478f6;
+  background-color: #f0f5ff;
 }
-
-.internattendance-day-number {
-    width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-}
-
-/* Previous / next month dates */
 
 .internattendance-other-month {
-    color: #cbd2dc;
-    background: #fdfdfd;
+  color: #cbd5e1;
+  background-color: #fafbfd;
+  border-color: #f1f5f9;
 }
 
-.internattendance-other-month:hover {
-    background: #f6f7f9;
+.internattendance-today {
+  border-color: #3478f6;
+  background-color: #edf3ff;
+  color: #3478f6;
+  font-weight: 800;
 }
-
-/* Today */
-
-.internattendance-day-cell.internattendance-today {
-    background: #ffffff;
-    border-color: #dce2e9;
-}
-
-.internattendance-today .internattendance-day-number {
-    background: #3980fa;
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.internattendance-today:hover .internattendance-day-number {
-    background: #2863e8;
-}
-
-.internattendance-today-dot {
-    position: absolute;
-    bottom: 9px;
-    left: 50%;
-    width: 7px;
-    height: 7px;
-    transform: translateX(-50%);
-    background: #3980fa;
-    border-radius: 50%;
-}
-
-/* Selected date */
 
 .internattendance-selected-day {
-    border: 2px solid #3980fa;
-    background: #f4f8ff;
-}
-
-/* =========================================
-   PRESENT / ABSENT DAY INDICATORS
-========================================= */
-
-.internattendance-day-indicator {
-    position: absolute;
-    bottom: 9px;
-    left: 50%;
-    width: 8px;
-    height: 8px;
-    transform: translateX(-50%);
-    border-radius: 50%;
-}
-
-.internattendance-indicator-present {
-    background: #10b981;
-}
-
-.internattendance-indicator-absent {
-    background: #f43f5e;
+  border-color: #3478f6;
+  box-shadow: 0 0 0 2px rgba(52, 120, 246, 0.2);
 }
 
 .internattendance-day-present {
-    background: #f5fdf9;
+  border-color: #a4ecd0;
+  background-color: #ebfaf3;
 }
 
 .internattendance-day-absent {
-    background: #fff8f8;
+  border-color: #ffb8c4;
+  background-color: #fff0f2;
 }
 
-/* =========================================
-   RIGHT INFORMATION PANEL
-========================================= */
+.internattendance-day-indicator {
+  position: absolute;
+  bottom: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
 
+.internattendance-indicator-present {
+  background-color: #06b987;
+}
+
+.internattendance-indicator-absent {
+  background-color: #ff4564;
+}
+
+.internattendance-today-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #3478f6;
+}
+
+/* Right Information Panel */
 .internattendance-information-panel {
-    width: 100%;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 55px;
-    padding-top: 45px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-/* =========================================
-   ATTENDANCE LEGEND
-========================================= */
-
-.internattendance-legend-card {
-    width: 100%;
-    min-height: 216px;
-    padding: 27px 28px;
-    background: #fcfdfd;
-    border: 1px solid #dce2e9;
-    border-radius: 20px;
+.internattendance-legend-card,
+.internattendance-summary-card {
+  padding: 18px 20px;
+  border: 1px solid #e0e5eb;
+  border-radius: 12px;
+  background-color: #f8fafc;
 }
 
-.internattendance-legend-card h3 {
-    margin: 0 0 16px;
-    color: #102036;
-    font-size: 15px;
-    font-weight: 600;
+.internattendance-legend-card h3,
+.internattendance-summary-card h3 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #101d2c;
+  margin: 0 0 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .internattendance-legend-item {
-    min-height: 32px;
-    display: flex;
-    align-items: center;
-    gap: 17px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
-.internattendance-legend-item p {
-    margin: 0;
-    color: #53647a;
-    font-size: 13px;
+.internattendance-legend-item:last-child {
+  margin-bottom: 0;
 }
 
 .internattendance-legend-dot {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-    border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .internattendance-legend-present {
-    background: #10b981;
+  background-color: #06b987;
 }
 
 .internattendance-legend-absent {
-    background: #f43f5e;
+  background-color: #ff4564;
 }
 
 .internattendance-legend-today {
-    background: #3980fa;
+  background-color: #3478f6;
 }
 
 .internattendance-legend-other {
-    background: #f8fafc;
-    border: 2px solid #e1e5eb;
+  background-color: #cbd5e1;
 }
 
-/* =========================================
-   MONTHLY SUMMARY
-========================================= */
-
-.internattendance-summary-card {
-    width: 100%;
-    min-height: 205px;
-    padding: 27px 28px;
-    background: #fcfdfd;
-    border: 1px solid #dce2e9;
-    border-radius: 20px;
-}
-
-.internattendance-summary-card h3 {
-    margin: 0 0 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #102036;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.internattendance-summary-card h3 svg {
-    color: #3278fa;
-    font-size: 20px;
+.internattendance-legend-item p {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #475569;
 }
 
 .internattendance-summary-row {
-    min-height: 31px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.internattendance-summary-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .internattendance-summary-row span {
-    color: #65758b;
-    font-size: 13px;
+  font-size: 12.5px;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .internattendance-summary-row strong {
-    color: #14283e;
-    font-size: 13px;
-    font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #071c36;
 }
 
-/* =========================================
-   RESPONSIVE - LAPTOP
-========================================= */
+/* Responsiveness */
+@media screen and (max-width: 1200px) {
+  .int-att-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-@media (max-width: 1400px) {
-
-    .internattendance-calendar-card {
-        padding: 28px 25px;
-    }
-
-    .internattendance-calendar-body {
-        grid-template-columns: 20% minmax(0, 1fr) 22%;
-        gap: 20px;
-    }
-
-    .internattendance-calendar-header {
-        grid-template-columns: 20% minmax(0, 1fr) auto 22%;
-        gap: 10px;
-    }
-
-    .internattendance-day-cell {
-        min-height: 65px;
-    }
-
-    .internattendance-legend-card,
-    .internattendance-summary-card {
-        padding: 22px 18px;
-    }
-
-    .internattendance-information-panel {
-        gap: 35px;
-    }
+  .internattendance-calendar-body {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* =========================================
-   RESPONSIVE - TABLET
-========================================= */
-
-@media (max-width: 1050px) {
-
-    .internattendance-stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .internattendance-calendar-header {
-        grid-template-columns: 1fr auto;
-        row-gap: 15px;
-    }
-
-    .internattendance-calendar-header > h3 {
-        grid-column: 1;
-        grid-row: 1;
-    }
-
-    .internattendance-calendar-header > h2 {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        text-align: left;
-    }
-
-    .internattendance-calendar-controls {
-        grid-column: 2;
-        grid-row: 1;
-    }
-
-    .internattendance-mentor-filter {
-        grid-column: 1 / -1;
-        grid-row: 3;
-        max-width: 100%;
-    }
-
-    .internattendance-calendar-body {
-        grid-template-columns: 190px minmax(0, 1fr);
-        gap: 22px;
-    }
-
-    .internattendance-information-panel {
-        grid-column: 1 / -1;
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 20px;
-        padding-top: 10px;
-    }
-
-    .internattendance-day-cell {
-        min-height: 65px;
-    }
-}
-
-/* =========================================
-   RESPONSIVE - MOBILE
-========================================= */
-
-@media (max-width: 768px) {
-
-    .internattendance-page {
-        padding: 12px;
-    }
-
-    .internattendance-header {
-        min-height: 75px;
-        margin-bottom: 18px;
-    }
-
-    .internattendance-heading h2 {
-        font-size: 19px;
-    }
-
-    .internattendance-heading p {
-        font-size: 11px;
-    }
-
-    .internattendance-profile {
-        min-width: 115px;
-        height: 52px;
-        padding: 5px 7px;
-        gap: 7px;
-    }
-
-    .internattendance-profile-icon {
-        width: 32px;
-        height: 32px;
-        font-size: 18px;
-    }
-
-    .internattendance-profile-info h4 {
-        font-size: 10px;
-    }
-
-    .internattendance-profile-info p {
-        font-size: 9px;
-    }
-
-    .internattendance-stats {
-        gap: 11px;
-        margin-bottom: 18px;
-    }
-
-    .internattendance-stat-card {
-        min-height: 95px;
-        padding: 12px;
-        gap: 10px;
-        border-radius: 13px;
-    }
-
-    .internattendance-stat-icon {
-        width: 39px;
-        height: 39px;
-        border-radius: 11px;
-        font-size: 21px;
-    }
-
-    .internattendance-stat-info p {
-        font-size: 10px;
-    }
-
-    .internattendance-stat-info h3 {
-        font-size: 19px;
-    }
-
-    .internattendance-stat-info span {
-        font-size: 9px;
-    }
-
-    .internattendance-calendar-card {
-        padding: 19px 14px;
-        border-radius: 17px;
-    }
-
-    .internattendance-calendar-header {
-        grid-template-columns: 1fr auto;
-        margin-bottom: 18px;
-    }
-
-    .internattendance-calendar-header > h3 {
-        font-size: 16px;
-    }
-
-    .internattendance-calendar-header > h2 {
-        font-size: 21px;
-    }
-
-    .internattendance-calendar-controls button {
-        min-width: 33px;
-        height: 34px;
-    }
-
-    .internattendance-calendar-controls .internattendance-today-btn {
-        min-width: 57px;
-    }
-
-    .internattendance-calendar-body {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-
-    .internattendance-month-sidebar {
-        order: 1;
-    }
-
-    .internattendance-calendar-grid-section {
-        order: 2;
-    }
-
-    .internattendance-information-panel {
-        order: 3;
-        grid-template-columns: 1fr;
-    }
-
-    .internattendance-year-navigation {
-        height: 35px;
-        max-width: 230px;
-        margin-bottom: 8px;
-    }
-
-    .internattendance-month-list {
-        flex-direction: row;
-        overflow-x: auto;
-        gap: 7px;
-        padding-bottom: 7px;
-    }
-
-    .internattendance-month-item {
-        min-width: 105px;
-        min-height: 38px;
-        padding: 0 10px;
-        justify-content: center;
-        gap: 7px;
-        font-size: 11px;
-    }
-
-    .internattendance-month-dot {
-        width: 9px;
-        height: 9px;
-    }
-
-    .internattendance-month-arrow {
-        font-size: 16px;
-    }
-
-    .internattendance-weekdays {
-        gap: 5px;
-        margin-bottom: 8px;
-    }
-
-    .internattendance-weekday {
-        font-size: 10px;
-    }
-
-    .internattendance-days-grid {
-        gap: 5px;
-    }
-
-    .internattendance-day-cell {
-        min-height: 49px;
-        padding: 5px 2px;
-        border-radius: 9px;
-        font-size: 12px;
-    }
-
-    .internattendance-day-number {
-        width: 29px;
-        height: 29px;
-    }
-
-    .internattendance-today-dot,
-    .internattendance-day-indicator {
-        bottom: 3px;
-        width: 5px;
-        height: 5px;
-    }
-
-    .internattendance-information-panel {
-        gap: 15px;
-    }
-
-    .internattendance-legend-card,
-    .internattendance-summary-card {
-        min-height: auto;
-        padding: 20px;
-        border-radius: 14px;
-    }
-}
-
-/* =========================================
-   RESPONSIVE - SMALL MOBILE
-========================================= */
-
-@media (max-width: 420px) {
-
-    .internattendance-page {
-        padding: 9px;
-    }
-
-    .internattendance-header {
-        gap: 5px;
-    }
-
-    .internattendance-heading h2 {
-        font-size: 16px;
-    }
-
-    .internattendance-heading p {
-        font-size: 9px;
-    }
-
-    .internattendance-profile {
-        min-width: 100px;
-        height: 44px;
-    }
-
-    .internattendance-profile-icon {
-        width: 28px;
-        height: 28px;
-    }
-
-    .internattendance-profile-info h4 {
-        font-size: 9px;
-    }
-
-    .internattendance-stat-card {
-        padding: 9px;
-        gap: 7px;
-    }
-
-    .internattendance-stat-icon {
-        width: 32px;
-        height: 32px;
-        font-size: 18px;
-    }
-
-    .internattendance-stat-info p {
-        font-size: 9px;
-    }
-
-    .internattendance-stat-info h3 {
-        font-size: 17px;
-    }
-
-    .internattendance-calendar-card {
-        padding: 15px 9px;
-    }
-
-    .internattendance-calendar-header > h2 {
-        font-size: 18px;
-    }
-
-    .internattendance-day-cell {
-        min-height: 42px;
-        font-size: 11px;
-    }
-
-    .internattendance-day-number {
-        width: 25px;
-        height: 25px;
-    }
-
-    .internattendance-month-item {
-        min-width: 95px;
-        font-size: 10px;
-    }
+@media screen and (max-width: 768px) {
+  .int-att-metrics-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,11 +1,6 @@
-
 import React, { useMemo, useState } from "react";
-import {
-    MdPersonOutline
-} from "react-icons/md";
-
+import { LuUser } from "react-icons/lu";
 import "./Internmonthlycard.css";
-
 
 /* =========================================
    STUDENT DETAILS
@@ -21,49 +16,13 @@ const InternmonthlycardStudent = {
     internshipType: "FULL TIME"
 };
 
-
-/* =========================================
-   MONTHLY EVALUATION DATA
-
-   Keep empty to display the empty state
-   exactly as shown in the screenshot.
-
-   Example record:
-   {
-      id: 1,
-      month: "November 2026",
-      aptitude: 80,
-      logical: 75,
-      technical: 85,
-      communication: 70,
-      attendance: 90,
-      mentorNote: "Good performance",
-      mentor: "Priyesh"
-   }
-========================================= */
-
 const InternmonthlycardInitialData = [];
 
-
 const Internmonthlycard = () => {
-
-    /* =====================================
-       STATE
-    ===================================== */
-
-    const [InternmonthlycardStudentData] =
-        useState(InternmonthlycardStudent);
-
-    const [InternmonthlycardEvaluationData] =
-        useState(InternmonthlycardInitialData);
-
-
-    /* =====================================
-       CALCULATE AVERAGES
-    ===================================== */
+    const [InternmonthlycardStudentData] = useState(InternmonthlycardStudent);
+    const [InternmonthlycardEvaluationData] = useState(InternmonthlycardInitialData);
 
     const InternmonthlycardCalculateAverage = (field) => {
-
         if (InternmonthlycardEvaluationData.length === 0) {
             return 0;
         }
@@ -73,42 +32,18 @@ const Internmonthlycard = () => {
             0
         );
 
-        return (
-            total / InternmonthlycardEvaluationData.length
-        ).toFixed(2);
-
+        return (total / InternmonthlycardEvaluationData.length).toFixed(2);
     };
 
-
-    /* =====================================
-       AVERAGE VALUES
-    ===================================== */
-
     const InternmonthlycardAverages = useMemo(() => {
-
         return {
-            technical:
-                InternmonthlycardCalculateAverage("technical"),
-
-            aptitude:
-                InternmonthlycardCalculateAverage("aptitude"),
-
-            logical:
-                InternmonthlycardCalculateAverage("logical"),
-
-            communication:
-                InternmonthlycardCalculateAverage("communication"),
-
-            attendance:
-                InternmonthlycardCalculateAverage("attendance")
+            technical: InternmonthlycardCalculateAverage("technical"),
+            aptitude: InternmonthlycardCalculateAverage("aptitude"),
+            logical: InternmonthlycardCalculateAverage("logical"),
+            communication: InternmonthlycardCalculateAverage("communication"),
+            attendance: InternmonthlycardCalculateAverage("attendance")
         };
-
     }, [InternmonthlycardEvaluationData]);
-
-
-    /* =====================================
-       EVALUATION TABLE HEADINGS
-    ===================================== */
 
     const InternmonthlycardTableHeadings = [
         "MONTH",
@@ -121,384 +56,177 @@ const Internmonthlycard = () => {
         "MENTOR"
     ];
 
-
-    /* =====================================
-       RENDER
-    ===================================== */
-
     return (
-
-        <div
-            className="Internmonthlycard-page"
-            id="Internmonthlycard-page"
-        >
-
-
-            {/* =================================
-                PAGE HEADER
-            ================================= */}
-
-            <div
-                className="Internmonthlycard-header"
-                id="Internmonthlycard-header"
-            >
-
-                <div className="Internmonthlycard-heading">
-
-                    <h2>My Monthly Evaluation</h2>
-
-                    <p>
-                        My Monthly Evaluation
-                        <span>&gt;</span>
-                        Monthly Card
-                    </p>
-
+        <div className="wk-card-container">
+            {/* Header */}
+            <header className="wk-card-header">
+                <div className="wk-card-title-group">
+                    <h1 className="wk-card-heading">My Monthly Evaluation</h1>
+                    <nav className="wk-card-breadcrumb">
+                        <span>My Monthly Evaluation</span>
+                        <span className="wk-card-breadcrumb-sep">&gt;</span>
+                        <span>Monthly Card</span>
+                    </nav>
                 </div>
 
-
-                {/* STUDENT PROFILE */}
-
-                <div
-                    className="Internmonthlycard-profile"
-                    id="Internmonthlycard-profile"
-                >
-
-                    <div className="Internmonthlycard-profile-icon">
-
-                        <MdPersonOutline />
-
+                <div className="wk-card-profile-card">
+                    <div className="wk-card-profile-avatar">
+                        <LuUser />
                     </div>
-
-                    <div className="Internmonthlycard-profile-details">
-
-                        <h4>{InternmonthlycardStudentData.name}</h4>
-
-                        <p>Intern</p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            {/* =================================
-                MAIN CONTENT
-            ================================= */}
-
-            <div
-                className="Internmonthlycard-content"
-                id="Internmonthlycard-content"
-            >
-
-
-                {/* =================================
-                    STUDENT INFORMATION CARD
-                ================================= */}
-
-                <div
-                    className="Internmonthlycard-student-card"
-                    id="Internmonthlycard-student-card"
-                >
-
-                    {/* STUDENT INITIALS */}
-
-                    <div className="Internmonthlycard-avatar">
-
-                        {InternmonthlycardStudentData.initials}
-
-                    </div>
-
-
-                    {/* STUDENT DETAILS */}
-
-                    <div className="Internmonthlycard-student-info">
-
-                        <h1>
+                    <div className="wk-card-profile-info">
+                        <span className="wk-card-username">
                             {InternmonthlycardStudentData.name}
-                        </h1>
+                        </span>
+                        <span className="wk-card-role">Intern</span>
+                    </div>
+                </div>
+            </header>
 
-                        <div className="Internmonthlycard-tags">
+            {/* Main Content Wrapper */}
+            <div className="wk-card-body">
+                {/* Intern Identity Banner */}
+                <section className="wk-card-identity-card">
+                    <div className="int-monthly-avatar-square">
+                        {InternmonthlycardStudentData.initials}
+                    </div>
 
-                            <span className="Internmonthlycard-tag Internmonthlycard-tag-fulltime">
+                    <div className="wk-card-identity-details">
+                        <h2 className="wk-card-intern-title">
+                            {InternmonthlycardStudentData.name}
+                        </h2>
+
+                        <div className="wk-card-badges-row">
+                            <span className="int-monthly-badge int-monthly-badge--fulltime">
                                 {InternmonthlycardStudentData.internshipType}
                             </span>
-
-                            <span className="Internmonthlycard-tag Internmonthlycard-tag-batch">
+                            <span className="int-monthly-badge int-monthly-badge--batch">
                                 {InternmonthlycardStudentData.batch}
                             </span>
-
-                            <span className="Internmonthlycard-tag Internmonthlycard-tag-id">
+                            <span className="int-monthly-badge int-monthly-badge--id">
                                 {InternmonthlycardStudentData.studentId}
                             </span>
-
-                            <span className="Internmonthlycard-tag Internmonthlycard-tag-course">
-                                {InternmonthlycardStudentData.course}
-                            </span>
-
+                            {InternmonthlycardStudentData.course && (
+                                <span className="int-monthly-badge int-monthly-badge--course">
+                                    {InternmonthlycardStudentData.course}
+                                </span>
+                            )}
                         </div>
-
                     </div>
+                </section>
 
-                </div>
-
-
-                {/* =================================
-                    EVALUATION STATISTICS
-                ================================= */}
-
-                <div
-                    className="Internmonthlycard-stats"
-                    id="Internmonthlycard-stats"
-                >
-
-
-                    {/* AVG TECHNICAL */}
-
-                    <div className="Internmonthlycard-stat-card Internmonthlycard-technical">
-
-                        <div className="Internmonthlycard-stat-top">
-
-                            <p>AVG TECHNICAL</p>
-
-                            <span>AVG</span>
-
+                {/* 5 Metric Summary Cards */}
+                <section className="int-monthly-metrics-grid">
+                    <div className="wk-card-metric-box int-monthly-metric--technical">
+                        <div className="wk-card-metric-top">
+                            <span className="wk-card-metric-label">AVG TECHNICAL</span>
+                            <span className="int-monthly-score-tag">AVG</span>
                         </div>
-
-                        <div className="Internmonthlycard-stat-value">
-
-                            <h2>
+                        <div className="wk-card-metric-value-row">
+                            <span className="wk-card-metric-num">
                                 {InternmonthlycardAverages.technical}
-                            </h2>
-
-                            <span>/ 100</span>
-
+                            </span>
+                            <span className="wk-card-metric-denom">/ 100</span>
                         </div>
-
                     </div>
 
-
-                    {/* AVG APTITUDE */}
-
-                    <div className="Internmonthlycard-stat-card Internmonthlycard-aptitude">
-
-                        <div className="Internmonthlycard-stat-top">
-
-                            <p>AVG APTITUDE</p>
-
-                            <span>AVG</span>
-
+                    <div className="wk-card-metric-box int-monthly-metric--aptitude">
+                        <div className="wk-card-metric-top">
+                            <span className="wk-card-metric-label">AVG APTITUDE</span>
+                            <span className="int-monthly-score-tag">AVG</span>
                         </div>
-
-                        <div className="Internmonthlycard-stat-value">
-
-                            <h2>
+                        <div className="wk-card-metric-value-row">
+                            <span className="wk-card-metric-num">
                                 {InternmonthlycardAverages.aptitude}
-                            </h2>
-
-                            <span>/ 100</span>
-
+                            </span>
+                            <span className="wk-card-metric-denom">/ 100</span>
                         </div>
-
                     </div>
 
-
-                    {/* AVG LOGICAL */}
-
-                    <div className="Internmonthlycard-stat-card Internmonthlycard-logical">
-
-                        <div className="Internmonthlycard-stat-top">
-
-                            <p>AVG LOGICAL</p>
-
-                            <span>AVG</span>
-
+                    <div className="wk-card-metric-box int-monthly-metric--logical">
+                        <div className="wk-card-metric-top">
+                            <span className="wk-card-metric-label">AVG LOGICAL</span>
+                            <span className="int-monthly-score-tag">AVG</span>
                         </div>
-
-                        <div className="Internmonthlycard-stat-value">
-
-                            <h2>
+                        <div className="wk-card-metric-value-row">
+                            <span className="wk-card-metric-num">
                                 {InternmonthlycardAverages.logical}
-                            </h2>
-
-                            <span>/ 100</span>
-
+                            </span>
+                            <span className="wk-card-metric-denom">/ 100</span>
                         </div>
-
                     </div>
 
-
-                    {/* AVG COMMUNICATION */}
-
-                    <div className="Internmonthlycard-stat-card Internmonthlycard-communication">
-
-                        <div className="Internmonthlycard-stat-top">
-
-                            <p>AVG COMMUNICATION</p>
-
-                            <span>AVG</span>
-
+                    <div className="wk-card-metric-box int-monthly-metric--communication">
+                        <div className="wk-card-metric-top">
+                            <span className="wk-card-metric-label">AVG COMMUNICATION</span>
+                            <span className="int-monthly-score-tag">AVG</span>
                         </div>
-
-                        <div className="Internmonthlycard-stat-value">
-
-                            <h2>
+                        <div className="wk-card-metric-value-row">
+                            <span className="wk-card-metric-num">
                                 {InternmonthlycardAverages.communication}
-                            </h2>
-
-                            <span>/ 100</span>
-
+                            </span>
+                            <span className="wk-card-metric-denom">/ 100</span>
                         </div>
-
                     </div>
 
-
-                    {/* ATTENDANCE */}
-
-                    <div className="Internmonthlycard-stat-card Internmonthlycard-attendance">
-
-                        <div className="Internmonthlycard-stat-top">
-
-                            <p>ATTENDANCE</p>
-
+                    <div className="wk-card-metric-box int-monthly-metric--attendance">
+                        <div className="wk-card-metric-top">
+                            <span className="wk-card-metric-label">ATTENDANCE</span>
                         </div>
-
-                        <div className="Internmonthlycard-stat-value">
-
-                            <h2>
+                        <div className="wk-card-metric-value-row">
+                            <span className="wk-card-metric-num">
                                 {InternmonthlycardAverages.attendance}
-                            </h2>
-
-                            <span>%</span>
-
+                            </span>
+                            <span className="wk-card-metric-percent">%</span>
                         </div>
-
-                        <p className="Internmonthlycard-overall">
-                            Overall
-                        </p>
-
+                        <span className="wk-card-metric-subtext">Overall</span>
                     </div>
+                </section>
 
-                </div>
-
-
-                {/* =================================
-                    MONTHLY EVALUATION TABLE
-                ================================= */}
-
-                <div
-                    className="Internmonthlycard-table-card"
-                    id="Internmonthlycard-table-card"
-                >
-
-                    <div className="Internmonthlycard-table-wrapper">
-
-                        <table className="Internmonthlycard-table">
-
-                            {/* TABLE HEADER */}
-
+                {/* Evaluation Table Card */}
+                <section className="wk-card-table-card">
+                    <div className="wk-card-table-scroll">
+                        <table className="wk-card-table">
                             <thead>
-
                                 <tr>
-
-                                    {InternmonthlycardTableHeadings.map(
-                                        (heading, index) => (
-
-                                            <th key={index}>
-                                                {heading}
-                                            </th>
-
-                                        )
-                                    )}
-
+                                    {InternmonthlycardTableHeadings.map((heading) => (
+                                        <th key={heading}>{heading}</th>
+                                    ))}
                                 </tr>
-
                             </thead>
 
-
-                            {/* TABLE BODY */}
-
                             <tbody>
-
                                 {InternmonthlycardEvaluationData.length > 0 ? (
-
-                                    InternmonthlycardEvaluationData.map(
-                                        (item) => (
-
-                                            <tr key={item.id}>
-
-                                                <td>
-                                                    {item.month}
-                                                </td>
-
-                                                <td>
-                                                    {item.aptitude}
-                                                </td>
-
-                                                <td>
-                                                    {item.logical}
-                                                </td>
-
-                                                <td>
-                                                    {item.technical}
-                                                </td>
-
-                                                <td>
-                                                    {item.communication}
-                                                </td>
-
-                                                <td>
-                                                    {item.attendance}%
-                                                </td>
-
-                                                <td className="Internmonthlycard-mentor-note">
-                                                    {item.mentorNote || "-"}
-                                                </td>
-
-                                                <td>
-                                                    {item.mentor || "-"}
-                                                </td>
-
-                                            </tr>
-
-                                        )
-
-                                    )
-
+                                    InternmonthlycardEvaluationData.map((item) => (
+                                        <tr key={item.id}>
+                                            <td>{item.month}</td>
+                                            <td>{item.aptitude}</td>
+                                            <td>{item.logical}</td>
+                                            <td>{item.technical}</td>
+                                            <td>{item.communication}</td>
+                                            <td>{item.attendance}%</td>
+                                            <td className="int-monthly-mentor-note">
+                                                {item.mentorNote || "-"}
+                                            </td>
+                                            <td>{item.mentor || "-"}</td>
+                                        </tr>
+                                    ))
                                 ) : (
-
-                                    <tr className="Internmonthlycard-empty-row">
-
-                                        <td colSpan="8">
-
-                                            <div className="Internmonthlycard-empty-state">
-
-                                                No monthly evaluation details are currently available for you.
-
-                                            </div>
-
+                                    <tr>
+                                        <td
+                                            colSpan={InternmonthlycardTableHeadings.length}
+                                            className="wk-card-table-status"
+                                        >
+                                            No monthly evaluation details are currently available for you.
                                         </td>
-
                                     </tr>
-
                                 )}
-
                             </tbody>
-
                         </table>
-
                     </div>
-
-                </div>
-
-
+                </section>
             </div>
-
         </div>
-
     );
-
 };
-
 
 export default Internmonthlycard;

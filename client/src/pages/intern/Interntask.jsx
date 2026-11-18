@@ -1,110 +1,85 @@
-
-import { useState } from "react";
-
-import {
-  FiUser,
-  FiClipboard
-} from "react-icons/fi";
-
+import React, { useState } from "react";
+import { LuUser, LuClipboardList } from "react-icons/lu";
 import "./interntask.css";
 
 export const Intrentask = () => {
-
   const [activeTab, setActiveTab] = useState("assigned");
 
   return (
-    <div className="intrentask">
-
-      {/* HEADER SECTION */}
-      <div className="intrentask-header">
-
-        <div className="intrentask-heading">
-          <h2>Task</h2>
-
-          <p>
-            Task <span>&gt;</span> Task Submission
-          </p>
+    <div className="wk-card-container">
+      {/* Header */}
+      <header className="wk-card-header">
+        <div className="wk-card-title-group">
+          <h1 className="wk-card-heading">Task</h1>
+          <nav className="wk-card-breadcrumb">
+            <span>Task</span>
+            <span className="wk-card-breadcrumb-sep">&gt;</span>
+            <span>Task Submission</span>
+          </nav>
         </div>
 
-        {/* USER PROFILE */}
-        <div className="intrentask-profile">
-
-          <div className="intrentask-profile-icon">
-            <FiUser />
+        <div className="wk-card-profile-card">
+          <div className="wk-card-profile-avatar">
+            <LuUser />
           </div>
-
-          <div className="intrentask-profile-details">
-            <h3>MUHAMMED JAZIL K</h3>
-            <p>Intern</p>
+          <div className="wk-card-profile-info">
+            <span className="wk-card-username">MUHAMMED JAZIL K</span>
+            <span className="wk-card-role">Intern</span>
           </div>
+        </div>
+      </header>
 
+      {/* Main Content Body */}
+      <div className="wk-card-body">
+        {/* Tab Selection Row */}
+        <div className="int-task-tabs-row">
+          <button
+            type="button"
+            className={`int-task-tab-btn ${
+              activeTab === "assigned" ? "int-task-tab-btn--active" : ""
+            }`}
+            onClick={() => setActiveTab("assigned")}
+          >
+            Assigned Tasks
+          </button>
+
+          <button
+            type="button"
+            className={`int-task-tab-btn ${
+              activeTab === "submissions" ? "int-task-tab-btn--active" : ""
+            }`}
+            onClick={() => setActiveTab("submissions")}
+          >
+            My Submissions
+          </button>
         </div>
 
-      </div>
-
-
-      {/* TAB SECTION */}
-      <div className="intrentask-tab-section">
-
-        <button
-          className={`intrentask-tab ${
-            activeTab === "assigned" ? "intrentask-active" : ""
-          }`}
-          onClick={() => setActiveTab("assigned")}
-        >
-          Assigned Tasks
-        </button>
-
-        <button
-          className={`intrentask-tab ${
-            activeTab === "submissions" ? "intrentask-active" : ""
-          }`}
-          onClick={() => setActiveTab("submissions")}
-        >
-          My Submissions
-        </button>
-
-      </div>
-
-
-      {/* CONTENT SECTION */}
-      <div className="intrentask-content">
-
-        <div className="intrentask-empty-container">
-
-          <div className="intrentask-empty-content">
-
-            <FiClipboard className="intrentask-empty-icon" />
+        {/* Task Content Card */}
+        <div className="int-task-card">
+          <div className="int-task-empty-box">
+            <div className="int-task-empty-icon-circle">
+              <LuClipboardList />
+            </div>
 
             {activeTab === "assigned" ? (
-
               <>
-                <h3>No tasks assigned</h3>
-
-                <p>
+                <h3 className="int-task-empty-title">No tasks assigned</h3>
+                <p className="int-task-empty-desc">
                   You currently have no tasks assigned to you.
                 </p>
               </>
-
             ) : (
-
               <>
-                <h3>No submissions yet</h3>
-
-                <p>
-                  You haven't submitted any tasks yet. Go to
-                  "Assigned Tasks" and click "Submit Task" to start.
+                <h3 className="int-task-empty-title">No submissions yet</h3>
+                <p className="int-task-empty-desc">
+                  You haven't submitted any tasks yet. Go to "Assigned Tasks" and
+                  click "Submit Task" to start.
                 </p>
               </>
-
             )}
-
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 };

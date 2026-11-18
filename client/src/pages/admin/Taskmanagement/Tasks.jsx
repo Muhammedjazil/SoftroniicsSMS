@@ -1418,7 +1418,9 @@ const Tasks = () => {
 
                 <div className="tasks-admin-profile">
 
-                    <MdPersonOutline className="tasks-admin-icon" />
+                    <div className="tasks-admin-avatar">
+                        <MdPersonOutline />
+                    </div>
 
                     <div className="tasks-admin-info">
 

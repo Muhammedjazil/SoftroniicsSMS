@@ -6,9 +6,9 @@
 .Rolemanagement {
     width: 100%;
     min-height: 100vh;
-    padding: 28px;
-    background: #ffffff;
-    font-family: Arial, sans-serif;
+    padding: 24px 32px 32px 32px;
+    background: #f8f9fa;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     box-sizing: border-box;
 }
 
@@ -20,24 +20,25 @@
 .Rolemanagement-role {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
 }
 
 .Rolemanagement-name h2 {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
-    margin: 0 0 8px;
-    color: #171717;
+    margin: 0 0 4px;
+    color: #1f2937;
+    letter-spacing: -0.02em;
 }
 
 .Rolemanagement-name p {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     font-size: 13px;
-    color: #999999;
+    color: #6b7280;
     margin: 0;
 }
 
@@ -50,35 +51,44 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 16px;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
+    padding: 8px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
     background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    min-width: 155px;
+    height: 54px;
+    box-sizing: border-box;
 }
 
 .Rolemanagement-profile-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 35px;
-    height: 35px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: #f0f1f2;
-    font-size: 20px;
-    color: #555555;
+    background: #e5e7eb;
+    font-size: 18px;
+    color: #6b7280;
+    flex-shrink: 0;
 }
 
 .Rolemanagement-profiledetails h5 {
-    margin: 0 0 4px;
+    margin: 0;
     font-size: 14px;
     font-weight: 600;
-    color: #333333;
+    color: #111827;
+    line-height: 1.2;
+    text-transform: capitalize;
 }
 
 .Rolemanagement-profiledetails p {
-    margin: 0;
+    margin: 2px 0 0 0;
     font-size: 12px;
-    color: #888888;
+    color: #6b7280;
+    line-height: 1.2;
+    text-transform: capitalize;
 }
 
 
@@ -91,10 +101,10 @@
     min-height: 650px;
     padding: 24px 28px;
     box-sizing: border-box;
-    border: 1px solid #eeeeee;
-    border-radius: 12px;
+    border: 1px solid #eef0f2;
+    border-radius: 14px;
     background: #ffffff;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 
@@ -113,32 +123,41 @@
 .Rolemanagement-hero1 {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 10px;
 }
 
 .Rolemanagement-hero1 button {
     min-width: 100px;
     height: 40px;
-    padding: 0 18px;
+    padding: 0 20px;
     border: 1px solid #e5e5e5;
-    border-radius: 6px;
+    border-radius: 8px;
     background: #ffffff;
-    color: #333333;
+    color: #374151;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: all 0.15s ease;
 }
 
 .Rolemanagement-hero1 button.active {
     background: #ed8019;
     border-color: #ed8019;
     color: #ffffff;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ed8019;
+}
+
+.Rolemanagement-hero1 button.active:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.94);
 }
 
 .Rolemanagement-hero1 button:hover:not(.active) {
-    background: #fff7eb;
-    border-color: #ed8019;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 
@@ -215,20 +234,21 @@
 /* EXPORT BUTTON */
 
 .Rolemanagement-export {
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
-    gap: 9px;
+    gap: 8px;
     width: 100%;
-    height: 42px;
-    padding: 0 12px;
-    border: 1px solid #e3e5e8;
-    border-radius: 6px;
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
     background: #ffffff;
-    color: #555555;
-    font-size: 13px;
+    color: #374151;
+    font-size: 13.5px;
+    font-weight: 600;
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: all 0.15s ease;
 }
 
 .Rolemanagement-export svg {
@@ -236,8 +256,11 @@
 }
 
 .Rolemanagement-export:hover {
-    background: #fff7eb;
-    border-color: #ed8019;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 

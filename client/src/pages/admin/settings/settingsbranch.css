@@ -6,9 +6,9 @@
 .Branch {
     width: 100%;
     min-height: 100vh;
-    padding: 20px 22px;
-    background: #ffffff;
-    font-family: Arial, sans-serif;
+    padding: 24px 32px 32px 32px;
+    background: #f8f9fa;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     box-sizing: border-box;
 }
 
@@ -74,10 +74,11 @@
 .branchherosection {
     width: 100%;
     min-height: 570px;
-    padding: 20px 25px 14px;
-    border: 1px solid #e5e5e5;
-    border-radius: 15px;
-    box-shadow: 0 0 5px #ddd;
+    padding: 24px 28px;
+    border: 1px solid #eef0f2;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    background: #ffffff;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
