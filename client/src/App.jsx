@@ -77,7 +77,7 @@ import Internmonthlycard from "./pages/intern/Internmonthlycard";
 import InternWeeklySchedule from "./pages/intern/InternWeeklySchedule";
 import WeeklyCard from "./pages/intern/WeeklyCard";
 import Dashboard from "./pages/admin/Dashboard/Dashboard";
-
+import Categories from "./pages/admin/CourseManagement/Categories";
 // =====================================
 // AUTH HELPERS & ROUTE GUARDS
 // =====================================
@@ -162,6 +162,40 @@ function App() {
                 ================================= */}
 
         <Route
+          path="/courses/:id"
+          element={
+            <Adminlayout>
+              <ViewCourse />
+            </Adminlayout>
+          }
+        />
+
+        <Route
+          path="/courses/:id/edit"
+          element={
+            <Adminlayout>
+              <EditCourse />
+            </Adminlayout>
+          }
+        />
+        <Route
+          path="/courses"
+          element={
+            <Adminlayout>
+              <CourseManagement />
+            </Adminlayout>
+          }
+        />
+
+        <Route
+          path="/categories"
+          element={
+            <Adminlayout>
+              <Categories />
+            </Adminlayout>
+          }
+        />
+        <Route
           path="/dashboard"
           element={
             <ProtectedRoute allowedTypes={["admin", "staff"]}>
@@ -171,7 +205,24 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* COURSE MANAGEMENT */}
+        <Route
+          path="/categories/view/:id"
+          element={
+            <Adminlayout>
+              <CategoryView />
+            </Adminlayout>
+          }
+        />
 
+        <Route
+          path="/categories/edit/:id"
+          element={
+            <Adminlayout>
+              <CategoryEdit />
+            </Adminlayout>
+          }
+        />
         {/* ADMINISTRATION */}
 
         <Route
