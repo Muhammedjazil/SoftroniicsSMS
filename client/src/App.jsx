@@ -93,6 +93,40 @@ function App() {
           }
         />
         <Route
+          path="/courses/:id"
+          element={
+            <Adminlayout>
+              <ViewCourse />
+            </Adminlayout>
+          }
+        />
+
+        <Route
+          path="/courses/:id/edit"
+          element={
+            <Adminlayout>
+              <EditCourse />
+            </Adminlayout>
+          }
+        />
+        <Route
+          path="/courses"
+          element={
+            <Adminlayout>
+              <CourseManagement />
+            </Adminlayout>
+          }
+        />
+
+        <Route
+          path="/categories"
+          element={
+            <Adminlayout>
+              <Categories />
+            </Adminlayout>
+          }
+        />
+        <Route
           path="/dashboard"
           element={
             <Adminlayout>
@@ -100,7 +134,24 @@ function App() {
             </Adminlayout>
           }
         />
+        {/* COURSE MANAGEMENT */}
+        <Route
+          path="/categories/view/:id"
+          element={
+            <Adminlayout>
+              <CategoryView />
+            </Adminlayout>
+          }
+        />
 
+        <Route
+          path="/categories/edit/:id"
+          element={
+            <Adminlayout>
+              <CategoryEdit />
+            </Adminlayout>
+          }
+        />
         {/* ADMINISTRATION */}
 
         <Route
