@@ -1,33 +1,33 @@
-
 const jwt = require("jsonwebtoken");
 
 const checkAuth = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    // Check whether token exists
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
-        message: "No Token Provided"
+        message: "No Token Provided",
       });
     }
 
-    // Remove Bearer prefix
-    const token = authHeader.startsWith("Bearer ")
-      ? authHeader.split(" ")[1]
-      : authHeader;
+    const token = authHeader.split(" ")[1];
 
-    // Verify token
+    if (!token) {
+      return res.status(401).json({
+        message: "Invalid Token",
+      });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Store user ID in request
     req.userId = decoded._id;
 
     next();
-
   } catch (error) {
+    console.log("Authentication Error:", error.message);
+
     return res.status(401).json({
-      message: "Invalid or Expired Token"
+      message: "Invalid or Expired Token",
     });
   }
 };

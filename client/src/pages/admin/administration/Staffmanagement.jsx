@@ -160,14 +160,14 @@ const sampleStaff = [
 // =====================================
 
 export const Staffmanagement = () => {
-  const { takeroletitle,takebranch,taketiming,createstaff } = AdminService();
+  const { takeroletitle,takebranch,taketiming,createstaff,getallstaff,updatestaff,staffremove} = AdminService();
 
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [branchFilter, setBranchFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const [allData, setAlldata] = useState(sampleStaff);
+  const [allData, setAlldata] = useState([]);
   const [roles, setRoles] = useState([]);
 
   const [formData, setFormData] = useState({ ...initialForm });
@@ -179,19 +179,25 @@ export const Staffmanagement = () => {
 
   const[branchOptions,setBranchOptions]=useState([])
   const[timingOptions,setTimingOptions]=useState([])
+
+  // const[allstaff,setStaff]=useState([])
   // =====================================
   // FETCH ROLES
   // =====================================
 
-  const fetchrole = async () => {
-    try {
-      const response = await takeroletitle();
-      setRoles(Array.isArray(response) ? response : []);
-      console.log("Fetched Roles:", response);
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
+const fetchrole = async () => {
+  try {
+    const response = await takeroletitle();
+
+    console.log("Role API Response:", response);
+
+    setRoles(Array.isArray(response) ? response : []);
+
+  } catch (error) {
+    console.error("Error fetching roles:", error);
+    setRoles([]);
+  }
+};
  const fetchbranch = async () => {
   try {
     const response = await takebranch();
@@ -218,10 +224,68 @@ export const Staffmanagement = () => {
   }
 };
 
+const fetchallstaff = async () => {
+  try {
+    const response = await getallstaff();
+
+    const formattedStaff = response.map((staff) => ({
+      ...staff,
+
+      id: staff._id,
+
+      fullname: staff.fullName,
+      dateofbirth: staff.dateOfBirth?.slice(0, 10) || "",
+      phone: staff.staffPhoneNumber,
+      whatsapp: staff.staffWhatsAppNumber,
+      address: staff.staffPermanentAddress,
+
+      officialemail: staff.officialEmail,
+
+      // Keep IDs for dropdowns and editing
+      role: staff.role?._id || "",
+      typeemply: staff.role?.role || "",
+
+      branch: staff.branch?._id || "",
+      branchName: staff.branch?.branchName || "",
+
+      additionalBranches:
+        staff.multipleBranches?.map((item) => item._id) || [],
+
+      additionalBranchNames:
+        staff.multipleBranches?.map((item) => item.branchName) || [],
+
+      allowAdditionalBranches: staff.isMultipleBranch,
+
+      experience: staff.yearsOfExperience,
+      joindate: staff.dateOfJoining?.slice(0, 10) || "",
+      status: staff.employmentStatus,
+      resingnation: staff.resignationDate?.slice(0, 10) || "",
+
+      remark: staff.remarks,
+
+      mentorRole: staff.isMentor,
+
+      mentorTimings:
+        staff.time?.map((item) => item._id) || [],
+
+      mentorTimingNames:
+        staff.time?.map((item) => item.timeSlot) || []
+    }));
+
+    setAlldata(formattedStaff);
+
+    console.log("Formatted Staff:", formattedStaff);
+
+  } catch (error) {
+    console.error("Staff Fetch Error:", error);
+  }
+};
+
   useEffect(() => {
     fetchrole();
     fetchbranch();
     fetchtiming();
+    fetchallstaff();
   }, []);
 
   // =====================================
@@ -229,16 +293,16 @@ export const Staffmanagement = () => {
   // =====================================
 
   const filteredStaff = allData.filter((value) => {
-    const matchesSearch = [
-      value.fullname,
-      value.email,
-      value.typeemply,
-      value.branch,
-      value.phone
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(search.toLowerCase());
+   const matchesSearch = [
+  value.fullname,
+  value.email,
+  value.typeemply,
+  value.branchName,
+  value.phone
+]
+  .join(" ")
+  .toLowerCase()
+  .includes(search.toLowerCase());
 
     const matchesDept =
       departmentFilter === "all" ||
@@ -263,6 +327,8 @@ export const Staffmanagement = () => {
     const foundRole = roles.find((role) => role._id === roleId);
     return foundRole?.role || roleId || "-";
   };
+
+  
 
   // =====================================
   // EXPORT CSV
@@ -523,34 +589,34 @@ const handleCreateStaff = async (e) => {
     }
 
     // API call
-    const response = await createstaff(data);
+   // API call - CREATE OR UPDATE
 
-    console.log("Created Staff:", response);
+let response;
 
-    alert("Staff created successfully!");
+if (editId !== null) {
+  // If editId has a value, UPDATE existing staff
+  response = await updatestaff(editId, data);
 
-    // Add returned staff to the list
-    const savedStaff = response.data;
+  alert("Staff updated successfully!");
+  await getallstaff()
+} else {
+  // If editId is null, CREATE new staff
+  response = await createstaff(data);
 
-    setAlldata((prev) => [
-      ...prev,
-      {
-        ...savedStaff,
-        id: savedStaff._id,
-        fullname: savedStaff.fullName,
-        phone: savedStaff.staffPhoneNumber,
-        officialemail: savedStaff.officialEmail,
-        typeemply: savedStaff.role?.role || "",
-        branch: savedStaff.branch?.branchName || "",
-      },
-    ]);
+  alert("Staff created successfully!");
+}
 
-    resetForm();
-    setEditId(null);
-    setView(null);
-    setActiveTab("stafflist");
+console.log("Staff Response:", response);
 
-  } catch (error) {
+// Refresh staff list
+await fetchallstaff();
+
+resetForm();
+setEditId(null);
+setView(null);
+setActiveTab("stafflist");
+}
+ catch (error) {
     console.error(
       "Create Staff Error:",
       error.response?.data || error
@@ -577,38 +643,43 @@ const handleCreateStaff = async (e) => {
   // EDIT STAFF
   // =====================================
 
-  const staffedit = () => {
-    if (!view) return;
+ const staffedit = () => {
+  if (!view) return;
 
-    setFormData({
-      ...initialForm,
-      ...view,
-      role: view.role || "",
-      additionalBranches: view.additionalBranches || [],
-      allowAdditionalBranches: view.allowAdditionalBranches || false,
-      mentorTimings: view.mentorTimings || []
-    });
+  setFormData({
+    ...initialForm,
+    ...view,
 
-    setSelectedTiming("");
-    setEditId(view.id);
-    setActiveTab("newstaff");
-  };
+    photo: null,
+    resume: null,
+
+    role: view.role || "",
+    additionalBranches: view.additionalBranches || [],
+    allowAdditionalBranches: view.allowAdditionalBranches || false,
+    mentorTimings: view.mentorTimings || [],
+
+    password: "",
+    conformpassword: ""
+  });
+
+  setSelectedTiming("");
+  setEditId(view.id);
+  setActiveTab("newstaff");
+};
 
   // =====================================
   // DELETE STAFF
   // =====================================
 
-  const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this staff?"
-    );
-
-    if (!confirmDelete) return;
-
+  const handleDelete = async(id) => {
+    
+    const response=await staffremove(id)
     setAlldata((prev) => prev.filter((item) => item.id !== id));
     setView(null);
   };
 
+
+   
   // =====================================
   // RENDER
   // =====================================
@@ -788,10 +859,9 @@ const handleCreateStaff = async (e) => {
                       <td>
                         {value.typeemply || getRoleName(value.role)}
                       </td>
-
-                      <td className="staffbranchname">
-                        {value.branch}
-                      </td>
+<td className="staffbranchname">
+  {value.branchName || "-"}
+</td>
 
                       <td>
                         {value.mentorRole && (
@@ -1038,44 +1108,46 @@ const handleCreateStaff = async (e) => {
                 <h3>Professional Details</h3>
 
                 <div className="staffprofessionalgrid">
+{/* DEPARTMENT */}
 
-                  <div className="staffprofessionalfield">
-                    <label>Department <span>*</span></label>
+<div className="staffprofessionalfield">
+  <label>
+    Department <span>*</span>
+  </label>
 
-                    <select
-                      required
-                      name="department"
-                      value={formData.department}
-                      onChange={handlecreate}
-                    >
-                      <option value="">Choose Department</option>
-                      <option value="uiux">UI/UX</option>
-                      <option value="mern">MERN</option>
-                      <option value="python">Python</option>
-                      <option value="datascience">Data Science</option>
-                    </select>
-                  </div>
-
+  <select
+    name="department"
+    value={formData.department}
+    onChange={handlecreate}
+    required
+  >
+    <option value="">Choose Department</option>
+    <option value="uiux">UI/UX</option>
+    <option value="mern">MERN</option>
+    <option value="python">Python</option>
+    <option value="datascience">Data Science</option>
+  </select>
+</div>
                   {/* ROLE */}
 
-                  <div className="staffprofessionalfield">
-                    <label>Type of Employee <span>*</span></label>
+             <div className="staffprofessionalfield">
+  <label>Type of Employee <span>*</span></label>
 
-                    <select
-                      required
-                      name="role"
-                      value={formData.role}
-                      onChange={handlecreate}
-                    >
-                      <option value="">Choose Role</option>
+  <select
+    required
+    name="role"
+    value={formData.role}
+    onChange={handlecreate}
+  >
+    <option value="">Choose Role</option>
 
-                      {roles.map((value) => (
-                        <option key={value._id} value={value._id}>
-                          {value.role}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+    {roles.map((value) => (
+      <option key={value._id} value={value._id}>
+        {value.role}
+      </option>
+    ))}
+  </select>
+</div>
 
                   {/* BRANCH */}
 
@@ -1487,9 +1559,7 @@ const handleCreateStaff = async (e) => {
                 <div className="staffper3">
                   <img
                     src={
-                      view.photo instanceof File
-                        ? URL.createObjectURL(view.photo)
-                        : view.photo || react
+                     `http://localhost:7000/uploads/${view.photo}`
                     }
                     alt="Staff"
                   />
@@ -1518,7 +1588,7 @@ const handleCreateStaff = async (e) => {
 
                 <div className="staffviewfield">
                   <h4>Branch</h4>
-                  <p>{view.branch || "-"}</p>
+                  <p>{view.branchName  || "-"}</p>
                 </div>
 
                 <div className="staffviewfield">

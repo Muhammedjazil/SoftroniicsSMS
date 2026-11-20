@@ -221,7 +221,19 @@ const AdminService = () => {
   return response.data;
 };
 
-  
+const getallstaff=async()=>{
+  let response=await axiosPrivate.get("/staffmanagement/allstaff")
+  return response.data;
+}
+  const updatestaff=async(id,data)=>{
+    let response=await axiosPrivate.put(`staffmanagement/${id}`,data)
+    return response.data
+  }
+
+ const staffremove=async(id)=>{
+  let response=await axiosPrivate.delete(`/staffmanagement/${id}`)
+  return response.data;
+ }
 
   return {
     newrolecreate,
@@ -261,7 +273,10 @@ const AdminService = () => {
     createtopic,
     updatetopic,
     removetopic,
-    createstaff
+    createstaff,
+    getallstaff,
+    updatestaff,
+    staffremove
   };
 };
 
