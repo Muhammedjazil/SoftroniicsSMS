@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../../Sidebar";
-import "./CourseManagement.css";
+
+import "./Course.css";
 import { Eye, Pencil, Trash2, UserRound, FileDown,Upload,Search } from "lucide-react";
 
 const CourseManagement = () => {
@@ -153,7 +153,7 @@ const CourseManagement = () => {
 
   return (
     <div className="course-management-layout">
-      <Sidebar />
+     
 
       <main className="course-management-main">
         {/* TOP HEADER */}

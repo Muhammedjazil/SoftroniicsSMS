@@ -71,7 +71,7 @@ import Internmonthlycard from "./pages/intern/Internmonthlycard";
 import InternWeeklySchedule from "./pages/intern/InternWeeklySchedule";
 import WeeklyCard from "./pages/intern/WeeklyCard";
 import Dashboard from "./pages/admin/Dashboard/Dashboard";
-
+import Categories from "./pages/admin/CourseManagement/Categories";
 // =====================================
 // APP COMPONENT
 // =====================================
