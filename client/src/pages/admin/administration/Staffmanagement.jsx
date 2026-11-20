@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 
 import {
@@ -15,24 +14,6 @@ import {
 import react from "../../../assets/react.svg";
 import "./staffmanagement.css";
 import AdminService from "../../../services/admin-api-services/AdminService";
-
-// =====================================
-// OPTIONS
-// =====================================
-
-// const timingOptions = [
-//   "09:30 AM - 12:00 PM",
-//   "11:00 AM - 01:30 PM",
-//   "02:00 PM - 05:00 PM",
-//   "08:30 AM - 11:00 AM"
-// ];
-
-// const branchOptions = [
-//   "calicut",
-//   "perinthalmanna",
-//   "palakkad",
-//   "kochi"
-// ];
 
 const initialForm = {
   fullname: "",
@@ -160,7 +141,7 @@ const sampleStaff = [
 // =====================================
 
 export const Staffmanagement = () => {
-  const { takeroletitle,takebranch,taketiming } = AdminService();
+  const { takeroletitle, takebranch, taketiming } = AdminService();
 
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
@@ -177,10 +158,29 @@ export const Staffmanagement = () => {
   const [editId, setEditId] = useState(null);
   const [selectedTiming, setSelectedTiming] = useState("");
 
-  const[branchOptions,setBranchOptions]=useState([])
-  const[timingOptions,setTimingOptions]=useState([])
+  const [branchOptions, setBranchOptions] = useState([]);
+  const [timingOptions, setTimingOptions] = useState([]);
+
   // =====================================
-  // FETCH ROLES
+  // HELPERS TO RESOLVE OBJECTS OR STRINGS
+  // =====================================
+
+  const getBranchName = (branchVal) => {
+    if (!branchVal) return "-";
+    if (typeof branchVal === "object") return branchVal.branchName || branchVal.name || "-";
+    const found = branchOptions.find((b) => b._id === branchVal);
+    return found?.branchName || found?.name || branchVal;
+  };
+
+  const getTimingLabel = (timingVal) => {
+    if (!timingVal) return "-";
+    if (typeof timingVal === "object") return timingVal.timeSlot || "-";
+    const found = timingOptions.find((t) => t._id === timingVal);
+    return found?.timeSlot || timingVal;
+  };
+
+  // =====================================
+  // FETCH ROLES, BRANCHES & TIMINGS
   // =====================================
 
   const fetchrole = async () => {
@@ -192,16 +192,24 @@ export const Staffmanagement = () => {
       console.error("Error fetching roles:", error);
     }
   };
-  const fetchbranch=async()=>{                  //route+controller ezhuthittilla
-    // let response=await axios.get("http://localhost:7000/createbranch")
-    let response=await takebranch();
-    setBranchOptions(response)
-  }
 
-  const fetchtiming=async()=>{
-    let response=await taketiming()
-    setTimingOptions(response)
-  }
+  const fetchbranch = async () => {
+    try {
+      const response = await takebranch();
+      setBranchOptions(Array.isArray(response) ? response : response?.data || []);
+    } catch (error) {
+      console.error("Error fetching branches:", error);
+    }
+  };
+
+  const fetchtiming = async () => {
+    try {
+      const response = await taketiming();
+      setTimingOptions(Array.isArray(response) ? response : response?.data || []);
+    } catch (error) {
+      console.error("Error fetching timings:", error);
+    }
+  };
 
   useEffect(() => {
     fetchrole();
@@ -214,11 +222,13 @@ export const Staffmanagement = () => {
   // =====================================
 
   const filteredStaff = allData.filter((value) => {
+    const branchLabel = getBranchName(value.branch);
+
     const matchesSearch = [
       value.fullname,
       value.email,
       value.typeemply,
-      value.branch,
+      branchLabel,
       value.phone
     ]
       .join(" ")
@@ -231,7 +241,8 @@ export const Staffmanagement = () => {
 
     const matchesBranch =
       branchFilter === "all" ||
-      value.branch?.toLowerCase() === branchFilter.toLowerCase();
+      value.branch === branchFilter ||
+      branchLabel.toLowerCase() === branchFilter.toLowerCase();
 
     const matchesStatus =
       statusFilter === "all" ||
@@ -277,7 +288,7 @@ export const Staffmanagement = () => {
       staff.phone,
       staff.typeemply || getRoleName(staff.role),
       staff.department,
-      staff.branch,
+      getBranchName(staff.branch),
       staff.status
     ]);
 
@@ -434,7 +445,7 @@ export const Staffmanagement = () => {
   // CREATE / UPDATE STAFF
   // =====================================
 
-  const handleCreateStaff =async(e) => {
+  const handleCreateStaff = async (e) => {
     e.preventDefault();
 
     // Password validation
@@ -473,7 +484,6 @@ export const Staffmanagement = () => {
       };
 
       setAlldata((prev) => [...prev, newStaff]);
-      // let response=await createnewstaff(newStaff)
       alert("Staff created successfully!");
     }
 
@@ -633,11 +643,15 @@ export const Staffmanagement = () => {
                   onChange={(e) => setBranchFilter(e.target.value)}
                 >
                   <option value="all">All Branches</option>
-                  {branchOptions.map((branch) => (
-                    <option key={branch} value={branch}>
-                      {branch}
-                    </option>
-                  ))}
+                  {branchOptions.map((branch) => {
+                    const bId = typeof branch === "object" ? branch._id : branch;
+                    const bName = typeof branch === "object" ? branch.branchName : branch;
+                    return (
+                      <option key={bId} value={bId}>
+                        {bName}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -708,7 +722,7 @@ export const Staffmanagement = () => {
                       </td>
 
                       <td className="staffbranchname">
-                        {value.branch}
+                        {getBranchName(value.branch)}
                       </td>
 
                       <td>
@@ -1008,11 +1022,15 @@ export const Staffmanagement = () => {
                     >
                       <option value="">Choose Branch</option>
 
-                      {branchOptions.map((branch) => (
-                        <option key={branch} value={branch}>
-                          {branch}
-                        </option>
-                      ))}
+                      {branchOptions.map((branch) => {
+                        const bId = typeof branch === "object" ? branch._id : branch;
+                        const bName = typeof branch === "object" ? branch.branchName : branch;
+                        return (
+                          <option key={bId} value={bId}>
+                            {bName}
+                          </option>
+                        );
+                      })}
                     </select>
 
                     <div className="staffcheckbox">
@@ -1046,24 +1064,29 @@ export const Staffmanagement = () => {
 
                       <div className="staff-additional-options">
                         {branchOptions
-                          .filter((branch) => branch !== formData.branch)
-                          .map((branch) => (
-                            <label
-                              key={branch}
-                              className="staff-additional-option"
-                            >
-                              <input
-                                type="checkbox"
-                                value={branch}
-                                checked={formData.additionalBranches.includes(
-                                  branch
-                                )}
-                                onChange={handleAdditionalBranchChange}
-                              />
+                          .filter((branch) => {
+                            const bId = typeof branch === "object" ? branch._id : branch;
+                            return bId !== formData.branch;
+                          })
+                          .map((branch) => {
+                            const bId = typeof branch === "object" ? branch._id : branch;
+                            const bName = typeof branch === "object" ? branch.branchName : branch;
+                            return (
+                              <label
+                                key={bId}
+                                className="staff-additional-option"
+                              >
+                                <input
+                                  type="checkbox"
+                                  value={bId}
+                                  checked={formData.additionalBranches.includes(bId)}
+                                  onChange={handleAdditionalBranchChange}
+                                />
 
-                              <span>{branch}</span>
-                            </label>
-                          ))}
+                                <span>{bName}</span>
+                              </label>
+                            );
+                          })}
                       </div>
                     </div>
                   )}
@@ -1200,15 +1223,19 @@ export const Staffmanagement = () => {
                             -- Select a Timing --
                           </option>
 
-                          {timingOptions.map((timing) => (
-                            <option
-                              key={timing}
-                              value={timing}
-                              disabled={formData.mentorTimings.includes(timing)}
-                            >
-                              {timing}
-                            </option>
-                          ))}
+                          {timingOptions.map((timing) => {
+                            const tId = typeof timing === "object" ? timing._id : timing;
+                            const tLabel = typeof timing === "object" ? timing.timeSlot : timing;
+                            return (
+                              <option
+                                key={tId}
+                                value={tId}
+                                disabled={formData.mentorTimings.includes(tId)}
+                              >
+                                {tLabel}
+                              </option>
+                            );
+                          })}
                         </select>
                       </div>
 
@@ -1217,24 +1244,27 @@ export const Staffmanagement = () => {
 
                         <div className="staff-timing-chips">
                           {formData.mentorTimings.length > 0 ? (
-                            formData.mentorTimings.map((timing) => (
-                              <div
-                                className="staff-timing-chip"
-                                key={timing}
-                              >
-                                <FiClock />
-
-                                <span>{timing}</span>
-
-                                <button
-                                  type="button"
-                                  onClick={() => removeTiming(timing)}
-                                  aria-label={`Remove ${timing}`}
+                            formData.mentorTimings.map((timing) => {
+                              const tKey = typeof timing === "object" ? timing._id : timing;
+                              return (
+                                <div
+                                  className="staff-timing-chip"
+                                  key={tKey}
                                 >
-                                  <FiX />
-                                </button>
-                              </div>
-                            ))
+                                  <FiClock />
+
+                                  <span>{getTimingLabel(timing)}</span>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => removeTiming(timing)}
+                                    aria-label={`Remove ${getTimingLabel(timing)}`}
+                                  >
+                                    <FiX />
+                                  </button>
+                                </div>
+                              );
+                            })
                           ) : (
                             <p className="staff-no-timings">
                               No timings selected
@@ -1433,7 +1463,7 @@ export const Staffmanagement = () => {
 
                 <div className="staffviewfield">
                   <h4>Branch</h4>
-                  <p>{view.branch || "-"}</p>
+                  <p>{getBranchName(view.branch)}</p>
                 </div>
 
                 <div className="staffviewfield">
@@ -1482,14 +1512,17 @@ export const Staffmanagement = () => {
 
                   <div className="staff-additional-options">
                     {(view.additionalBranches || []).length > 0 ? (
-                      view.additionalBranches.map((branch) => (
-                        <div
-                          className="staff-additional-option"
-                          key={branch}
-                        >
-                          <span>{branch}</span>
-                        </div>
-                      ))
+                      view.additionalBranches.map((branch) => {
+                        const bKey = typeof branch === "object" ? branch._id : branch;
+                        return (
+                          <div
+                            className="staff-additional-option"
+                            key={bKey}
+                          >
+                            <span>{getBranchName(branch)}</span>
+                          </div>
+                        );
+                      })
                     ) : (
                       <p>No additional branches selected</p>
                     )}
@@ -1511,15 +1544,18 @@ export const Staffmanagement = () => {
 
                   <div className="staff-timing-chips">
                     {(view.mentorTimings || []).length > 0 ? (
-                      view.mentorTimings.map((timing) => (
-                        <div
-                          className="staff-timing-chip"
-                          key={timing}
-                        >
-                          <FiClock />
-                          <span>{timing}</span>
-                        </div>
-                      ))
+                      view.mentorTimings.map((timing) => {
+                        const tKey = typeof timing === "object" ? timing._id : timing;
+                        return (
+                          <div
+                            className="staff-timing-chip"
+                            key={tKey}
+                          >
+                            <FiClock />
+                            <span>{getTimingLabel(timing)}</span>
+                          </div>
+                        );
+                      })
                     ) : (
                       <p>No timings selected</p>
                     )}

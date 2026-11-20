@@ -1,6 +1,6 @@
-const WeeklySchedule = require("../models/weeklyScheduleModel"); // Adjust path to your WeeklySchedule model
+const WeeklySchedule = require("../Models/weeklyScheduleModel"); // Adjust path to your WeeklySchedule model
 const { Staff } = require("../Models/staffModel");
-const Batch = require("../models/batchModel");
+const Batch = require("../Models/batchModel");
 const Day = require("../models/dayModel"); // Adjust path to your Day model
 const DayCombination = require("../models/dayCombinationModel"); // Adjust path to your DayCombination model
 const Module = require("../Models/moduleModel"); // Adjust path to your Module model

@@ -1,54 +1,40 @@
-  //
-
 import { useEffect } from "react";
-// import Swal from "sweetalert2";
-// import useAuth from "./useAuth";
 import { axiosPrivate } from "../Axios";
 
-
 const useAxiosPrivate = () => {
-    // const { auth, setAuth } = useAuth();
+  useEffect(() => {
+    const requestIntercept = axiosPrivate.interceptors.request.use(
+      (config) => {
+        if (config.data instanceof FormData) {
+          config.headers["Content-Type"] = "multipart/form-data";
+        } else {
+          config.headers["Content-Type"] = "application/json";
+        }
 
+        if (!config.headers["Authorization"]) {
+          const token = localStorage.getItem("SMStoken");
+          if (token) {
+            config.headers["Authorization"] = token;
+          }
+        }
 
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
 
-    useEffect(() => {
-        axiosPrivate.interceptors.request.use(            //request to backend
-            config => {
-                if (config.data instanceof FormData) {
-                    config.headers["Content-Type"] = "multipart/form-data";
-                  } else {
-                    config.headers["Content-Type"] = "application/json";
-                  }
+    const responseIntercept = axiosPrivate.interceptors.response.use(
+      (response) => response,
+      async (error) => Promise.reject(error)
+    );
 
-                if (!config.headers['Authorization']) {
-                    // config.headers['Authorization'] = `Token ${auth?.accessToken}`;
-                    // config.headers['Authorization'] = auth?.accessToken;
-                    config.headers['Authorization'] = localStorage.getItem("SMStoken");
-                }
+    return () => {
+      axiosPrivate.interceptors.request.eject(requestIntercept);
+      axiosPrivate.interceptors.response.eject(responseIntercept);
+    };
+  }, []);
 
-
-
-                return config;
-            },
-            error => {
-                return Promise.reject(error)
-            }
-        );
-
-        axiosPrivate.interceptors.response.use(    //responsefrom backend  -->evadannu AdminServiceleek avadennu frontend
-            response => {
-                return response
-            },
-           async error => {
- 
-
-                return Promise.reject(error)
-            }
-        );
-    // }, [auth])
-    }, [])
-
-    return axiosPrivate
-}
+  return axiosPrivate;
+};
 
 export default useAxiosPrivate;
