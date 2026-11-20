@@ -1,32 +1,75 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './InternWeeklySchedule.css';
 import { LuUser, LuCalendar, LuDownload, LuBriefcase } from 'react-icons/lu';
 import { FiCalendar } from 'react-icons/fi';
+import UserService from "../../services/user-api-services/UserService"
 
 const InternWeeklySchedule = () => {
-  const [selectedDate, setSelectedDate] = useState('2026-11-15');
+  const { takeinternweeklyschedule } = UserService();
 
-  const internProfile = {
-    name: 'SAYANTH',
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+
+  const [internProfile, setInternProfile] = useState({
+    name: 'INTERN',
     role: 'Intern',
     badgeRole: 'INTERN',
-    email: 'sayanthsajeev721@gmail.com',
+    email: '',
+  });
+  const [myBatches, setMyBatches] = useState([]);
+  const [weeklySlots, setWeeklySlots] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Resolve logged-in intern identifier from localStorage if available
+  const getStoredUserQuery = () => {
+    try {
+      const rawUser =
+        localStorage.getItem('user') ||
+        localStorage.getItem('intern') ||
+        localStorage.getItem('auth');
+      if (!rawUser) return {};
+      const parsed = JSON.parse(rawUser);
+      const u = parsed?.user || parsed;
+      return {
+        internId: u?._id || u?.id || '',
+        email: u?.email || u?.officialEmail || '',
+      };
+    } catch {
+      return {};
+    }
   };
 
-  const myBatches = [
-    {
-      id: 'b1',
-      name: 'MERN_batch_02',
-      branch: 'calicut',
-    },
-  ];
+  const fetchInternSchedule = useCallback(async () => {
+    setLoading(true);
+    try {
+      const userQuery = getStoredUserQuery();
+      const data = await takeinternweeklyschedule({
+        ...userQuery,
+        startDate: selectedDate,
+      });
 
-  // Sample schedule entries (empty by default to match the screenshot state; populates dynamically if slots exist)
-  const [weeklySlots] = useState([]);
+      if (data?.intern) {
+        setInternProfile(data.intern);
+      }
+      setMyBatches(Array.isArray(data?.myBatches) ? data.myBatches : []);
+      setWeeklySlots(Array.isArray(data?.weeklySlots) ? data.weeklySlots : []);
+    } catch (error) {
+      console.error('Failed to load intern weekly schedule:', error);
+      setWeeklySlots([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    fetchInternSchedule();
+  }, [fetchInternSchedule]);
 
   // Calculates "To: DD/MM/YYYY" (6 days after selected start date)
   const endDateFormatted = useMemo(() => {
-    if (!selectedDate) return '21/11/2026';
+    if (!selectedDate) return '';
     const [year, month, day] = selectedDate.split('-').map(Number);
     const dt = new Date(year, month - 1, day);
     dt.setDate(dt.getDate() + 6);
@@ -40,10 +83,34 @@ const InternWeeklySchedule = () => {
     const csvRows = [
       ['Batch', 'Branch', 'Day', 'Time', 'Subject', 'Mentor'],
       ...(weeklySlots.length > 0
-        ? weeklySlots.map((s) => [s.batch, s.branch, s.day, s.time, s.subject, s.mentor])
-        : [[myBatches[0]?.name || '', myBatches[0]?.branch || '', '-', '-', 'No classes scheduled', '-']]),
+        ? weeklySlots.map((s) => [
+            s.batch,
+            s.branch,
+            s.day,
+            s.time,
+            s.subject,
+            s.mentor,
+          ])
+        : [
+            [
+              myBatches[0]?.name || '',
+              myBatches[0]?.branch || '',
+              '-',
+              '-',
+              'No classes scheduled',
+              '-',
+            ],
+          ]),
     ];
-    const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map((e) => e.join(',')).join('\n');
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      csvRows
+        .map((row) =>
+          row.map((cell) => `"${String(cell || '').replace(/"/g, '""')}"`).join(',')
+        )
+        .join('\n');
+
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
@@ -129,7 +196,7 @@ const InternWeeklySchedule = () => {
               <div className="int-sched-intern-meta">
                 <span className="int-sched-role-badge">{internProfile.badgeRole}</span>
                 <h3 className="int-sched-intern-name">{internProfile.name}</h3>
-                <p className="int-sched-intern-email">{internProfile.email}</p>
+                <p className="int-sched-intern-email">{internProfile.email || '—'}</p>
               </div>
             </div>
 
@@ -159,14 +226,18 @@ const InternWeeklySchedule = () => {
               <h3 className="int-sched-card-title">My Batches ({myBatches.length})</h3>
             </div>
 
-            <div className="int-sched-batches-list">
-              {myBatches.map((batch) => (
-                <div key={batch.id} className="int-sched-batch-item">
-                  <span className="int-sched-batch-name">{batch.name}</span>
-                  <span className="int-sched-batch-branch">{batch.branch}</span>
-                </div>
-              ))}
-            </div>
+            {myBatches.length === 0 ? (
+              <p className="int-sched-empty-text">No batches assigned yet.</p>
+            ) : (
+              <div className="int-sched-batches-list">
+                {myBatches.map((batch) => (
+                  <div key={batch.id} className="int-sched-batch-item">
+                    <span className="int-sched-batch-name">{batch.name}</span>
+                    <span className="int-sched-batch-branch">{batch.branch}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -180,7 +251,11 @@ const InternWeeklySchedule = () => {
               <h3 className="int-sched-card-title">Weekly Schedule Timeline</h3>
             </div>
 
-            {weeklySlots.length === 0 ? (
+            {loading ? (
+              <div className="int-sched-empty-state">
+                <p className="int-sched-empty-text">Loading weekly schedule...</p>
+              </div>
+            ) : weeklySlots.length === 0 ? (
               <div className="int-sched-empty-state">
                 <p className="int-sched-empty-text">
                   No classes scheduled for your batches this week.
