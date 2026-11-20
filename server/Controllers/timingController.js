@@ -1,4 +1,4 @@
-const Timing = require("../models/timingModel");
+const Timing = require("../Models/timingModel");
 
 // @desc    Create a new timing slot
 // @route   POST /timemanagement
