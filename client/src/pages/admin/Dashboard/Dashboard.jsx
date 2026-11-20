@@ -1,0 +1,86 @@
+
+import React from "react";
+import { UserRound } from "lucide-react";
+import Sidebar from "../Sidebar";
+import "./Dashboard.css";
+
+const Dashboard = () => {
+
+  const reminders = [
+    {
+      category: "BIRTHDAY",
+      title: "Today is Priyash's Birthday",
+      color: "#096DCA"
+    },
+    {
+      category: "HOLIDAY",
+      title: "Indusua Closed Today - Onam Holiday",
+      color: "#CD0000"
+    },
+    {
+      category: "MEETING",
+      title: "Staff Meeting today at 10 AM",
+      color: "#096DCA"
+    },
+    {
+      category: "ANNIVERSARY",
+      title: "1 Year Milestone: Priyash at Softronics.",
+      color: "#CE840C"
+    }
+  ];
+
+  return (
+    <div className="dashboard-layout">
+
+      {/* Reusable Sidebar */}
+      <Sidebar />
+
+      {/* Main Content */}
+      <main className="dashboard-main">
+
+        <header className="dashboard-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Dashboard</p>
+          </div>
+
+          <div className="admin-profile">
+            <UserRound size={17} />
+
+            <div>
+              <h4>Priyesh</h4>
+              <p>Super Admin</p>
+            </div>
+          </div>
+        </header>
+
+        <section className="dashboard-content">
+
+          <div className="reminder-section">
+            <h3>Your Reminders For Today</h3>
+
+            <div className="reminder-grid">
+
+              {reminders.map((reminder, index) => (
+                <div className="reminder-card" key={index}>
+
+                  <span style={{ color: reminder.color }}>
+                    {reminder.category}
+                  </span>
+
+                  <p>{reminder.title}</p>
+
+                </div>
+              ))}
+
+            </div>
+          </div>
+
+        </section>
+
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;

@@ -1,0 +1,274 @@
+
+/* COLOUR PALETTE */
+
+:root {
+  --primary-color: #E59120;
+  --red-color: #CD0000;
+  --border-color: #BABABA;
+  --inactive-font: #7E7E7E;
+  --green-color: #078039;
+  --orange-color: #CE840C;
+  --blue-color: #096DCA;
+  --inactive-box: #DBDBDB;
+  --secondary-color: #231F20;
+  --invisible-text: #D3D3D3;
+  --third-color: #FAEECB;
+}
+
+/* GENERAL */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.dashboard-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: Arial, sans-serif;
+  color: var(--secondary-color);
+}
+
+/* SIDEBAR */
+
+.dashboard-sidebar {
+  width: 205px;
+  min-width: 205px;
+  min-height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid var(--border-color);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+/* LOGO */
+
+.sidebar-logo {
+  height: 65px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 5px;
+ 
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--secondary-color);
+  white-space: nowrap;
+}
+
+.logo-mark {
+  font-size: 27px;
+  color: var(--primary-color);
+}
+
+/* NAVIGATION */
+
+.sidebar-navigation {
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sidebar-menu-item {
+  height: 36px;
+  padding: 0 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  color: var(--secondary-color);
+  font-size: 12px;
+  border-radius: 4px;
+  transition: 0.2s ease;
+}
+
+.sidebar-menu-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-menu-item.active {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.sidebar-menu-item:hover {
+  background: var(--third-color);
+  color: var(--primary-color);
+}
+
+/* LOGOUT */
+
+.sidebar-logout {
+  margin-top: auto;
+  margin-bottom: 20px;
+  margin-left: 20px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  background: transparent;
+  color: var(--red-color);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 7px;
+}
+
+/* MAIN CONTENT */
+
+.dashboard-main {
+  flex: 1;
+  min-width: 0;
+  padding: 0 20px 20px;
+}
+
+/* HEADER */
+
+.dashboard-header {
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboard-header h1 {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--secondary-color);
+}
+
+.dashboard-header > div:first-child p {
+  font-size: 10px;
+  color: var(--inactive-font);
+  margin-top: 3px;
+}
+
+/* ADMIN PROFILE */
+
+.admin-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 12px;
+  border: 1px solid var(--inactive-box);
+  border-radius: 6px;
+}
+
+.admin-profile h4 {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-profile p {
+  font-size: 9px;
+  color: var(--inactive-font);
+  margin-top: 3px;
+}
+
+/* DASHBOARD CONTENT */
+
+.dashboard-content {
+  width: 100%;
+  min-height: calc(100vh - 85px);
+  margin-top: 15px;
+  border: 1px solid var(--inactive-box);
+  border-radius: 9px;
+  padding: 20px;
+}
+
+/* REMINDERS */
+
+.reminder-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.reminder-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reminder-card {
+  min-height: 80px;
+  border: 1px solid var(--inactive-box);
+  border-radius: 6px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.reminder-card span {
+  display: block;
+  font-size: 9px;
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+
+.reminder-card p {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--secondary-color);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .reminder-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-sidebar {
+    width: 65px;
+    min-width: 65px;
+  }
+
+  .sidebar-logo {
+    padding: 0;
+    justify-content: center;
+  }
+
+  .sidebar-logo > span:last-child,
+  .sidebar-menu-left span,
+  .sidebar-menu-item > svg:last-child,
+  .sidebar-logout span {
+    display: none;
+  }
+
+  .sidebar-menu-item,
+  .sidebar-menu-left {
+    justify-content: center;
+  }
+
+  .sidebar-logout {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .dashboard-main {
+    padding: 0 10px 10px;
+  }
+
+  .dashboard-content {
+    padding: 12px;
+  }
+
+  .reminder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header h1 {
+    font-size: 16px;
+  }
+}

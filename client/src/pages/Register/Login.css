@@ -1,0 +1,198 @@
+
+/* =================================
+   SOFTRONICS LMS COLOUR PALETTE
+================================= */
+
+:root {
+  --primary-color: #E59120;
+  --red-color: #CD0000;
+  --border-color: #BABABA;
+  --inactive-font: #7E7E7E;
+  --green-color: #078039;
+  --orange-color: #CE840C;
+  --blue-color: #096DCA;
+  --inactive-box: #DBDBDB;
+  --secondary-color: #231F20;
+  --invisible-text: #D3D3D3;
+  --third-color: #FAEECB;
+}
+
+/* =================================
+   GENERAL
+================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+.login-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 25px 15px;
+}
+
+/* =================================
+   LOGO
+================================= */
+
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  gap: 5px;
+}
+
+.logo-symbol {
+  color: var(--primary-color);
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.logo-name {
+  color: var(--secondary-color);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* =================================
+   LOGIN CARD
+================================= */
+
+.login-card {
+  width: 440px;
+  max-width: 100%;
+  padding: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.login-card h2 {
+  font-size: 19px;
+  color: var(--secondary-color);
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+/* =================================
+   INPUT FIELDS
+================================= */
+
+.login-input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.login-input-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--secondary-color);
+  margin-bottom: 7px;
+}
+
+.login-input-group input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 0 10px;
+  outline: none;
+  font-size: 11px;
+  color: var(--secondary-color);
+}
+
+.login-input-group input::placeholder {
+  color: var(--inactive-font);
+  font-size: 10px;
+}
+
+.login-input-group input:focus {
+  border-color: var(--primary-color);
+}
+
+/* =================================
+   PASSWORD
+================================= */
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  padding-right: 55px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 9px;
+  border: none;
+  background: transparent;
+  color: var(--inactive-font);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+/* =================================
+   LOGIN BUTTON
+================================= */
+
+.login-button {
+  width: 100%;
+  height: 38px;
+  background: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 3px;
+  transition: 0.3s ease;
+}
+
+.login-button:hover {
+  background: var(--orange-color);
+}
+
+/* =================================
+   VERSION
+================================= */
+
+.login-version {
+  font-size: 9px;
+  color: var(--secondary-color);
+  margin-top: 22px;
+}
+
+/* =================================
+   RESPONSIVE
+================================= */
+
+@media (max-width: 480px) {
+  .login-card {
+    width: 100%;
+    max-width: 330px;
+  }
+}
