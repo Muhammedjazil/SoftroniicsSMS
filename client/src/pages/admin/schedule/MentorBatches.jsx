@@ -1,141 +1,129 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './MentorBatches.css';
 import { LuUser, LuClock, LuBriefcase, LuTag } from 'react-icons/lu';
 import { HiOutlineArrowDownTray } from 'react-icons/hi2';
 import { FiChevronDown, FiCalendar } from 'react-icons/fi';
+import AdminService from '../../../services/admin-api-services/AdminService'
 
 const MentorBatches = () => {
-  const [startDate, setStartDate] = useState('2026-11-08');
-  const [branchFilter, setBranchFilter] = useState('calicut');
-  const [selectedMentorId, setSelectedMentorId] = useState('akhil');
+  const { takebranch, takementors, takementorschedule } = AdminService();
 
-  const mentorsData = {
-    akhil: {
-      id: 'akhil',
-      name: 'Akhil C V',
-      email: 'akhilcv430@gmail.com',
-      primaryBranch: 'calicut',
-      assignedBatches: [
-        {
-          id: 'ab1',
-          name: 'MERN_batch_02',
-          isToday: true,
-          days: 'Friday, Monday, Wednesday',
-          branch: 'calicut',
-          course: 'MERN 6 MONTH',
-        },
-        {
-          id: 'ab2',
-          name: 'PY-01',
-          isToday: false,
-          days: 'Monday',
-          branch: 'calicut',
-          course: 'PYTHON 6 MONTH',
-        },
-        {
-          id: 'ab3',
-          name: 'MERN_batch01',
-          isToday: false,
-          days: 'Tuesday, Thursday, Saturday',
-          branch: 'calicut',
-          course: 'MERN 6 MONTH',
-        },
-      ],
-      timeline: [
-        {
-          slot: '08:30 AM - 11:00 AM',
-          entries: [
-            {
-              day: 'MONDAY',
-              branch: 'calicut',
-              active: true,
-              batchName: 'PY-01',
-              subject: 'JAVASCRIPT',
-            },
-            {
-              day: 'TUESDAY',
-              branch: 'calicut',
-              active: true,
-              batchName: 'MERN_batch01',
-              subject: '',
-            },
-            {
-              day: 'THURSDAY',
-              branch: 'calicut',
-              active: true,
-              batchName: 'MERN_batch01',
-              subject: '',
-            },
-            {
-              day: 'SATURDAY',
-              branch: 'calicut',
-              active: true,
-              batchName: 'MERN_batch01',
-              subject: 'JAVASCRIPT',
-            },
-          ],
-        },
-        {
-          slot: '11:00 AM - 01:30 PM',
-          entries: [
-            {
-              day: 'MONDAY',
-              branch: 'calicut',
-              active: true,
-              batchName: 'MERN_batch_02',
-              subject: '',
-            },
-            {
-              day: 'TUESDAY',
-              branch: 'calicut',
-              active: false,
-              batchName: '',
-              subject: '',
-            },
-          ],
-        },
-      ],
-    },
-    nasih: {
-      id: 'nasih',
-      name: 'Mohammed Nasih',
-      email: 'nasih@softroniics.in',
-      primaryBranch: 'calicut',
-      assignedBatches: [
-        {
-          id: 'nb1',
-          name: 'DA_BATCH4',
-          isToday: true,
-          days: 'Monday, Wednesday, Friday',
-          branch: 'calicut',
-          course: 'DATA ANALYTICS',
-        },
-      ],
-      timeline: [
-        {
-          slot: '09:30 AM - 12:00 PM',
-          entries: [
-            {
-              day: 'MONDAY',
-              branch: 'calicut',
-              active: true,
-              batchName: 'DA_BATCH4',
-              subject: 'PYTHON',
-            },
-          ],
-        },
-      ],
-    },
-  };
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+  const [branches, setBranches] = useState([]);
+  const [branchFilter, setBranchFilter] = useState('All Branches');
+  const [mentors, setMentors] = useState([]);
+  const [selectedMentorId, setSelectedMentorId] = useState('');
 
-  const currentMentor = mentorsData[selectedMentorId] || mentorsData.akhil;
+  const [mentorDetails, setMentorDetails] = useState(null);
+  const [loadingMentors, setLoadingMentors] = useState(false);
+  const [loadingSchedule, setLoadingSchedule] = useState(false);
+
+  // 1. Load Branches on mount
+  useEffect(() => {
+    const loadBranches = async () => {
+      try {
+        const res = await takebranch();
+        const rawBranches = Array.isArray(res) ? res : res?.data || [];
+        setBranches(rawBranches);
+
+        const calicut = rawBranches.find(
+          (b) => (b.branchName || b.name || '').toLowerCase() === 'calicut'
+        );
+        if (calicut) {
+          setBranchFilter(calicut._id);
+        }
+      } catch (err) {
+        console.error('Failed to load branches:', err);
+      }
+    };
+    loadBranches();
+  }, []);
+
+  // 2. Load Mentors whenever branchFilter changes
+  useEffect(() => {
+    const loadMentors = async () => {
+      setLoadingMentors(true);
+      try {
+        const res = await takementors(branchFilter);
+        const list = Array.isArray(res) ? res : res?.data || [];
+        setMentors(list);
+
+        if (list.length > 0) {
+          setSelectedMentorId((prev) =>
+            list.some((m) => m._id === prev) ? prev : list[0]._id
+          );
+        } else {
+          setSelectedMentorId('');
+          setMentorDetails(null);
+        }
+      } catch (err) {
+        console.error('Failed to load mentors:', err);
+        setMentors([]);
+        setSelectedMentorId('');
+      } finally {
+        setLoadingMentors(false);
+      }
+    };
+    loadMentors();
+  }, [branchFilter]);
+
+  // 3. Load Selected Mentor's Assigned Batches & Weekly Schedule
+  const fetchSchedule = useCallback(async () => {
+    if (!selectedMentorId) {
+      setMentorDetails(null);
+      return;
+    }
+
+    setLoadingSchedule(true);
+    try {
+      const data = await takementorschedule(selectedMentorId, {
+        startDate,
+        branchId: branchFilter,
+      });
+      setMentorDetails(data);
+    } catch (err) {
+      console.error('Failed to load mentor schedule:', err);
+      setMentorDetails(null);
+    } finally {
+      setLoadingSchedule(false);
+    }
+  }, [selectedMentorId, startDate, branchFilter]);
+
+  useEffect(() => {
+    fetchSchedule();
+  }, [fetchSchedule]);
 
   const endDateFormatted = useMemo(() => {
-    if (!startDate) return '11/14/2026';
+    if (!startDate) return '';
     const dt = new Date(startDate);
     dt.setDate(dt.getDate() + 6);
     return `${dt.getMonth() + 1}/${dt.getDate()}/${dt.getFullYear()}`;
   }, [startDate]);
+
+  const selectedMentorMeta = useMemo(
+    () => mentors.find((m) => m._id === selectedMentorId) || null,
+    [mentors, selectedMentorId]
+  );
+
+  const currentMentor = mentorDetails?.mentor || {
+    name: selectedMentorMeta?.fullName || 'No Mentor Selected',
+    email: selectedMentorMeta?.email || selectedMentorMeta?.officialEmail || '—',
+    primaryBranch:
+      selectedMentorMeta?.branch?.branchName ||
+      selectedMentorMeta?.branch?.name ||
+      '—',
+    multipleBranches: [],
+  };
+
+  const assignedBatches = mentorDetails?.assignedBatches || [];
+  const timeline = mentorDetails?.timeline || [];
+  const stats = mentorDetails?.stats || {
+    assignedBatchesCount: assignedBatches.length,
+    scheduleSlotsCount: timeline.length,
+  };
 
   return (
     <div className="mnt-btc-container">
@@ -191,9 +179,12 @@ const MentorBatches = () => {
               value={branchFilter}
               onChange={(e) => setBranchFilter(e.target.value)}
             >
-              <option value="calicut">calicut</option>
-              <option value="kochi">kochi</option>
-              <option value="kannur">kannur</option>
+              <option value="All Branches">All Branches</option>
+              {branches.map((br) => (
+                <option key={br._id} value={br._id}>
+                  {br.branchName || br.name}
+                </option>
+              ))}
             </select>
             <FiChevronDown className="mnt-btc-select-arrow" />
           </div>
@@ -203,9 +194,19 @@ const MentorBatches = () => {
               className="mnt-btc-select"
               value={selectedMentorId}
               onChange={(e) => setSelectedMentorId(e.target.value)}
+              disabled={loadingMentors || mentors.length === 0}
             >
-              <option value="akhil">Akhil C V</option>
-              <option value="nasih">Mohammed Nasih</option>
+              {loadingMentors ? (
+                <option value="">Loading mentors...</option>
+              ) : mentors.length === 0 ? (
+                <option value="">No mentors found</option>
+              ) : (
+                mentors.map((mentor) => (
+                  <option key={mentor._id} value={mentor._id}>
+                    {mentor.fullName}
+                  </option>
+                ))
+              )}
             </select>
             <FiChevronDown className="mnt-btc-select-arrow" />
           </div>
@@ -238,52 +239,66 @@ const MentorBatches = () => {
               <span className="mnt-btc-branch-dot" />
               <span>{currentMentor.primaryBranch} (Primary)</span>
             </div>
+            {currentMentor.multipleBranches?.map((mb, idx) => (
+              <div key={idx} className="mnt-btc-branch-tag" style={{ marginTop: '6px' }}>
+                <span className="mnt-btc-branch-dot" />
+                <span>{mb}</span>
+              </div>
+            ))}
 
             <div className="mnt-btc-stats-row">
               <div className="mnt-btc-stat-box">
                 <span className="mnt-btc-stat-num mnt-btc-stat-num--blue">
-                  {currentMentor.assignedBatches.length}
+                  {stats.assignedBatchesCount}
                 </span>
                 <span className="mnt-btc-stat-label">ASSIGNED BATCHES</span>
               </div>
 
               <div className="mnt-btc-stat-box">
                 <span className="mnt-btc-stat-num mnt-btc-stat-num--green">
-                  {currentMentor.assignedBatches.length}
+                  {stats.scheduleSlotsCount}
                 </span>
                 <span className="mnt-btc-stat-label">SCHEDULE SLOTS</span>
               </div>
             </div>
           </div>
 
-          {/* Assigned Batches Card (Matching Screenshot 3) */}
+          {/* Assigned Batches Card */}
           <div className="mnt-btc-card">
             <div className="mnt-btc-card-header">
               <div className="mnt-btc-card-header-icon">
                 <LuBriefcase />
               </div>
               <h3 className="mnt-btc-card-title">
-                Assigned Batches ({currentMentor.assignedBatches.length})
+                Assigned Batches ({assignedBatches.length})
               </h3>
             </div>
 
-            <div className="mnt-btc-assigned-list">
-              {currentMentor.assignedBatches.map((batch) => (
-                <div key={batch.id} className="mnt-btc-assigned-item">
-                  <div className="mnt-btc-assigned-item-top">
-                    <span className="mnt-btc-assigned-batch-name">{batch.name}</span>
-                    <div className="mnt-btc-assigned-badges">
-                      {batch.isToday && <span className="mnt-btc-today-pill">Today</span>}
-                      <span className="mnt-btc-days-pill">{batch.days}</span>
-                      <span className="mnt-btc-branch-mini-pill">{batch.branch}</span>
+            {loadingSchedule ? (
+              <p className="mnt-btc-inactive-text">Loading assigned batches...</p>
+            ) : assignedBatches.length === 0 ? (
+              <p className="mnt-btc-inactive-text">
+                No batches assigned to this mentor for the selected range.
+              </p>
+            ) : (
+              <div className="mnt-btc-assigned-list">
+                {assignedBatches.map((batch) => (
+                  <div key={batch.id} className="mnt-btc-assigned-item">
+                    <div className="mnt-btc-assigned-item-top">
+                      <span className="mnt-btc-assigned-batch-name">{batch.name}</span>
+                      <div className="mnt-btc-assigned-badges">
+                        {batch.isToday && <span className="mnt-btc-today-pill">Today</span>}
+                        <span className="mnt-btc-days-pill">{batch.days}</span>
+                        <span className="mnt-btc-branch-mini-pill">{batch.branch}</span>
+                      </div>
+                    </div>
+                    <div className="mnt-btc-assigned-course-sub">
+                      {batch.course} &bull; {batch.branch}
                     </div>
                   </div>
-                  <div className="mnt-btc-assigned-course-sub">
-                    {batch.course} &bull; {batch.branch}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -296,60 +311,78 @@ const MentorBatches = () => {
             <h3 className="mnt-btc-card-title">Weekly Schedule Timeline</h3>
           </div>
 
-          <div className="mnt-btc-timeline-wrapper">
-            {currentMentor.timeline.map((group) => (
-              <div key={group.slot} className="mnt-btc-slot-group">
-                <span className="mnt-btc-slot-dot" />
-                <div className="mnt-btc-slot-badge">
-                  <LuClock />
-                  <span>{group.slot}</span>
-                </div>
+          {loadingSchedule ? (
+            <p className="mnt-btc-inactive-text">Loading schedule timeline...</p>
+          ) : timeline.length === 0 ? (
+            <p className="mnt-btc-inactive-text">
+              No schedule slots found for this mentor in the selected week.
+            </p>
+          ) : (
+            <div className="mnt-btc-timeline-wrapper">
+              {timeline.map((group) => (
+                <div key={group.slot} className="mnt-btc-slot-group">
+                  <span className="mnt-btc-slot-dot" />
+                  <div className="mnt-btc-slot-badge">
+                    <LuClock />
+                    <span>{group.slot}</span>
+                  </div>
 
-                <div className="mnt-btc-day-cards">
-                  {group.entries.map((entry, idx) => (
-                    <div
-                      key={`${group.slot}_${entry.day}_${idx}`}
-                      className={`mnt-btc-day-card ${
-                        !entry.active ? 'mnt-btc-day-card--inactive' : ''
-                      }`}
-                    >
-                      <div className="mnt-btc-day-card-top">
-                        <div className="mnt-btc-day-left">
-                          <span className="mnt-btc-day-badge">{entry.day}</span>
-                          <span className="mnt-btc-branch-mini-pill">{entry.branch}</span>
-                        </div>
-                        {entry.active ? (
-                          <span className="mnt-btc-active-status">1 Batch(es) Active</span>
-                        ) : (
-                          <span className="mnt-btc-no-batch-status">No Batches</span>
-                        )}
-                      </div>
-
-                      {entry.active ? (
-                        <div className="mnt-btc-day-batch-row">
-                          <span className="mnt-btc-batch-tag">
-                            {entry.batchName}{' '}
-                            <span className="mnt-btc-batch-tag-branch">{entry.branch}</span>
-                          </span>
-
-                          {entry.subject && (
-                            <span className="mnt-btc-subject-tag">
-                              <LuTag />
-                              <span>Subject: {entry.subject}</span>
-                            </span>
-                          )}
-                        </div>
-                      ) : (
+                  <div className="mnt-btc-day-cards">
+                    {group.entries.length === 0 ? (
+                      <div className="mnt-btc-day-card mnt-btc-day-card--inactive">
                         <p className="mnt-btc-inactive-text">
                           No active batches assigned to this slot
                         </p>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    ) : (
+                      group.entries.map((entry, idx) => (
+                        <div
+                          key={`${group.slot}_${entry.day}_${idx}`}
+                          className={`mnt-btc-day-card ${
+                            !entry.active ? 'mnt-btc-day-card--inactive' : ''
+                          }`}
+                        >
+                          <div className="mnt-btc-day-card-top">
+                            <div className="mnt-btc-day-left">
+                              <span className="mnt-btc-day-badge">{entry.day}</span>
+                              {entry.branch && (
+                                <span className="mnt-btc-branch-mini-pill">{entry.branch}</span>
+                              )}
+                            </div>
+                            {entry.active ? (
+                              <span className="mnt-btc-active-status">1 Batch(es) Active</span>
+                            ) : (
+                              <span className="mnt-btc-no-batch-status">No Batches</span>
+                            )}
+                          </div>
+
+                          {entry.active ? (
+                            <div className="mnt-btc-day-batch-row">
+                              <span className="mnt-btc-batch-tag">
+                                {entry.batchName}{' '}
+                                <span className="mnt-btc-batch-tag-branch">{entry.branch}</span>
+                              </span>
+
+                              {entry.subject && (
+                                <span className="mnt-btc-subject-tag">
+                                  <LuTag />
+                                  <span>Subject: {entry.subject}</span>
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="mnt-btc-inactive-text">
+                              No active batches assigned to this slot
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

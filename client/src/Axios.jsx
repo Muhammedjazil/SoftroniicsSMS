@@ -13,7 +13,7 @@
 
 // export default axiosPrivate;
 
-import axios from "axios";
+import axios from "axios"
 
 export const BASE_URL =
     import.meta.env.VITE_BACKEND_URL ||

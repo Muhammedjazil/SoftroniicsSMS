@@ -1,22 +1,39 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './BatchManagement.css';
 import { LuUser, LuSearch, LuX } from 'react-icons/lu';
 import { HiOutlineArrowDownTray } from 'react-icons/hi2';
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import AdminService from "../../../services/admin-api-services/AdminService" // Adjust path if needed
 
 const BatchManagement = () => {
+  const {
+    takebatches,
+    takebranch,
+    takeinternsbybranch,
+    createbatch,
+    updatebatch,
+    removebatch,
+  } = AdminService();
+
   const [activeTab, setActiveTab] = useState('batches'); // 'batches' | 'add-batch' | 'edit-batch'
   const [viewingBatch, setViewingBatch] = useState(null);
   const [editingBatchId, setEditingBatchId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  // List Filter States (Matching Screenshot 1)
+  // API Data States
+  const [batches, setBatches] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [branchInternsList, setBranchInternsList] = useState([]);
+
+  // List Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('Active');
-  const [branchFilter, setBranchFilter] = useState('calicut');
+  const [branchFilter, setBranchFilter] = useState('All Branches');
 
   // Form States
   const [formBatchName, setFormBatchName] = useState('');
-  const [formBranchName, setFormBranchName] = useState('');
+  const [formBranchId, setFormBranchId] = useState('');
   const [formStatus, setFormStatus] = useState('Active');
   const [formInterns, setFormInterns] = useState([]);
 
@@ -27,69 +44,95 @@ const BatchManagement = () => {
   const [selectedInternObj, setSelectedInternObj] = useState(null);
   const [showInternSuggestions, setShowInternSuggestions] = useState(false);
 
-  const [batches, setBatches] = useState([
-    {
-      id: 1,
-      code: 'b5b23e',
-      name: 'DA_BATCH4',
-      branch: 'calicut',
-      status: 'Active',
-      createdAt: '11/6/2026',
-      interns: [
-        { id: 1, name: 'John', courseName: 'DATA ANALYTICS', admissionNumber: '0001' },
-      ],
-    },
-    {
-      id: 2,
-      code: '24f14e',
-      name: 'DS_BATCH1',
-      branch: 'calicut',
-      status: 'Active',
-      createdAt: '11/6/2026',
-      interns: [
-        { id: 2, name: 'Abrahm', courseName: 'DATA SCIENCE', admissionNumber: '0002' },
-      ],
-    },
-    {
-      id: 3,
-      code: '24f097',
-      name: 'DA_BATCH3',
-      branch: 'calicut',
-      status: 'Active',
-      createdAt: '11/6/2026',
-      interns: Array.from({ length: 16 }, (_, idx) => ({
-        id: 300 + idx,
-        name: `Intern ${idx + 1}`,
-        courseName: 'DATA ANALYTICS',
-        admissionNumber: `010${idx + 1}`,
-      })),
-    },
-    {
-      id: 4,
-      code: '6b34e4',
-      name: 'DA_BATCH2',
-      branch: 'calicut',
-      status: 'Active',
-      createdAt: '11/6/2026',
-      interns: Array.from({ length: 15 }, (_, idx) => ({
-        id: 400 + idx,
-        name: `Intern ${idx + 1}`,
-        courseName: 'DATA ANALYTICS',
-        admissionNumber: `020${idx + 1}`,
-      })),
-    },
-  ]);
+  // Helper to normalize intern fields from API
+  const normalizeIntern = (intern) => ({
+    _id: intern._id || intern.id,
+    name: intern.name || 'Unnamed Intern',
+    admissionNumber: intern.admissionNo || intern.admissionNumber || 'N/A',
+    courseName:
+      intern.course?.courseName ||
+      intern.course?.name ||
+      intern.courseName ||
+      (typeof intern.course === 'string' ? intern.course : 'N/A'),
+  });
 
-  const mockInternsDatabase = [
-    { id: 101, name: 'John', admissionNo: '0001', course: 'DATA ANALYTICS', branch: 'calicut' },
-    { id: 102, name: 'Abrahm', admissionNo: '0002', course: 'DATA SCIENCE', branch: 'calicut' },
-    { id: 103, name: 'Tasion', admissionNo: '0003', course: 'UI/UX DESIGNING', branch: 'calicut' },
-    { id: 104, name: 'Santhos', admissionNo: '0004', course: 'UI/UX DESIGNING', branch: 'kochi' },
-    { id: 105, name: 'Sayanth KV', admissionNo: '0005', course: 'MERN 6 MONTH', branch: 'calicut' },
-    { id: 106, name: 'Rahul Sharma', admissionNo: '0006', course: 'PYTHON 6 MONTH', branch: 'kannur' },
-  ];
+  // Helper to normalize batch fields from API
+  const normalizeBatch = useCallback((b) => {
+    const branchObj = typeof b.branch === 'object' && b.branch !== null ? b.branch : null;
+    const branchId = branchObj ? branchObj._id : b.branch || '';
+    const branchLabel = branchObj
+      ? branchObj.branchName || branchObj.name || 'Unknown'
+      : b.branch || 'Unknown';
 
-  const availableBranches = ['calicut', 'perinthalmanna', 'kochi', 'kannur', 'trivandrum'];
+    const createdDate = b.createdAt
+      ? new Date(b.createdAt).toLocaleDateString('en-US')
+      : '';
+
+    return {
+      id: b._id,
+      code: b._id ? b._id.slice(-6) : '',
+      name: b.batchName || '',
+      branchId,
+      branch: branchLabel,
+      status: b.status || 'Active',
+      createdAt: createdDate,
+      interns: Array.isArray(b.interns) ? b.interns.map(normalizeIntern) : [],
+    };
+  }, []);
+
+  // Fetch initial batches and branches
+  const fetchInitialData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [batchesRes, branchesRes] = await Promise.all([
+        takebatches(),
+        takebranch(),
+      ]);
+
+      const rawBatches = Array.isArray(batchesRes) ? batchesRes : batchesRes?.data || [];
+      const rawBranches = Array.isArray(branchesRes) ? branchesRes : branchesRes?.data || [];
+
+      setBatches(rawBatches.map(normalizeBatch));
+      setBranches(rawBranches);
+
+      // Default to 'calicut' branch if present
+      const calicutBranch = rawBranches.find(
+        (br) => (br.branchName || br.name || '').toLowerCase() === 'calicut'
+      );
+      if (calicutBranch) {
+        setBranchFilter(calicutBranch._id);
+      }
+    } catch (error) {
+      console.error('Failed to load batch management data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [normalizeBatch]);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  // Fetch interns whenever formBranchId changes
+  useEffect(() => {
+    if (!formBranchId) {
+      setBranchInternsList([]);
+      return;
+    }
+
+    const fetchBranchInterns = async () => {
+      try {
+        const res = await takeinternsbybranch(formBranchId);
+        const list = Array.isArray(res) ? res : res?.data || [];
+        setBranchInternsList(list.map(normalizeIntern));
+      } catch (error) {
+        console.error('Failed to load interns for branch:', error);
+        setBranchInternsList([]);
+      }
+    };
+
+    fetchBranchInterns();
+  }, [formBranchId]);
 
   const filteredBatches = useMemo(() => {
     return batches.filter((batch) => {
@@ -99,24 +142,25 @@ const BatchManagement = () => {
       const matchesStatus = statusFilter === 'All Status' || batch.status === statusFilter;
       const matchesBranch =
         branchFilter === 'All Branches' ||
+        batch.branchId === branchFilter ||
         batch.branch.toLowerCase() === branchFilter.toLowerCase();
       return matchesSearch && matchesStatus && matchesBranch;
     });
   }, [batches, searchQuery, statusFilter, branchFilter]);
 
   const branchFilteredInterns = useMemo(() => {
-    if (!formBranchName) return [];
-    return mockInternsDatabase.filter(
+    if (!formBranchId) return [];
+    const query = internSearch.toLowerCase().trim();
+    return branchInternsList.filter(
       (i) =>
-        i.branch.toLowerCase() === formBranchName.toLowerCase() &&
-        (i.name.toLowerCase().includes(internSearch.toLowerCase().trim()) ||
-          i.admissionNo.includes(internSearch.trim()))
+        i.name.toLowerCase().includes(query) ||
+        i.admissionNumber.toLowerCase().includes(query)
     );
-  }, [formBranchName, internSearch]);
+  }, [formBranchId, branchInternsList, internSearch]);
 
   const resetForm = () => {
     setFormBatchName('');
-    setFormBranchName('');
+    setFormBranchId('');
     setFormStatus('Active');
     setFormInterns([]);
     setInternSearch('');
@@ -147,7 +191,7 @@ const BatchManagement = () => {
     setViewingBatch(null);
     setEditingBatchId(batchItem.id);
     setFormBatchName(batchItem.name);
-    setFormBranchName(batchItem.branch);
+    setFormBranchId(batchItem.branchId);
     setFormStatus(batchItem.status || 'Active');
     setFormInterns([...batchItem.interns]);
     setActiveTab('edit-batch');
@@ -156,83 +200,92 @@ const BatchManagement = () => {
   const handleSelectInternSuggestion = (intern) => {
     setSelectedInternObj(intern);
     setInternSearch(intern.name);
-    setInternAdmissionNumber(intern.admissionNo);
-    setInternCourseName(intern.course);
+    setInternAdmissionNumber(intern.admissionNumber);
+    setInternCourseName(intern.courseName);
     setShowInternSuggestions(false);
   };
 
   const handleAddIntern = () => {
     if (!selectedInternObj) return;
 
-    const alreadyAdded = formInterns.some(
-      (i) => i.admissionNumber === selectedInternObj.admissionNo
-    );
+    const alreadyAdded = formInterns.some((i) => i._id === selectedInternObj._id);
     if (alreadyAdded) return;
 
-    const newEntry = {
-      id: Date.now(),
-      name: selectedInternObj.name,
-      courseName: selectedInternObj.course,
-      admissionNumber: selectedInternObj.admissionNo,
-    };
-
-    setFormInterns((prev) => [...prev, newEntry]);
+    setFormInterns((prev) => [...prev, selectedInternObj]);
     setInternSearch('');
     setInternAdmissionNumber('');
     setInternCourseName('');
     setSelectedInternObj(null);
   };
 
-  const handleRemoveIntern = (id) => {
-    setFormInterns((prev) => prev.filter((intern) => intern.id !== id));
+  const handleRemoveIntern = (internId) => {
+    setFormInterns((prev) => prev.filter((intern) => intern._id !== internId));
   };
 
-  const handleCreateBatch = (e) => {
+  const handleCreateBatch = async (e) => {
     e.preventDefault();
-    if (!formBatchName.trim() || !formBranchName) return;
+    if (!formBatchName.trim() || !formBranchId || submitting) return;
 
-    const today = new Date();
-    const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+    setSubmitting(true);
+    try {
+      const payload = {
+        batchName: formBatchName.trim().toUpperCase(),
+        branch: formBranchId,
+        status: formStatus || 'Active',
+        interns: formInterns.map((i) => i._id),
+      };
 
-    const newBatch = {
-      id: Date.now(),
-      code: Math.random().toString(16).substring(2, 8),
-      name: formBatchName.trim().toUpperCase(),
-      branch: formBranchName.toLowerCase(),
-      status: formStatus || 'Active',
-      createdAt: formattedDate,
-      interns: formInterns,
-    };
+      const res = await createbatch(payload);
+      const created = res?.data || res;
 
-    setBatches((prev) => [newBatch, ...prev]);
-    handleBackToBatches();
+      setBatches((prev) => [normalizeBatch(created), ...prev]);
+      handleBackToBatches();
+    } catch (error) {
+      console.error('Error creating batch:', error);
+      alert(error?.response?.data?.message || 'Failed to create batch');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleSaveEditedBatch = (e) => {
+  const handleSaveEditedBatch = async (e) => {
     e.preventDefault();
-    if (!formBatchName.trim() || !formBranchName) return;
+    if (!formBatchName.trim() || !formBranchId || !editingBatchId || submitting) return;
 
-    setBatches((prev) =>
-      prev.map((b) =>
-        b.id === editingBatchId
-          ? {
-              ...b,
-              name: formBatchName.trim().toUpperCase(),
-              branch: formBranchName.toLowerCase(),
-              status: formStatus,
-              interns: formInterns,
-            }
-          : b
-      )
-    );
+    setSubmitting(true);
+    try {
+      const payload = {
+        batchName: formBatchName.trim().toUpperCase(),
+        branch: formBranchId,
+        status: formStatus,
+        interns: formInterns.map((i) => i._id),
+      };
 
-    handleBackToBatches();
+      const res = await updatebatch(editingBatchId, payload);
+      const updated = res?.data || res;
+
+      setBatches((prev) =>
+        prev.map((b) => (b.id === editingBatchId ? normalizeBatch(updated) : b))
+      );
+      handleBackToBatches();
+    } catch (error) {
+      console.error('Error updating batch:', error);
+      alert(error?.response?.data?.message || 'Failed to update batch');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleDeleteBatch = (id) => {
-    setBatches((prev) => prev.filter((b) => b.id !== id));
-    if (viewingBatch && viewingBatch.id === id) {
-      setViewingBatch(null);
+  const handleDeleteBatch = async (id) => {
+    try {
+      await removebatch(id);
+      setBatches((prev) => prev.filter((b) => b.id !== id));
+      if (viewingBatch && viewingBatch.id === id) {
+        setViewingBatch(null);
+      }
+    } catch (error) {
+      console.error('Error deleting batch:', error);
+      alert(error?.response?.data?.message || 'Failed to delete batch');
     }
   };
 
@@ -264,7 +317,7 @@ const BatchManagement = () => {
         </div>
       </header>
 
-      {/* Outer Toolbar (Matches Screenshot 1, 2, 3) */}
+      {/* Outer Toolbar */}
       <div className="btc-mgmt-toolbar">
         <div className="btc-mgmt-tab-group">
           <button
@@ -295,7 +348,7 @@ const BatchManagement = () => {
 
       {/* Main White Card Container */}
       <main className="btc-mgmt-panel">
-        {/* BATCHES LIST VIEW (Matches Screenshot 1) */}
+        {/* BATCHES LIST VIEW */}
         {activeTab === 'batches' && (
           <>
             <div className="btc-mgmt-filter-bar">
@@ -318,8 +371,8 @@ const BatchManagement = () => {
                 >
                   <option value="All Status">All Status</option>
                   <option value="Active">Active</option>
-                  <option value="Upcoming">Upcoming</option>
-                  <option value="Completed">Completed</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Closed">Closed</option>
                 </select>
                 <FiChevronDown className="btc-mgmt-select-arrow" />
               </div>
@@ -331,9 +384,9 @@ const BatchManagement = () => {
                   onChange={(e) => setBranchFilter(e.target.value)}
                 >
                   <option value="All Branches">All Branches</option>
-                  {availableBranches.map((br) => (
-                    <option key={br} value={br}>
-                      {br}
+                  {branches.map((br) => (
+                    <option key={br._id} value={br._id}>
+                      {br.branchName || br.name}
                     </option>
                   ))}
                 </select>
@@ -341,7 +394,11 @@ const BatchManagement = () => {
               </div>
             </div>
 
-            {filteredBatches.length === 0 ? (
+            {loading ? (
+              <div className="btc-mgmt-content-area">
+                <p className="btc-mgmt-empty-message">Loading batches...</p>
+              </div>
+            ) : filteredBatches.length === 0 ? (
               <div className="btc-mgmt-content-area">
                 <p className="btc-mgmt-empty-message">
                   No batches available. Please add batches to view them here.
@@ -449,7 +506,7 @@ const BatchManagement = () => {
           </>
         )}
 
-        {/* NEW BATCH & EDIT BATCH FORM (Matches Screenshot 2 & 3) */}
+        {/* NEW BATCH & EDIT BATCH FORM */}
         {(activeTab === 'add-batch' || activeTab === 'edit-batch') && (
           <form
             className="btc-mgmt-form-layout"
@@ -480,22 +537,26 @@ const BatchManagement = () => {
                   <div className="btc-mgmt-select-wrapper">
                     <select
                       className="btc-mgmt-select-input"
-                      value={formBranchName}
+                      value={formBranchId}
                       onChange={(e) => {
-                        setFormBranchName(e.target.value);
+                        setFormBranchId(e.target.value);
                         setInternSearch('');
                         setSelectedInternObj(null);
+                        setFormInterns([]);
                       }}
                       required
                     >
                       <option value="" disabled>
                         Choose Branch
                       </option>
-                      {availableBranches.map((br) => (
-                        <option key={br} value={br}>
-                          {br.charAt(0).toUpperCase() + br.slice(1)}
-                        </option>
-                      ))}
+                      {branches.map((br) => {
+                        const label = br.branchName || br.name || '';
+                        return (
+                          <option key={br._id} value={br._id}>
+                            {label.charAt(0).toUpperCase() + label.slice(1)}
+                          </option>
+                        );
+                      })}
                     </select>
                     <FiChevronDown className="btc-mgmt-select-arrow" />
                   </div>
@@ -512,7 +573,6 @@ const BatchManagement = () => {
                 </div>
               </div>
 
-              {/* Full-width Status Dropdown (Matching Screenshot 2) */}
               <div className="btc-mgmt-form-full-row">
                 <div className="btc-mgmt-input-group">
                   <label className="btc-mgmt-label">Status</label>
@@ -523,8 +583,8 @@ const BatchManagement = () => {
                       onChange={(e) => setFormStatus(e.target.value)}
                     >
                       <option value="Active">Active</option>
-                      <option value="Upcoming">Upcoming</option>
-                      <option value="Completed">Completed</option>
+                      <option value="Inactive">Inactive</option>
+                      <option value="Closed">Closed</option>
                     </select>
                     <FiChevronDown className="btc-mgmt-select-arrow" />
                   </div>
@@ -544,12 +604,12 @@ const BatchManagement = () => {
                       type="text"
                       className="btc-mgmt-text-input btc-mgmt-text-input--left-icon"
                       placeholder={
-                        formBranchName
+                        formBranchId
                           ? 'Search by intern name or admission no...'
                           : 'Select a branch first to search interns...'
                       }
                       value={internSearch}
-                      disabled={!formBranchName}
+                      disabled={!formBranchId}
                       onFocus={() => setShowInternSuggestions(true)}
                       onChange={(e) => {
                         setInternSearch(e.target.value);
@@ -558,18 +618,18 @@ const BatchManagement = () => {
                       }}
                     />
                     {showInternSuggestions &&
-                      formBranchName &&
+                      formBranchId &&
                       branchFilteredInterns.length > 0 && (
                         <div className="btc-mgmt-intern-dropdown">
                           {branchFilteredInterns.map((intern) => (
                             <div
-                              key={intern.id}
+                              key={intern._id}
                               className="btc-mgmt-intern-dropdown-item"
                               onClick={() => handleSelectInternSuggestion(intern)}
                             >
                               <span>{intern.name}</span>
                               <span className="btc-mgmt-intern-dropdown-meta">
-                                #{intern.admissionNo} • {intern.course}
+                                #{intern.admissionNumber} • {intern.courseName}
                               </span>
                             </div>
                           ))}
@@ -625,7 +685,7 @@ const BatchManagement = () => {
               ) : (
                 <div className="btc-mgmt-added-interns-grid">
                   {formInterns.map((intern) => (
-                    <div key={intern.id} className="btc-mgmt-intern-chip">
+                    <div key={intern._id} className="btc-mgmt-intern-chip">
                       <div className="btc-mgmt-intern-chip-info">
                         <span className="btc-mgmt-intern-chip-name">{intern.name}</span>
                         <span className="btc-mgmt-intern-chip-sub">
@@ -635,7 +695,7 @@ const BatchManagement = () => {
                       <button
                         type="button"
                         className="btc-mgmt-intern-remove-btn"
-                        onClick={() => handleRemoveIntern(intern.id)}
+                        onClick={() => handleRemoveIntern(intern._id)}
                       >
                         <LuX />
                       </button>
@@ -653,8 +713,12 @@ const BatchManagement = () => {
               >
                 Cancel
               </button>
-              <button type="submit" className="btc-mgmt-submit-btn">
-                {activeTab === 'add-batch' ? 'Create Batch' : 'Save Changes'}
+              <button type="submit" className="btc-mgmt-submit-btn" disabled={submitting}>
+                {submitting
+                  ? 'Saving...'
+                  : activeTab === 'add-batch'
+                  ? 'Create Batch'
+                  : 'Save Changes'}
               </button>
             </div>
           </form>
@@ -723,7 +787,7 @@ const BatchManagement = () => {
               ) : (
                 <div className="btc-mgmt-modal-interns-list">
                   {viewingBatch.interns.map((intern) => (
-                    <div key={intern.id} className="btc-mgmt-modal-intern-tag">
+                    <div key={intern._id} className="btc-mgmt-modal-intern-tag">
                       <strong>{intern.name}</strong> ({intern.admissionNumber}) —{' '}
                       {intern.courseName}
                     </div>
