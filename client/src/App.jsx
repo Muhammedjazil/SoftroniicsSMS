@@ -70,246 +70,253 @@ import Internattendance from "./pages/intern/Internattendance";
 import Internmonthlycard from "./pages/intern/Internmonthlycard";
 import InternWeeklySchedule from "./pages/intern/InternWeeklySchedule";
 import WeeklyCard from "./pages/intern/WeeklyCard";
+import Dashboard from "./pages/admin/Dashboard/Dashboard";
 
 // =====================================
 // APP COMPONENT
 // =====================================
 
 function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
-
-                {/* =================================
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* =================================
                     ADMIN ROUTES
                 ================================= */}
 
-                <Route
-                    path="/"
-                    element={
-                        <Adminlayout>
-                            <Rolemanagement />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/"
+          element={
+            <Adminlayout>
+              <Rolemanagement />
+            </Adminlayout>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <Adminlayout>
+              <Dashboard />
+            </Adminlayout>
+          }
+        />
 
-                {/* ADMINISTRATION */}
+        {/* ADMINISTRATION */}
 
-                <Route
-                    path="/rolemanagement"
-                    element={
-                        <Adminlayout>
-                            <Rolemanagement />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/rolemanagement"
+          element={
+            <Adminlayout>
+              <Rolemanagement />
+            </Adminlayout>
+          }
+        />
 
-                <Route
-                    path="/staffmanagement"
-                    element={
-                        <Adminlayout>
-                            <Staffmanagement />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/staffmanagement"
+          element={
+            <Adminlayout>
+              <Staffmanagement />
+            </Adminlayout>
+          }
+        />
 
-                <Route
-                    path="/internmanagement"
-                    element={
-                        <Adminlayout>
-                            <Internmanagement />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/internmanagement"
+          element={
+            <Adminlayout>
+              <Internmanagement />
+            </Adminlayout>
+          }
+        />
 
-                {/* SCHEDULE */}
+        {/* SCHEDULE */}
 
-                <Route
-                    path="/batchmanagement"
-                    element={
-                        <Adminlayout>
-                            <BatchManagement />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/batchmanagement"
+          element={
+            <Adminlayout>
+              <BatchManagement />
+            </Adminlayout>
+          }
+        />
 
-                <Route
-                    path="/mentorbatches"
-                    element={
-                        <Adminlayout>
-                            <MentorBatches />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/mentorbatches"
+          element={
+            <Adminlayout>
+              <MentorBatches />
+            </Adminlayout>
+          }
+        />
 
-                <Route
-                    path="/timingsmanagement"
-                    element={
-                        <Adminlayout>
-                            <TimingsManagement />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/timingsmanagement"
+          element={
+            <Adminlayout>
+              <TimingsManagement />
+            </Adminlayout>
+          }
+        />
 
-                <Route
-                    path="/weeklyschedule"
-                    element={
-                        <Adminlayout>
-                            <WeeklySchedule />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/weeklyschedule"
+          element={
+            <Adminlayout>
+              <WeeklySchedule />
+            </Adminlayout>
+          }
+        />
 
-                {/* SETTINGS */}
+        {/* SETTINGS */}
 
-                <Route
-                    path="/branch"
-                    element={
-                        <Adminlayout>
-                            <Branch />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/branch"
+          element={
+            <Adminlayout>
+              <Branch />
+            </Adminlayout>
+          }
+        />
 
-                <Route
-                    path="/notification"
-                    element={
-                        <Adminlayout>
-                            <Notification />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/notification"
+          element={
+            <Adminlayout>
+              <Notification />
+            </Adminlayout>
+          }
+        />
 
-                {/* TASK MANAGEMENT */}
+        {/* TASK MANAGEMENT */}
 
-                <Route
-                    path="/taskevaluation"
-                    element={
-                        <Adminlayout>
-                            <Taskevaluation />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/taskevaluation"
+          element={
+            <Adminlayout>
+              <Taskevaluation />
+            </Adminlayout>
+          }
+        />
 
-                <Route
-                    path="/taskmaterial"
-                    element={
-                        <Adminlayout>
-                            <Taskmaterial />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/taskmaterial"
+          element={
+            <Adminlayout>
+              <Taskmaterial />
+            </Adminlayout>
+          }
+        />
 
-                <Route
-                    path="/tasks"
-                    element={
-                        <Adminlayout>
-                            <Tasks />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/tasks"
+          element={
+            <Adminlayout>
+              <Tasks />
+            </Adminlayout>
+          }
+        />
 
-                {/* ATTENDANCE */}
+        {/* ATTENDANCE */}
 
-                <Route
-                    path="/attendancestudent"
-                    element={
-                        <Adminlayout>
-                            <Attendancestudent />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/attendancestudent"
+          element={
+            <Adminlayout>
+              <Attendancestudent />
+            </Adminlayout>
+          }
+        />
 
-                <Route
-                    path="/leaverequest"
-                    element={
-                        <Adminlayout>
-                            <Leaverequest />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/leaverequest"
+          element={
+            <Adminlayout>
+              <Leaverequest />
+            </Adminlayout>
+          }
+        />
 
-                {/* SYLLABUS */}
+        {/* SYLLABUS */}
 
-                <Route
-                    path="/modulemanagement"
-                    element={
-                        <Adminlayout>
-                            <ModuleManagement />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/modulemanagement"
+          element={
+            <Adminlayout>
+              <ModuleManagement />
+            </Adminlayout>
+          }
+        />
 
-                <Route
-                    path="/topicsmanagement"
-                    element={
-                        <Adminlayout>
-                            <TopicsManagement />
-                        </Adminlayout>
-                    }
-                />
+        <Route
+          path="/topicsmanagement"
+          element={
+            <Adminlayout>
+              <TopicsManagement />
+            </Adminlayout>
+          }
+        />
 
-                {/* =================================
+        {/* =================================
                     INTERN ROUTES
                 ================================= */}
 
-                <Route
-                    path="/internnotification"
-                    element={
-                        <Internlayout>
-                            <Internnotification />
-                        </Internlayout>
-                    }
-                />
+        <Route
+          path="/internnotification"
+          element={
+            <Internlayout>
+              <Internnotification />
+            </Internlayout>
+          }
+        />
 
-                <Route
-                    path="/interntask"
-                    element={
-                        <Internlayout>
-                            <Intrentask />
-                        </Internlayout>
-                    }
-                />
+        <Route
+          path="/interntask"
+          element={
+            <Internlayout>
+              <Intrentask />
+            </Internlayout>
+          }
+        />
 
-                <Route
-                    path="/internattendance"
-                    element={
-                        <Internlayout>
-                            <Internattendance />
-                        </Internlayout>
-                    }
-                />
+        <Route
+          path="/internattendance"
+          element={
+            <Internlayout>
+              <Internattendance />
+            </Internlayout>
+          }
+        />
 
-                <Route
-                    path="/internweekly"
-                    element={
-                        <Internlayout>
-                            <InternWeeklySchedule />
-                        </Internlayout>
-                    }
-                />
+        <Route
+          path="/internweekly"
+          element={
+            <Internlayout>
+              <InternWeeklySchedule />
+            </Internlayout>
+          }
+        />
 
-                <Route
-                    path="/internweeklycard"
-                    element={
-                        <Internlayout>
-                            <WeeklyCard />
-                        </Internlayout>
-                    }
-                />
+        <Route
+          path="/internweeklycard"
+          element={
+            <Internlayout>
+              <WeeklyCard />
+            </Internlayout>
+          }
+        />
 
-                <Route
-                    path="/internmonthlycard"
-                    element={
-                        <Internlayout>
-                            <Internmonthlycard />
-                        </Internlayout>
-                    }
-                />
-
-            </Routes>
-        </BrowserRouter>
-    );
+        <Route
+          path="/internmonthlycard"
+          element={
+            <Internlayout>
+              <Internmonthlycard />
+            </Internlayout>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
