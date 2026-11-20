@@ -7,6 +7,8 @@ const staffRoute = require("./Routes/staffRoute");
 const batchRoute = require("./Routes/batchRoute");
 // const branchRoute = require("./Routes/branchRoute");
 const mentorBatchRoute = require("./Routes/mentorBatchRoute");
+const timingRoute = require("./Routes/timingRoute");
+const weeklyScheduleRoute = require("./Routes/weeklyScheduleRoute");
 
 const app = express();
 const PORT = process.env.PORT || 7000;
@@ -21,6 +23,8 @@ app.use("/staffmanagement", staffRoute);
 app.use("/batchmanagement", batchRoute);
 // app.use("/branchmanagement", branchRoute);
 app.use("/mentorbatches", mentorBatchRoute);
+app.use("/timemanagement", timingRoute);
+app.use("/weeklyschedule", weeklyScheduleRoute);
 
 
 app.listen(PORT, () => {

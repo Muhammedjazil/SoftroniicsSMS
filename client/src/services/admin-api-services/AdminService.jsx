@@ -34,14 +34,30 @@ const AdminService = () => {
     return response.data;
   };
 
-  // ======== Branch & Timing ======== //
+  // ======== Branch & Timing Management ======== //
   const takebranch = async () => {
     const response = await axiosPrivate.get("/branchmanagement");
     return response.data;
   };
 
-  const taketiming = async () => {
-    const response = await axiosPrivate.get("/timemanagement");
+  const taketiming = async (branchId) => {
+    const params = branchId && branchId !== "All Branches" ? { branch: branchId } : {};
+    const response = await axiosPrivate.get("/timemanagement", { params });
+    return response.data;
+  };
+
+  const createtiming = async (timingData) => {
+    const response = await axiosPrivate.post("/timemanagement", timingData);
+    return response.data;
+  };
+
+  const updatetiming = async (id, timingData) => {
+    const response = await axiosPrivate.put(`/timemanagement/${id}`, timingData);
+    return response.data;
+  };
+
+  const removetiming = async (id) => {
+    const response = await axiosPrivate.delete(`/timemanagement/${id}`);
     return response.data;
   };
 
@@ -97,6 +113,27 @@ const AdminService = () => {
     return response.data;
   };
 
+  // ======== Weekly Schedule Matrix ======== //
+  const takeweeklyschedule = async ({ branchId, startDate }) => {
+    const response = await axiosPrivate.get("/weeklyschedule", {
+      params: { branchId, startDate },
+    });
+    return response.data;
+  };
+
+  const saveweeklyschedulecell = async (cellPayload) => {
+    const response = await axiosPrivate.post("/weeklyschedule/cell", cellPayload);
+    return response.data;
+  };
+
+  const clonenextweeklyschedule = async ({ branchId, startDate }) => {
+    const response = await axiosPrivate.post("/weeklyschedule/clone-next", {
+      branchId,
+      startDate,
+    });
+    return response.data;
+  };
+
   return {
     newrolecreate,
     takeroles,
@@ -106,6 +143,9 @@ const AdminService = () => {
     takeroletitle,
     takebranch,
     taketiming,
+    createtiming,
+    updatetiming,
+    removetiming,
     createbatch,
     takebatches,
     takebatchbyid,
@@ -115,6 +155,9 @@ const AdminService = () => {
     takeinternsbybranch,
     takementors,
     takementorschedule,
+    takeweeklyschedule,
+    saveweeklyschedulecell,
+    clonenextweeklyschedule,
   };
 };
 

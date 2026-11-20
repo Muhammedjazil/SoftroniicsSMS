@@ -1,29 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './TimingsManagement.css';
 import { LuUser } from 'react-icons/lu';
 import { FiChevronDown, FiEdit2 } from 'react-icons/fi';
+import AdminService from "../../../services/admin-api-services/AdminService"
 
 const TimingsManagement = () => {
+  const { takebranch, taketiming, createtiming, updatetiming } = AdminService();
+
   const [activeTab, setActiveTab] = useState('timings'); // 'timings' | 'new-timing' | 'edit-timing'
-  const [branchFilter, setBranchFilter] = useState('calicut');
+  const [branchFilter, setBranchFilter] = useState('');
   const [editingId, setEditingId] = useState(null);
+
+  const [branches, setBranches] = useState([]);
+  const [timings, setTimings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [branchName, setBranchName] = useState('');
+  const [branchId, setBranchId] = useState('');
   const [timeError, setTimeError] = useState('');
 
-  const [timings, setTimings] = useState([
-    { id: 1, start: '08:30', end: '11:00', label: '08:30 AM - 11:00 AM', branch: 'calicut' },
-    { id: 2, start: '11:00', end: '13:30', label: '11:00 AM - 01:30 PM', branch: 'calicut' },
-    { id: 3, start: '14:00', end: '17:00', label: '02:00 PM - 05:00 PM', branch: 'calicut' },
-    { id: 4, start: '09:30', end: '12:00', label: '09:30 AM - 12:00 PM', branch: 'calicut' },
-    { id: 5, start: '10:00', end: '13:00', label: '10:00 AM - 01:00 PM', branch: 'calicut' },
-    { id: 6, start: '09:00', end: '11:00', label: '09:00 AM - 11:00 AM', branch: 'calicut' },
-  ]);
-
-  const branches = ['calicut', 'perinthalmanna', 'kochi', 'kannur', 'trivandrum'];
-
+  // Convert 24-hour ("14:00") -> 12-hour ("02:00 PM")
   const formatTo12Hour = (time24) => {
     if (!time24) return '';
     const [hourStr, minute] = time24.split(':');
@@ -33,16 +31,81 @@ const TimingsManagement = () => {
     return `${String(hour).padStart(2, '0')}:${minute} ${ampm}`;
   };
 
+  // Convert 12-hour ("02:00 PM") -> 24-hour ("14:00") for <input type="time">
+  const parse12To24Hour = (time12) => {
+    if (!time12) return '';
+    const match = time12.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return '';
+    let hour = parseInt(match[1], 10);
+    const minute = match[2];
+    const modifier = match[3].toUpperCase();
+
+    if (modifier === 'PM' && hour !== 12) hour += 12;
+    if (modifier === 'AM' && hour === 12) hour = 0;
+
+    return `${String(hour).padStart(2, '0')}:${minute}`;
+  };
+
+  // Normalize API Timing record
+  const normalizeTiming = useCallback((item) => {
+    const parts = (item.timeSlot || '').split('-').map((p) => p.trim());
+    const start = parts[0] ? parse12To24Hour(parts[0]) : '';
+    const end = parts[1] ? parse12To24Hour(parts[1]) : '';
+    const bObj = typeof item.branch === 'object' && item.branch !== null ? item.branch : null;
+
+    return {
+      id: item._id,
+      start,
+      end,
+      label: item.timeSlot,
+      branchId: bObj ? bObj._id : item.branch || '',
+      branchName: bObj ? bObj.branchName || bObj.name : '',
+    };
+  }, []);
+
+  // Load initial branches and timings
+  const fetchInitialData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [branchesRes, timingsRes] = await Promise.all([
+        takebranch(),
+        taketiming(),
+      ]);
+
+      const rawBranches = Array.isArray(branchesRes) ? branchesRes : branchesRes?.data || [];
+      const rawTimings = Array.isArray(timingsRes) ? timingsRes : timingsRes?.data || [];
+
+      setBranches(rawBranches);
+      setTimings(rawTimings.map(normalizeTiming));
+
+      if (rawBranches.length > 0) {
+        const calicut = rawBranches.find(
+          (b) => (b.branchName || b.name || '').toLowerCase() === 'calicut'
+        );
+        setBranchFilter(calicut ? calicut._id : rawBranches[0]._id);
+      }
+    } catch (error) {
+      console.error('Failed to load timings data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [normalizeTiming]);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
+
   const resetForm = () => {
     setStartTime('');
     setEndTime('');
-    setBranchName('');
+    setBranchId('');
     setEditingId(null);
     setTimeError('');
   };
 
   const handleOpenNew = () => {
     resetForm();
+    if (branchFilter) setBranchId(branchFilter);
     setActiveTab('new-timing');
   };
 
@@ -50,7 +113,7 @@ const TimingsManagement = () => {
     setEditingId(item.id);
     setStartTime(item.start);
     setEndTime(item.end);
-    setBranchName(item.branch);
+    setBranchId(item.branchId);
     setTimeError('');
     setActiveTab('edit-timing');
   };
@@ -73,36 +136,49 @@ const TimingsManagement = () => {
     }
   };
 
-  const handleSaveTiming = (e) => {
+  const handleSaveTiming = async (e) => {
     e.preventDefault();
-    if (!startTime || !endTime || !branchName) return;
+    if (!startTime || !endTime || !branchId || submitting) return;
 
     if (endTime <= startTime) {
       setTimeError('End time must be later than start time.');
       return;
     }
 
-    const label = `${formatTo12Hour(startTime)} - ${formatTo12Hour(endTime)}`;
+    const timeSlot = `${formatTo12Hour(startTime)} - ${formatTo12Hour(endTime)}`;
+    const payload = {
+      branch: branchId,
+      timeSlot,
+    };
 
-    if (activeTab === 'edit-timing' && editingId) {
-      setTimings((prev) =>
-        prev.map((t) =>
-          t.id === editingId ? { ...t, start: startTime, end: endTime, label, branch: branchName } : t
-        )
-      );
-    } else {
-      setTimings((prev) => [
-        ...prev,
-        { id: Date.now(), start: startTime, end: endTime, label, branch: branchName },
-      ]);
+    setSubmitting(true);
+    try {
+      if (activeTab === 'edit-timing' && editingId) {
+        const res = await updatetiming(editingId, payload);
+        const updated = res?.data || res;
+        setTimings((prev) =>
+          prev.map((t) => (t.id === editingId ? normalizeTiming(updated) : t))
+        );
+      } else {
+        const res = await createtiming(payload);
+        const created = res?.data || res;
+        setTimings((prev) => [...prev, normalizeTiming(created)]);
+      }
+
+      setBranchFilter(branchId);
+      resetForm();
+      setActiveTab('timings');
+    } catch (error) {
+      console.error('Error saving timing:', error);
+      alert(error?.response?.data?.message || 'Failed to save timing');
+    } finally {
+      setSubmitting(false);
     }
-
-    setBranchFilter(branchName);
-    resetForm();
-    setActiveTab('timings');
   };
 
-  const filteredTimings = timings.filter((t) => t.branch === branchFilter);
+  const filteredTimings = timings.filter((t) =>
+    branchFilter ? t.branchId === branchFilter : true
+  );
 
   return (
     <div className="tmg-mgmt-container">
@@ -112,7 +188,13 @@ const TimingsManagement = () => {
           <nav className="tmg-mgmt-breadcrumb">
             <span>Settings</span>
             <span className="tmg-mgmt-breadcrumb-separator">&gt;</span>
-            <span>{activeTab === 'timings' ? 'timings' : 'new-timing'}</span>
+            <span>
+              {activeTab === 'timings'
+                ? 'timings'
+                : activeTab === 'edit-timing'
+                ? 'edit-timing'
+                : 'new-timing'}
+            </span>
           </nav>
         </div>
 
@@ -168,8 +250,8 @@ const TimingsManagement = () => {
                     onChange={(e) => setBranchFilter(e.target.value)}
                   >
                     {branches.map((br) => (
-                      <option key={br} value={br}>
-                        {br}
+                      <option key={br._id} value={br._id}>
+                        {br.branchName || br.name}
                       </option>
                     ))}
                   </select>
@@ -178,7 +260,9 @@ const TimingsManagement = () => {
               </div>
             </div>
 
-            {filteredTimings.length === 0 ? (
+            {loading ? (
+              <p className="tmg-mgmt-empty-text">Loading timings...</p>
+            ) : filteredTimings.length === 0 ? (
               <p className="tmg-mgmt-empty-text">No timings added for this branch yet.</p>
             ) : (
               <div className="tmg-mgmt-pills-grid">
@@ -243,18 +327,21 @@ const TimingsManagement = () => {
                 <div className="tmg-mgmt-select-wrapper">
                   <select
                     className="tmg-mgmt-select-input tmg-mgmt-select-input--form"
-                    value={branchName}
-                    onChange={(e) => setBranchName(e.target.value)}
+                    value={branchId}
+                    onChange={(e) => setBranchId(e.target.value)}
                     required
                   >
                     <option value="" disabled>
                       Choose Branch
                     </option>
-                    {branches.map((br) => (
-                      <option key={br} value={br}>
-                        {br.charAt(0).toUpperCase() + br.slice(1)}
-                      </option>
-                    ))}
+                    {branches.map((br) => {
+                      const label = br.branchName || br.name || '';
+                      return (
+                        <option key={br._id} value={br._id}>
+                          {label.charAt(0).toUpperCase() + label.slice(1)}
+                        </option>
+                      );
+                    })}
                   </select>
                   <FiChevronDown className="tmg-mgmt-select-arrow" />
                 </div>
@@ -275,9 +362,13 @@ const TimingsManagement = () => {
               <button
                 type="submit"
                 className="tmg-mgmt-submit-btn"
-                disabled={Boolean(timeError)}
+                disabled={Boolean(timeError) || submitting}
               >
-                {activeTab === 'edit-timing' ? 'Save Timing' : 'Create Timing'}
+                {submitting
+                  ? 'Saving...'
+                  : activeTab === 'edit-timing'
+                  ? 'Save Timing'
+                  : 'Create Timing'}
               </button>
             </div>
           </form>

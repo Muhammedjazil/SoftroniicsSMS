@@ -1,57 +1,98 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './WeeklySchedule.css';
 import { LuUser, LuSearch, LuEye, LuX } from 'react-icons/lu';
 import { FiChevronDown, FiEdit3, FiCalendar } from 'react-icons/fi';
+import AdminService from "../../../services/admin-api-services/AdminService"
 
 const WeeklySchedule = () => {
-  const [branchFilter, setBranchFilter] = useState('calicut');
-  const [startDate, setStartDate] = useState('2026-11-08');
+  const {
+    takebranch,
+    takeweeklyschedule,
+    saveweeklyschedulecell,
+    clonenextweeklyschedule,
+  } = AdminService();
+
+  const [branches, setBranches] = useState([]);
+  const [branchFilter, setBranchFilter] = useState('');
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+
   const [batchSearch, setBatchSearch] = useState('');
   const [previewBatch, setPreviewBatch] = useState(null);
   const [dragOverCell, setDragOverCell] = useState(null);
   const [editingNoteKey, setEditingNoteKey] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-  const subjects = ['PYTHON', 'JAVASCRIPT', 'REACT', 'NODE & EXPRESS', 'MONGODB', 'UI/UX FIGMA'];
 
-  const allBatches = [
-    { id: 'b1', name: 'DA_BATCH4', course: 'DATA ANALYTICS', interns: 1, branch: 'calicut' },
-    { id: 'b2', name: 'DS_BATCH1', course: 'DATA SCIENCE', interns: 1, branch: 'calicut' },
-    { id: 'b3', name: 'DA_BATCH3', course: 'DATA ANALYTICS', interns: 16, branch: 'calicut' },
-    { id: 'b4', name: 'DA_BATCH2', course: 'DATA ANALYTICS', interns: 15, branch: 'calicut' },
-    { id: 'b5', name: 'DA_BATCH1', course: 'DATA ANALYTICS', interns: 12, branch: 'calicut' },
-    { id: 'b6', name: 'MERN_batch01', course: 'MERN 6 MONTH', interns: 14, branch: 'calicut' },
-    { id: 'b7', name: 'MERN_batch_02', course: 'MERN 6 MONTH', interns: 10, branch: 'calicut' },
-    { id: 'b8', name: 'PY_Batch old 01', course: 'PYTHON 6 MONTH', interns: 8, branch: 'calicut' },
-  ];
+  const [allBatches, setAllBatches] = useState([]);
+  const [mentors, setMentors] = useState([]);
+  const [subjects, setSubjects] = useState([]);
 
-  const mentors = [
-    {
-      id: 'm1',
-      name: 'MOHAMMED NASIH',
-      branch: 'calicut',
-      slots: ['09:30 AM - 12:00 PM', '11:00 AM - 01:30 PM', '02:00 PM - 05:00 PM'],
-    },
-    { id: 'm2', name: 'SHAHAL KP', branch: 'calicut', slots: [] },
-    { id: 'm3', name: 'HIBA C', branch: 'calicut', slots: [] },
-    { id: 'm4', name: 'ARJUN P', branch: 'calicut', slots: [] },
-  ];
-
-  // Schedule state keyed by `${mentorId}_${slot}_${day}`
+  // Schedule state keyed by `${mentorId}_${timeId}_${day}`
   const [scheduleData, setScheduleData] = useState({});
 
+  // 1. Load branches on mount
+  useEffect(() => {
+    const loadBranches = async () => {
+      try {
+        const res = await takebranch();
+        const rawBranches = Array.isArray(res) ? res : res?.data || [];
+        setBranches(rawBranches);
+
+        if (rawBranches.length > 0) {
+          const calicut = rawBranches.find(
+            (b) => (b.branchName || b.name || '').toLowerCase() === 'calicut'
+          );
+          setBranchFilter(calicut ? calicut._id : rawBranches[0]._id);
+        }
+      } catch (err) {
+        console.error('Failed to load branches:', err);
+      }
+    };
+    loadBranches();
+  }, []);
+
+  // 2. Load weekly schedule matrix whenever branchFilter or startDate changes
+  const fetchMatrix = useCallback(async () => {
+    if (!branchFilter || !startDate) return;
+
+    setLoading(true);
+    try {
+      const data = await takeweeklyschedule({
+        branchId: branchFilter,
+        startDate,
+      });
+
+      setMentors(data.mentors || []);
+      setAllBatches(data.batches || []);
+      setSubjects(data.subjects || []);
+      setScheduleData(data.scheduleMap || {});
+    } catch (err) {
+      console.error('Failed to load weekly schedule matrix:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [branchFilter, startDate]);
+
+  useEffect(() => {
+    fetchMatrix();
+  }, [fetchMatrix]);
+
   const endDateFormatted = useMemo(() => {
-    if (!startDate) return '11/14/2026';
+    if (!startDate) return '';
     const dt = new Date(startDate);
     dt.setDate(dt.getDate() + 6);
     return `${dt.getMonth() + 1}/${dt.getDate()}/${dt.getFullYear()}`;
   }, [startDate]);
 
   // Track which batches have at least one slot assigned (highlights green in sidebar)
-  const assignedBatchNames = useMemo(() => {
-    const set = new Set(['MERN_batch01', 'MERN_batch_02']);
+  const assignedBatchIds = useMemo(() => {
+    const set = new Set();
     Object.values(scheduleData).forEach((entry) => {
-      if (entry.batch) set.add(entry.batch);
+      if (entry.batchId) set.add(entry.batchId);
     });
     return set;
   }, [scheduleData]);
@@ -60,56 +101,129 @@ const WeeklySchedule = () => {
     b.name.toLowerCase().includes(batchSearch.toLowerCase().trim())
   );
 
-  const handleDragStart = (e, batchName) => {
-    e.dataTransfer.setData('text/plain', batchName);
+  // Persist a single cell change to backend
+  const persistCell = async ({ mentorId, timeId, day, batchId, subjectId, note }) => {
+    try {
+      await saveweeklyschedulecell({
+        startDate,
+        branchId: branchFilter,
+        mentorId,
+        timeId,
+        day,
+        batchId,
+        subjectId,
+        note,
+      });
+    } catch (err) {
+      console.error('Failed to save cell:', err);
+    }
+  };
+
+  const handleDragStart = (e, batch) => {
+    e.dataTransfer.setData(
+      'application/json',
+      JSON.stringify({ id: batch._id, name: batch.name })
+    );
   };
 
   // Allows only ONE batch per time slot (replaces any existing batch in that slot)
-  const handleDropBatch = (e, cellKey) => {
+  const handleDropBatch = async (e, mentorId, timeId, day) => {
     e.preventDefault();
     setDragOverCell(null);
-    const batchName = e.dataTransfer.getData('text/plain');
-    if (!batchName) return;
 
-    setScheduleData((prev) => {
-      const existing = prev[cellKey] || { batch: null, subject: '', note: '' };
-      return {
-        ...prev,
-        [cellKey]: {
-          ...existing,
-          batch: batchName,
-        },
-      };
+    const raw = e.dataTransfer.getData('application/json');
+    if (!raw) return;
+
+    const droppedBatch = JSON.parse(raw);
+    const cellKey = `${mentorId}_${timeId}_${day}`;
+    const existing = scheduleData[cellKey] || {
+      batchId: null,
+      batchName: null,
+      subjectId: '',
+      note: '',
+    };
+
+    const updatedCell = {
+      ...existing,
+      batchId: droppedBatch.id,
+      batchName: droppedBatch.name,
+    };
+
+    setScheduleData((prev) => ({
+      ...prev,
+      [cellKey]: updatedCell,
+    }));
+
+    await persistCell({
+      mentorId,
+      timeId,
+      day,
+      batchId: updatedCell.batchId,
+      subjectId: updatedCell.subjectId,
+      note: updatedCell.note,
     });
   };
 
-  const handleRemoveAssignedBatch = (cellKey) => {
-    setScheduleData((prev) => {
-      const existing = prev[cellKey];
-      if (!existing) return prev;
-      return {
-        ...prev,
-        [cellKey]: {
-          ...existing,
-          batch: null,
-        },
-      };
+  const handleRemoveAssignedBatch = async (mentorId, timeId, day) => {
+    const cellKey = `${mentorId}_${timeId}_${day}`;
+    const existing = scheduleData[cellKey];
+    if (!existing) return;
+
+    const updatedCell = {
+      ...existing,
+      batchId: null,
+      batchName: null,
+    };
+
+    setScheduleData((prev) => ({
+      ...prev,
+      [cellKey]: updatedCell,
+    }));
+
+    await persistCell({
+      mentorId,
+      timeId,
+      day,
+      batchId: null,
+      subjectId: updatedCell.subjectId,
+      note: updatedCell.note,
     });
   };
 
-  const handleSubjectChange = (cellKey, subject) => {
-    setScheduleData((prev) => {
-      const existing = prev[cellKey] || { batch: null, subject: '', note: '' };
-      return {
-        ...prev,
-        [cellKey]: { ...existing, subject },
-      };
+  const handleSubjectChange = async (mentorId, timeId, day, subjectId) => {
+    const cellKey = `${mentorId}_${timeId}_${day}`;
+    const existing = scheduleData[cellKey] || {
+      batchId: null,
+      batchName: null,
+      subjectId: '',
+      note: '',
+    };
+
+    const updatedCell = { ...existing, subjectId };
+
+    setScheduleData((prev) => ({
+      ...prev,
+      [cellKey]: updatedCell,
+    }));
+
+    await persistCell({
+      mentorId,
+      timeId,
+      day,
+      batchId: updatedCell.batchId,
+      subjectId: updatedCell.subjectId,
+      note: updatedCell.note,
     });
   };
 
   const handleNoteChange = (cellKey, note) => {
     setScheduleData((prev) => {
-      const existing = prev[cellKey] || { batch: null, subject: '', note: '' };
+      const existing = prev[cellKey] || {
+        batchId: null,
+        batchName: null,
+        subjectId: '',
+        note: '',
+      };
       return {
         ...prev,
         [cellKey]: { ...existing, note },
@@ -117,10 +231,76 @@ const WeeklySchedule = () => {
     });
   };
 
-  const handleAdvanceWeek = () => {
-    const dt = new Date(startDate);
-    dt.setDate(dt.getDate() + 7);
-    setStartDate(dt.toISOString().split('T')[0]);
+  const handleNoteBlur = async (mentorId, timeId, day) => {
+    setEditingNoteKey(null);
+    const cellKey = `${mentorId}_${timeId}_${day}`;
+    const cell = scheduleData[cellKey];
+    if (!cell) return;
+
+    await persistCell({
+      mentorId,
+      timeId,
+      day,
+      batchId: cell.batchId,
+      subjectId: cell.subjectId,
+      note: cell.note,
+    });
+  };
+
+  const handleAdvanceWeek = async () => {
+    if (!startDate || !branchFilter) return;
+    try {
+      const res = await clonenextweeklyschedule({
+        branchId: branchFilter,
+        startDate,
+      });
+      if (res?.nextStartDate) {
+        setStartDate(res.nextStartDate);
+      } else {
+        const dt = new Date(startDate);
+        dt.setDate(dt.getDate() + 7);
+        setStartDate(dt.toISOString().split('T')[0]);
+      }
+    } catch (err) {
+      console.error('Failed to advance week:', err);
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['Mentor', 'Time Slot', ...days.flatMap((d) => [d, `${d} Subject`, `${d} Note`])];
+    const rows = [];
+
+    mentors.forEach((mentor) => {
+      if (mentor.slots.length === 0) {
+        rows.push([mentor.name, '-', ...Array(days.length * 3).fill('')]);
+      } else {
+        mentor.slots.forEach((slot) => {
+          const row = [mentor.name, slot.timeSlot];
+          days.forEach((day) => {
+            const cellKey = `${mentor._id}_${slot._id}_${day}`;
+            const cell = scheduleData[cellKey] || {};
+            const subjName =
+              subjects.find((s) => s._id === cell.subjectId)?.name || '';
+            row.push(cell.batchName || '', subjName, cell.note || '');
+          });
+          rows.push(row);
+        });
+      }
+    });
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers, ...rows]
+        .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `weekly_schedule_${startDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -169,12 +349,12 @@ const WeeklySchedule = () => {
 
           <div className="wk-sched-batch-list">
             {filteredSidebarBatches.map((batch) => {
-              const isAssigned = assignedBatchNames.has(batch.name);
+              const isAssigned = assignedBatchIds.has(batch._id);
               return (
                 <div
-                  key={batch.id}
+                  key={batch._id}
                   draggable
-                  onDragStart={(e) => handleDragStart(e, batch.name)}
+                  onDragStart={(e) => handleDragStart(e, batch)}
                   className={`wk-sched-batch-pill ${
                     isAssigned ? 'wk-sched-batch-pill--assigned' : ''
                   }`}
@@ -209,10 +389,11 @@ const WeeklySchedule = () => {
                   value={branchFilter}
                   onChange={(e) => setBranchFilter(e.target.value)}
                 >
-                  <option value="calicut">calicut</option>
-                  <option value="kochi">kochi</option>
-                  <option value="kannur">kannur</option>
-                  <option value="trivandrum">trivandrum</option>
+                  {branches.map((br) => (
+                    <option key={br._id} value={br._id}>
+                      {br.branchName || br.name}
+                    </option>
+                  ))}
                 </select>
                 <FiChevronDown className="wk-sched-select-arrow" />
               </div>
@@ -226,7 +407,11 @@ const WeeklySchedule = () => {
 
               <span className="wk-sched-to-badge">To: {endDateFormatted}</span>
 
-              <button type="button" className="wk-sched-export-btn">
+              <button
+                type="button"
+                className="wk-sched-export-btn"
+                onClick={handleExportCSV}
+              >
                 Export
               </button>
 
@@ -258,121 +443,156 @@ const WeeklySchedule = () => {
               </thead>
 
               <tbody className="wk-sched-tbody">
-                {mentors.map((mentor) => {
-                  if (mentor.slots.length === 0) {
-                    return (
-                      <tr key={mentor.id}>
-                        <td className="wk-sched-mentor-cell">{mentor.name}</td>
-                        <td className="wk-sched-time-cell">-</td>
-                        <td colSpan={days.length * 2} className="wk-sched-no-timings">
-                          No timings assigned for this branch
-                        </td>
-                      </tr>
-                    );
-                  }
+                {loading ? (
+                  <tr>
+                    <td colSpan={2 + days.length * 2} className="wk-sched-no-timings">
+                      Loading weekly schedule...
+                    </td>
+                  </tr>
+                ) : mentors.length === 0 ? (
+                  <tr>
+                    <td colSpan={2 + days.length * 2} className="wk-sched-no-timings">
+                      No mentors found for this branch
+                    </td>
+                  </tr>
+                ) : (
+                  mentors.map((mentor) => {
+                    if (mentor.slots.length === 0) {
+                      return (
+                        <tr key={mentor._id}>
+                          <td className="wk-sched-mentor-cell">{mentor.name}</td>
+                          <td className="wk-sched-time-cell">-</td>
+                          <td colSpan={days.length * 2} className="wk-sched-no-timings">
+                            No timings assigned for this branch
+                          </td>
+                        </tr>
+                      );
+                    }
 
-                  return mentor.slots.map((slot, slotIdx) => (
-                    <tr key={`${mentor.id}_${slot}`}>
-                      {slotIdx === 0 && (
-                        <td
-                          rowSpan={mentor.slots.length}
-                          className="wk-sched-mentor-cell"
-                        >
-                          {mentor.name}
-                        </td>
-                      )}
+                    return mentor.slots.map((slot, slotIdx) => (
+                      <tr key={`${mentor._id}_${slot._id}`}>
+                        {slotIdx === 0 && (
+                          <td
+                            rowSpan={mentor.slots.length}
+                            className="wk-sched-mentor-cell"
+                          >
+                            {mentor.name}
+                          </td>
+                        )}
 
-                      <td className="wk-sched-time-cell">{slot}</td>
+                        <td className="wk-sched-time-cell">{slot.timeSlot}</td>
 
-                      {days.map((day) => {
-                        const cellKey = `${mentor.id}_${slot}_${day}`;
-                        const cellData = scheduleData[cellKey] || {
-                          batch: null,
-                          subject: '',
-                          note: '',
-                        };
-                        const isOver = dragOverCell === cellKey;
+                        {days.map((day) => {
+                          const cellKey = `${mentor._id}_${slot._id}_${day}`;
+                          const cellData = scheduleData[cellKey] || {
+                            batchId: null,
+                            batchName: null,
+                            subjectId: '',
+                            note: '',
+                          };
+                          const isOver = dragOverCell === cellKey;
 
-                        return (
-                          <React.Fragment key={cellKey}>
-                            <td
-                              className={`wk-sched-drop-cell ${
-                                isOver ? 'wk-sched-drop-cell--over' : ''
-                              }`}
-                              onDragOver={(e) => {
-                                e.preventDefault();
-                                setDragOverCell(cellKey);
-                              }}
-                              onDragLeave={() => setDragOverCell(null)}
-                              onDrop={(e) => handleDropBatch(e, cellKey)}
-                            >
-                              <div className="wk-sched-drop-box">
-                                {!cellData.batch ? (
-                                  <span className="wk-sched-empty-slot-text">
-                                    No batches assigned
-                                  </span>
-                                ) : (
-                                  <div className="wk-sched-assigned-tags">
-                                    <span className="wk-sched-assigned-chip">
-                                      {cellData.batch}
-                                      <button
-                                        type="button"
-                                        className="wk-sched-chip-remove"
-                                        onClick={() => handleRemoveAssignedBatch(cellKey)}
-                                      >
-                                        <LuX />
-                                      </button>
-                                    </span>
-                                  </div>
-                                )}
-
-                                {editingNoteKey === cellKey ? (
-                                  <input
-                                    type="text"
-                                    className="wk-sched-note-input"
-                                    placeholder="Type note..."
-                                    value={cellData.note}
-                                    autoFocus
-                                    onBlur={() => setEditingNoteKey(null)}
-                                    onChange={(e) =>
-                                      handleNoteChange(cellKey, e.target.value)
-                                    }
-                                  />
-                                ) : (
-                                  <button
-                                    type="button"
-                                    className="wk-sched-note-trigger"
-                                    onClick={() => setEditingNoteKey(cellKey)}
-                                  >
-                                    <FiEdit3 />
-                                    <span>{cellData.note || 'Add Note'}</span>
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-
-                            <td className="wk-sched-subject-cell">
-                              <select
-                                className="wk-sched-subject-select"
-                                value={cellData.subject}
-                                onChange={(e) =>
-                                  handleSubjectChange(cellKey, e.target.value)
+                          return (
+                            <React.Fragment key={cellKey}>
+                              <td
+                                className={`wk-sched-drop-cell ${
+                                  isOver ? 'wk-sched-drop-cell--over' : ''
+                                }`}
+                                onDragOver={(e) => {
+                                  e.preventDefault();
+                                  setDragOverCell(cellKey);
+                                }}
+                                onDragLeave={() => setDragOverCell(null)}
+                                onDrop={(e) =>
+                                  handleDropBatch(e, mentor._id, slot._id, day)
                                 }
                               >
-                                <option value="">Choose Subject</option>
-                                {subjects.map((sub) => (
-                                  <option key={sub} value={sub}>
-                                    {sub}
-                                  </option>
-                                ))}
-                              </select>
-                            </td>
-                          </React.Fragment>
-                        );
-                      })}
-                    </tr>
-                  ));
-                })}
+                                <div className="wk-sched-drop-box">
+                                  {!cellData.batchName ? (
+                                    <span className="wk-sched-empty-slot-text">
+                                      No batches assigned
+                                    </span>
+                                  ) : (
+                                    <div className="wk-sched-assigned-tags">
+                                      <span className="wk-sched-assigned-chip">
+                                        {cellData.batchName}
+                                        <button
+                                          type="button"
+                                          className="wk-sched-chip-remove"
+                                          onClick={() =>
+                                            handleRemoveAssignedBatch(
+                                              mentor._id,
+                                              slot._id,
+                                              day
+                                            )
+                                          }
+                                        >
+                                          <LuX />
+                                        </button>
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {editingNoteKey === cellKey ? (
+                                    <input
+                                      type="text"
+                                      className="wk-sched-note-input"
+                                      placeholder="Type note..."
+                                      value={cellData.note}
+                                      autoFocus
+                                      onBlur={() =>
+                                        handleNoteBlur(mentor._id, slot._id, day)
+                                      }
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          e.target.blur();
+                                        }
+                                      }}
+                                      onChange={(e) =>
+                                        handleNoteChange(cellKey, e.target.value)
+                                      }
+                                    />
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      className="wk-sched-note-trigger"
+                                      onClick={() => setEditingNoteKey(cellKey)}
+                                    >
+                                      <FiEdit3 />
+                                      <span>{cellData.note || 'Add Note'}</span>
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+
+                              <td className="wk-sched-subject-cell">
+                                <select
+                                  className="wk-sched-subject-select"
+                                  value={cellData.subjectId}
+                                  onChange={(e) =>
+                                    handleSubjectChange(
+                                      mentor._id,
+                                      slot._id,
+                                      day,
+                                      e.target.value
+                                    )
+                                  }
+                                >
+                                  <option value="">Choose Subject</option>
+                                  {subjects.map((sub) => (
+                                    <option key={sub._id} value={sub._id}>
+                                      {sub.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+                            </React.Fragment>
+                          );
+                        })}
+                      </tr>
+                    ));
+                  })
+                )}
               </tbody>
             </table>
           </div>
