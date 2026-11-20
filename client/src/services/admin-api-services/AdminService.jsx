@@ -40,25 +40,25 @@ const AdminService = () => {
     return response.data;
   };
 
-  const takebranchbyid = async (id) => {
-    const response = await axiosPrivate.get(`/branchmanagement/${id}`);
-    return response.data;
-  };
+  // const takebranchbyid = async (id) => {
+  //   const response = await axiosPrivate.get(`/branchmanagement/${id}`);
+  //   return response.data;
+  // };
 
-  const createbranch = async (branchData) => {
-    const response = await axiosPrivate.post("/branchmanagement", branchData);
-    return response.data;
-  };
+  // const createbranch = async (branchData) => {
+  //   const response = await axiosPrivate.post("/branchmanagement", branchData);
+  //   return response.data;
+  // };
 
-  const updatebranch = async (id, branchData) => {
-    const response = await axiosPrivate.put(`/branchmanagement/${id}`, branchData);
-    return response.data;
-  };
+  // const updatebranch = async (id, branchData) => {
+  //   const response = await axiosPrivate.put(`/branchmanagement/${id}`, branchData);
+  //   return response.data;
+  // };
 
-  const removebranch = async (id) => {
-    const response = await axiosPrivate.delete(`/branchmanagement/${id}`);
-    return response.data;
-  };
+  // const removebranch = async (id) => {
+  //   const response = await axiosPrivate.delete(`/branchmanagement/${id}`);
+  //   return response.data;
+  // };
 
   // ======== Timing Management ======== //
   const taketiming = async (branchId) => {
@@ -242,7 +242,19 @@ const AdminService = () => {
   return response.data;
 };
 
-  
+const getallstaff=async()=>{
+  let response=await axiosPrivate.get("/staffmanagement/allstaff")
+  return response.data;
+}
+  const updatestaff=async(id,data)=>{
+    let response=await axiosPrivate.put(`staffmanagement/${id}`,data)
+    return response.data
+  }
+
+ const staffremove=async(id)=>{
+  let response=await axiosPrivate.delete(`/staffmanagement/${id}`)
+  return response.data;
+ }
 
   return {
     newrolecreate,
@@ -282,7 +294,10 @@ const AdminService = () => {
     createtopic,
     updatetopic,
     removetopic,
-    createstaff
+    createstaff,
+    getallstaff,
+    updatestaff,
+    staffremove
   };
 };
 
