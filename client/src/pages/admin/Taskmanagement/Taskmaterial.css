@@ -150,18 +150,24 @@
 }
 
 .tasks-material-tabs button:hover:not(.tasks-material-tab-active) {
-    border-color: #f47a13;
-    color: #f47a13;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .tasks-material-tabs button.tasks-material-tab-active {
-    background: #f47713;
-    border-color: #f47713;
+    background: #ff790e;
+    border-color: #ff790e;
     color: #ffffff;
-
     font-weight: 600;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
+}
 
-    box-shadow: 0 2px 5px rgba(244, 119, 19, 0.16);
+.tasks-material-tabs button.tasks-material-tab-active:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.94);
 }
 
 

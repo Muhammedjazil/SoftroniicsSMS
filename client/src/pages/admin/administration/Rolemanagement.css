@@ -141,10 +141,10 @@
 }
 
 .Rolemanagement-hero1 button.active {
-    background: #ed8019;
-    border-color: #ed8019;
+    background: #ff790e;
+    border-color: #ff790e;
     color: #ffffff;
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ed8019;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
 }
 
 .Rolemanagement-hero1 button.active:hover {
@@ -917,4 +917,79 @@
         align-items: flex-start;
         gap: 10px;
     }
+}
+/* STATUS BUTTON */
+
+.Rolemanagement-status {
+    display: inline-block;
+    padding: 0;
+    border: none;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.Rolemanagement-status button {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+/* ACTIVE - GREEN */
+
+.Rolemanagement-status.active-status button {
+    background: #dcf8e6;
+    color: #29965a;
+}
+
+/* INACTIVE - RED */
+
+.Rolemanagement-status.inactive-status button {
+    background: #ffe5e5;
+    color: #d94c4c;
+}
+
+.Rolemanagement-status button:hover {
+    opacity: 0.8;
+}
+
+.Rolemanagement-pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.Rolemanagement-pagination span {
+    color: #777777;
+    font-size: 12px;
+}
+
+.Rolemanagement-pagination button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #e3e5e8;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #777777;
+    cursor: pointer;
+}
+
+.Rolemanagement-pagination button:hover:not(:disabled) {
+    background: #ff790e;
+    color: #ffffff;
+    border-color: #ff790e;
+}
+
+.Rolemanagement-pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
