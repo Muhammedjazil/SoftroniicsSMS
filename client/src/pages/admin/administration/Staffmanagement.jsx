@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 
 import {
@@ -15,24 +14,6 @@ import {
 import react from "../../../assets/react.svg";
 import "./staffmanagement.css";
 import AdminService from "../../../services/admin-api-services/AdminService";
-
-// =====================================
-// OPTIONS
-// =====================================
-
-// const timingOptions = [
-//   "09:30 AM - 12:00 PM",
-//   "11:00 AM - 01:30 PM",
-//   "02:00 PM - 05:00 PM",
-//   "08:30 AM - 11:00 AM"
-// ];
-
-// const branchOptions = [
-//   "calicut",
-//   "perinthalmanna",
-//   "palakkad",
-//   "kochi"
-// ];
 
 const initialForm = {
   fullname: "",
@@ -160,7 +141,7 @@ const sampleStaff = [
 // =====================================
 
 export const Staffmanagement = () => {
-  const { takeroletitle,takebranch,taketiming,createstaff,getallstaff,updatestaff,staffremove} = AdminService();
+  const { takeroletitle,takebranch,taketiming,createstaff } = AdminService();
 
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
@@ -179,10 +160,26 @@ export const Staffmanagement = () => {
 
   const[branchOptions,setBranchOptions]=useState([])
   const[timingOptions,setTimingOptions]=useState([])
-
-  // const[allstaff,setStaff]=useState([])
   // =====================================
-  // FETCH ROLES
+  // HELPERS TO RESOLVE OBJECTS OR STRINGS
+  // =====================================
+
+  const getBranchName = (branchVal) => {
+    if (!branchVal) return "-";
+    if (typeof branchVal === "object") return branchVal.branchName || branchVal.name || "-";
+    const found = branchOptions.find((b) => b._id === branchVal);
+    return found?.branchName || found?.name || branchVal;
+  };
+
+  const getTimingLabel = (timingVal) => {
+    if (!timingVal) return "-";
+    if (typeof timingVal === "object") return timingVal.timeSlot || "-";
+    const found = timingOptions.find((t) => t._id === timingVal);
+    return found?.timeSlot || timingVal;
+  };
+
+  // =====================================
+  // FETCH ROLES, BRANCHES & TIMINGS
   // =====================================
 
 const fetchrole = async () => {
@@ -224,63 +221,6 @@ const fetchrole = async () => {
   }
 };
 
-const fetchallstaff = async () => {
-  try {
-    const response = await getallstaff();
-
-    const formattedStaff = response.map((staff) => ({
-      ...staff,
-
-      id: staff._id,
-
-      fullname: staff.fullName,
-      dateofbirth: staff.dateOfBirth?.slice(0, 10) || "",
-      phone: staff.staffPhoneNumber,
-      whatsapp: staff.staffWhatsAppNumber,
-      address: staff.staffPermanentAddress,
-
-      officialemail: staff.officialEmail,
-
-      // Keep IDs for dropdowns and editing
-      role: staff.role?._id || "",
-      typeemply: staff.role?.role || "",
-
-      branch: staff.branch?._id || "",
-      branchName: staff.branch?.branchName || "",
-
-      additionalBranches:
-        staff.multipleBranches?.map((item) => item._id) || [],
-
-      additionalBranchNames:
-        staff.multipleBranches?.map((item) => item.branchName) || [],
-
-      allowAdditionalBranches: staff.isMultipleBranch,
-
-      experience: staff.yearsOfExperience,
-      joindate: staff.dateOfJoining?.slice(0, 10) || "",
-      status: staff.employmentStatus,
-      resingnation: staff.resignationDate?.slice(0, 10) || "",
-
-      remark: staff.remarks,
-
-      mentorRole: staff.isMentor,
-
-      mentorTimings:
-        staff.time?.map((item) => item._id) || [],
-
-      mentorTimingNames:
-        staff.time?.map((item) => item.timeSlot) || []
-    }));
-
-    setAlldata(formattedStaff);
-
-    console.log("Formatted Staff:", formattedStaff);
-
-  } catch (error) {
-    console.error("Staff Fetch Error:", error);
-  }
-};
-
   useEffect(() => {
     fetchrole();
     fetchbranch();
@@ -293,16 +233,16 @@ const fetchallstaff = async () => {
   // =====================================
 
   const filteredStaff = allData.filter((value) => {
-   const matchesSearch = [
-  value.fullname,
-  value.email,
-  value.typeemply,
-  value.branchName,
-  value.phone
-]
-  .join(" ")
-  .toLowerCase()
-  .includes(search.toLowerCase());
+    const matchesSearch = [
+      value.fullname,
+      value.email,
+      value.typeemply,
+      value.branch,
+      value.phone
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
     const matchesDept =
       departmentFilter === "all" ||
@@ -310,7 +250,8 @@ const fetchallstaff = async () => {
 
     const matchesBranch =
       branchFilter === "all" ||
-      value.branch?.toLowerCase() === branchFilter.toLowerCase();
+      value.branch === branchFilter ||
+      branchLabel.toLowerCase() === branchFilter.toLowerCase();
 
     const matchesStatus =
       statusFilter === "all" ||
@@ -358,7 +299,7 @@ const fetchallstaff = async () => {
       staff.phone,
       staff.typeemply || getRoleName(staff.role),
       staff.department,
-      staff.branch,
+      getBranchName(staff.branch),
       staff.status
     ]);
 
@@ -603,19 +544,30 @@ if (editId !== null) {
   // If editId is null, CREATE new staff
   response = await createstaff(data);
 
-  alert("Staff created successfully!");
-}
+    alert("Staff created successfully!");
 
-console.log("Staff Response:", response);
+    // Add returned staff to the list
+    const savedStaff = response.data;
 
-// Refresh staff list
-await fetchallstaff();
+    setAlldata((prev) => [
+      ...prev,
+      {
+        ...savedStaff,
+        id: savedStaff._id,
+        fullname: savedStaff.fullName,
+        phone: savedStaff.staffPhoneNumber,
+        officialemail: savedStaff.officialEmail,
+        typeemply: savedStaff.role?.role || "",
+        branch: savedStaff.branch?.branchName || "",
+      },
+    ]);
 
 resetForm();
 setEditId(null);
 setView(null);
 setActiveTab("stafflist");
 }
+  }
  catch (error) {
     console.error(
       "Create Staff Error:",
@@ -792,6 +744,21 @@ setActiveTab("stafflist");
     </option>
   ))}
 </select>
+                <select
+                  value={branchFilter}
+                  onChange={(e) => setBranchFilter(e.target.value)}
+                >
+                  <option value="all">All Branches</option>
+                  {branchOptions.map((branch) => {
+                    const bId = typeof branch === "object" ? branch._id : branch;
+                    const bName = typeof branch === "object" ? branch.branchName : branch;
+                    return (
+                      <option key={bId} value={bId}>
+                        {bName}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
 
               <div className="staffactive">
@@ -859,9 +826,10 @@ setActiveTab("stafflist");
                       <td>
                         {value.typeemply || getRoleName(value.role)}
                       </td>
-<td className="staffbranchname">
-  {value.branchName || "-"}
-</td>
+
+                      <td className="staffbranchname">
+                        {value.branch}
+                      </td>
 
                       <td>
                         {value.mentorRole && (
@@ -1168,6 +1136,24 @@ setActiveTab("stafflist");
     </option>
   ))}
 </select>
+                    <select
+                      required
+                      name="branch"
+                      value={formData.branch}
+                      onChange={handlecreate}
+                    >
+                      <option value="">Choose Branch</option>
+
+                      {branchOptions.map((branch) => {
+                        const bId = typeof branch === "object" ? branch._id : branch;
+                        const bName = typeof branch === "object" ? branch.branchName : branch;
+                        return (
+                          <option key={bId} value={bId}>
+                            {bName}
+                          </option>
+                        );
+                      })}
+                    </select>
 
                     <div className="staffcheckbox">
                       <input
@@ -1217,6 +1203,48 @@ setActiveTab("stafflist");
     </div>
   </div>
 )}
+                  {formData.allowAdditionalBranches && (
+                    <div
+                      className="staff-additional-branches"
+                      style={{ gridColumn: "1 / -1" }}
+                    >
+                      <div className="staff-additional-heading">
+                        <strong>Additional Branches</strong>
+
+                        <span>
+                          (Select all additional branches this staff member can access)
+                        </span>
+                      </div>
+
+                      <div className="staff-additional-options">
+                        {branchOptions
+                          .filter((branch) => {
+                            const bId = typeof branch === "object" ? branch._id : branch;
+                            return bId !== formData.branch;
+                          })
+                          .map((branch) => {
+                            const bId = typeof branch === "object" ? branch._id : branch;
+                            const bName = typeof branch === "object" ? branch.branchName : branch;
+                            return (
+                              <label
+                                key={bId}
+                                className="staff-additional-option"
+                              >
+                                <input
+                                  type="checkbox"
+                                  value={bId}
+                                  checked={formData.additionalBranches.includes(bId)}
+                                  onChange={handleAdditionalBranchChange}
+                                />
+
+                                <span>{bName}</span>
+                              </label>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
+
                   {/* EXPERIENCE */}
 
                   <div className="staffprofessionalfield">
@@ -1359,6 +1387,28 @@ setActiveTab("stafflist");
     </option>
   ))}
 </select>
+                        <select
+                          value={selectedTiming}
+                          onChange={handleTimingChange}
+                        >
+                          <option value="">
+                            -- Select a Timing --
+                          </option>
+
+                          {timingOptions.map((timing) => {
+                            const tId = typeof timing === "object" ? timing._id : timing;
+                            const tLabel = typeof timing === "object" ? timing.timeSlot : timing;
+                            return (
+                              <option
+                                key={tId}
+                                value={tId}
+                                disabled={formData.mentorTimings.includes(tId)}
+                              >
+                                {tLabel}
+                              </option>
+                            );
+                          })}
+                        </select>
                       </div>
 
                       <div className="staff-selected-timings">
@@ -1398,6 +1448,35 @@ setActiveTab("stafflist");
     </p>
   )}
 </div>
+                        <div className="staff-timing-chips">
+                          {formData.mentorTimings.length > 0 ? (
+                            formData.mentorTimings.map((timing) => {
+                              const tKey = typeof timing === "object" ? timing._id : timing;
+                              return (
+                                <div
+                                  className="staff-timing-chip"
+                                  key={tKey}
+                                >
+                                  <FiClock />
+
+                                  <span>{getTimingLabel(timing)}</span>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => removeTiming(timing)}
+                                    aria-label={`Remove ${getTimingLabel(timing)}`}
+                                  >
+                                    <FiX />
+                                  </button>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <p className="staff-no-timings">
+                              No timings selected
+                            </p>
+                          )}
+                        </div>
                       </div>
 
                     </div>
@@ -1588,7 +1667,7 @@ setActiveTab("stafflist");
 
                 <div className="staffviewfield">
                   <h4>Branch</h4>
-                  <p>{view.branchName  || "-"}</p>
+                  <p>{view.branch || "-"}</p>
                 </div>
 
                 <div className="staffviewfield">
@@ -1637,14 +1716,17 @@ setActiveTab("stafflist");
 
                   <div className="staff-additional-options">
                     {(view.additionalBranches || []).length > 0 ? (
-                      view.additionalBranches.map((branch) => (
-                        <div
-                          className="staff-additional-option"
-                          key={branch}
-                        >
-                          <span>{branch}</span>
-                        </div>
-                      ))
+                      view.additionalBranches.map((branch) => {
+                        const bKey = typeof branch === "object" ? branch._id : branch;
+                        return (
+                          <div
+                            className="staff-additional-option"
+                            key={bKey}
+                          >
+                            <span>{getBranchName(branch)}</span>
+                          </div>
+                        );
+                      })
                     ) : (
                       <p>No additional branches selected</p>
                     )}
@@ -1666,15 +1748,18 @@ setActiveTab("stafflist");
 
                   <div className="staff-timing-chips">
                     {(view.mentorTimings || []).length > 0 ? (
-                      view.mentorTimings.map((timing) => (
-                        <div
-                          className="staff-timing-chip"
-                          key={timing}
-                        >
-                          <FiClock />
-                          <span>{timing}</span>
-                        </div>
-                      ))
+                      view.mentorTimings.map((timing) => {
+                        const tKey = typeof timing === "object" ? timing._id : timing;
+                        return (
+                          <div
+                            className="staff-timing-chip"
+                            key={tKey}
+                          >
+                            <FiClock />
+                            <span>{getTimingLabel(timing)}</span>
+                          </div>
+                        );
+                      })
                     ) : (
                       <p>No timings selected</p>
                     )}

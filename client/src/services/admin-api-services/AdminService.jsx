@@ -34,12 +34,33 @@ const AdminService = () => {
     return response.data;
   };
 
-  // ======== Branch & Timing Management ======== //
+  // ======== Branch Management ======== //
   const takebranch = async () => {
     const response = await axiosPrivate.get("/branchmanagement");
     return response.data;
   };
 
+  // const takebranchbyid = async (id) => {
+  //   const response = await axiosPrivate.get(`/branchmanagement/${id}`);
+  //   return response.data;
+  // };
+
+  // const createbranch = async (branchData) => {
+  //   const response = await axiosPrivate.post("/branchmanagement", branchData);
+  //   return response.data;
+  // };
+
+  // const updatebranch = async (id, branchData) => {
+  //   const response = await axiosPrivate.put(`/branchmanagement/${id}`, branchData);
+  //   return response.data;
+  // };
+
+  // const removebranch = async (id) => {
+  //   const response = await axiosPrivate.delete(`/branchmanagement/${id}`);
+  //   return response.data;
+  // };
+
+  // ======== Timing Management ======== //
   const taketiming = async (branchId) => {
     const params = branchId && branchId !== "All Branches" ? { branch: branchId } : {};
     const response = await axiosPrivate.get("/timemanagement", { params });
@@ -243,6 +264,11 @@ const getallstaff=async()=>{
     changestatus,
     takeroletitle,
     // takebranch,
+    takebranch,
+    takebranchbyid,
+    createbranch,
+    updatebranch,
+    removebranch,
     taketiming,
     createtiming,
     updatetiming,
@@ -259,11 +285,6 @@ const getallstaff=async()=>{
     takeweeklyschedule,
     saveweeklyschedulecell,
     clonenextweeklyschedule,
-    takebranch,
-    takebranchbyid,
-    createbranch,
-    updatebranch,
-    removebranch,
     takemodules,
     takecoursesformodules,
     createmodule,
