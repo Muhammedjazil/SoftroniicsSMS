@@ -135,12 +135,6 @@ const AdminService = () => {
   };
 
 
-  // ======== Branch Management ======== //
-
-  // const takebranch = async () => {
-  //   const response = await axiosPrivate.get("/branchmanagement");
-  //   return response.data;
-  // };
 
   const takebranchbyid = async (id) => {
     const response = await axiosPrivate.get(`/branchmanagement/${id}`);
@@ -218,6 +212,17 @@ const AdminService = () => {
     return response.data;
   };
 
+  const createstaff = async (data) => {
+  const response = await axiosPrivate.post(
+    "/staffmanagement",
+    data
+  );
+
+  return response.data;
+};
+
+  
+
   return {
     newrolecreate,
     takeroles,
@@ -225,7 +230,7 @@ const AdminService = () => {
     roleremove,
     changestatus,
     takeroletitle,
-    takebranch,
+    // takebranch,
     taketiming,
     createtiming,
     updatetiming,
@@ -256,6 +261,7 @@ const AdminService = () => {
     createtopic,
     updatetopic,
     removetopic,
+    createstaff
   };
 };
 

@@ -8,6 +8,7 @@ const {
   createBranch,
   updateBranch,
   deleteBranch,
+  
 } = require("../Controllers/branchController");
 
 // GET all branches
@@ -24,5 +25,7 @@ router.put("/:id", updateBranch);
 
 // DELETE branch
 router.delete("/:id", deleteBranch);
+
+
 
 module.exports = router;

@@ -160,7 +160,7 @@ const sampleStaff = [
 // =====================================
 
 export const Staffmanagement = () => {
-  const { takeroletitle,takebranch,taketiming } = AdminService();
+  const { takeroletitle,takebranch,taketiming,createstaff } = AdminService();
 
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
@@ -192,16 +192,31 @@ export const Staffmanagement = () => {
       console.error("Error fetching roles:", error);
     }
   };
-  const fetchbranch=async()=>{                  //route+controller ezhuthittilla
-    // let response=await axios.get("http://localhost:7000/createbranch")
-    let response=await takebranch();
-    setBranchOptions(response)
-  }
+ const fetchbranch = async () => {
+  try {
+    const response = await takebranch();
 
-  const fetchtiming=async()=>{
-    let response=await taketiming()
-    setTimingOptions(response)
+    console.log("Branch API Response:", response);
+
+    setBranchOptions(Array.isArray(response) ? response : []);
+  } catch (error) {
+    console.error("Error fetching branches:", error);
+    setBranchOptions([]);
   }
+};
+
+  const fetchtiming = async () => {
+  try {
+    const response = await taketiming();
+
+    console.log("Fetched Timings:", response);
+
+    setTimingOptions(Array.isArray(response) ? response : []);
+  } catch (error) {
+    console.error("Error fetching timings:", error);
+    setTimingOptions([]);
+  }
+};
 
   useEffect(() => {
     fetchrole();
@@ -402,86 +417,152 @@ export const Staffmanagement = () => {
   // ADD TIMING
   // =====================================
 
-  const handleTimingChange = (e) => {
-    const timing = e.target.value;
+ const handleTimingChange = (e) => {
+  const timingId = e.target.value;
 
-    if (!timing) return;
+  if (!timingId) return;
 
-    setFormData((prev) => ({
-      ...prev,
-      mentorTimings: prev.mentorTimings.includes(timing)
-        ? prev.mentorTimings
-        : [...prev.mentorTimings, timing]
-    }));
+  setFormData((prev) => ({
+    ...prev,
+    mentorTimings: prev.mentorTimings.includes(timingId)
+      ? prev.mentorTimings
+      : [...prev.mentorTimings, timingId],
+  }));
 
-    setSelectedTiming("");
-  };
+  setSelectedTiming("");
+};
 
   // =====================================
   // REMOVE TIMING
   // =====================================
 
-  const removeTiming = (timingToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      mentorTimings: prev.mentorTimings.filter(
-        (timing) => timing !== timingToRemove
-      )
-    }));
-  };
+ const removeTiming = (timingId) => {
+  setFormData((prev) => ({
+    ...prev,
+    mentorTimings: prev.mentorTimings.filter(
+      (id) => id !== timingId
+    ),
+  }));
+};
 
   // =====================================
   // CREATE / UPDATE STAFF
   // =====================================
 
-  const handleCreateStaff =async(e) => {
-    e.preventDefault();
 
-    // Password validation
-    if (editId === null || formData.password || formData.conformpassword) {
-      if (formData.password !== formData.conformpassword) {
-        alert("Password and Confirm Password do not match!");
-        return;
-      }
+const handleCreateStaff = async (e) => {
+  e.preventDefault();
+
+  // Validate password
+  if (formData.password !== formData.conformpassword) {
+    alert("Password and Confirm Password do not match!");
+    return;
+  }
+
+  if (!formData.role) {
+    alert("Please select a role");
+    return;
+  }
+
+  if (formData.mentorRole && formData.mentorTimings.length === 0) {
+    alert("Please select at least one mentor timing");
+    return;
+  }
+
+  try {
+    const data = new FormData();
+
+    // Basic Details
+    data.append("fullname", formData.fullname);
+    data.append("dateofbirth", formData.dateofbirth);
+    data.append("gender", formData.gender);
+    data.append("email", formData.email);
+    data.append("phone", formData.phone);
+    data.append("whatsapp", formData.whatsapp);
+    data.append("address", formData.address);
+    data.append("district", formData.district);
+    data.append("state", formData.state);
+
+    // Professional Details
+    data.append("department", formData.department);
+    data.append("branch", formData.branch);
+    data.append(
+      "allowAdditionalBranches",
+      formData.allowAdditionalBranches
+    );
+    data.append(
+      "additionalBranches",
+      JSON.stringify(formData.additionalBranches)
+    );
+
+    data.append("role", formData.role);
+    data.append("experience", formData.experience);
+    data.append("joindate", formData.joindate);
+    data.append("status", formData.status);
+    data.append("resingnation", formData.resingnation);
+    data.append("remark", formData.remark);
+
+    // Mentor Details
+    data.append("mentorRole", formData.mentorRole);
+    data.append(
+      "mentorTimings",
+      JSON.stringify(formData.mentorTimings)
+    );
+
+    // Login Details
+    data.append("officialemail", formData.officialemail);
+    data.append("password", formData.password);
+
+    // File uploads
+    if (formData.photo) {
+      data.append("photo", formData.photo);
     }
 
-    // Required field validation
-    if (!formData.role) {
-      alert("Please select a role");
-      return;
+    if (formData.resume) {
+      data.append("resume", formData.resume);
     }
 
-    if (editId !== null) {
-      setAlldata((prev) =>
-        prev.map((item) =>
-          item.id === editId
-            ? {
-                ...formData,
-                id: editId,
-                typeemply: getRoleName(formData.role)
-              }
-            : item
-        )
-      );
+    // API call
+    const response = await createstaff(data);
 
-      alert("Staff updated successfully!");
-    } else {
-      const newStaff = {
-        ...formData,
-        id: Date.now(),
-        typeemply: getRoleName(formData.role)
-      };
+    console.log("Created Staff:", response);
 
-      setAlldata((prev) => [...prev, newStaff]);
-      // let response=await createnewstaff(newStaff)
-      alert("Staff created successfully!");
-    }
+    alert("Staff created successfully!");
+
+    // Add returned staff to the list
+    const savedStaff = response.data;
+
+    setAlldata((prev) => [
+      ...prev,
+      {
+        ...savedStaff,
+        id: savedStaff._id,
+        fullname: savedStaff.fullName,
+        phone: savedStaff.staffPhoneNumber,
+        officialemail: savedStaff.officialEmail,
+        typeemply: savedStaff.role?.role || "",
+        branch: savedStaff.branch?.branchName || "",
+      },
+    ]);
 
     resetForm();
     setEditId(null);
     setView(null);
     setActiveTab("stafflist");
-  };
+
+  } catch (error) {
+    console.error(
+      "Create Staff Error:",
+      error.response?.data || error
+    );
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to create staff. Please try again."
+    );
+  }
+};
+
 
   // =====================================
   // VIEW STAFF
@@ -628,17 +709,18 @@ export const Staffmanagement = () => {
               </div>
 
               <div className="staffbranch">
-                <select
-                  value={branchFilter}
-                  onChange={(e) => setBranchFilter(e.target.value)}
-                >
-                  <option value="all">All Branches</option>
-                  {branchOptions.map((branch) => (
-                    <option key={branch} value={branch}>
-                      {branch}
-                    </option>
-                  ))}
-                </select>
+               <select
+  value={branchFilter}
+  onChange={(e) => setBranchFilter(e.target.value)}
+>
+  <option value="all">All Branches</option>
+
+  {branchOptions.map((branch) => (
+    <option key={branch._id} value={branch._id}>
+      {branch.branchName}
+    </option>
+  ))}
+</select>
               </div>
 
               <div className="staffactive">
@@ -1000,20 +1082,20 @@ export const Staffmanagement = () => {
                   <div className="staffprofessionalfield">
                     <label>Branch <span>*</span></label>
 
-                    <select
-                      required
-                      name="branch"
-                      value={formData.branch}
-                      onChange={handlecreate}
-                    >
-                      <option value="">Choose Branch</option>
+                  <select
+  required
+  name="branch"
+  value={formData.branch}
+  onChange={handlecreate}
+>
+  <option value="">Choose Branch</option>
 
-                      {branchOptions.map((branch) => (
-                        <option key={branch} value={branch}>
-                          {branch}
-                        </option>
-                      ))}
-                    </select>
+  {branchOptions.map((branch) => (
+    <option key={branch._id} value={branch._id}>
+      {branch.branchName}
+    </option>
+  ))}
+</select>
 
                     <div className="staffcheckbox">
                       <input
@@ -1030,44 +1112,39 @@ export const Staffmanagement = () => {
                   </div>
 
                   {/* ADDITIONAL BRANCHES */}
+{formData.allowAdditionalBranches && (
+  <div
+    className="staff-additional-branches"
+    style={{ gridColumn: "1 / -1" }}
+  >
+    <div className="staff-additional-heading">
+      <strong>Additional Branches</strong>
+      <span>
+        (Select all additional branches this staff member can access)
+      </span>
+    </div>
 
-                  {formData.allowAdditionalBranches && (
-                    <div
-                      className="staff-additional-branches"
-                      style={{ gridColumn: "1 / -1" }}
-                    >
-                      <div className="staff-additional-heading">
-                        <strong>Additional Branches</strong>
+    <div className="staff-additional-options">
+      {branchOptions
+        .filter((branch) => branch._id !== formData.branch)
+        .map((branch) => (
+          <label
+            key={branch._id}
+            className="staff-additional-option"
+          >
+            <input
+              type="checkbox"
+              value={branch._id}
+              checked={formData.additionalBranches.includes(branch._id)}
+              onChange={handleAdditionalBranchChange}
+            />
 
-                        <span>
-                          (Select all additional branches this staff member can access)
-                        </span>
-                      </div>
-
-                      <div className="staff-additional-options">
-                        {branchOptions
-                          .filter((branch) => branch !== formData.branch)
-                          .map((branch) => (
-                            <label
-                              key={branch}
-                              className="staff-additional-option"
-                            >
-                              <input
-                                type="checkbox"
-                                value={branch}
-                                checked={formData.additionalBranches.includes(
-                                  branch
-                                )}
-                                onChange={handleAdditionalBranchChange}
-                              />
-
-                              <span>{branch}</span>
-                            </label>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-
+            <span>{branch.branchName}</span>
+          </label>
+        ))}
+    </div>
+  </div>
+)}
                   {/* EXPERIENCE */}
 
                   <div className="staffprofessionalfield">
@@ -1192,55 +1269,63 @@ export const Staffmanagement = () => {
                       <div className="staff-timing-select">
                         <label>Select Timings</label>
 
-                        <select
-                          value={selectedTiming}
-                          onChange={handleTimingChange}
-                        >
-                          <option value="">
-                            -- Select a Timing --
-                          </option>
+                       <select
+  value={selectedTiming}
+  onChange={handleTimingChange}
+>
+  <option value="">
+    -- Select a Timing --
+  </option>
 
-                          {timingOptions.map((timing) => (
-                            <option
-                              key={timing}
-                              value={timing}
-                              disabled={formData.mentorTimings.includes(timing)}
-                            >
-                              {timing}
-                            </option>
-                          ))}
-                        </select>
+  {timingOptions.map((timing) => (
+    <option
+      key={timing._id}
+      value={timing._id}
+      disabled={formData.mentorTimings.includes(timing._id)}
+    >
+      {timing.timeSlot}
+    </option>
+  ))}
+</select>
                       </div>
 
                       <div className="staff-selected-timings">
                         <label>Selected Timings</label>
 
-                        <div className="staff-timing-chips">
-                          {formData.mentorTimings.length > 0 ? (
-                            formData.mentorTimings.map((timing) => (
-                              <div
-                                className="staff-timing-chip"
-                                key={timing}
-                              >
-                                <FiClock />
+                       <div className="staff-timing-chips">
+  {formData.mentorTimings.length > 0 ? (
+    formData.mentorTimings.map((timingId) => {
+      const timing = timingOptions.find(
+        (item) => item._id === timingId
+      );
 
-                                <span>{timing}</span>
+      return (
+        <div
+          className="staff-timing-chip"
+          key={timingId}
+        >
+          <FiClock />
 
-                                <button
-                                  type="button"
-                                  onClick={() => removeTiming(timing)}
-                                  aria-label={`Remove ${timing}`}
-                                >
-                                  <FiX />
-                                </button>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="staff-no-timings">
-                              No timings selected
-                            </p>
-                          )}
-                        </div>
+          <span>
+            {timing ? timing.timeSlot : timingId}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => removeTiming(timingId)}
+            aria-label="Remove timing"
+          >
+            <FiX />
+          </button>
+        </div>
+      );
+    })
+  ) : (
+    <p className="staff-no-timings">
+      No timings selected
+    </p>
+  )}
+</div>
                       </div>
 
                     </div>
