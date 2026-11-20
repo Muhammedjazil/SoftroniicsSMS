@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   FiUser,
@@ -14,28 +14,25 @@ import {
 
 import react from "../../../assets/react.svg";
 import "./staffmanagement.css";
+import AdminService from "../../../services/admin-api-services/AdminService";
 
 // =====================================
 // OPTIONS
 // =====================================
 
-const timingOptions = [
-  "09:30 AM - 12:00 PM",
-  "11:00 AM - 01:30 PM",
-  "02:00 PM - 05:00 PM",
-  "08:30 AM - 11:00 AM"
-];
+// const timingOptions = [
+//   "09:30 AM - 12:00 PM",
+//   "11:00 AM - 01:30 PM",
+//   "02:00 PM - 05:00 PM",
+//   "08:30 AM - 11:00 AM"
+// ];
 
-const branchOptions = [
-  "calicut",
-  "perinthalmanna",
-  "palakkad",
-  "kochi"
-];
-
-// =====================================
-// INITIAL FORM DATA
-// =====================================
+// const branchOptions = [
+//   "calicut",
+//   "perinthalmanna",
+//   "palakkad",
+//   "kochi"
+// ];
 
 const initialForm = {
   fullname: "",
@@ -54,7 +51,7 @@ const initialForm = {
   allowAdditionalBranches: false,
   additionalBranches: [],
 
-  typeemply: "",
+  role: "",
   experience: "",
   joindate: "",
   status: "",
@@ -93,9 +90,9 @@ const sampleStaff = [
     allowAdditionalBranches: true,
     additionalBranches: ["kochi"],
     typeemply: "Senior UI/UX Mentor",
-    experience: "5 Years",
+    experience: "5",
     joindate: "2023-01-10",
-    status: "active",
+    status: "Active",
     resingnation: "",
     resume: null,
     remark: "Lead mentor for UI/UX batches",
@@ -120,9 +117,9 @@ const sampleStaff = [
     allowAdditionalBranches: false,
     additionalBranches: [],
     typeemply: "Full Stack Developer",
-    experience: "4 Years",
+    experience: "4",
     joindate: "2023-03-15",
-    status: "active",
+    status: "Active",
     resingnation: "",
     resume: null,
     remark: "MERN Stack instructor",
@@ -147,66 +144,12 @@ const sampleStaff = [
     allowAdditionalBranches: false,
     additionalBranches: [],
     typeemply: "Python Instructor",
-    experience: "3 Years",
+    experience: "3",
     joindate: "2023-06-01",
-    status: "active",
+    status: "Active",
     resingnation: "",
     resume: null,
     remark: "Django and Python lead",
-    mentorRole: false,
-    mentorTimings: []
-  },
-  {
-    id: 4,
-    fullname: "Mohammed Fazil",
-    dateofbirth: "1993-04-18",
-    gender: "Male",
-    email: "fazil.m@gmail.com",
-    officialemail: "fazil@softroniics.com",
-    phone: "9895456783",
-    whatsapp: "9895456783",
-    address: "Kochi Marine Drive",
-    district: "Ernakulam",
-    state: "Kerala",
-    photo: null,
-    department: "datascience",
-    branch: "kochi",
-    allowAdditionalBranches: false,
-    additionalBranches: [],
-    typeemply: "Data Science Mentor",
-    experience: "4 Years",
-    joindate: "2023-08-20",
-    status: "active",
-    resingnation: "",
-    resume: null,
-    remark: "AI & ML Specialist",
-    mentorRole: true,
-    mentorTimings: ["09:30 AM - 12:00 PM"]
-  },
-  {
-    id: 5,
-    fullname: "Sneha Menon",
-    dateofbirth: "1996-08-30",
-    gender: "Female",
-    email: "sneha.menon@gmail.com",
-    officialemail: "sneha@softroniics.com",
-    phone: "9633567894",
-    whatsapp: "9633567894",
-    address: "Thrissur Round",
-    district: "Thrissur",
-    state: "Kerala",
-    photo: null,
-    department: "uiux",
-    branch: "perinthalmanna",
-    allowAdditionalBranches: false,
-    additionalBranches: [],
-    typeemply: "Course Coordinator",
-    experience: "2 Years",
-    joindate: "2024-01-05",
-    status: "active",
-    resingnation: "",
-    resume: null,
-    remark: "Perinthalmanna branch coordinator",
     mentorRole: false,
     mentorTimings: []
   }
@@ -217,6 +160,7 @@ const sampleStaff = [
 // =====================================
 
 export const Staffmanagement = () => {
+  const { takeroletitle,takebranch,taketiming } = AdminService();
 
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
@@ -224,39 +168,86 @@ export const Staffmanagement = () => {
   const [statusFilter, setStatusFilter] = useState("all");
 
   const [allData, setAlldata] = useState(sampleStaff);
+  const [roles, setRoles] = useState([]);
 
-  const [formData, setFormData] = useState({
-    ...initialForm
-  });
+  const [formData, setFormData] = useState({ ...initialForm });
 
   const [activetap, setActiveTab] = useState("stafflist");
-
   const [view, setView] = useState(null);
-
   const [editId, setEditId] = useState(null);
-
   const [selectedTiming, setSelectedTiming] = useState("");
+
+  const[branchOptions,setBranchOptions]=useState([])
+  const[timingOptions,setTimingOptions]=useState([])
+  // =====================================
+  // FETCH ROLES
+  // =====================================
+
+  const fetchrole = async () => {
+    try {
+      const response = await takeroletitle();
+      setRoles(Array.isArray(response) ? response : []);
+      console.log("Fetched Roles:", response);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+  const fetchbranch=async()=>{                  //route+controller ezhuthittilla
+    // let response=await axios.get("http://localhost:7000/createbranch")
+    let response=await takebranch();
+    setBranchOptions(response)
+  }
+
+  const fetchtiming=async()=>{
+    let response=await taketiming()
+    setTimingOptions(response)
+  }
+
+  useEffect(() => {
+    fetchrole();
+    fetchbranch();
+    fetchtiming();
+  }, []);
 
   // =====================================
   // FILTER STAFF
   // =====================================
 
   const filteredStaff = allData.filter((value) => {
-    const matchesSearch = `${value.fullname} ${value.email} ${value.typeemply} ${value.branch} ${value.phone}`
+    const matchesSearch = [
+      value.fullname,
+      value.email,
+      value.typeemply,
+      value.branch,
+      value.phone
+    ]
+      .join(" ")
       .toLowerCase()
       .includes(search.toLowerCase());
+
     const matchesDept =
       departmentFilter === "all" ||
       value.department?.toLowerCase() === departmentFilter.toLowerCase();
+
     const matchesBranch =
       branchFilter === "all" ||
       value.branch?.toLowerCase() === branchFilter.toLowerCase();
+
     const matchesStatus =
       statusFilter === "all" ||
       value.status?.toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesDept && matchesBranch && matchesStatus;
   });
+
+  // =====================================
+  // GET ROLE NAME
+  // =====================================
+
+  const getRoleName = (roleId) => {
+    const foundRole = roles.find((role) => role._id === roleId);
+    return foundRole?.role || roleId || "-";
+  };
 
   // =====================================
   // EXPORT CSV
@@ -279,29 +270,31 @@ export const Staffmanagement = () => {
       "Status"
     ];
 
-    const rows = filteredStaff.map((s) => [
-      s.fullname,
-      s.email,
-      s.officialemail,
-      s.phone,
-      s.typeemply,
-      s.department,
-      s.branch,
-      s.status
+    const rows = filteredStaff.map((staff) => [
+      staff.fullname,
+      staff.email,
+      staff.officialemail,
+      staff.phone,
+      staff.typeemply || getRoleName(staff.role),
+      staff.department,
+      staff.branch,
+      staff.status
     ]);
 
     const csvContent =
       "data:text/csv;charset=utf-8," +
       [headers, ...rows]
-        .map((e) =>
-          e.map((cell) => `"${String(cell || "").replace(/"/g, '""')}"`).join(",")
+        .map((row) =>
+          row
+            .map((cell) => `"${String(cell || "").replace(/"/g, '""')}"`)
+            .join(",")
         )
         .join("\n");
 
-    const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "staff-list.csv");
+    link.href = encodeURI(csvContent);
+    link.download = "staff-list.csv";
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -343,92 +336,50 @@ export const Staffmanagement = () => {
   // =====================================
 
   const handlecreate = (e) => {
-
     const { name, value, type, files, checked } = e.target;
 
-    setFormData((prev) => {
-
-      // When main branch changes,
-      // remove it from additional branches.
-
-      if (name === "branch") {
-
-        return {
-          ...prev,
-          branch: value,
-          additionalBranches: prev.additionalBranches.filter(
-            (branch) => branch !== value
-          )
-        };
-      }
-
-      return {
-        ...prev,
-        [name]:
-          type === "file"
-            ? files[0]
-            : type === "checkbox"
-            ? checked
-            : value
-      };
-
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "file"
+          ? files[0]
+          : type === "checkbox"
+          ? checked
+          : value
+    }));
   };
 
   // =====================================
-  // ALLOW ADDITIONAL BRANCHES
+  // ADDITIONAL BRANCH TOGGLE
   // =====================================
 
   const handleAdditionalBranchToggle = (e) => {
-
     const checked = e.target.checked;
 
     setFormData((prev) => ({
       ...prev,
       allowAdditionalBranches: checked,
-
-      // Clear branches when disabled
-      additionalBranches: checked
-        ? prev.additionalBranches
-        : []
+      additionalBranches: checked ? prev.additionalBranches : []
     }));
-
   };
 
   // =====================================
-  // SELECT / UNSELECT ADDITIONAL BRANCH
+  // ADDITIONAL BRANCH SELECTION
   // =====================================
 
   const handleAdditionalBranchChange = (e) => {
-
     const { value, checked } = e.target;
 
     setFormData((prev) => {
-
-      let updatedBranches;
-
-      if (checked) {
-
-        updatedBranches = [
-          ...prev.additionalBranches,
-          value
-        ];
-
-      } else {
-
-        updatedBranches = prev.additionalBranches.filter(
-          (branch) => branch !== value
-        );
-
-      }
+      const updatedBranches = checked
+        ? [...prev.additionalBranches, value]
+        : prev.additionalBranches.filter((branch) => branch !== value);
 
       return {
         ...prev,
         additionalBranches: updatedBranches
       };
-
     });
-
   };
 
   // =====================================
@@ -436,112 +387,100 @@ export const Staffmanagement = () => {
   // =====================================
 
   const handleMentorRole = (e) => {
-
     const checked = e.target.checked;
 
     setFormData((prev) => ({
       ...prev,
       mentorRole: checked,
-      mentorTimings: checked
-        ? prev.mentorTimings
-        : []
+      mentorTimings: checked ? prev.mentorTimings : []
     }));
 
     setSelectedTiming("");
-
   };
 
   // =====================================
-  // ADD MENTOR TIMING
+  // ADD TIMING
   // =====================================
 
   const handleTimingChange = (e) => {
-
     const timing = e.target.value;
 
     if (!timing) return;
 
     setFormData((prev) => ({
       ...prev,
-
       mentorTimings: prev.mentorTimings.includes(timing)
         ? prev.mentorTimings
         : [...prev.mentorTimings, timing]
-
     }));
 
     setSelectedTiming("");
-
   };
 
   // =====================================
-  // REMOVE MENTOR TIMING
+  // REMOVE TIMING
   // =====================================
 
   const removeTiming = (timingToRemove) => {
-
     setFormData((prev) => ({
       ...prev,
-
       mentorTimings: prev.mentorTimings.filter(
         (timing) => timing !== timingToRemove
       )
-
     }));
-
   };
 
   // =====================================
   // CREATE / UPDATE STAFF
   // =====================================
 
-  const handleCreateStaff = (e) => {
-
+  const handleCreateStaff =async(e) => {
     e.preventDefault();
 
-    if (
-      !editId ||
-      formData.password ||
-      formData.conformpassword
-    ) {
-
+    // Password validation
+    if (editId === null || formData.password || formData.conformpassword) {
       if (formData.password !== formData.conformpassword) {
         alert("Password and Confirm Password do not match!");
         return;
       }
+    }
 
+    // Required field validation
+    if (!formData.role) {
+      alert("Please select a role");
+      return;
     }
 
     if (editId !== null) {
-
       setAlldata((prev) =>
         prev.map((item) =>
           item.id === editId
-            ? { ...formData, id: editId }
+            ? {
+                ...formData,
+                id: editId,
+                typeemply: getRoleName(formData.role)
+              }
             : item
         )
       );
 
       alert("Staff updated successfully!");
-
     } else {
-
       const newStaff = {
         ...formData,
-        id: Date.now()
+        id: Date.now(),
+        typeemply: getRoleName(formData.role)
       };
 
       setAlldata((prev) => [...prev, newStaff]);
-
+      // let response=await createnewstaff(newStaff)
       alert("Staff created successfully!");
-
     }
 
     resetForm();
     setEditId(null);
     setView(null);
     setActiveTab("stafflist");
-
   };
 
   // =====================================
@@ -549,10 +488,8 @@ export const Staffmanagement = () => {
   // =====================================
 
   const handleview = (value) => {
-
     setView(value);
     setActiveTab("staffview");
-
   };
 
   // =====================================
@@ -560,23 +497,20 @@ export const Staffmanagement = () => {
   // =====================================
 
   const staffedit = () => {
+    if (!view) return;
 
     setFormData({
       ...initialForm,
       ...view,
-
+      role: view.role || "",
       additionalBranches: view.additionalBranches || [],
-
-      allowAdditionalBranches:
-        view.allowAdditionalBranches || false,
-
+      allowAdditionalBranches: view.allowAdditionalBranches || false,
       mentorTimings: view.mentorTimings || []
     });
 
     setSelectedTiming("");
     setEditId(view.id);
     setActiveTab("newstaff");
-
   };
 
   // =====================================
@@ -584,21 +518,14 @@ export const Staffmanagement = () => {
   // =====================================
 
   const handleDelete = (id) => {
-
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this staff?"
     );
 
-    if (confirmDelete) {
+    if (!confirmDelete) return;
 
-      setAlldata((prev) =>
-        prev.filter((item) => item.id !== id)
-      );
-
-      setView(null);
-
-    }
-
+    setAlldata((prev) => prev.filter((item) => item.id !== id));
+    setView(null);
   };
 
   // =====================================
@@ -606,31 +533,29 @@ export const Staffmanagement = () => {
   // =====================================
 
   return (
-
     <div className="staffmanagement">
 
       {/* HEADER */}
 
       <div className="stafffirst">
-
         <div className="staffhead">
-
           <h2>Staff Management</h2>
 
           <p>
             Staff Management
             <FiChevronRight />
+
             {activetap === "stafflist"
               ? "Staff List"
               : activetap === "newstaff"
-              ? (editId !== null ? "Edit Staff" : "New Staff")
+              ? editId !== null
+                ? "Edit Staff"
+                : "New Staff"
               : "Staff Details"}
           </p>
-
         </div>
 
         <div className="staffadminprofile">
-
           <div className="stafficon">
             <FiUser />
           </div>
@@ -639,9 +564,7 @@ export const Staffmanagement = () => {
             <h5>Vijitha</h5>
             <p>Super Admin</p>
           </div>
-
         </div>
-
       </div>
 
       {/* MAIN CARD */}
@@ -651,16 +574,11 @@ export const Staffmanagement = () => {
         {/* TOP TABS */}
 
         <div className="staff-hero0">
-
           <div className="staff-hero1">
 
             <button
               type="button"
-              className={
-                activetap === "stafflist"
-                  ? "active"
-                  : ""
-              }
+              className={activetap === "stafflist" ? "active" : ""}
               onClick={handlestafflist}
             >
               Staff List
@@ -668,18 +586,13 @@ export const Staffmanagement = () => {
 
             <button
               type="button"
-              className={
-                activetap === "newstaff"
-                  ? "active"
-                  : ""
-              }
+              className={activetap === "newstaff" ? "active" : ""}
               onClick={handlenewstaff}
             >
               {editId !== null ? "Edit Staff" : "New Staff"}
             </button>
 
           </div>
-
         </div>
 
         {/* =====================================
@@ -687,1170 +600,960 @@ export const Staffmanagement = () => {
         ===================================== */}
 
         {activetap === "stafflist" && (
-
           <>
-
             <div className="staffherosection">
 
-            <div className="staffsearch">
-
-              <FiSearch />
-
-              <input
-                type="text"
-                placeholder="Search Staff"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-
-            </div>
-
-            <div className="staffalldepartment">
-
-              <select
-                value={departmentFilter}
-                onChange={(e) => setDepartmentFilter(e.target.value)}
-              >
-
-                <option value="all">All Departments</option>
-                <option value="uiux">UI/UX</option>
-                <option value="mern">MERN</option>
-                <option value="python">Python</option>
-                <option value="datascience">Data Science</option>
-
-              </select>
-
-            </div>
-
-            <div className="staffbranch">
-
-              <select
-                value={branchFilter}
-                onChange={(e) => setBranchFilter(e.target.value)}
-              >
-
-                <option value="all">All Branches</option>
-                <option value="calicut">Calicut</option>
-                <option value="palakkad">Palakkad</option>
-                <option value="thrissur">Thrissur</option>
-                <option value="perinthalmanna">Perinthalmanna</option>
-                <option value="kochi">Kochi</option>
-
-              </select>
-
-            </div>
-
-            <div className="staffactive">
-
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-
-              </select>
-
-            </div>
-
-            <div className="staffexport">
-
-              <button
-                type="button"
-                className="staffexport-btn"
-                onClick={handleExport}
-              >
-                <FiDownload />
-                Export
-              </button>
-
-            </div>
-
-          </div>
-
-          {/* STAFF TABLE */}
-
-          <div className="stafftable">
-
-            <table>
-
-              <thead>
-                <tr>
-                  <th>NAME</th>
-                  <th>EMAIL</th>
-                  <th>ROLE</th>
-                  <th>BRANCH</th>
-                  <th>BATCHES</th>
-                  <th>ACTIONS</th>
-                </tr>
-              </thead>
-
-              <tbody className="stafftabledetails">
-
-                {filteredStaff.map((value) => (
-
-                  <tr key={value.id}>
-
-                    <td>
-
-                      <div className="staffnamecell">
-
-                        <div className="staffavatar">
-                          {value.fullname.charAt(0).toUpperCase()}
-                        </div>
-
-                        <div className="staffnamedetails">
-                          <h5>{value.fullname}</h5>
-                          <p>{value.phone}</p>
-                        </div>
-
-                      </div>
-
-                    </td>
-
-                    <td>
-
-                      <div className="staffemail">
-                        <p>{value.email}</p>
-                        <span>{value.officialemail}</span>
-                      </div>
-
-                    </td>
-
-                    <td>{value.typeemply}</td>
-
-                    <td className="staffbranchname">
-                      {value.branch}
-                    </td>
-
-                    <td>
-
-                      {value.mentorRole && (
-
-                        <button
-                          type="button"
-                          className="staffbatches"
-                        >
-                          View Batches
-                        </button>
-
-                      )}
-
-                    </td>
-
-                    <td>
-
-                      <div className="staffactions">
-
-                        <button
-                          type="button"
-                          className="staffviewbtn"
-                          onClick={() => handleview(value)}
-                        >
-                          View
-                        </button>
-
-                        <button
-                          type="button"
-                          className="staffedit"
-                          onClick={() => {
-                            setView(value);
-
-                            setFormData({
-                              ...initialForm,
-                              ...value,
-                              additionalBranches: value.additionalBranches || [],
-                              allowAdditionalBranches: value.allowAdditionalBranches || false,
-                              mentorTimings: value.mentorTimings || []
-                            });
-
-                            setEditId(value.id);
-                            setActiveTab("newstaff");
-                          }}
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          type="button"
-                          className="staffdelete"
-                          onClick={() => handleDelete(value.id)}
-                        >
-                          Delete
-                        </button>
-
-                      </div>
-
-                    </td>
-
-                  </tr>
-
-                ))}
-
-                {filteredStaff.length === 0 && (
-
-                  <tr>
-                    <td colSpan="6" className="staffnodata">
-                      No staff found
-                    </td>
-                  </tr>
-
-                )}
-
-              </tbody>
-
-            </table>
-
-            {/* PAGINATION */}
-
-            <div className="staffpagination">
-
-              <span>
-                {filteredStaff.length} Staff
-              </span>
-
-              <button type="button" disabled>
-                <FiChevronLeft />
-              </button>
-
-              <button type="button" disabled>
-                <FiChevronRight />
-              </button>
-
-            </div>
-
-          </div>
-
-        </>
-
-      )}
-
-      {/* =====================================
-          NEW STAFF FORM
-      ===================================== */}
-
-      {activetap === "newstaff" && (
-
-        <div className="newstaff">
-
-          <div className="staff-create-heading">
-
-            <h3>
-              {editId !== null
-                ? "Edit Staff"
-                : "Create New Staff"}
-            </h3>
-
-            <p>Fill in staff details and configure permissions</p>
-
-          </div>
-
-          <form onSubmit={handleCreateStaff}>
-
-            {/* BASIC DETAILS */}
-
-            <h3>Basic Details</h3>
-
-            <div className="staff-newstaff">
-
-              <div className="stafffield">
-
-                <label>Full Name <span>*</span></label>
+              <div className="staffsearch">
+                <FiSearch />
 
                 <input
                   type="text"
-                  name="fullname"
-                  value={formData.fullname}
-                  placeholder="Enter full name"
-                  onChange={handlecreate}
-                  required
+                  placeholder="Search Staff"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                 />
-
               </div>
 
-              <div className="stafffield">
-
-                <label>Date of Birth <span>*</span></label>
-
-                <input
-                  type="date"
-                  name="dateofbirth"
-                  value={formData.dateofbirth}
-                  onChange={handlecreate}
-                  required
-                />
-
-              </div>
-
-              <div className="stafffield">
-
-                <label>Gender <span>*</span></label>
-
+              <div className="staffalldepartment">
                 <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handlecreate}
-                  required
+                  value={departmentFilter}
+                  onChange={(e) => setDepartmentFilter(e.target.value)}
                 >
-                  <option value="">Choose Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
+                  <option value="all">All Departments</option>
+                  <option value="uiux">UI/UX</option>
+                  <option value="mern">MERN</option>
+                  <option value="python">Python</option>
+                  <option value="datascience">Data Science</option>
                 </select>
-
               </div>
 
-              <div className="stafffield">
-
-                <label>Email Address <span>*</span></label>
-
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  placeholder="Enter Email Address"
-                  required
-                  onChange={handlecreate}
-                />
-
+              <div className="staffbranch">
+                <select
+                  value={branchFilter}
+                  onChange={(e) => setBranchFilter(e.target.value)}
+                >
+                  <option value="all">All Branches</option>
+                  {branchOptions.map((branch) => (
+                    <option key={branch} value={branch}>
+                      {branch}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <div className="stafffield">
-
-                <label>Staff Phone Number <span>*</span></label>
-
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  placeholder="Enter Staff Phone Number"
-                  required
-                  onChange={handlecreate}
-                />
-
+              <div className="staffactive">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="pause">Pause</option>
+                  <option value="inactive">Inactive</option>
+                </select>
               </div>
 
-              <div className="stafffield">
-
-                <label>Staff WhatsApp Number</label>
-
-                <input
-                  type="tel"
-                  name="whatsapp"
-                  value={formData.whatsapp}
-                  placeholder="Enter Staff WhatsApp Number"
-                  onChange={handlecreate}
-                />
-
+              <div className="staffexport">
+                <button
+                  type="button"
+                  className="staffexport-btn"
+                  onClick={handleExport}
+                >
+                  <FiDownload />
+                  Export
+                </button>
               </div>
-
-              <div className="stafffield">
-
-                <label>Staff Permanent Address</label>
-
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  placeholder="Enter Staff Permanent Address"
-                  onChange={handlecreate}
-                />
-
-              </div>
-
-              <div className="stafffield">
-
-                <label>District</label>
-
-                <input
-                  type="text"
-                  name="district"
-                  value={formData.district}
-                  placeholder="Enter Staff District"
-                  onChange={handlecreate}
-                />
-
-              </div>
-
-              <div className="stafffield">
-
-                <label>State</label>
-
-                <input
-                  type="text"
-                  name="state"
-                  value={formData.state}
-                  placeholder="Enter Staff State"
-                  onChange={handlecreate}
-                />
-
-              </div>
-
-              <div className="stafffield">
-
-                <label>
-                  Photo{" "}
-                  <span className="optional">
-                    (Photo format: JPG/PNG only)
-                  </span>
-                </label>
-
-                <input
-                  type="file"
-                  name="photo"
-                  accept=".jpg,.jpeg,.png"
-                  onChange={handlecreate}
-                />
-
-              </div>
-
             </div>
 
-            {/* PROFESSIONAL DETAILS */}
+            {/* STAFF TABLE */}
 
-            <div className="staffpersonaldetails">
+            <div className="stafftable">
+              <table>
+                <thead>
+                  <tr>
+                    <th>NAME</th>
+                    <th>EMAIL</th>
+                    <th>ROLE</th>
+                    <th>BRANCH</th>
+                    <th>BATCHES</th>
+                    <th>ACTIONS</th>
+                  </tr>
+                </thead>
 
-              <h3>Professional Details</h3>
+                <tbody className="stafftabledetails">
+                  {filteredStaff.map((value) => (
+                    <tr key={value.id}>
+                      <td>
+                        <div className="staffnamecell">
+                          <div className="staffavatar">
+                            {value.fullname?.charAt(0).toUpperCase()}
+                          </div>
 
-              <div className="staffprofessionalgrid">
+                          <div className="staffnamedetails">
+                            <h5>{value.fullname}</h5>
+                            <p>{value.phone}</p>
+                          </div>
+                        </div>
+                      </td>
 
-                {/* DEPARTMENT */}
+                      <td>
+                        <div className="staffemail">
+                          <p>{value.email}</p>
+                          <span>{value.officialemail}</span>
+                        </div>
+                      </td>
 
-                <div className="staffprofessionalfield">
+                      <td>
+                        {value.typeemply || getRoleName(value.role)}
+                      </td>
 
-                  <label>Department <span>*</span></label>
+                      <td className="staffbranchname">
+                        {value.branch}
+                      </td>
 
-                  <select
-                    required
-                    name="department"
-                    value={formData.department}
-                    onChange={handlecreate}
-                  >
-
-                    <option value="">Choose Department</option>
-                    <option value="ui/ux">UI/UX</option>
-                    <option value="mern">MERN</option>
-                    <option value="python">Python</option>
-                    <option value="datascience">Data Science</option>
-
-                  </select>
-
-                </div>
-
-                {/* EMPLOYEE TYPE */}
-
-                <div className="staffprofessionalfield">
-
-                  <label>Type of Employee <span>*</span></label>
-
-                  <select
-                    required
-                    name="typeemply"
-                    value={formData.typeemply}
-                    onChange={handlecreate}
-                  >
-
-                    <option value="">Choose Role</option>
-                    <option value="Career Advisor">Career Advisor</option>
-                    <option value="mentor">Mentor</option>
-                    <option value="accountant">Accountant</option>
-
-                    <option value="placement coordinator">
-                      Placement Coordinator
-                    </option>
-
-                    <option value="branch admin">Branch Admin</option>
-
-                  </select>
-
-                </div>
-
-                {/* MAIN BRANCH */}
-
-                <div className="staffprofessionalfield">
-
-                  <label>Branch <span>*</span></label>
-
-                  <select
-                    required
-                    name="branch"
-                    value={formData.branch}
-                    onChange={handlecreate}
-                  >
-
-                    <option value="">Choose Branch</option>
-
-                    {branchOptions.map((branch) => (
-
-                      <option
-                        key={branch}
-                        value={branch}
-                      >
-                        {branch}
-                      </option>
-
-                    ))}
-
-                  </select>
-
-                  {/* ALLOW ADDITIONAL BRANCHES */}
-
-                  <div className="staffcheckbox">
-
-                    <input
-                      type="checkbox"
-                      id="additionalBranch"
-                      checked={formData.allowAdditionalBranches}
-                      onChange={handleAdditionalBranchToggle}
-                    />
-
-                    <label htmlFor="additionalBranch">
-                      Allow Additional Branches
-                    </label>
-
-                  </div>
-
-                </div>
-
-                {/* =====================================
-                    ADDITIONAL BRANCHES SECTION
-                    SHOW ONLY WHEN CHECKED
-                ===================================== */}
-
-                {formData.allowAdditionalBranches && (
-
-                  <div
-                    className="staff-additional-branches"
-                    style={{ gridColumn: "1 / -1" }}
-                  >
-
-                    <div className="staff-additional-heading">
-
-                      <strong>Additional Branches</strong>
-
-                      <span>
-                        (Select all additional branches this staff member can access)
-                      </span>
-
-                    </div>
-
-                    <div className="staff-additional-options">
-
-                      {branchOptions
-                        .filter(
-                          (branch) => branch !== formData.branch
-                        )
-                        .map((branch) => (
-
-                          <label
-                            key={branch}
-                            className="staff-additional-option"
+                      <td>
+                        {value.mentorRole && (
+                          <button
+                            type="button"
+                            className="staffbatches"
                           >
+                            View Batches
+                          </button>
+                        )}
+                      </td>
 
-                            <input
-                              type="checkbox"
-                              value={branch}
-                              checked={formData.additionalBranches.includes(branch)}
-                              onChange={handleAdditionalBranchChange}
-                            />
+                      <td>
+                        <div className="staffactions">
 
-                            <span>{branch}</span>
+                          <button
+                            type="button"
+                            className="staffviewbtn"
+                            onClick={() => handleview(value)}
+                          >
+                            View
+                          </button>
 
-                          </label>
+                          <button
+                            type="button"
+                            className="staffedit"
+                            onClick={() => {
+                              setView(value);
+                              setFormData({
+                                ...initialForm,
+                                ...value,
+                                role: value.role || "",
+                                additionalBranches:
+                                  value.additionalBranches || [],
+                                mentorTimings: value.mentorTimings || []
+                              });
+                              setEditId(value.id);
+                              setActiveTab("newstaff");
+                            }}
+                          >
+                            Edit
+                          </button>
 
-                        ))}
+                          <button
+                            type="button"
+                            className="staffdelete"
+                            onClick={() => handleDelete(value.id)}
+                          >
+                            Delete
+                          </button>
 
-                    </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
 
-                  </div>
+                  {filteredStaff.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="staffnodata">
+                        No staff found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
 
-                )}
+              <div className="staffpagination">
+                <span>{filteredStaff.length} Staff</span>
 
-                {/* EXPERIENCE */}
+                <button type="button" disabled>
+                  <FiChevronLeft />
+                </button>
 
-                <div className="staffprofessionalfield">
+                <button type="button" disabled>
+                  <FiChevronRight />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
 
-                  <label>Years of Experience</label>
+        {/* =====================================
+            NEW STAFF FORM
+        ===================================== */}
+
+        {activetap === "newstaff" && (
+          <div className="newstaff">
+
+            <div className="staff-create-heading">
+              <h3>
+                {editId !== null ? "Edit Staff" : "Create New Staff"}
+              </h3>
+
+              <p>
+                Fill in staff details and configure permissions
+              </p>
+            </div>
+
+            <form onSubmit={handleCreateStaff}>
+
+              {/* BASIC DETAILS */}
+
+              <h3>Basic Details</h3>
+
+              <div className="staff-newstaff">
+
+                <div className="stafffield">
+                  <label>Full Name <span>*</span></label>
 
                   <input
-                    type="number"
-                    placeholder="Enter years of experience"
-                    name="experience"
-                    value={formData.experience}
+                    type="text"
+                    name="fullname"
+                    value={formData.fullname}
+                    placeholder="Enter full name"
                     onChange={handlecreate}
+                    required
                   />
-
                 </div>
 
-                {/* JOINING DATE */}
-
-                <div className="staffprofessionalfield">
-
-                  <label>Date of Joining <span>*</span></label>
+                <div className="stafffield">
+                  <label>Date of Birth <span>*</span></label>
 
                   <input
                     type="date"
-                    required
-                    name="joindate"
-                    value={formData.joindate}
+                    name="dateofbirth"
+                    value={formData.dateofbirth}
                     onChange={handlecreate}
+                    required
                   />
-
                 </div>
 
-                {/* EMPLOYMENT STATUS */}
-
-                <div className="staffprofessionalfield">
-
-                  <label>Employment Status <span>*</span></label>
+                <div className="stafffield">
+                  <label>Gender <span>*</span></label>
 
                   <select
-                    required
-                    name="status"
-                    value={formData.status}
+                    name="gender"
+                    value={formData.gender}
                     onChange={handlecreate}
+                    required
                   >
-
-                    <option value="">Choose Employment Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-
+                    <option value="">Choose Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
-
                 </div>
 
-                {/* RESIGNATION DATE */}
-
-                <div className="staffprofessionalfield">
-
-                  <label>
-                    Resignation Date{" "}
-                    <span className="optional">
-                      (Only If Inactive)
-                    </span>
-                  </label>
+                <div className="stafffield">
+                  <label>Email Address <span>*</span></label>
 
                   <input
-                    type="date"
-                    name="resingnation"
-                    value={formData.resingnation}
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    placeholder="Enter Email Address"
                     onChange={handlecreate}
+                    required
                   />
-
                 </div>
 
-                {/* RESUME */}
+                <div className="stafffield">
+                  <label>Staff Phone Number <span>*</span></label>
 
-                <div className="staffprofessionalfield">
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    placeholder="Enter Staff Phone Number"
+                    onChange={handlecreate}
+                    required
+                  />
+                </div>
 
+                <div className="stafffield">
+                  <label>Staff WhatsApp Number</label>
+
+                  <input
+                    type="tel"
+                    name="whatsapp"
+                    value={formData.whatsapp}
+                    placeholder="Enter Staff WhatsApp Number"
+                    onChange={handlecreate}
+                  />
+                </div>
+
+                <div className="stafffield">
+                  <label>Staff Permanent Address</label>
+
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    placeholder="Enter Staff Permanent Address"
+                    onChange={handlecreate}
+                  />
+                </div>
+
+                <div className="stafffield">
+                  <label>District</label>
+
+                  <input
+                    type="text"
+                    name="district"
+                    value={formData.district}
+                    placeholder="Enter Staff District"
+                    onChange={handlecreate}
+                  />
+                </div>
+
+                <div className="stafffield">
+                  <label>State</label>
+
+                  <input
+                    type="text"
+                    name="state"
+                    value={formData.state}
+                    placeholder="Enter Staff State"
+                    onChange={handlecreate}
+                  />
+                </div>
+
+                <div className="stafffield">
                   <label>
-                    Resume{" "}
+                    Photo{" "}
                     <span className="optional">
-                      (Upload PDF only Max 5MB)
+                      (Photo format: JPG/PNG only)
                     </span>
                   </label>
 
                   <input
                     type="file"
-                    name="resume"
-                    accept=".pdf"
+                    name="photo"
+                    accept=".jpg,.jpeg,.png"
                     onChange={handlecreate}
                   />
-
-                </div>
-
-                {/* REMARKS */}
-
-                <div className="staffprofessionalfield">
-
-                  <label>
-                    Remarks/Notes{" "}
-                    <span className="optional">(Optional)</span>
-                  </label>
-
-                  <input
-                    type="text"
-                    placeholder="Enter Any Remarks or notes"
-                    name="remark"
-                    value={formData.remark}
-                    onChange={handlecreate}
-                  />
-
                 </div>
 
               </div>
 
-              {/* =====================================
-                  MENTOR ROLE
-              ===================================== */}
+              {/* PROFESSIONAL DETAILS */}
 
-              <div className="staffmentor-section">
+              <div className="staffpersonaldetails">
 
-                <div className="staffcheckbox staffmentorcheck">
+                <h3>Professional Details</h3>
 
-                  <input
-                    type="checkbox"
-                    id="mentorRole"
-                    name="mentorRole"
-                    checked={formData.mentorRole}
-                    onChange={handleMentorRole}
-                  />
+                <div className="staffprofessionalgrid">
 
-                  <label htmlFor="mentorRole">
-                    Enable Mentor Role
-                  </label>
+                  <div className="staffprofessionalfield">
+                    <label>Department <span>*</span></label>
+
+                    <select
+                      required
+                      name="department"
+                      value={formData.department}
+                      onChange={handlecreate}
+                    >
+                      <option value="">Choose Department</option>
+                      <option value="uiux">UI/UX</option>
+                      <option value="mern">MERN</option>
+                      <option value="python">Python</option>
+                      <option value="datascience">Data Science</option>
+                    </select>
+                  </div>
+
+                  {/* ROLE */}
+
+                  <div className="staffprofessionalfield">
+                    <label>Type of Employee <span>*</span></label>
+
+                    <select
+                      required
+                      name="role"
+                      value={formData.role}
+                      onChange={handlecreate}
+                    >
+                      <option value="">Choose Role</option>
+
+                      {roles.map((value) => (
+                        <option key={value._id} value={value._id}>
+                          {value.role}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* BRANCH */}
+
+                  <div className="staffprofessionalfield">
+                    <label>Branch <span>*</span></label>
+
+                    <select
+                      required
+                      name="branch"
+                      value={formData.branch}
+                      onChange={handlecreate}
+                    >
+                      <option value="">Choose Branch</option>
+
+                      {branchOptions.map((branch) => (
+                        <option key={branch} value={branch}>
+                          {branch}
+                        </option>
+                      ))}
+                    </select>
+
+                    <div className="staffcheckbox">
+                      <input
+                        type="checkbox"
+                        id="additionalBranch"
+                        checked={formData.allowAdditionalBranches}
+                        onChange={handleAdditionalBranchToggle}
+                      />
+
+                      <label htmlFor="additionalBranch">
+                        Allow Additional Branches
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* ADDITIONAL BRANCHES */}
+
+                  {formData.allowAdditionalBranches && (
+                    <div
+                      className="staff-additional-branches"
+                      style={{ gridColumn: "1 / -1" }}
+                    >
+                      <div className="staff-additional-heading">
+                        <strong>Additional Branches</strong>
+
+                        <span>
+                          (Select all additional branches this staff member can access)
+                        </span>
+                      </div>
+
+                      <div className="staff-additional-options">
+                        {branchOptions
+                          .filter((branch) => branch !== formData.branch)
+                          .map((branch) => (
+                            <label
+                              key={branch}
+                              className="staff-additional-option"
+                            >
+                              <input
+                                type="checkbox"
+                                value={branch}
+                                checked={formData.additionalBranches.includes(
+                                  branch
+                                )}
+                                onChange={handleAdditionalBranchChange}
+                              />
+
+                              <span>{branch}</span>
+                            </label>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* EXPERIENCE */}
+
+                  <div className="staffprofessionalfield">
+                    <label>Years of Experience</label>
+
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="Enter years of experience"
+                      name="experience"
+                      value={formData.experience}
+                      onChange={handlecreate}
+                    />
+                  </div>
+
+                  {/* JOINING DATE */}
+
+                  <div className="staffprofessionalfield">
+                    <label>Date of Joining <span>*</span></label>
+
+                    <input
+                      type="date"
+                      required
+                      name="joindate"
+                      value={formData.joindate}
+                      onChange={handlecreate}
+                    />
+                  </div>
+
+                  {/* EMPLOYMENT STATUS */}
+
+                  <div className="staffprofessionalfield">
+                    <label>Employment Status <span>*</span></label>
+
+                    <select
+                      required
+                      name="status"
+                      value={formData.status}
+                      onChange={handlecreate}
+                    >
+                      <option value="">Choose Employment Status</option>
+                      <option value="Active">Active</option>
+                      <option value="Pause">Pause</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+
+                  {/* RESIGNATION DATE */}
+
+                  <div className="staffprofessionalfield">
+                    <label>
+                      Resignation Date{" "}
+                      <span className="optional">(Only If Inactive)</span>
+                    </label>
+
+                    <input
+                      type="date"
+                      name="resingnation"
+                      value={formData.resingnation}
+                      onChange={handlecreate}
+                    />
+                  </div>
+
+                  {/* RESUME */}
+
+                  <div className="staffprofessionalfield">
+                    <label>
+                      Resume{" "}
+                      <span className="optional">
+                        (Upload PDF only Max 5MB)
+                      </span>
+                    </label>
+
+                    <input
+                      type="file"
+                      name="resume"
+                      accept=".pdf"
+                      onChange={handlecreate}
+                    />
+                  </div>
+
+                  {/* REMARKS */}
+
+                  <div className="staffprofessionalfield">
+                    <label>
+                      Remarks/Notes{" "}
+                      <span className="optional">(Optional)</span>
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Enter Any Remarks or notes"
+                      name="remark"
+                      value={formData.remark}
+                      onChange={handlecreate}
+                    />
+                  </div>
 
                 </div>
 
-                {formData.mentorRole && (
+                {/* MENTOR ROLE */}
 
-                  <div className="staff-mentor-timings">
+                <div className="staffmentor-section">
 
-                    <div className="staff-timing-select">
+                  <div className="staffcheckbox staffmentorcheck">
+                    <input
+                      type="checkbox"
+                      id="mentorRole"
+                      name="mentorRole"
+                      checked={formData.mentorRole}
+                      onChange={handleMentorRole}
+                    />
 
-                      <label>Select Timings</label>
+                    <label htmlFor="mentorRole">
+                      Enable Mentor Role
+                    </label>
+                  </div>
 
-                      <select
-                        value={selectedTiming}
-                        onChange={handleTimingChange}
-                      >
+                  {formData.mentorRole && (
+                    <div className="staff-mentor-timings">
 
-                        <option value="">
-                          -- Select a Timing --
-                        </option>
+                      <div className="staff-timing-select">
+                        <label>Select Timings</label>
 
-                        {timingOptions.map((timing) => (
-
-                          <option
-                            key={timing}
-                            value={timing}
-                            disabled={formData.mentorTimings.includes(timing)}
-                          >
-                            {timing}
+                        <select
+                          value={selectedTiming}
+                          onChange={handleTimingChange}
+                        >
+                          <option value="">
+                            -- Select a Timing --
                           </option>
 
-                        ))}
-
-                      </select>
-
-                    </div>
-
-                    <div className="staff-selected-timings">
-
-                      <label>Selected Timings</label>
-
-                      <div className="staff-timing-chips">
-
-                        {formData.mentorTimings.length > 0 ? (
-
-                          formData.mentorTimings.map((timing) => (
-
-                            <div
-                              className="staff-timing-chip"
+                          {timingOptions.map((timing) => (
+                            <option
                               key={timing}
+                              value={timing}
+                              disabled={formData.mentorTimings.includes(timing)}
                             >
+                              {timing}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                              <FiClock />
+                      <div className="staff-selected-timings">
+                        <label>Selected Timings</label>
 
-                              <span>{timing}</span>
-
-                              <button
-                                type="button"
-                                onClick={() => removeTiming(timing)}
-                                aria-label={`Remove ${timing}`}
+                        <div className="staff-timing-chips">
+                          {formData.mentorTimings.length > 0 ? (
+                            formData.mentorTimings.map((timing) => (
+                              <div
+                                className="staff-timing-chip"
+                                key={timing}
                               >
-                                <FiX />
-                              </button>
+                                <FiClock />
 
-                            </div>
+                                <span>{timing}</span>
 
-                          ))
-
-                        ) : (
-
-                          <p className="staff-no-timings">
-                            No timings selected
-                          </p>
-
-                        )}
-
+                                <button
+                                  type="button"
+                                  onClick={() => removeTiming(timing)}
+                                  aria-label={`Remove ${timing}`}
+                                >
+                                  <FiX />
+                                </button>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="staff-no-timings">
+                              No timings selected
+                            </p>
+                          )}
+                        </div>
                       </div>
 
                     </div>
+                  )}
 
+                </div>
+              </div>
+
+              {/* LOGIN DETAILS */}
+
+              <div className="stafflogindetails">
+                <div className="stafflogin">
+
+                  <div className="stafflog">
+                    <label>Staff Official Email Address <span>*</span></label>
+
+                    <input
+                      type="email"
+                      placeholder="Enter Staff Official Email Address"
+                      name="officialemail"
+                      value={formData.officialemail}
+                      onChange={handlecreate}
+                      required
+                    />
                   </div>
 
-                )}
+                  <div className="stafflog">
+                    <label>Create Password <span>*</span></label>
+
+                    <input
+                      type="password"
+                      placeholder="Enter staff Password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handlecreate}
+                      required={editId === null}
+                    />
+                  </div>
+
+                  <div className="stafflog">
+                    <label>Confirm Password <span>*</span></label>
+
+                    <input
+                      type="password"
+                      placeholder="Enter Staff Confirm Password"
+                      name="conformpassword"
+                      value={formData.conformpassword}
+                      onChange={handlecreate}
+                      required={editId === null}
+                    />
+                  </div>
+
+                </div>
+              </div>
+
+              {/* FORM BUTTONS */}
+
+              <div className="staffformbutton">
+
+                <button
+                  type="button"
+                  className="staffformbuttoncancel"
+                  onClick={handlestafflist}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className={
+                    editId !== null
+                      ? "staffbtnupdate"
+                      : "staffformbuttoncreate"
+                  }
+                >
+                  {editId !== null ? "Update" : "Create Staff"}
+                </button>
 
               </div>
 
-            </div>
+            </form>
+          </div>
+        )}
 
-            {/* LOGIN DETAILS */}
+        {/* =====================================
+            STAFF VIEW
+        ===================================== */}
 
-            <div className="stafflogindetails">
+        {activetap === "staffview" && view && (
+          <div className="staffview">
 
-              <div className="stafflogin">
-
-                <div className="stafflog">
-
-                  <label>Staff Official Email Address</label>
-
-                  <input
-                    type="email"
-                    placeholder="Enter Staff Official Email Address"
-                    name="officialemail"
-                    value={formData.officialemail}
-                    onChange={handlecreate}
-                  />
-
-                </div>
-
-                <div className="stafflog">
-
-                  <label>Create Password</label>
-
-                  <input
-                    type="password"
-                    placeholder="Enter staff Password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handlecreate}
-                  />
-
-                </div>
-
-                <div className="stafflog">
-
-                  <label>Confirm Password</label>
-
-                  <input
-                    type="password"
-                    placeholder="Enter Staff Confirm Password"
-                    name="conformpassword"
-                    value={formData.conformpassword}
-                    onChange={handlecreate}
-                  />
-
-                </div>
-
-              </div>
-
-            </div>
-
-            {/* FORM BUTTONS */}
-
-            <div className="staffformbutton">
+            <div className="staffviewheader">
+              <h1>{view.fullname}</h1>
 
               <button
                 type="button"
-                className="staffformbuttoncancel"
+                className="staffviewback"
                 onClick={handlestafflist}
               >
-                Cancel
+                <FiArrowLeft /> Back
               </button>
-
-              {editId !== null ? (
-
-                <button
-                  type="submit"
-                  className="staffbtnupdate"
-                >
-                  Update
-                </button>
-
-              ) : (
-
-                <button
-                  type="submit"
-                  className="staffformbuttoncreate"
-                >
-                  Create Staff
-                </button>
-
-              )}
-
             </div>
 
-          </form>
+            {/* BASIC DETAILS */}
 
-        </div>
+            <div className="staffbasicdetails">
+              <h3 className="staffviewtitle">Basic Details</h3>
 
-      )}
+              <div className="staffpersonal">
+                <div className="staffviewdetailsgrid">
 
-      {/* =====================================
-          STAFF VIEW
-      ===================================== */}
+                  <div className="staffviewfield">
+                    <h4>Full Name</h4>
+                    <p>{view.fullname || "-"}</p>
+                  </div>
 
-      {activetap === "staffview" && view && (
+                  <div className="staffviewfield">
+                    <h4>Date of Birth</h4>
+                    <p>{view.dateofbirth || "-"}</p>
+                  </div>
 
-        <div className="staffview">
+                  <div className="staffviewfield">
+                    <h4>Gender</h4>
+                    <p>{view.gender || "-"}</p>
+                  </div>
 
-          <div className="staffviewheader">
+                  <div className="staffviewfield">
+                    <h4>Email Address</h4>
+                    <p>{view.email || "-"}</p>
+                  </div>
 
-            <h1>{view.fullname}</h1>
+                  <div className="staffviewfield">
+                    <h4>Staff Phone Number</h4>
+                    <p>{view.phone || "-"}</p>
+                  </div>
 
-            <button
-              type="button"
-              className="staffviewback"
-              onClick={handlestafflist}
-            >
-              <FiArrowLeft /> Back
-            </button>
+                  <div className="staffviewfield">
+                    <h4>Staff WhatsApp Number</h4>
+                    <p>{view.whatsapp || "-"}</p>
+                  </div>
 
-          </div>
+                  <div className="staffviewfield">
+                    <h4>Permanent Address</h4>
+                    <p>{view.address || "-"}</p>
+                  </div>
 
-          {/* BASIC DETAILS */}
+                  <div className="staffviewfield">
+                    <h4>District</h4>
+                    <p>{view.district || "-"}</p>
+                  </div>
 
-          <div className="staffbasicdetails">
+                  <div className="staffviewfield">
+                    <h4>State</h4>
+                    <p>{view.state || "-"}</p>
+                  </div>
 
-            <h3 className="staffviewtitle">Basic Details</h3>
+                </div>
 
-            <div className="staffpersonal">
+                <div className="staffper3">
+                  <img
+                    src={
+                      view.photo instanceof File
+                        ? URL.createObjectURL(view.photo)
+                        : view.photo || react
+                    }
+                    alt="Staff"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* PROFESSIONAL DETAILS */}
+
+            <div className="staffprofessionalview">
+              <h3 className="staffviewtitle">
+                Professional Details
+              </h3>
 
               <div className="staffviewdetailsgrid">
 
                 <div className="staffviewfield">
-                  <h4>Full Name</h4>
-                  <p>{view.fullname || "-"}</p>
+                  <h4>ID</h4>
+                  <p>{view.id || "-"}</p>
                 </div>
 
                 <div className="staffviewfield">
-                  <h4>Date of Birth</h4>
-                  <p>{view.dateofbirth || "-"}</p>
+                  <h4>Department</h4>
+                  <p>{view.department || "-"}</p>
                 </div>
 
                 <div className="staffviewfield">
-                  <h4>Gender</h4>
-                  <p>{view.gender || "-"}</p>
+                  <h4>Branch</h4>
+                  <p>{view.branch || "-"}</p>
                 </div>
 
                 <div className="staffviewfield">
-                  <h4>Email Address</h4>
-                  <p>{view.email || "-"}</p>
+                  <h4>Employee Type</h4>
+                  <p>
+                    {view.typeemply || getRoleName(view.role)}
+                  </p>
                 </div>
 
                 <div className="staffviewfield">
-                  <h4>Mentor Phone Number</h4>
-                  <p>{view.phone || "-"}</p>
+                  <h4>Years of Experience</h4>
+                  <p>{view.experience || "-"}</p>
                 </div>
 
                 <div className="staffviewfield">
-                  <h4>Mentor WhatsApp Number</h4>
-                  <p>{view.whatsapp || "-"}</p>
+                  <h4>Date of Joining</h4>
+                  <p>{view.joindate || "-"}</p>
                 </div>
 
                 <div className="staffviewfield">
-                  <h4>Mentor Permanent Address</h4>
-                  <p>{view.address || "-"}</p>
+                  <h4>Resignation Date</h4>
+                  <p>{view.resingnation || "-"}</p>
                 </div>
 
                 <div className="staffviewfield">
-                  <h4>District</h4>
-                  <p>{view.district || "-"}</p>
+                  <h4>Employment Status</h4>
+                  <p className="staffviewstatus">
+                    {view.status || "-"}
+                  </p>
                 </div>
 
                 <div className="staffviewfield">
-                  <h4>State</h4>
-                  <p>{view.state || "-"}</p>
+                  <h4>Remarks/Notes</h4>
+                  <p>{view.remark || "-"}</p>
                 </div>
 
               </div>
 
-              <div className="staffper3">
+              {/* ADDITIONAL BRANCHES */}
 
-                <img
-                  src={
-                    view.photo instanceof File
-                      ? URL.createObjectURL(view.photo)
-                      : view.photo || react
-                  }
-                  alt="Staff"
-                />
+              {view.allowAdditionalBranches && (
+                <div className="staff-view-mentor">
+                  <h3 className="staffviewtitle">
+                    Additional Branches
+                  </h3>
 
-              </div>
+                  <div className="staff-additional-options">
+                    {(view.additionalBranches || []).length > 0 ? (
+                      view.additionalBranches.map((branch) => (
+                        <div
+                          className="staff-additional-option"
+                          key={branch}
+                        >
+                          <span>{branch}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No additional branches selected</p>
+                    )}
+                  </div>
+                </div>
+              )}
 
+              {/* MENTOR TIMINGS */}
+
+              {view.mentorRole && (
+                <div className="staff-view-mentor">
+                  <h3 className="staffviewtitle">
+                    Mentor Role & Timings
+                  </h3>
+
+                  <p>
+                    Mentor Role: <strong>Enabled</strong>
+                  </p>
+
+                  <div className="staff-timing-chips">
+                    {(view.mentorTimings || []).length > 0 ? (
+                      view.mentorTimings.map((timing) => (
+                        <div
+                          className="staff-timing-chip"
+                          key={timing}
+                        >
+                          <FiClock />
+                          <span>{timing}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No timings selected</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* BOTTOM BUTTONS */}
+
+            <div className="staffviewbuttons">
+              <button
+                type="button"
+                className="staffviewedit"
+                onClick={staffedit}
+              >
+                Edit
+              </button>
+
+              <button
+                type="button"
+                className="staffviewprint"
+                onClick={() => window.print()}
+              >
+                Print
+              </button>
             </div>
 
           </div>
-
-          {/* PROFESSIONAL DETAILS */}
-
-          <div className="staffprofessionalview">
-
-            <h3 className="staffviewtitle">
-              Professional Details
-            </h3>
-
-            <div className="staffviewdetailsgrid">
-
-              <div className="staffviewfield">
-                <h4>ID</h4>
-                <p>{view.id || "-"}</p>
-              </div>
-
-              <div className="staffviewfield">
-                <h4>Department</h4>
-                <p>{view.department || "-"}</p>
-              </div>
-
-              <div className="staffviewfield">
-                <h4>Branch</h4>
-                <p>{view.branch || "-"}</p>
-              </div>
-
-              <div className="staffviewfield">
-                <h4>Employee Type</h4>
-                <p>{view.typeemply || "-"}</p>
-              </div>
-
-              <div className="staffviewfield">
-                <h4>Years of Experience</h4>
-                <p>{view.experience || "-"}</p>
-              </div>
-
-              <div className="staffviewfield">
-                <h4>Date of Joining</h4>
-                <p>{view.joindate || "-"}</p>
-              </div>
-
-              <div className="staffviewfield">
-                <h4>Resignation Date</h4>
-                <p>{view.resingnation || "-"}</p>
-              </div>
-
-              <div className="staffviewfield">
-                <h4>Employment Status</h4>
-                <p className="staffviewstatus">
-                  {view.status || "-"}
-                </p>
-              </div>
-
-              <div className="staffviewfield">
-                <h4>Remarks/Notes</h4>
-                <p>{view.remark || "-"}</p>
-              </div>
-
-            </div>
-
-            {/* ADDITIONAL BRANCHES IN VIEW */}
-
-            {view.allowAdditionalBranches && (
-
-              <div className="staff-view-mentor">
-
-                <h3 className="staffviewtitle">
-                  Additional Branches
-                </h3>
-
-                <div className="staff-additional-options">
-
-                  {(view.additionalBranches || []).length > 0 ? (
-
-                    view.additionalBranches.map((branch) => (
-
-                      <div
-                        className="staff-additional-option"
-                        key={branch}
-                      >
-                        <span>{branch}</span>
-                      </div>
-
-                    ))
-
-                  ) : (
-
-                    <p>No additional branches selected</p>
-
-                  )}
-
-                </div>
-
-              </div>
-
-            )}
-
-            {/* MENTOR TIMINGS */}
-
-            {view.mentorRole && (
-
-              <div className="staff-view-mentor">
-
-                <h3 className="staffviewtitle">
-                  Mentor Role & Timings
-                </h3>
-
-                <p>
-                  Mentor Role: <strong>Enabled</strong>
-                </p>
-
-                <div className="staff-timing-chips">
-
-                  {(view.mentorTimings || []).length > 0 ? (
-
-                    view.mentorTimings.map((timing) => (
-
-                      <div
-                        className="staff-timing-chip"
-                        key={timing}
-                      >
-
-                        <FiClock />
-
-                        <span>{timing}</span>
-
-                      </div>
-
-                    ))
-
-                  ) : (
-
-                    <p>No timings selected</p>
-
-                  )}
-
-                </div>
-
-              </div>
-
-            )}
-
-          </div>
-
-          {/* BOTTOM BUTTONS */}
-
-          <div className="staffviewbuttons">
-
-            <button
-              type="button"
-              className="staffviewedit"
-              onClick={staffedit}
-            >
-              Edit
-            </button>
-
-            <button
-              type="button"
-              className="staffviewprint"
-              onClick={() => window.print()}
-            >
-              Print
-            </button>
-
-          </div>
-
-        </div>
-
-      )}
+        )}
 
       </div>
-
     </div>
-
   );
-
 };
 
 export default Staffmanagement;

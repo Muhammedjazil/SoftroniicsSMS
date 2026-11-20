@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import "./settingsbranch.css";
-
 import {
   FiUser,
   FiDownload,
@@ -62,7 +61,7 @@ export const Branch = () => {
   // CREATE BRANCH
   // =====================================
 
-  const handlesave = () => {
+  const handlesave =() => {
 
     if (!formData.branch.trim() || !formData.location.trim()) {
       alert("Please fill all fields");
@@ -76,6 +75,7 @@ export const Branch = () => {
         location: formData.location.trim()
       }
     ]);
+   
 
     setFormData({
       branch: "",
