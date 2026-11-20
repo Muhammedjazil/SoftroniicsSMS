@@ -1,6 +1,8 @@
-
 const mongoose = require("mongoose");
 const Branch = require("../Models/branchModel");
+const Batch = require("../Models/batchModel");
+const Timing = require("../Models/timingModel");
+const WeeklySchedule = require("../Models/weeklyScheduleModel");
 
 // =====================================
 // GET ALL BRANCHES
@@ -94,9 +96,6 @@ const createBranch = async (req, res) => {
     const newBranch = await Branch.create({
       branchName: trimmedBranchName,
       location: trimmedLocation,
-
-      // Your current UI does not have a Batch Type field.
-      // So Regular is used as the default.
       batchType: batchType || "Regular",
     });
 
@@ -220,10 +219,6 @@ const updateBranch = async (req, res) => {
 };
 
 // =====================================
-// DELETE BRANCH (SOFT DELETE)
-// =====================================
-
-// =====================================
 // DELETE BRANCH (PERMANENT + SAFE)
 // =====================================
 const deleteBranch = async (req, res) => {
@@ -249,11 +244,13 @@ const deleteBranch = async (req, res) => {
     // 3. Check references in Batch collection
     const batchCount = await Batch.countDocuments({
       branch: id,
+      isDeleted: { $ne: true },
     });
 
     // 4. Check references in Timing collection
     const timingCount = await Timing.countDocuments({
       branch: id,
+      isDeleted: { $ne: true },
     });
 
     // 5. Check references in WeeklySchedule collection
@@ -262,11 +259,7 @@ const deleteBranch = async (req, res) => {
     });
 
     // 6. Prevent deletion if references exist
-    if (
-      batchCount > 0 ||
-      timingCount > 0 ||
-      weeklyScheduleCount > 0
-    ) {
+    if (batchCount > 0 || timingCount > 0 || weeklyScheduleCount > 0) {
       return res.status(409).json({
         message: "Cannot delete this branch because it is being used.",
         dependencies: {
@@ -283,7 +276,6 @@ const deleteBranch = async (req, res) => {
     return res.status(200).json({
       message: "Branch permanently deleted successfully",
     });
-
   } catch (error) {
     console.error("Delete branch error:", error);
 
@@ -294,7 +286,6 @@ const deleteBranch = async (req, res) => {
   }
 };
 
-
 module.exports = {
   getBranches,
   getBranchById,
@@ -302,4 +293,5 @@ module.exports = {
   updateBranch,
   deleteBranch,
   
+};
 };

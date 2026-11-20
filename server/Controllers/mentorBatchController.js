@@ -1,6 +1,6 @@
 const { Staff } = require("../Models/staffModel"); // Adjust path to your Staff model
-const WeeklySchedule = require("../models/weeklyScheduleModel"); // Adjust path to your WeeklySchedule model
-const Batch = require("../models/batchModel");
+const WeeklySchedule = require("../Models/weeklyScheduleModel"); // Adjust path to your WeeklySchedule model
+const Batch = require("../Models/batchModel");
 
 // Helper: Format DayCombination into readable days array & string
 const extractDaysInfo = (dayCombObj) => {

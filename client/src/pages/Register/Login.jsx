@@ -1,32 +1,58 @@
-
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "../../Axios";
 import "./Login.css";
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
 
     if (!email || !password) {
-      alert("Please enter your email and password");
+      setErrorMsg("Please enter your email and password.");
       return;
     }
 
-    // Backend login API will be connected here later
-    console.log("Email:", email);
-    console.log("Password:", password);
+    setLoading(true);
+    try {
+      const response = await axios.post("/auth/login", {
+        email: email.trim(),
+        password,
+      });
+
+      const { accessToken, user } = response.data;
+
+      localStorage.setItem("SMStoken", accessToken);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      if (user?.userType === "intern") {
+        navigate("/internweekly", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      setErrorMsg(
+        error?.response?.data?.message || "Invalid email or password. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="login-page">
       <div className="login-container">
-
         {/* Logo */}
         <div className="login-logo">
-          {/* Add your logo PNG here later */}
           <span className="logo-symbol">✦</span>
           <span className="logo-name">Softronics.</span>
         </div>
@@ -34,6 +60,22 @@ const Login = () => {
         {/* Login Card */}
         <div className="login-card">
           <h2>Welcome Back!</h2>
+
+          {errorMsg && (
+            <div
+              style={{
+                backgroundColor: "#fee2e2",
+                color: "#b91c1c",
+                padding: "10px 12px",
+                borderRadius: "6px",
+                fontSize: "13px",
+                marginBottom: "14px",
+                textAlign: "center",
+              }}
+            >
+              {errorMsg}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="login-input-group">
@@ -70,15 +112,11 @@ const Login = () => {
               </div>
             </div>
 
-            <button type="submit" className="login-button">
-              Log In
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? "Logging in..." : "Log In"}
             </button>
           </form>
         </div>
-
-        {/* Version */}
-        
-
       </div>
     </div>
   );

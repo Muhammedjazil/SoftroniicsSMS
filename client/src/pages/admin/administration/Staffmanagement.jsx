@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 
 import {
@@ -15,24 +14,6 @@ import {
 import react from "../../../assets/react.svg";
 import "./staffmanagement.css";
 import AdminService from "../../../services/admin-api-services/AdminService";
-
-// =====================================
-// OPTIONS
-// =====================================
-
-// const timingOptions = [
-//   "09:30 AM - 12:00 PM",
-//   "11:00 AM - 01:30 PM",
-//   "02:00 PM - 05:00 PM",
-//   "08:30 AM - 11:00 AM"
-// ];
-
-// const branchOptions = [
-//   "calicut",
-//   "perinthalmanna",
-//   "palakkad",
-//   "kochi"
-// ];
 
 const initialForm = {
   fullname: "",
@@ -161,6 +142,7 @@ const sampleStaff = [
 
 export const Staffmanagement = () => {
   const { takeroletitle,takebranch,taketiming,createstaff } = AdminService();
+  const { takeroletitle, takebranch, taketiming } = AdminService();
 
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
@@ -177,10 +159,29 @@ export const Staffmanagement = () => {
   const [editId, setEditId] = useState(null);
   const [selectedTiming, setSelectedTiming] = useState("");
 
-  const[branchOptions,setBranchOptions]=useState([])
-  const[timingOptions,setTimingOptions]=useState([])
+  const [branchOptions, setBranchOptions] = useState([]);
+  const [timingOptions, setTimingOptions] = useState([]);
+
   // =====================================
-  // FETCH ROLES
+  // HELPERS TO RESOLVE OBJECTS OR STRINGS
+  // =====================================
+
+  const getBranchName = (branchVal) => {
+    if (!branchVal) return "-";
+    if (typeof branchVal === "object") return branchVal.branchName || branchVal.name || "-";
+    const found = branchOptions.find((b) => b._id === branchVal);
+    return found?.branchName || found?.name || branchVal;
+  };
+
+  const getTimingLabel = (timingVal) => {
+    if (!timingVal) return "-";
+    if (typeof timingVal === "object") return timingVal.timeSlot || "-";
+    const found = timingOptions.find((t) => t._id === timingVal);
+    return found?.timeSlot || timingVal;
+  };
+
+  // =====================================
+  // FETCH ROLES, BRANCHES & TIMINGS
   // =====================================
 
   const fetchrole = async () => {
@@ -218,6 +219,24 @@ export const Staffmanagement = () => {
   }
 };
 
+  const fetchbranch = async () => {
+    try {
+      const response = await takebranch();
+      setBranchOptions(Array.isArray(response) ? response : response?.data || []);
+    } catch (error) {
+      console.error("Error fetching branches:", error);
+    }
+  };
+
+  const fetchtiming = async () => {
+    try {
+      const response = await taketiming();
+      setTimingOptions(Array.isArray(response) ? response : response?.data || []);
+    } catch (error) {
+      console.error("Error fetching timings:", error);
+    }
+  };
+
   useEffect(() => {
     fetchrole();
     fetchbranch();
@@ -229,11 +248,13 @@ export const Staffmanagement = () => {
   // =====================================
 
   const filteredStaff = allData.filter((value) => {
+    const branchLabel = getBranchName(value.branch);
+
     const matchesSearch = [
       value.fullname,
       value.email,
       value.typeemply,
-      value.branch,
+      branchLabel,
       value.phone
     ]
       .join(" ")
@@ -246,7 +267,8 @@ export const Staffmanagement = () => {
 
     const matchesBranch =
       branchFilter === "all" ||
-      value.branch?.toLowerCase() === branchFilter.toLowerCase();
+      value.branch === branchFilter ||
+      branchLabel.toLowerCase() === branchFilter.toLowerCase();
 
     const matchesStatus =
       statusFilter === "all" ||
@@ -292,7 +314,7 @@ export const Staffmanagement = () => {
       staff.phone,
       staff.typeemply || getRoleName(staff.role),
       staff.department,
-      staff.branch,
+      getBranchName(staff.branch),
       staff.status
     ]);
 
@@ -449,6 +471,8 @@ export const Staffmanagement = () => {
   // CREATE / UPDATE STAFF
   // =====================================
 
+  const handleCreateStaff = async (e) => {
+    e.preventDefault();
 
 const handleCreateStaff = async (e) => {
   e.preventDefault();
@@ -544,6 +568,9 @@ const handleCreateStaff = async (e) => {
         branch: savedStaff.branch?.branchName || "",
       },
     ]);
+      setAlldata((prev) => [...prev, newStaff]);
+      alert("Staff created successfully!");
+    }
 
     resetForm();
     setEditId(null);
@@ -721,6 +748,21 @@ const handleCreateStaff = async (e) => {
     </option>
   ))}
 </select>
+                <select
+                  value={branchFilter}
+                  onChange={(e) => setBranchFilter(e.target.value)}
+                >
+                  <option value="all">All Branches</option>
+                  {branchOptions.map((branch) => {
+                    const bId = typeof branch === "object" ? branch._id : branch;
+                    const bName = typeof branch === "object" ? branch.branchName : branch;
+                    return (
+                      <option key={bId} value={bId}>
+                        {bName}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
 
               <div className="staffactive">
@@ -790,7 +832,7 @@ const handleCreateStaff = async (e) => {
                       </td>
 
                       <td className="staffbranchname">
-                        {value.branch}
+                        {getBranchName(value.branch)}
                       </td>
 
                       <td>
@@ -1096,6 +1138,24 @@ const handleCreateStaff = async (e) => {
     </option>
   ))}
 </select>
+                    <select
+                      required
+                      name="branch"
+                      value={formData.branch}
+                      onChange={handlecreate}
+                    >
+                      <option value="">Choose Branch</option>
+
+                      {branchOptions.map((branch) => {
+                        const bId = typeof branch === "object" ? branch._id : branch;
+                        const bName = typeof branch === "object" ? branch.branchName : branch;
+                        return (
+                          <option key={bId} value={bId}>
+                            {bName}
+                          </option>
+                        );
+                      })}
+                    </select>
 
                     <div className="staffcheckbox">
                       <input
@@ -1145,6 +1205,48 @@ const handleCreateStaff = async (e) => {
     </div>
   </div>
 )}
+                  {formData.allowAdditionalBranches && (
+                    <div
+                      className="staff-additional-branches"
+                      style={{ gridColumn: "1 / -1" }}
+                    >
+                      <div className="staff-additional-heading">
+                        <strong>Additional Branches</strong>
+
+                        <span>
+                          (Select all additional branches this staff member can access)
+                        </span>
+                      </div>
+
+                      <div className="staff-additional-options">
+                        {branchOptions
+                          .filter((branch) => {
+                            const bId = typeof branch === "object" ? branch._id : branch;
+                            return bId !== formData.branch;
+                          })
+                          .map((branch) => {
+                            const bId = typeof branch === "object" ? branch._id : branch;
+                            const bName = typeof branch === "object" ? branch.branchName : branch;
+                            return (
+                              <label
+                                key={bId}
+                                className="staff-additional-option"
+                              >
+                                <input
+                                  type="checkbox"
+                                  value={bId}
+                                  checked={formData.additionalBranches.includes(bId)}
+                                  onChange={handleAdditionalBranchChange}
+                                />
+
+                                <span>{bName}</span>
+                              </label>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
+
                   {/* EXPERIENCE */}
 
                   <div className="staffprofessionalfield">
@@ -1287,6 +1389,28 @@ const handleCreateStaff = async (e) => {
     </option>
   ))}
 </select>
+                        <select
+                          value={selectedTiming}
+                          onChange={handleTimingChange}
+                        >
+                          <option value="">
+                            -- Select a Timing --
+                          </option>
+
+                          {timingOptions.map((timing) => {
+                            const tId = typeof timing === "object" ? timing._id : timing;
+                            const tLabel = typeof timing === "object" ? timing.timeSlot : timing;
+                            return (
+                              <option
+                                key={tId}
+                                value={tId}
+                                disabled={formData.mentorTimings.includes(tId)}
+                              >
+                                {tLabel}
+                              </option>
+                            );
+                          })}
+                        </select>
                       </div>
 
                       <div className="staff-selected-timings">
@@ -1326,6 +1450,35 @@ const handleCreateStaff = async (e) => {
     </p>
   )}
 </div>
+                        <div className="staff-timing-chips">
+                          {formData.mentorTimings.length > 0 ? (
+                            formData.mentorTimings.map((timing) => {
+                              const tKey = typeof timing === "object" ? timing._id : timing;
+                              return (
+                                <div
+                                  className="staff-timing-chip"
+                                  key={tKey}
+                                >
+                                  <FiClock />
+
+                                  <span>{getTimingLabel(timing)}</span>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => removeTiming(timing)}
+                                    aria-label={`Remove ${getTimingLabel(timing)}`}
+                                  >
+                                    <FiX />
+                                  </button>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <p className="staff-no-timings">
+                              No timings selected
+                            </p>
+                          )}
+                        </div>
                       </div>
 
                     </div>
@@ -1518,7 +1671,7 @@ const handleCreateStaff = async (e) => {
 
                 <div className="staffviewfield">
                   <h4>Branch</h4>
-                  <p>{view.branch || "-"}</p>
+                  <p>{getBranchName(view.branch)}</p>
                 </div>
 
                 <div className="staffviewfield">
@@ -1567,14 +1720,17 @@ const handleCreateStaff = async (e) => {
 
                   <div className="staff-additional-options">
                     {(view.additionalBranches || []).length > 0 ? (
-                      view.additionalBranches.map((branch) => (
-                        <div
-                          className="staff-additional-option"
-                          key={branch}
-                        >
-                          <span>{branch}</span>
-                        </div>
-                      ))
+                      view.additionalBranches.map((branch) => {
+                        const bKey = typeof branch === "object" ? branch._id : branch;
+                        return (
+                          <div
+                            className="staff-additional-option"
+                            key={bKey}
+                          >
+                            <span>{getBranchName(branch)}</span>
+                          </div>
+                        );
+                      })
                     ) : (
                       <p>No additional branches selected</p>
                     )}
@@ -1596,15 +1752,18 @@ const handleCreateStaff = async (e) => {
 
                   <div className="staff-timing-chips">
                     {(view.mentorTimings || []).length > 0 ? (
-                      view.mentorTimings.map((timing) => (
-                        <div
-                          className="staff-timing-chip"
-                          key={timing}
-                        >
-                          <FiClock />
-                          <span>{timing}</span>
-                        </div>
-                      ))
+                      view.mentorTimings.map((timing) => {
+                        const tKey = typeof timing === "object" ? timing._id : timing;
+                        return (
+                          <div
+                            className="staff-timing-chip"
+                            key={tKey}
+                          >
+                            <FiClock />
+                            <span>{getTimingLabel(timing)}</span>
+                          </div>
+                        );
+                      })
                     ) : (
                       <p>No timings selected</p>
                     )}
