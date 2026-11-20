@@ -1,7 +1,7 @@
 
 import React from "react";
 import { UserRound } from "lucide-react";
-import Sidebar from "../Sidebar";
+
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -33,7 +33,7 @@ const Dashboard = () => {
     <div className="dashboard-layout">
 
       {/* Reusable Sidebar */}
-      <Sidebar />
+    
 
       {/* Main Content */}
       <main className="dashboard-main">
