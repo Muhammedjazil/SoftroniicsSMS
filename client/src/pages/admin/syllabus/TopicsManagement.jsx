@@ -1,13 +1,24 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './TopicManagement.css';
 import { LuUser, LuSearch } from 'react-icons/lu';
 import { HiOutlineArrowDownTray } from 'react-icons/hi2';
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import AdminService from '../../../services/admin-api-services/AdminService'; // Adjust path if needed
 
 const TopicManagement = () => {
+  const {
+    taketopics,
+    takemodules,
+    createtopic,
+    updatetopic,
+    removetopic,
+  } = AdminService();
+
   const [activeTab, setActiveTab] = useState('topics'); // 'topics' | 'new-topic' | 'edit-topic'
   const [viewingTopic, setViewingTopic] = useState(null);
   const [editingTopicId, setEditingTopicId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,18 +26,55 @@ const TopicManagement = () => {
 
   // Form states
   const [formTopicName, setFormTopicName] = useState('');
-  const [formModule, setFormModule] = useState('');
+  const [formModuleId, setFormModuleId] = useState('');
 
-  // Starts empty to match Screenshot 1; adding a topic populates the table
+  // API Data states
   const [topics, setTopics] = useState([]);
+  const [availableModules, setAvailableModules] = useState([]);
 
-  const availableModules = [
-    'PYTHON',
-    'MONGODB',
-    'NODE AND EXPRESS',
-    'REACT',
-    'FIGMA',
-  ];
+  // Normalize topic document from API
+  const normalizeTopic = useCallback((t, index = 0) => {
+    const modObj = typeof t.module === 'object' && t.module !== null ? t.module : null;
+    const moduleId = modObj ? modObj._id : t.module || '';
+    const moduleName = modObj ? modObj.moduleName || 'Untitled Module' : 'Module';
+    const createdDate = t.createdAt
+      ? new Date(t.createdAt).toLocaleDateString('en-US')
+      : '';
+
+    return {
+      id: t._id,
+      code: t._id ? t._id.slice(-4).toUpperCase() : `T${index + 11}`,
+      name: t.topicName || '',
+      moduleId,
+      module: moduleName,
+      createdAt: createdDate,
+    };
+  }, []);
+
+  // Load topics and modules on mount
+  const fetchInitialData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [topicsRes, modulesRes] = await Promise.all([
+        taketopics(),
+        takemodules(),
+      ]);
+
+      const rawTopics = Array.isArray(topicsRes) ? topicsRes : topicsRes?.data || [];
+      const rawModules = Array.isArray(modulesRes) ? modulesRes : modulesRes?.data || [];
+
+      setTopics(rawTopics.map((item, idx) => normalizeTopic(item, idx)));
+      setAvailableModules(rawModules);
+    } catch (error) {
+      console.error('Failed to load topics data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [normalizeTopic]);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
 
   const filteredTopics = useMemo(() => {
     return topics.filter((topic) => {
@@ -34,14 +82,14 @@ const TopicManagement = () => {
         .toLowerCase()
         .includes(searchQuery.toLowerCase().trim());
       const matchesModule =
-        moduleFilter === 'All Modules' || topic.module === moduleFilter;
+        moduleFilter === 'All Modules' || topic.moduleId === moduleFilter;
       return matchesSearch && matchesModule;
     });
   }, [topics, searchQuery, moduleFilter]);
 
   const resetForm = () => {
     setFormTopicName('');
-    setFormModule('');
+    setFormModuleId('');
     setEditingTopicId(null);
   };
 
@@ -57,23 +105,28 @@ const TopicManagement = () => {
     setActiveTab('topics');
   };
 
-  const handleCreateTopic = (e) => {
+  const handleCreateTopic = async (e) => {
     e.preventDefault();
-    if (!formTopicName.trim() || !formModule) return;
+    if (!formTopicName.trim() || !formModuleId || submitting) return;
 
-    const today = new Date();
-    const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+    setSubmitting(true);
+    try {
+      const payload = {
+        topicName: formTopicName.trim().toUpperCase(),
+        module: formModuleId,
+      };
 
-    const newTopic = {
-      id: Date.now(),
-      code: `T${topics.length + 11}`,
-      name: formTopicName.trim().toUpperCase(),
-      module: formModule,
-      createdAt: formattedDate,
-    };
+      const res = await createtopic(payload);
+      const created = res?.data || res;
 
-    setTopics((prev) => [newTopic, ...prev]);
-    handleBackToTopics();
+      setTopics((prev) => [normalizeTopic(created, prev.length), ...prev]);
+      handleBackToTopics();
+    } catch (error) {
+      console.error('Error creating topic:', error);
+      alert(error?.response?.data?.message || 'Failed to create topic');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleViewTopic = (topicItem) => {
@@ -84,34 +137,73 @@ const TopicManagement = () => {
     setViewingTopic(null);
     setEditingTopicId(topicItem.id);
     setFormTopicName(topicItem.name);
-    setFormModule(topicItem.module);
+    setFormModuleId(topicItem.moduleId);
     setActiveTab('edit-topic');
   };
 
-  const handleSaveEditedTopic = (e) => {
+  const handleSaveEditedTopic = async (e) => {
     e.preventDefault();
-    if (!formTopicName.trim() || !formModule) return;
+    if (!formTopicName.trim() || !formModuleId || !editingTopicId || submitting) return;
 
-    setTopics((prev) =>
-      prev.map((t) =>
-        t.id === editingTopicId
-          ? {
-              ...t,
-              name: formTopicName.trim().toUpperCase(),
-              module: formModule,
-            }
-          : t
-      )
-    );
+    setSubmitting(true);
+    try {
+      const payload = {
+        topicName: formTopicName.trim().toUpperCase(),
+        module: formModuleId,
+      };
 
-    handleBackToTopics();
+      const res = await updatetopic(editingTopicId, payload);
+      const updated = res?.data || res;
+
+      setTopics((prev) =>
+        prev.map((t, idx) =>
+          t.id === editingTopicId ? normalizeTopic(updated, idx) : t
+        )
+      );
+      handleBackToTopics();
+    } catch (error) {
+      console.error('Error updating topic:', error);
+      alert(error?.response?.data?.message || 'Failed to update topic');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleDeleteTopic = (id) => {
-    setTopics((prev) => prev.filter((t) => t.id !== id));
-    if (viewingTopic && viewingTopic.id === id) {
-      setViewingTopic(null);
+  const handleDeleteTopic = async (id) => {
+    try {
+      await removetopic(id);
+      setTopics((prev) => prev.filter((t) => t.id !== id));
+      if (viewingTopic && viewingTopic.id === id) {
+        setViewingTopic(null);
+      }
+    } catch (error) {
+      console.error('Error deleting topic:', error);
+      alert(error?.response?.data?.message || 'Failed to delete topic');
     }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['#', 'Topic Name', 'Module', 'Topic Code', 'Created'];
+    const rows = filteredTopics.map((t, idx) => [
+      idx + 1,
+      t.name,
+      t.module,
+      t.code,
+      t.createdAt,
+    ]);
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers, ...rows]
+        .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', 'topics_list.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -142,7 +234,7 @@ const TopicManagement = () => {
         </div>
       </header>
 
-      {/* Outer Toolbar (Matches Screenshot 1 & 2) */}
+      {/* Outer Toolbar */}
       <div className="tpc-mgmt-toolbar">
         <div className="tpc-mgmt-tab-group">
           <button
@@ -165,7 +257,11 @@ const TopicManagement = () => {
           </button>
         </div>
 
-        <button type="button" className="tpc-mgmt-export-btn">
+        <button
+          type="button"
+          className="tpc-mgmt-export-btn"
+          onClick={handleExportCSV}
+        >
           <HiOutlineArrowDownTray className="tpc-mgmt-export-icon" />
           <span>Export</span>
         </button>
@@ -173,7 +269,7 @@ const TopicManagement = () => {
 
       {/* Main White Card Container */}
       <main className="tpc-mgmt-panel">
-        {/* TOPICS LIST & EMPTY STATE (Matches Screenshot 1) */}
+        {/* TOPICS LIST & EMPTY STATE */}
         {activeTab === 'topics' && (
           <>
             <div className="tpc-mgmt-filter-bar">
@@ -196,8 +292,8 @@ const TopicManagement = () => {
                 >
                   <option value="All Modules">All Modules</option>
                   {availableModules.map((mod) => (
-                    <option key={mod} value={mod}>
-                      {mod}
+                    <option key={mod._id} value={mod._id}>
+                      {mod.moduleName}
                     </option>
                   ))}
                 </select>
@@ -205,7 +301,11 @@ const TopicManagement = () => {
               </div>
             </div>
 
-            {filteredTopics.length === 0 ? (
+            {loading ? (
+              <div className="tpc-mgmt-content-area">
+                <p className="tpc-mgmt-empty-message">Loading topics...</p>
+              </div>
+            ) : filteredTopics.length === 0 ? (
               <div className="tpc-mgmt-content-area">
                 <p className="tpc-mgmt-empty-message">
                   No topics available. Please add topics to view them here.
@@ -293,7 +393,7 @@ const TopicManagement = () => {
           </>
         )}
 
-        {/* NEW TOPIC & EDIT TOPIC FORM (Matches Screenshot 2) */}
+        {/* NEW TOPIC & EDIT TOPIC FORM */}
         {(activeTab === 'new-topic' || activeTab === 'edit-topic') && (
           <form
             className="tpc-mgmt-form-layout"
@@ -324,16 +424,16 @@ const TopicManagement = () => {
                   <div className="tpc-mgmt-select-wrapper">
                     <select
                       className="tpc-mgmt-select-input"
-                      value={formModule}
-                      onChange={(e) => setFormModule(e.target.value)}
+                      value={formModuleId}
+                      onChange={(e) => setFormModuleId(e.target.value)}
                       required
                     >
                       <option value="" disabled>
                         Choose Module
                       </option>
                       {availableModules.map((mod) => (
-                        <option key={mod} value={mod}>
-                          {mod}
+                        <option key={mod._id} value={mod._id}>
+                          {mod.moduleName}
                         </option>
                       ))}
                     </select>
@@ -351,8 +451,12 @@ const TopicManagement = () => {
               >
                 Cancel
               </button>
-              <button type="submit" className="tpc-mgmt-submit-btn">
-                {activeTab === 'new-topic' ? 'Create Topic' : 'Save Changes'}
+              <button type="submit" className="tpc-mgmt-submit-btn" disabled={submitting}>
+                {submitting
+                  ? 'Saving...'
+                  : activeTab === 'new-topic'
+                  ? 'Create Topic'
+                  : 'Save Changes'}
               </button>
             </div>
           </form>
