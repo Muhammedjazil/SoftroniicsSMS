@@ -155,6 +155,37 @@ const AdminService = () => {
     return response.data;
   };
 
+
+
+  const takebranchbyid = async (id) => {
+    const response = await axiosPrivate.get(`/branchmanagement/${id}`);
+    return response.data;
+  };
+
+  const createbranch = async (branchData) => {
+    const response = await axiosPrivate.post(
+      "/branchmanagement",
+      branchData
+    );
+    return response.data;
+  };
+
+  const updatebranch = async (id, branchData) => {
+    const response = await axiosPrivate.put(
+      `/branchmanagement/${id}`,
+      branchData
+    );
+    return response.data;
+  };
+
+  const removebranch = async (id) => {
+    const response = await axiosPrivate.delete(
+      `/branchmanagement/${id}`
+    );
+    return response.data;
+  };
+
+
   // ======== Module Management ======== //
   const takemodules = async (params = {}) => {
     const response = await axiosPrivate.get("/modulemanagement", { params });
@@ -202,6 +233,17 @@ const AdminService = () => {
     return response.data;
   };
 
+  const createstaff = async (data) => {
+  const response = await axiosPrivate.post(
+    "/staffmanagement",
+    data
+  );
+
+  return response.data;
+};
+
+  
+
   return {
     newrolecreate,
     takeroles,
@@ -209,6 +251,7 @@ const AdminService = () => {
     roleremove,
     changestatus,
     takeroletitle,
+    // takebranch,
     takebranch,
     takebranchbyid,
     createbranch,
@@ -239,6 +282,7 @@ const AdminService = () => {
     createtopic,
     updatetopic,
     removetopic,
+    createstaff
   };
 };
 
