@@ -72,6 +72,12 @@ import InternWeeklySchedule from "./pages/intern/InternWeeklySchedule";
 import WeeklyCard from "./pages/intern/WeeklyCard";
 import Dashboard from "./pages/admin/Dashboard/Dashboard";
 import Categories from "./pages/admin/CourseManagement/Categories";
+import Course from "./pages/admin/CourseManagement/Course";
+import CategoryView from "./pages/admin/CourseManagement/CategoryView";
+
+import ViewCourse from "./pages/admin/CourseManagement/ViewCourse";
+import EditCourse from "./pages/admin/CourseManagement/EditCourse";
+import CategoryEdit from "./pages/admin/CourseManagement/CategoryEdit";
 // =====================================
 // APP COMPONENT
 // =====================================
@@ -113,7 +119,7 @@ function App() {
           path="/courses"
           element={
             <Adminlayout>
-              <CourseManagement />
+              <Course />
             </Adminlayout>
           }
         />

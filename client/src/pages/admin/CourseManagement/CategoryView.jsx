@@ -8,7 +8,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import Sidebar from "../../Sidebar";
+
 import "./CategoryDetails.css";
 
 const CategoryView = () => {
@@ -58,7 +58,7 @@ const CategoryView = () => {
 
   return (
     <div className="course-management-layout">
-      <Sidebar />
+      
 
       <main className="course-management-main">
 
