@@ -1,4 +1,4 @@
-import useAxiosPrivate from "../../hooks/useAxiosPrivate";
+import useAxiosPrivate from "../../hooks/UseAxiosPrivate";
 
 const AdminService = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -134,6 +134,53 @@ const AdminService = () => {
     return response.data;
   };
 
+  // ======== Module Management ======== //
+  const takemodules = async (params = {}) => {
+    const response = await axiosPrivate.get("/modulemanagement", { params });
+    return response.data;
+  };
+
+  const takecoursesformodules = async () => {
+    const response = await axiosPrivate.get("/modulemanagement/courses");
+    return response.data;
+  };
+
+  const createmodule = async (moduleData) => {
+    const response = await axiosPrivate.post("/modulemanagement", moduleData);
+    return response.data;
+  };
+
+  const updatemodule = async (id, moduleData) => {
+    const response = await axiosPrivate.put(`/modulemanagement/${id}`, moduleData);
+    return response.data;
+  };
+
+  const removemodule = async (id) => {
+    const response = await axiosPrivate.delete(`/modulemanagement/${id}`);
+    return response.data;
+  };
+
+  // ======== Topic Management ======== //
+  const taketopics = async (params = {}) => {
+    const response = await axiosPrivate.get("/topicmanagement", { params });
+    return response.data;
+  };
+
+  const createtopic = async (topicData) => {
+    const response = await axiosPrivate.post("/topicmanagement", topicData);
+    return response.data;
+  };
+
+  const updatetopic = async (id, topicData) => {
+    const response = await axiosPrivate.put(`/topicmanagement/${id}`, topicData);
+    return response.data;
+  };
+
+  const removetopic = async (id) => {
+    const response = await axiosPrivate.delete(`/topicmanagement/${id}`);
+    return response.data;
+  };
+
   return {
     newrolecreate,
     takeroles,
@@ -158,6 +205,15 @@ const AdminService = () => {
     takeweeklyschedule,
     saveweeklyschedulecell,
     clonenextweeklyschedule,
+    takemodules,
+    takecoursesformodules,
+    createmodule,
+    updatemodule,
+    removemodule,
+    taketopics,
+    createtopic,
+    updatetopic,
+    removetopic,
   };
 };
 

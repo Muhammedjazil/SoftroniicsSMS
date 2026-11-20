@@ -1,13 +1,24 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './ModuleManagement.css';
 import { LuUser, LuX, LuSearch } from 'react-icons/lu';
 import { HiOutlineArrowDownTray, HiOutlineArrowUpTray } from 'react-icons/hi2';
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import AdminService from '../../../services/admin-api-services/AdminService'; // Adjust path if needed
 
 const SyllabusManagement = () => {
+  const {
+    takemodules,
+    takecoursesformodules,
+    createmodule,
+    updatemodule,
+    removemodule,
+  } = AdminService();
+
   const [activeTab, setActiveTab] = useState('modules'); // 'modules' | 'new-module' | 'edit-module'
-  const [viewingModule, setViewingModule] = useState(null); // Controls View Modal
+  const [viewingModule, setViewingModule] = useState(null);
   const [editingModuleId, setEditingModuleId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,70 +26,82 @@ const SyllabusManagement = () => {
 
   // Form states (Add & Edit)
   const [formName, setFormName] = useState('');
-  const [formSelectedCourses, setFormSelectedCourses] = useState([]);
+  const [formSelectedCourses, setFormSelectedCourses] = useState([]); // Array of { _id, courseName }
   const [formFileName, setFormFileName] = useState('');
-  const [formTopics, setFormTopics] = useState([]);
+  const [formTopics, setFormTopics] = useState([]); // Array of { _id, topicName }
 
-  const [modules, setModules] = useState([
-    {
-      id: 1,
-      code: '8ae94b',
-      name: 'PYTHON',
-      courses: ['PYTHON 6 MONTH'],
-      addedTopics: 0,
-      document: '',
-      createdAt: '8/13/2026',
-      topicsList: [],
-    },
-    {
-      id: 2,
-      code: '4f12c9',
-      name: 'MONGODB',
-      courses: ['MERN 6 MONTH'],
-      addedTopics: 0,
-      document: '',
-      createdAt: '8/12/2026',
-      topicsList: [],
-    },
-    {
-      id: 3,
-      code: '9d31e2',
-      name: 'NODE AND EXPRESS',
-      courses: ['MERN 6 MONTH'],
-      addedTopics: 0,
-      document: '',
-      createdAt: '8/11/2026',
-      topicsList: [],
-    },
-    {
-      id: 4,
-      code: '7c84a1',
-      name: 'REACT',
-      courses: ['PYTHON 6 MONTH', 'MERN 6 MONTH'],
-      addedTopics: 0,
-      document: '',
-      createdAt: '8/11/2026',
-      topicsList: [],
-    },
-  ]);
+  const [modules, setModules] = useState([]);
+  const [availableCourses, setAvailableCourses] = useState([]);
 
-  const availableCourses = [
-    'DATA ANALYTICS',
-    'DATA ANALYTICS WITH GEN AI',
-    'DATA SCIENCE',
-    'DATA SCIENCE & AI ENGINEERING',
-    'DIGITAL MARKETING',
-    'FLUTTER',
-    'MERN 6 MONTH',
-    'PYTHON 6 MONTH',
-    'UI/UX DESIGNING',
-  ];
+  // Normalize module document from API
+  const normalizeModule = useCallback((m) => {
+    const normalizedCourses = Array.isArray(m.course)
+      ? m.course.map((c) =>
+          typeof c === 'object' && c !== null
+            ? { _id: c._id, courseName: c.courseName || 'Untitled Course' }
+            : { _id: c, courseName: 'Course' }
+        )
+      : [];
+
+    const normalizedTopics = Array.isArray(m.topics)
+      ? m.topics
+          .filter((t) => t && !t.isDeleted)
+          .map((t) =>
+            typeof t === 'object' && t !== null
+              ? { _id: t._id, topicName: t.topicName || 'Topic' }
+              : { _id: t, topicName: 'Topic' }
+          )
+      : [];
+
+    const createdDate = m.createdAt
+      ? new Date(m.createdAt).toLocaleDateString('en-US')
+      : '';
+
+    return {
+      id: m._id,
+      code: m._id ? m._id.slice(-6) : '',
+      name: m.moduleName || '',
+      courses: normalizedCourses,
+      addedTopics: normalizedTopics.length || m.totalTopics || 0,
+      document: m.moduleImage || '',
+      createdAt: createdDate,
+      topicsList: normalizedTopics,
+    };
+  }, []);
+
+  // Load modules & courses on mount
+  const fetchInitialData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [modulesRes, coursesRes] = await Promise.all([
+        takemodules(),
+        takecoursesformodules(),
+      ]);
+
+      const rawModules = Array.isArray(modulesRes) ? modulesRes : modulesRes?.data || [];
+      const rawCourses = Array.isArray(coursesRes) ? coursesRes : coursesRes?.data || [];
+
+      setModules(rawModules.map(normalizeModule));
+      setAvailableCourses(rawCourses);
+    } catch (error) {
+      console.error('Failed to load modules data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [normalizeModule]);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
 
   const filteredModules = useMemo(() => {
     return modules.filter((mod) => {
-      const matchesSearch = mod.name.toLowerCase().includes(searchQuery.toLowerCase().trim());
+      const matchesSearch = mod.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase().trim());
       const matchesCourse =
-        courseFilter === 'All Courses' || mod.courses.includes(courseFilter);
+        courseFilter === 'All Courses' ||
+        mod.courses.some((c) => c._id === courseFilter);
       return matchesSearch && matchesCourse;
     });
   }, [modules, searchQuery, courseFilter]);
@@ -118,14 +141,23 @@ const SyllabusManagement = () => {
   };
 
   const handleAddCourseToForm = (e) => {
-    const selected = e.target.value;
-    if (selected && !formSelectedCourses.includes(selected)) {
-      setFormSelectedCourses((prev) => [...prev, selected]);
+    const selectedId = e.target.value;
+    if (!selectedId) return;
+
+    const alreadySelected = formSelectedCourses.some((c) => c._id === selectedId);
+    if (alreadySelected) return;
+
+    const courseObj = availableCourses.find((c) => c._id === selectedId);
+    if (courseObj) {
+      setFormSelectedCourses((prev) => [
+        ...prev,
+        { _id: courseObj._id, courseName: courseObj.courseName },
+      ]);
     }
   };
 
-  const handleRemoveCourseFromForm = (courseToRemove) => {
-    setFormSelectedCourses((prev) => prev.filter((c) => c !== courseToRemove));
+  const handleRemoveCourseFromForm = (courseIdToRemove) => {
+    setFormSelectedCourses((prev) => prev.filter((c) => c._id !== courseIdToRemove));
   };
 
   const handleFileChange = (e) => {
@@ -134,61 +166,102 @@ const SyllabusManagement = () => {
     }
   };
 
-  const handleRemoveTopic = (indexToRemove) => {
-    setFormTopics((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  const handleRemoveTopic = (topicIdToRemove) => {
+    setFormTopics((prev) => prev.filter((t) => t._id !== topicIdToRemove));
   };
 
-  const handleCreateModule = (e) => {
+  const handleCreateModule = async (e) => {
     e.preventDefault();
-    if (!formName.trim() || formSelectedCourses.length === 0) return;
+    if (!formName.trim() || formSelectedCourses.length === 0 || submitting) return;
 
-    const today = new Date();
-    const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+    setSubmitting(true);
+    try {
+      const payload = {
+        moduleName: formName.trim().toUpperCase(),
+        course: formSelectedCourses.map((c) => c._id),
+        moduleImage: formFileName || '',
+      };
 
-    const newModule = {
-      id: Date.now(),
-      code: Math.random().toString(16).substring(2, 8),
-      name: formName.trim().toUpperCase(),
-      courses: formSelectedCourses,
-      addedTopics: 0,
-      document: formFileName || '',
-      createdAt: formattedDate,
-      topicsList: [],
-    };
+      const res = await createmodule(payload);
+      const created = res?.data || res;
 
-    setModules((prev) => [newModule, ...prev]);
-    resetForm();
-    setActiveTab('modules');
-  };
-
-  const handleSaveEditedModule = (e) => {
-    e.preventDefault();
-    if (!formName.trim() || formSelectedCourses.length === 0) return;
-
-    setModules((prev) =>
-      prev.map((m) =>
-        m.id === editingModuleId
-          ? {
-              ...m,
-              name: formName.trim().toUpperCase(),
-              courses: formSelectedCourses,
-              document: formFileName,
-              topicsList: formTopics,
-              addedTopics: formTopics.length,
-            }
-          : m
-      )
-    );
-
-    resetForm();
-    setActiveTab('modules');
-  };
-
-  const handleDeleteModule = (id) => {
-    setModules((prev) => prev.filter((m) => m.id !== id));
-    if (viewingModule && viewingModule.id === id) {
-      setViewingModule(null);
+      setModules((prev) => [normalizeModule(created), ...prev]);
+      resetForm();
+      setActiveTab('modules');
+    } catch (error) {
+      console.error('Error creating module:', error);
+      alert(error?.response?.data?.message || 'Failed to create module');
+    } finally {
+      setSubmitting(false);
     }
+  };
+
+  const handleSaveEditedModule = async (e) => {
+    e.preventDefault();
+    if (!formName.trim() || formSelectedCourses.length === 0 || !editingModuleId || submitting)
+      return;
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        moduleName: formName.trim().toUpperCase(),
+        course: formSelectedCourses.map((c) => c._id),
+        moduleImage: formFileName || '',
+        topics: formTopics.map((t) => t._id),
+      };
+
+      const res = await updatemodule(editingModuleId, payload);
+      const updated = res?.data || res;
+
+      setModules((prev) =>
+        prev.map((m) => (m.id === editingModuleId ? normalizeModule(updated) : m))
+      );
+      resetForm();
+      setActiveTab('modules');
+    } catch (error) {
+      console.error('Error updating module:', error);
+      alert(error?.response?.data?.message || 'Failed to update module');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteModule = async (id) => {
+    try {
+      await removemodule(id);
+      setModules((prev) => prev.filter((m) => m.id !== id));
+      if (viewingModule && viewingModule.id === id) {
+        setViewingModule(null);
+      }
+    } catch (error) {
+      console.error('Error deleting module:', error);
+      alert(error?.response?.data?.message || 'Failed to delete module');
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['#', 'Module Name', 'Courses', 'Total Topics', 'Document', 'Created'];
+    const rows = filteredModules.map((m, idx) => [
+      idx + 1,
+      m.name,
+      m.courses.map((c) => c.courseName).join('; '),
+      m.addedTopics,
+      m.document || 'No File',
+      m.createdAt,
+    ]);
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers, ...rows]
+        .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', 'modules_list.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -219,7 +292,7 @@ const SyllabusManagement = () => {
         </div>
       </header>
 
-      {/* Outer Toolbar (Matches Screenshot 1, 2, 3) */}
+      {/* Outer Toolbar */}
       <div className="syl-mgmt-toolbar">
         <div className="syl-mgmt-tab-group">
           <button
@@ -242,7 +315,11 @@ const SyllabusManagement = () => {
           </button>
         </div>
 
-        <button type="button" className="syl-mgmt-export-btn">
+        <button
+          type="button"
+          className="syl-mgmt-export-btn"
+          onClick={handleExportCSV}
+        >
           <HiOutlineArrowDownTray className="syl-mgmt-export-icon" />
           <span>Export</span>
         </button>
@@ -273,8 +350,8 @@ const SyllabusManagement = () => {
                 >
                   <option value="All Courses">All Courses</option>
                   {availableCourses.map((course) => (
-                    <option key={course} value={course}>
-                      {course}
+                    <option key={course._id} value={course._id}>
+                      {course.courseName}
                     </option>
                   ))}
                 </select>
@@ -282,7 +359,11 @@ const SyllabusManagement = () => {
               </div>
             </div>
 
-            {filteredModules.length === 0 ? (
+            {loading ? (
+              <div className="syl-mgmt-content-area">
+                <p className="syl-mgmt-empty-message">Loading modules...</p>
+              </div>
+            ) : filteredModules.length === 0 ? (
               <div className="syl-mgmt-content-area">
                 <p className="syl-mgmt-empty-message">
                   No modules found. Please add a module or adjust your search filters.
@@ -318,9 +399,9 @@ const SyllabusManagement = () => {
 
                       <div className="syl-mgmt-td syl-mgmt-td-center" data-label="Course">
                         <div className="syl-mgmt-course-badges">
-                          {item.courses.map((courseName, cIdx) => (
-                            <span key={cIdx} className="syl-mgmt-course-pill">
-                              {courseName}
+                          {item.courses.map((courseObj) => (
+                            <span key={courseObj._id} className="syl-mgmt-course-pill">
+                              {courseObj.courseName}
                             </span>
                           ))}
                         </div>
@@ -388,7 +469,7 @@ const SyllabusManagement = () => {
           </>
         )}
 
-        {/* NEW MODULE & EDIT MODULE FORM (Matches Screenshot 2 & 3) */}
+        {/* NEW MODULE & EDIT MODULE FORM */}
         {(activeTab === 'new-module' || activeTab === 'edit-module') && (
           <form
             className="syl-mgmt-form-layout"
@@ -435,11 +516,11 @@ const SyllabusManagement = () => {
                       <option value="">-- Add a Course --</option>
                       {availableCourses.map((course) => (
                         <option
-                          key={course}
-                          value={course}
-                          disabled={formSelectedCourses.includes(course)}
+                          key={course._id}
+                          value={course._id}
+                          disabled={formSelectedCourses.some((sc) => sc._id === course._id)}
                         >
-                          {course}
+                          {course.courseName}
                         </option>
                       ))}
                     </select>
@@ -459,12 +540,12 @@ const SyllabusManagement = () => {
                       <span className="syl-mgmt-placeholder-italic">No courses selected yet.</span>
                     ) : (
                       formSelectedCourses.map((course) => (
-                        <span key={course} className="syl-mgmt-course-pill">
-                          {course}
+                        <span key={course._id} className="syl-mgmt-course-pill">
+                          {course.courseName}
                           <button
                             type="button"
                             className="syl-mgmt-pill-remove"
-                            onClick={() => handleRemoveCourseFromForm(course)}
+                            onClick={() => handleRemoveCourseFromForm(course._id)}
                             title="Remove course"
                           >
                             <LuX />
@@ -510,13 +591,13 @@ const SyllabusManagement = () => {
                   <div className="syl-mgmt-input-group">
                     <label className="syl-mgmt-label">Added Topics</label>
                     <div className="syl-mgmt-topics-grid">
-                      {formTopics.map((topic, index) => (
-                        <div key={index} className="syl-mgmt-topic-chip">
-                          <span>{topic}</span>
+                      {formTopics.map((topic) => (
+                        <div key={topic._id} className="syl-mgmt-topic-chip">
+                          <span>{topic.topicName}</span>
                           <button
                             type="button"
                             className="syl-mgmt-topic-remove-btn"
-                            onClick={() => handleRemoveTopic(index)}
+                            onClick={() => handleRemoveTopic(topic._id)}
                           >
                             <LuX />
                           </button>
@@ -536,15 +617,19 @@ const SyllabusManagement = () => {
               >
                 Cancel
               </button>
-              <button type="submit" className="syl-mgmt-submit-btn">
-                {activeTab === 'new-module' ? 'Create Module' : 'Save Changes'}
+              <button type="submit" className="syl-mgmt-submit-btn" disabled={submitting}>
+                {submitting
+                  ? 'Saving...'
+                  : activeTab === 'new-module'
+                  ? 'Create Module'
+                  : 'Save Changes'}
               </button>
             </div>
           </form>
         )}
       </main>
 
-      {/* VIEW MODULE MODAL (Matches Screenshot 4) */}
+      {/* VIEW MODULE MODAL */}
       {viewingModule && (
         <div
           className="syl-mgmt-modal-backdrop"
@@ -578,7 +663,7 @@ const SyllabusManagement = () => {
 
               <div className="syl-mgmt-modal-detail-item">
                 <span className="syl-mgmt-modal-detail-label">Courses:</span>
-                <span>{viewingModule.courses.join(', ')}</span>
+                <span>{viewingModule.courses.map((c) => c.courseName).join(', ')}</span>
               </div>
 
               <div className="syl-mgmt-modal-detail-item">
@@ -602,9 +687,9 @@ const SyllabusManagement = () => {
 
               {viewingModule.topicsList && viewingModule.topicsList.length > 0 && (
                 <div className="syl-mgmt-modal-topics-list">
-                  {viewingModule.topicsList.map((topic, idx) => (
-                    <span key={idx} className="syl-mgmt-modal-topic-tag">
-                      {topic}
+                  {viewingModule.topicsList.map((topic) => (
+                    <span key={topic._id} className="syl-mgmt-modal-topic-tag">
+                      {topic.topicName}
                     </span>
                   ))}
                 </div>
