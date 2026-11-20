@@ -6,7 +6,7 @@ import {
   ArrowLeft,
   X,
 } from "lucide-react";
-import Sidebar from "../../Sidebar";
+
 import "./CategoryDetails.css";
 
 const CategoryEdit = () => {
@@ -126,7 +126,7 @@ const CategoryEdit = () => {
 
   return (
     <div className="course-management-layout">
-      <Sidebar />
+   
 
       <main className="course-management-main">
 

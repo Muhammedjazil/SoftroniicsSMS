@@ -78,6 +78,12 @@ import InternWeeklySchedule from "./pages/intern/InternWeeklySchedule";
 import WeeklyCard from "./pages/intern/WeeklyCard";
 import Dashboard from "./pages/admin/Dashboard/Dashboard";
 import Categories from "./pages/admin/CourseManagement/Categories";
+import Course from "./pages/admin/CourseManagement/Course";
+import CategoryView from "./pages/admin/CourseManagement/CategoryView";
+
+import ViewCourse from "./pages/admin/CourseManagement/ViewCourse";
+import EditCourse from "./pages/admin/CourseManagement/EditCourse";
+import CategoryEdit from "./pages/admin/CourseManagement/CategoryEdit";
 // =====================================
 // AUTH HELPERS & ROUTE GUARDS
 // =====================================
@@ -162,7 +168,7 @@ function App() {
                 ================================= */}
 
         <Route
-          path="/courses/:id"
+          path="/course/:id"
           element={
             <Adminlayout>
               <ViewCourse />
@@ -171,7 +177,7 @@ function App() {
         />
 
         <Route
-          path="/courses/:id/edit"
+          path="/course/:id/edit"
           element={
             <Adminlayout>
               <EditCourse />
@@ -179,10 +185,10 @@ function App() {
           }
         />
         <Route
-          path="/courses"
+          path="/course"
           element={
             <Adminlayout>
-              <CourseManagement />
+              <Course />
             </Adminlayout>
           }
         />

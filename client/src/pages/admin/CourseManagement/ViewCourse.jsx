@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Sidebar from "../../Sidebar";
-import "./CourseManagement.css";
+
+import "./Course.css";
 
 const ViewCourse = () => {
   const { id } = useParams();
@@ -25,7 +25,7 @@ const ViewCourse = () => {
 
   return (
     <div className="course-management-layout">
-      <Sidebar />
+      
 
       <main className="course-management-main">
         <header className="course-top-header">
