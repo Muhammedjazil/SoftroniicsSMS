@@ -1744,10 +1744,10 @@ setActiveTab("stafflist");
                   <p>{view.department || "-"}</p>
                 </div>
 
-                <div className="staffviewfield">
-                  <h4>Branch</h4>
-                  <p>{view.branch || "-"}</p>
-                </div>
+             <div className="staffviewfield">
+  <h4>Branch</h4>
+  <p>{getBranchName(view.branch)}</p>
+</div>
 
                 <div className="staffviewfield">
                   <h4>Employee Type</h4>
