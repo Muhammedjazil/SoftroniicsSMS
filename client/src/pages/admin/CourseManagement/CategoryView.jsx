@@ -1,64 +1,84 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   UserRound,
   ArrowLeft,
-  Pencil,
-  Trash2,
-  X,
 } from "lucide-react";
 
+import AdminService from "../../../services/admin-api-services/AdminService";
 import "./CategoryDetails.css";
 
 const CategoryView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const categories = JSON.parse(
-    localStorage.getItem("categories") || "[]"
-  );
+  const { takecategorybyid, removecategory } = AdminService();
 
-  const courses = JSON.parse(
-    localStorage.getItem("courses") || "[]"
-  );
+  const [category, setCategory] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const category = categories.find(
-    (item) => String(item.id) === id
-  );
+  // FETCH CATEGORY DETAILS
+  const fetchCategory = async () => {
+    try {
+      setLoading(true);
 
-  if (!category) {
-    return <div>Category not found</div>;
-  }
+      const response = await takecategorybyid(id);
 
-  const addedCourses = courses.filter((course) =>
-    category.courseIds?.some(
-      (courseId) => String(courseId) === String(course.id)
-    )
-  );
+      // Adjust this line if your controller returns { category: ... }
+      setCategory(response.category || response);
+    } catch (error) {
+      console.error("Error fetching category:", error);
+      setCategory(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const handleDelete = () => {
+  useEffect(() => {
+    fetchCategory();
+  }, [id]);
+
+  // DELETE CATEGORY
+  const handleDelete = async () => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this category?"
     );
 
     if (!confirmDelete) return;
 
-    const updatedCategories = categories.filter(
-      (item) => String(item.id) !== id
-    );
+    try {
+      await removecategory(id);
+      alert("Category deleted successfully");
+      navigate("/categories");
+    } catch (error) {
+      console.error("Error deleting category:", error);
 
-    localStorage.setItem(
-      "categories",
-      JSON.stringify(updatedCategories)
-    );
-
-    navigate("/categories");
+      alert(
+        error.response?.data?.message ||
+        "Unable to delete category"
+      );
+    }
   };
+
+  if (loading) {
+    return <div>Loading category details...</div>;
+  }
+
+  if (!category) {
+    return <div>Category not found</div>;
+  }
+
+  // BRANCH NAMES
+  const branchNames = category.branch
+    ?.map((branch) => branch.branchName)
+    .join(", ") || "No branch assigned";
+
+  // COURSES
+  const addedCourses = category.courses || [];
 
   return (
     <div className="course-management-layout">
-      
 
       <main className="course-management-main">
 
@@ -103,7 +123,7 @@ const CategoryView = () => {
             <div className="category-detail-group">
               <label>Category Name</label>
               <input
-                value={category.categoryName}
+                value={category.categoryName || ""}
                 disabled
                 readOnly
               />
@@ -112,7 +132,7 @@ const CategoryView = () => {
             <div className="category-detail-group">
               <label>Total Courses</label>
               <input
-                value={addedCourses.length}
+                value={category.totalCourses ?? addedCourses.length}
                 disabled
                 readOnly
               />
@@ -121,7 +141,7 @@ const CategoryView = () => {
             <div className="category-detail-group">
               <label>Branch</label>
               <input
-                value={category.branch}
+                value={branchNames}
                 disabled
                 readOnly
               />
@@ -135,14 +155,14 @@ const CategoryView = () => {
           </h4>
 
           <div className="category-view-course-list">
+
             {addedCourses.length > 0 ? (
               addedCourses.map((course) => (
                 <div
                   className="category-course-chip"
-                  key={course.id}
+                  key={course._id}
                 >
                   <span>{course.courseName}</span>
-                  <X size={12} />
                 </div>
               ))
             ) : (
@@ -150,6 +170,7 @@ const CategoryView = () => {
                 No courses added.
               </p>
             )}
+
           </div>
 
           {/* ACTION BUTTONS */}
@@ -165,7 +186,7 @@ const CategoryView = () => {
             <button
               className="category-edit-btn"
               onClick={() =>
-                navigate(`/categories/edit/${category.id}`)
+                navigate(`/categories/edit/${category._id}`)
               }
             >
               Edit Category

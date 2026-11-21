@@ -99,7 +99,7 @@ function App() {
           }
         />
         <Route
-          path="/course/:id"
+          path="/courses/:id"
           element={
             <Adminlayout>
               <ViewCourse />
@@ -108,7 +108,7 @@ function App() {
         />
 
         <Route
-          path="/course/:id/edit"
+          path="/courses/:id/edit"
           element={
             <Adminlayout>
               <EditCourse />
