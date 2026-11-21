@@ -1,9 +1,19 @@
-const WeeklySchedule = require("../Models/weeklyScheduleModel"); // Adjust path to your WeeklySchedule model
+const WeeklySchedule = require("../Models/weeklyScheduleModel");
 const { Staff } = require("../Models/staffModel");
 const Batch = require("../Models/batchModel");
-const Day = require("../models/dayModel"); // Adjust path to your Day model
-const DayCombination = require("../models/dayCombinationModel"); // Adjust path to your DayCombination model
-const Module = require("../Models/moduleModel"); // Adjust path to your Module model
+const Day = require("../Models/dayModel");
+const DayCombination = require("../Models/dayCombinationModel");
+const Module = require("../Models/moduleModel");
+
+const DAY_SHORT_CODE = {
+  Sunday: "S",
+  Monday: "M",
+  Tuesday: "T",
+  Wednesday: "W",
+  Thursday: "T",
+  Friday: "F",
+  Saturday: "S",
+};
 
 // Helper: Normalize 7-day range from startDate string (YYYY-MM-DD)
 const getWeekRange = (startDateStr) => {
@@ -22,8 +32,19 @@ const resolveDayCombinationId = async (dayUpper) => {
   const formattedDay =
     dayUpper.charAt(0).toUpperCase() + dayUpper.slice(1).toLowerCase();
 
-  const dayDoc = await Day.findOne({ day: formattedDay, isDeleted: { $ne: true } });
-  if (!dayDoc) return null;
+  let dayDoc = await Day.findOne({
+    day: formattedDay,
+    isDeleted: { $ne: true },
+  });
+
+  // Auto-seed the Day document with all required schema fields if missing
+  if (!dayDoc) {
+    dayDoc = await Day.create({
+      name: DAY_SHORT_CODE[formattedDay] || formattedDay.charAt(0),
+      day: formattedDay,
+      description: `${formattedDay} class day`,
+    });
+  }
 
   // Prefer an exact single-day DayCombination first
   let combination = await DayCombination.findOne({
@@ -33,7 +54,7 @@ const resolveDayCombinationId = async (dayUpper) => {
 
   if (!combination) {
     combination = await DayCombination.create({
-      name: dayDoc.name || formattedDay.slice(0, 3).toUpperCase(),
+      name: formattedDay.slice(0, 3).toUpperCase(),
       dayCombination: [dayDoc._id],
       description: `${formattedDay} schedule`,
     });
@@ -46,7 +67,9 @@ const resolveDayCombinationId = async (dayUpper) => {
 const extractUpperDays = (dayCombObj) => {
   if (!dayCombObj || !Array.isArray(dayCombObj.dayCombination)) return [];
   return dayCombObj.dayCombination
-    .map((d) => (typeof d === "object" && d !== null && d.day ? d.day.toUpperCase() : null))
+    .map((d) =>
+      typeof d === "object" && d !== null && d.day ? d.day.toUpperCase() : null
+    )
     .filter(Boolean);
 };
 
@@ -57,7 +80,9 @@ const getWeeklyScheduleMatrix = async (req, res) => {
     const { branchId, startDate } = req.query;
 
     if (!branchId || !startDate) {
-      return res.status(400).json({ message: "branchId and startDate are required." });
+      return res
+        .status(400)
+        .json({ message: "branchId and startDate are required." });
     }
 
     const { start, end } = getWeekRange(startDate);
@@ -110,18 +135,27 @@ const getWeeklyScheduleMatrix = async (req, res) => {
       _id: b._id,
       name: b.batchName,
       course: b.course?.courseName || "N/A",
-      interns: b.totalInterns ?? (Array.isArray(b.interns) ? b.interns.length : 0),
+      interns:
+        b.totalInterns ?? (Array.isArray(b.interns) ? b.interns.length : 0),
       branch: b.branch?.branchName || b.branch?.name || "",
     }));
 
     // 3. Fetch Available Subjects / Modules
-    const modulesRaw = await Module.find({ isDeleted: { $ne: true }, isActive: { $ne: false } })
+    const modulesRaw = await Module.find({
+      isDeleted: { $ne: true },
+      isActive: { $ne: false },
+    })
       .select("moduleName subjectName title name")
       .sort({ createdAt: 1 });
 
     const subjects = modulesRaw.map((mod) => ({
       _id: mod._id,
-      name: mod.moduleName || mod.subjectName || mod.title || mod.name || "Untitled Module",
+      name:
+        mod.moduleName ||
+        mod.subjectName ||
+        mod.title ||
+        mod.name ||
+        "Untitled Module",
     }));
 
     // 4. Fetch WeeklySchedule entries for this branch & week
@@ -155,7 +189,8 @@ const getWeeklyScheduleMatrix = async (req, res) => {
       const sub = sched.sub_details || {};
       const upperDays = extractUpperDays(sub.day);
 
-      const firstBatch = Array.isArray(sub.batch) && sub.batch.length > 0 ? sub.batch[0] : null;
+      const firstBatch =
+        Array.isArray(sub.batch) && sub.batch.length > 0 ? sub.batch[0] : null;
 
       upperDays.forEach((dayUpper) => {
         const cellKey = `${mentorId}_${timeId}_${dayUpper}`;
@@ -200,14 +235,18 @@ const upsertScheduleCell = async (req, res) => {
     } = req.body;
 
     if (!startDate || !branchId || !mentorId || !timeId || !day) {
-      return res.status(400).json({ message: "Missing required cell identifiers." });
+      return res
+        .status(400)
+        .json({ message: "Missing required cell identifiers." });
     }
 
     const { start, end } = getWeekRange(startDate);
     const dayCombinationId = await resolveDayCombinationId(day);
 
     if (!dayCombinationId) {
-      return res.status(400).json({ message: `Day record not configured in database for ${day}.` });
+      return res
+        .status(400)
+        .json({ message: `Day record not configured in database for ${day}.` });
     }
 
     const query = {
@@ -266,7 +305,9 @@ const cloneScheduleToNextWeek = async (req, res) => {
   try {
     const { startDate, branchId } = req.body;
     if (!startDate || !branchId) {
-      return res.status(400).json({ message: "startDate and branchId are required." });
+      return res
+        .status(400)
+        .json({ message: "startDate and branchId are required." });
     }
 
     const { start: currStart, end: currEnd } = getWeekRange(startDate);
