@@ -127,27 +127,7 @@ const MentorBatches = () => {
 
   return (
     <div className="mnt-btc-container">
-      {/* Header */}
-      <header className="mnt-btc-header">
-        <div className="mnt-btc-title-group">
-          <h1 className="mnt-btc-heading">Mentor Batches</h1>
-          <nav className="mnt-btc-breadcrumb">
-            <span>Mentor Batches</span>
-            <span className="mnt-btc-breadcrumb-separator">&gt;</span>
-            <span>Mentor Batches</span>
-          </nav>
-        </div>
-
-        <div className="mnt-btc-profile-card">
-          <div className="mnt-btc-profile-avatar">
-            <LuUser />
-          </div>
-          <div className="mnt-btc-profile-info">
-            <span className="mnt-btc-username">vijitha</span>
-            <span className="mnt-btc-role">super admin</span>
-          </div>
-        </div>
-      </header>
+      
 
       {/* Top Selector Bar */}
       <section className="mnt-btc-selector-card">

@@ -68,21 +68,7 @@ const ViewCourse = () => {
     <div className="course-management-layout">
 
       <main className="course-management-main">
-
-        <header className="course-top-header">
-          <div>
-            <h2>Course Management</h2>
-            <p>Dashboard / Course Management / View Course</p>
-          </div>
-
-          <div className="course-admin-profile">
-            <div className="course-admin-avatar">P</div>
-            <div>
-              <h4>Priyesh</h4>
-              <span>Super Admin</span>
-            </div>
-          </div>
-        </header>
+        
 
         <section className="course-management-content">
 

@@ -271,23 +271,7 @@ const CourseManagement = () => {
     <div className="course-management-layout">
 
       <main className="course-management-main">
-
-        {/* TOP HEADER */}
-        <header className="course-top-header">
-          <div>
-            <h2>Course Management</h2>
-            <p>Dashboard / Course Management</p>
-          </div>
-
-          <div className="admin-profile">
-            <UserRound size={17} />
-
-            <div>
-              <h4>Priyesh</h4>
-              <p>Super Admin</p>
-            </div>
-          </div>
-        </header>
+       
 
         {/* PAGE CONTENT */}
         <section className="course-management-content">

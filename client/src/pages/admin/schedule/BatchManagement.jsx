@@ -291,31 +291,7 @@ const BatchManagement = () => {
 
   return (
     <div className="btc-mgmt-container">
-      {/* Header */}
-      <header className="btc-mgmt-header">
-        <div className="btc-mgmt-title-group">
-          <h1 className="btc-mgmt-heading">Batch Management</h1>
-          <nav className="btc-mgmt-breadcrumb">
-            <span>Batch Management</span>
-            <span className="btc-mgmt-breadcrumb-separator">&gt;</span>
-            <span>
-              {activeTab === 'batches' && 'batches'}
-              {activeTab === 'add-batch' && 'new-batch'}
-              {activeTab === 'edit-batch' && 'edit-batch'}
-            </span>
-          </nav>
-        </div>
-
-        <div className="btc-mgmt-profile-card">
-          <div className="btc-mgmt-profile-avatar">
-            <LuUser />
-          </div>
-          <div className="btc-mgmt-profile-info">
-            <span className="btc-mgmt-username">vijitha</span>
-            <span className="btc-mgmt-role">super admin</span>
-          </div>
-        </div>
-      </header>
+     
 
       {/* Outer Toolbar */}
       <div className="btc-mgmt-toolbar">

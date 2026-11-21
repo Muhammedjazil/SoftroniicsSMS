@@ -1,5 +1,5 @@
 const Batch = require("../Models/batchModel");
-const Intern = require("../models/internModel"); // Adjust path/filename to match your Intern model
+const Intern = require("../Models/internModel"); // Adjust path/filename to match your Intern model
 
 // @desc    Create a new batch
 // @route   POST /batchmanagement

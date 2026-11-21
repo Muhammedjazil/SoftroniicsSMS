@@ -28,10 +28,10 @@ const batchSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// Update totalCourses automatically
-batchSchema.pre("save", function (next) {
-  this.totalInterns = this.interns.length;
-  next();
+// Update totalInterns automatically
+batchSchema.pre("save", function () {
+  this.totalInterns = Array.isArray(this.interns) ? this.interns.length : 0;
 });
+
 
 module.exports = mongoose.model("Batch", batchSchema);
