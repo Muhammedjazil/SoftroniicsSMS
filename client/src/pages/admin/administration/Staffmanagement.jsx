@@ -141,7 +141,16 @@ const sampleStaff = [
 // =====================================
 
 export const Staffmanagement = () => {
-  const { takeroletitle,takebranch,taketiming,createstaff,getallstaff } = AdminService();
+  // const { takeroletitle,takebranch,taketiming,createstaff,getallstaff } = AdminService();
+  const {
+  takeroletitle,
+  takebranch,
+  taketiming,
+  createstaff,
+  getallstaff,
+  updatestaff,
+  staffremove
+} = AdminService();
 
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
@@ -217,11 +226,14 @@ const fetchrole = async () => {
   }
 };
 
-  const fetchtiming = async () => {
+ const fetchtiming = async (branchId) => {
   try {
-    const response = await taketiming();
+    if (!branchId) {
+      setTimingOptions([]);
+      return;
+    }
 
-    console.log("Fetched Timings:", response);
+    const response = await taketiming(branchId);
 
     setTimingOptions(Array.isArray(response) ? response : []);
   } catch (error) {
@@ -316,7 +328,6 @@ const fetchallstaff = async () => {
   useEffect(() => {
     fetchrole();
     fetchbranch();
-    fetchtiming();
     fetchallstaff();
   }, []);
 
@@ -452,19 +463,37 @@ const fetchallstaff = async () => {
   // HANDLE INPUTS
   // =====================================
 
-  const handlecreate = (e) => {
-    const { name, value, type, files, checked } = e.target;
+const handlecreate = (e) => {
+  const { name, value, type, checked, files } = e.target;
 
+  if (name === "branch") {
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        type === "file"
-          ? files[0]
-          : type === "checkbox"
-          ? checked
-          : value
+      branch: value,
+      mentorTimings: [],
+      additionalBranches: prev.additionalBranches.filter(
+        (id) => id !== value
+      ),
     }));
-  };
+
+    setSelectedTiming("");
+    fetchtiming(value);
+    return;
+  }
+
+  if (type === "file") {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files[0] || null,
+    }));
+    return;
+  }
+
+  setFormData((prev) => ({
+    ...prev,
+    [name]: type === "checkbox" ? checked : value,
+  }));
+};
 
   // =====================================
   // ADDITIONAL BRANCH TOGGLE
@@ -713,9 +742,15 @@ let response;
 if (editId !== null) {
   // If editId has a value, UPDATE existing staff
   response = await updatestaff(editId, data);
+alert("Staff updated successfully!");
+await fetchallstaff();
 
-  alert("Staff updated successfully!");
-  await getallstaff()
+setActiveTab("stafflist");
+setEditId(null);
+setView(null);
+resetForm();
+  // alert("Staff updated successfully!");
+  // await getallstaff()
 } else {
   // If editId is null, CREATE new staff
   response = await createstaff(data);
@@ -771,26 +806,41 @@ setActiveTab("stafflist");
   // EDIT STAFF
   // =====================================
 
- const staffedit = () => {
+const staffedit = () => {
   if (!view) return;
+
+  const branchId =
+    typeof view.branch === "object"
+      ? view.branch?._id
+      : view.branch;
 
   setFormData({
     ...initialForm,
     ...view,
 
+    branch: branchId || "",
+    role:
+      typeof view.role === "object"
+        ? view.role?._id
+        : view.role || "",
+
     photo: null,
     resume: null,
 
-    role: view.role || "",
     additionalBranches: view.additionalBranches || [],
     allowAdditionalBranches: view.allowAdditionalBranches || false,
     mentorTimings: view.mentorTimings || [],
 
     password: "",
-    conformpassword: ""
+    conformpassword: "",
   });
 
   setSelectedTiming("");
+
+  if (branchId) {
+    fetchtiming(branchId);
+  }
+
   setEditId(view.id);
   setActiveTab("newstaff");
 };
@@ -1029,25 +1079,41 @@ setActiveTab("stafflist");
                             View
                           </button>
 
-                          <button
-                            type="button"
-                            className="staffedit"
-                            onClick={() => {
-                              setView(value);
-                              setFormData({
-                                ...initialForm,
-                                ...value,
-                                role: value.role || "",
-                                additionalBranches:
-                                  value.additionalBranches || [],
-                                mentorTimings: value.mentorTimings || []
-                              });
-                              setEditId(value.id);
-                              setActiveTab("newstaff");
-                            }}
-                          >
-                            Edit
-                          </button>
+                      <button
+  type="button"
+  className="staffedit"
+  onClick={() => {
+    const branchId =
+      typeof value.branch === "object"
+        ? value.branch?._id
+        : value.branch;
+
+    setView(value);
+
+    setFormData({
+      ...initialForm,
+      ...value,
+      branch: branchId || "",
+      role:
+        typeof value.role === "object"
+          ? value.role?._id
+          : value.role || "",
+      additionalBranches: value.additionalBranches || [],
+      mentorTimings: value.mentorTimings || [],
+    });
+
+    setSelectedTiming("");
+    setEditId(value.id);
+
+    if (branchId) {
+      fetchtiming(branchId);
+    }
+
+    setActiveTab("newstaff");
+  }}
+>
+  Edit
+</button>
 
                           <button
                             type="button"
@@ -1529,13 +1595,11 @@ setActiveTab("stafflist");
                       <div className="staff-timing-select">
                         <label>Select Timings</label>
 
-                       <select
+                    <select
   value={selectedTiming}
   onChange={handleTimingChange}
 >
-  <option value="">
-    -- Select a Timing --
-  </option>
+  <option value="">-- Select a Timing --</option>
 
   {timingOptions.map((timing) => (
     <option
