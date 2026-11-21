@@ -1,56 +1,88 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   UserRound,
   ArrowLeft,
-  X,
 } from "lucide-react";
 
+import AdminService from "../../../services/admin-api-services/AdminService";
 import "./CategoryDetails.css";
 
 const CategoryEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const categories = JSON.parse(
-    localStorage.getItem("categories") || "[]"
-  );
+  const {
+    takecategorybyid,
+    updatecategory,
+    takebranch,
+  } = AdminService();
 
-  const courses = JSON.parse(
-    localStorage.getItem("courses") || "[]"
-  );
-
-  const category = categories.find(
-    (item) => String(item.id) === id
-  );
+  const [category, setCategory] = useState(null);
+  const [branches, setBranches] = useState([]);
 
   const [formData, setFormData] = useState({
-    categoryName: category?.categoryName || "",
-    branch: category?.branch || "All",
-    courseIds: category?.courseIds || [],
+    categoryName: "",
+    branch: "",
   });
 
-  const branches = [
-    "All",
-    "Calicut",
-    "Kochi",
-    "Malappuram",
-    "Trivandrum",
-  ];
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const [selectedCourse, setSelectedCourse] = useState("");
+  // FETCH CATEGORY AND BRANCHES
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-  if (!category) {
-    return <div>Category not found</div>;
-  }
+        const [categoryResponse, branchResponse] =
+          await Promise.all([
+            takecategorybyid(id),
+            takebranch(),
+          ]);
 
-  const addedCourses = courses.filter((course) =>
-    formData.courseIds.some(
-      (courseId) => String(courseId) === String(course.id)
-    )
-  );
+        const categoryData =
+          categoryResponse.category || categoryResponse;
 
+        const branchData =
+          Array.isArray(branchResponse)
+            ? branchResponse
+            : branchResponse.branches || [];
+
+        setCategory(categoryData);
+
+        setBranches(
+          branchData.filter(
+            (branch) =>
+              branch.isActive !== false &&
+              branch.isDeleted !== true
+          )
+        );
+
+        // Get the first assigned branch ID
+        const assignedBranch =
+          categoryData.branch?.[0]?._id ||
+          categoryData.branch?.[0] ||
+          "";
+
+        setFormData({
+          categoryName: categoryData.categoryName || "",
+          branch: String(assignedBranch),
+        });
+
+      } catch (error) {
+        console.error("Error fetching category:", error);
+        setCategory(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  // HANDLE INPUT CHANGE
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -60,41 +92,8 @@ const CategoryEdit = () => {
     }));
   };
 
-  // ADD COURSE
-  const handleAddCourse = () => {
-    if (!selectedCourse) return;
-
-    const courseId = String(selectedCourse);
-
-    if (
-      formData.courseIds.some(
-        (id) => String(id) === courseId
-      )
-    ) {
-      alert("Course already added");
-      return;
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      courseIds: [...prev.courseIds, courseId],
-    }));
-
-    setSelectedCourse("");
-  };
-
-  // REMOVE COURSE
-  const handleRemoveCourse = (courseId) => {
-    setFormData((prev) => ({
-      ...prev,
-      courseIds: prev.courseIds.filter(
-        (id) => String(id) !== String(courseId)
-      ),
-    }));
-  };
-
   // SAVE CATEGORY
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
 
     if (!formData.categoryName.trim()) {
@@ -102,31 +101,54 @@ const CategoryEdit = () => {
       return;
     }
 
-    const updatedCategories = categories.map((item) =>
-      String(item.id) === id
-        ? {
-            ...item,
-            categoryName: formData.categoryName.trim(),
-            branch: formData.branch,
-            courseIds: formData.courseIds,
-            totalCourses: formData.courseIds.length,
-          }
-        : item
-    );
+    try {
+      setSaving(true);
 
-    localStorage.setItem(
-      "categories",
-      JSON.stringify(updatedCategories)
-    );
+      const updatedData = {
+        categoryName: formData.categoryName.trim(),
 
-    alert("Category updated successfully!");
+        // Backend expects an array of Branch IDs
+        branch: formData.branch
+          ? [formData.branch]
+          : [],
 
-    navigate("/categories");
+        // Preserve the courses already assigned
+        courses: (category.courses || []).map(
+          (course) => course._id || course
+        ),
+      };
+
+      await updatecategory(id, updatedData);
+
+      alert("Category updated successfully!");
+
+      navigate("/categories");
+
+    } catch (error) {
+      console.error("Error updating category:", error);
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to update category"
+      );
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return <div>Loading category details...</div>;
+  }
+
+  if (!category) {
+    return <div>Category not found</div>;
+  }
+
+  // COURSES ALREADY ASSIGNED
+  const addedCourses = category.courses || [];
 
   return (
     <div className="course-management-layout">
-   
 
       <main className="course-management-main">
 
@@ -174,7 +196,10 @@ const CategoryEdit = () => {
                 <label>Total Courses</label>
 
                 <input
-                  value={addedCourses.length}
+                  value={
+                    category.totalCourses ??
+                    addedCourses.length
+                  }
                   disabled
                   readOnly
                 />
@@ -188,9 +213,14 @@ const CategoryEdit = () => {
                   value={formData.branch}
                   onChange={handleChange}
                 >
+                  <option value="">Select Branch</option>
+
                   {branches.map((branch) => (
-                    <option key={branch} value={branch}>
-                      {branch}
+                    <option
+                      key={branch._id}
+                      value={branch._id}
+                    >
+                      {branch.branchName}
                     </option>
                   ))}
                 </select>
@@ -203,66 +233,31 @@ const CategoryEdit = () => {
               Added Courses
             </h4>
 
-            {/* COURSE DROPDOWN */}
-            <div className="category-add-course">
-
-              <select
-                value={selectedCourse}
-                onChange={(e) => setSelectedCourse(e.target.value)}
-              >
-                <option value="">Select Course</option>
-
-                {courses.map((course) => (
-                  <option
-                    key={course.id}
-                    value={course.id}
-                    disabled={formData.courseIds.some(
-                      (courseId) =>
-                        String(courseId) === String(course.id)
-                    )}
-                  >
-                    {course.courseName} ({course.courseCode})
-                  </option>
-                ))}
-              </select>
-
-              <button
-                type="button"
-                onClick={handleAddCourse}
-                className="category-add-btn"
-              >
-                Add
-              </button>
-
-            </div>
-
-            {/* SELECTED COURSE CHIPS */}
             <div className="category-view-course-list">
 
-              {addedCourses.map((course) => (
-                <div
-                  className="category-course-chip"
-                  key={course.id}
-                >
-                  <span>{course.courseName}</span>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveCourse(course.id)}
-                    title="Remove course"
+              {addedCourses.length > 0 ? (
+                addedCourses.map((course) => (
+                  <div
+                    className="category-course-chip"
+                    key={course._id}
                   >
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
-
-              {addedCourses.length === 0 && (
+                    <span>
+                      {course.courseName}
+                    </span>
+                  </div>
+                ))
+              ) : (
                 <p className="category-no-course">
                   No courses added.
                 </p>
               )}
 
             </div>
+
+            <p>
+              Courses can be assigned or changed through
+              Course Management.
+            </p>
 
             {/* BOTTOM BUTTONS */}
             <div className="category-edit-actions">
@@ -271,6 +266,7 @@ const CategoryEdit = () => {
                 type="button"
                 className="category-cancel-btn"
                 onClick={() => navigate("/categories")}
+                disabled={saving}
               >
                 Cancel
               </button>
@@ -278,8 +274,9 @@ const CategoryEdit = () => {
               <button
                 type="submit"
                 className="category-save-btn"
+                disabled={saving}
               >
-                Save
+                {saving ? "Saving..." : "Save"}
               </button>
 
             </div>

@@ -7,54 +7,79 @@ import {
   Pencil,
   Trash2,
   Plus,
-  X,
 } from "lucide-react";
+
+import AdminService from "../../../services/admin-api-services/AdminService";
 import "./Categories.css";
 
 const Categories = () => {
   const navigate = useNavigate();
 
+  const {
+    createcategory,
+    takecategories,
+    removecategory,
+    takebranch,
+  } = AdminService();
+
   const [activeTab, setActiveTab] = useState("category");
 
-  // Load saved categories
-  const [categories, setCategories] = useState(() => {
-    return JSON.parse(localStorage.getItem("categories") || "[]");
-  });
+  const [categories, setCategories] = useState([]);
+  const [branches, setBranches] = useState([]);
 
-  // Load courses created in Course Management
-  const [courses, setCourses] = useState(() => {
-    return JSON.parse(localStorage.getItem("courses") || "[]");
-  });
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     categoryName: "",
-    branch: "All",
-    courseIds: [],
+    branch: "",
   });
 
-  const [selectedCourse, setSelectedCourse] = useState("");
+  // FETCH CATEGORIES
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
 
-  const branches = [
-    "All",
-    "Calicut",
-    "Kochi",
-    "Malappuram",
-    "Trivandrum",
-  ];
+      const data = await takecategories();
+      setCategories(data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      alert("Unable to load categories");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Save categories whenever they change
+  // FETCH BRANCHES
+  const fetchBranches = async () => {
+    try {
+      const data = await takebranch();
+
+      const activeBranches = data.filter(
+        (branch) => branch.isActive && !branch.isDeleted
+      );
+
+      setBranches(activeBranches);
+    } catch (error) {
+      console.error("Error fetching branches:", error);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem("categories", JSON.stringify(categories));
-  }, [categories]);
+    fetchCategories();
+    fetchBranches();
+  }, []);
 
-  // Refresh course data when opening New Category
+  // OPEN NEW CATEGORY
   const openNewCategory = () => {
-    setCourses(
-      JSON.parse(localStorage.getItem("courses") || "[]")
-    );
+    setFormData({
+      categoryName: "",
+      branch: "",
+    });
+
     setActiveTab("newCategory");
   };
 
+  // HANDLE INPUT CHANGE
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -64,37 +89,8 @@ const Categories = () => {
     }));
   };
 
-  // Add selected course
-  const handleAddCourse = () => {
-    if (!selectedCourse) return;
-
-    const courseId = String(selectedCourse);
-
-    if (formData.courseIds.some((id) => String(id) === courseId)) {
-      alert("Course already added");
-      return;
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      courseIds: [...prev.courseIds, courseId],
-    }));
-
-    setSelectedCourse("");
-  };
-
-  // Remove selected course
-  const handleRemoveCourse = (courseId) => {
-    setFormData((prev) => ({
-      ...prev,
-      courseIds: prev.courseIds.filter(
-        (id) => String(id) !== String(courseId)
-      ),
-    }));
-  };
-
-  // Create category
-  const handleCreateCategory = (e) => {
+  // CREATE CATEGORY
+  const handleCreateCategory = async (e) => {
     e.preventDefault();
 
     if (!formData.categoryName.trim()) {
@@ -102,53 +98,90 @@ const Categories = () => {
       return;
     }
 
-    const nextCode = `C${String(categories.length + 1).padStart(2, "0")}`;
+    if (!formData.branch) {
+      alert("Please select a branch");
+      return;
+    }
 
-    const newCategory = {
-      id: Date.now(),
-      catCode: nextCode,
-      categoryName: formData.categoryName.trim(),
-      branch: formData.branch,
-      courseIds: formData.courseIds,
-      totalCourses: formData.courseIds.length,
-    };
+    try {
+      const categoryData = {
+        categoryName: formData.categoryName.trim(),
+        branch: [formData.branch],
+      };
 
-    setCategories((prev) => [...prev, newCategory]);
+      await createcategory(categoryData);
 
-    setFormData({
-      categoryName: "",
-      branch: "All",
-      courseIds: [],
-    });
+      alert("Category created successfully");
 
-    setActiveTab("category");
+      setFormData({
+        categoryName: "",
+        branch: "",
+      });
+
+      await fetchCategories();
+
+      setActiveTab("category");
+    } catch (error) {
+      console.error("Error creating category:", error);
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to create category"
+      );
+    }
   };
 
+  // CANCEL
   const handleCancel = () => {
     setFormData({
       categoryName: "",
-      branch: "All",
-      courseIds: [],
+      branch: "",
     });
 
-    setSelectedCourse("");
     setActiveTab("category");
   };
 
-  // Delete category
-  const handleDelete = (id) => {
+  // DELETE CATEGORY
+  const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this category?"
     );
 
     if (!confirmDelete) return;
 
-    setCategories((prev) =>
-      prev.filter((category) => category.id !== id)
-    );
+    try {
+      await removecategory(id);
+
+      alert("Category deleted successfully");
+
+      await fetchCategories();
+    } catch (error) {
+      console.error("Error deleting category:", error);
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to delete category"
+      );
+    }
   };
 
-  // Export CSV
+  // GET BRANCH NAMES
+  const getBranchNames = (branchList) => {
+    if (!branchList || branchList.length === 0) {
+      return "No Branch";
+    }
+
+    return branchList
+      .map((branch) =>
+        typeof branch === "object"
+          ? branch.branchName
+          : ""
+      )
+      .filter(Boolean)
+      .join(", ");
+  };
+
+  // EXPORT CSV
   const handleExport = () => {
     if (!categories.length) {
       alert("No categories available to export");
@@ -157,17 +190,22 @@ const Categories = () => {
 
     const rows = [
       ["Cat Code", "Category Name", "Added Courses", "Branch"],
-      ...categories.map((category) => [
-        category.catCode,
+
+      ...categories.map((category, index) => [
+        `C${String(index + 1).padStart(2, "0")}`,
         category.categoryName,
-        category.totalCourses,
-        category.branch,
+        category.totalCourses ?? category.courses?.length ?? 0,
+        getBranchNames(category.branch),
       ]),
     ];
 
     const csvContent = rows
       .map((row) =>
-        row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(",")
+        row
+          .map((value) =>
+            `"${String(value).replace(/"/g, '""')}"`
+          )
+          .join(",")
       )
       .join("\n");
 
@@ -185,13 +223,6 @@ const Categories = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Get selected course details
-  const getCourse = (courseId) => {
-    return courses.find(
-      (course) => String(course.id) === String(courseId)
-    );
-  };
-
   return (
     <div className="categories-page">
 
@@ -202,20 +233,30 @@ const Categories = () => {
 
         {/* TABS */}
         <div className="category-topbar">
+
           <div className="category-tabs">
+
             <button
-              className={activeTab === "category" ? "active" : ""}
-              onClick={() => setActiveTab("category")}
+              className={
+                activeTab === "category" ? "active" : ""
+              }
+              onClick={() => {
+                setActiveTab("category");
+                fetchCategories();
+              }}
             >
               Category
             </button>
 
             <button
-              className={activeTab === "newCategory" ? "active" : ""}
+              className={
+                activeTab === "newCategory" ? "active" : ""
+              }
               onClick={openNewCategory}
             >
               New Category
             </button>
+
           </div>
 
           {activeTab === "category" && (
@@ -226,18 +267,25 @@ const Categories = () => {
               Export <Plus size={12} />
             </button>
           )}
+
         </div>
 
         {/* CATEGORY TABLE */}
         {activeTab === "category" && (
           <div className="category-list">
 
-            {categories.length === 0 ? (
+            {loading ? (
+              <div className="category-empty">
+                Loading categories...
+              </div>
+            ) : categories.length === 0 ? (
               <div className="category-empty">
                 No data available. Please add Category to view them here
               </div>
             ) : (
+
               <table className="category-table">
+
                 <thead>
                   <tr>
                     <th>Cat Code</th>
@@ -249,22 +297,35 @@ const Categories = () => {
                 </thead>
 
                 <tbody>
-                  {categories.map((category) => (
-                    <tr key={category.id}>
-                      <td>{category.catCode}</td>
+                  {categories.map((category, index) => (
+
+                    <tr key={category._id}>
+
+                      <td>
+                        C{String(index + 1).padStart(2, "0")}
+                      </td>
 
                       <td>{category.categoryName}</td>
 
-                      <td>{category.courseIds?.length || 0}</td>
+                      <td>
+                        {category.totalCourses ??
+                          category.courses?.length ??
+                          0}
+                      </td>
 
-                      <td>{category.branch}</td>
+                      <td>
+                        {getBranchNames(category.branch)}
+                      </td>
 
                       <td>
                         <div className="category-actions">
+
                           <button
                             title="View"
                             onClick={() =>
-                              navigate(`/categories/view/${category.id}`)
+                              navigate(
+                                `/categories/view/${category._id}`
+                              )
                             }
                           >
                             <Eye size={15} />
@@ -273,7 +334,9 @@ const Categories = () => {
                           <button
                             title="Edit"
                             onClick={() =>
-                              navigate(`/categories/edit/${category.id}`)
+                              navigate(
+                                `/categories/edit/${category._id}`
+                              )
                             }
                           >
                             <Pencil size={15} />
@@ -282,15 +345,20 @@ const Categories = () => {
                           <button
                             title="Delete"
                             className="delete-action"
-                            onClick={() => handleDelete(category.id)}
+                            onClick={() =>
+                              handleDelete(category._id)
+                            }
                           >
                             <Trash2 size={15} />
                           </button>
+
                         </div>
                       </td>
+
                     </tr>
                   ))}
                 </tbody>
+
               </table>
             )}
 
@@ -299,15 +367,19 @@ const Categories = () => {
 
         {/* NEW CATEGORY FORM */}
         {activeTab === "newCategory" && (
+
           <form
             className="new-category-form"
             onSubmit={handleCreateCategory}
           >
+
             <h4>Category Details</h4>
 
             <div className="category-form-row">
 
+              {/* CATEGORY NAME */}
               <div className="category-form-group">
+
                 <label>Category Name</label>
 
                 <input
@@ -318,19 +390,25 @@ const Categories = () => {
                   onChange={handleChange}
                   required
                 />
+
               </div>
 
+              {/* TOTAL COURSES */}
               <div className="category-form-group">
+
                 <label>Total Courses</label>
 
                 <input
                   type="text"
-                  value={formData.courseIds.length}
+                  value="0"
                   disabled
                 />
+
               </div>
 
+              {/* BRANCH */}
               <div className="category-form-group">
+
                 <label>Branch</label>
 
                 <select
@@ -339,85 +417,43 @@ const Categories = () => {
                   onChange={handleChange}
                   required
                 >
+
+                  <option value="">
+                    Select Branch
+                  </option>
+
                   {branches.map((branch) => (
-                    <option key={branch} value={branch}>
-                      {branch}
+
+                    <option
+                      key={branch._id}
+                      value={branch._id}
+                    >
+                      {branch.branchName}
                     </option>
+
                   ))}
+
                 </select>
+
               </div>
 
             </div>
 
             {/* ADDED COURSES */}
             <div className="added-courses-section">
+
               <h4>Added Courses</h4>
 
-              <div className="add-course-controls">
-                <select
-                  value={selectedCourse}
-                  onChange={(e) => setSelectedCourse(e.target.value)}
-                >
-                  <option value="">Select Course</option>
+              <p className="no-courses-message">
+                Courses can be assigned to this category
+                when creating or editing a course in Course Management.
+              </p>
 
-                  {courses.map((course) => (
-                    <option
-                      key={course.id}
-                      value={course.id}
-                      disabled={formData.courseIds.some(
-                        (id) => String(id) === String(course.id)
-                      )}
-                    >
-                      {course.courseName} ({course.courseCode})
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="button"
-                  className="add-course-btn"
-                  onClick={handleAddCourse}
-                >
-                  Add
-                </button>
-              </div>
-
-              <div className="selected-course-list">
-                {formData.courseIds.map((courseId) => {
-                  const course = getCourse(courseId);
-
-                  if (!course) return null;
-
-                  return (
-                    <div
-                      className="selected-course-chip"
-                      key={courseId}
-                    >
-                      <span>
-                        {course.courseName}
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCourse(courseId)}
-                        title="Remove course"
-                      >
-                        <X size={13} />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {courses.length === 0 && (
-                <p className="no-courses-message">
-                  No courses available. Please add courses in Course Management first.
-                </p>
-              )}
             </div>
 
             {/* BUTTONS */}
             <div className="category-form-actions">
+
               <button
                 type="button"
                 className="category-cancel-btn"
@@ -432,6 +468,7 @@ const Categories = () => {
               >
                 Create Category
               </button>
+
             </div>
 
           </form>

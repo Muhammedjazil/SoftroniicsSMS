@@ -62,7 +62,8 @@ const AdminService = () => {
 
   // ======== Timing Management ======== //
   const taketiming = async (branchId) => {
-    const params = branchId && branchId !== "All Branches" ? { branch: branchId } : {};
+    const params =
+      branchId && branchId !== "All Branches" ? { branch: branchId } : {};
     const response = await axiosPrivate.get("/timemanagement", { params });
     return response.data;
   };
@@ -73,7 +74,10 @@ const AdminService = () => {
   };
 
   const updatetiming = async (id, timingData) => {
-    const response = await axiosPrivate.put(`/timemanagement/${id}`, timingData);
+    const response = await axiosPrivate.put(
+      `/timemanagement/${id}`,
+      timingData,
+    );
     return response.data;
   };
 
@@ -99,12 +103,17 @@ const AdminService = () => {
   };
 
   const updatebatch = async (id, batchData) => {
-    const response = await axiosPrivate.put(`/batchmanagement/${id}`, batchData);
+    const response = await axiosPrivate.put(
+      `/batchmanagement/${id}`,
+      batchData,
+    );
     return response.data;
   };
 
   const changebatchstatus = async (id, status) => {
-    const response = await axiosPrivate.put(`/batchmanagement/status/${id}`, { status });
+    const response = await axiosPrivate.put(`/batchmanagement/status/${id}`, {
+      status,
+    });
     return response.data;
   };
 
@@ -114,14 +123,18 @@ const AdminService = () => {
   };
 
   const takeinternsbybranch = async (branchId) => {
-    const response = await axiosPrivate.get(`/batchmanagement/interns/${branchId}`);
+    const response = await axiosPrivate.get(
+      `/batchmanagement/interns/${branchId}`,
+    );
     return response.data;
   };
 
   // ======== Mentor Batches & Schedule ======== //
   const takementors = async (branchId) => {
     const params = branchId && branchId !== "All Branches" ? { branchId } : {};
-    const response = await axiosPrivate.get("/mentorbatches/mentors", { params });
+    const response = await axiosPrivate.get("/mentorbatches/mentors", {
+      params,
+    });
     return response.data;
   };
 
@@ -130,7 +143,9 @@ const AdminService = () => {
     if (startDate) params.startDate = startDate;
     if (branchId && branchId !== "All Branches") params.branchId = branchId;
 
-    const response = await axiosPrivate.get(`/mentorbatches/${mentorId}`, { params });
+    const response = await axiosPrivate.get(`/mentorbatches/${mentorId}`, {
+      params,
+    });
     return response.data;
   };
 
@@ -143,7 +158,10 @@ const AdminService = () => {
   };
 
   const saveweeklyschedulecell = async (cellPayload) => {
-    const response = await axiosPrivate.post("/weeklyschedule/cell", cellPayload);
+    const response = await axiosPrivate.post(
+      "/weeklyschedule/cell",
+      cellPayload,
+    );
     return response.data;
   };
 
@@ -203,7 +221,10 @@ const AdminService = () => {
   };
 
   const updatemodule = async (id, moduleData) => {
-    const response = await axiosPrivate.put(`/modulemanagement/${id}`, moduleData);
+    const response = await axiosPrivate.put(
+      `/modulemanagement/${id}`,
+      moduleData,
+    );
     return response.data;
   };
 
@@ -224,12 +245,58 @@ const AdminService = () => {
   };
 
   const updatetopic = async (id, topicData) => {
-    const response = await axiosPrivate.put(`/topicmanagement/${id}`, topicData);
+    const response = await axiosPrivate.put(
+      `/topicmanagement/${id}`,
+      topicData,
+    );
     return response.data;
   };
 
   const removetopic = async (id) => {
     const response = await axiosPrivate.delete(`/topicmanagement/${id}`);
+    return response.data;
+  };
+  // ======== Category Management ======== //
+
+  const createcategory = async (categoryData) => {
+    const response = await axiosPrivate.post(
+      "/categorymanagement",
+      categoryData,
+    );
+    return response.data;
+  };
+
+  const takecategories = async () => {
+    const response = await axiosPrivate.get("/categorymanagement");
+    return response.data;
+  };
+
+  const takecategorybyid = async (id) => {
+    const response = await axiosPrivate.get(`/categorymanagement/${id}`);
+    return response.data;
+  };
+
+  const updatecategory = async (id, categoryData) => {
+    const response = await axiosPrivate.put(
+      `/categorymanagement/${id}`,
+      categoryData,
+    );
+    return response.data;
+  };
+
+  const removecategory = async (id) => {
+    const response = await axiosPrivate.delete(`/categorymanagement/${id}`);
+    return response.data;
+  };
+  // ======== Course Management ======== //
+
+  const createcourse = async (courseData) => {
+    const response = await axiosPrivate.post("/coursemanagement", courseData);
+    return response.data;
+  };
+
+  const takecourses = async (params = {}) => {
+    const response = await axiosPrivate.get("/coursemanagement", { params });
     return response.data;
   };
 
