@@ -141,7 +141,7 @@ const sampleStaff = [
 // =====================================
 
 export const Staffmanagement = () => {
-  const { takeroletitle,takebranch,taketiming,createstaff } = AdminService();
+  const { takeroletitle,takebranch,taketiming,createstaff,getallstaff } = AdminService();
 
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
@@ -164,12 +164,21 @@ export const Staffmanagement = () => {
   // HELPERS TO RESOLVE OBJECTS OR STRINGS
   // =====================================
 
-  const getBranchName = (branchVal) => {
-    if (!branchVal) return "-";
-    if (typeof branchVal === "object") return branchVal.branchName || branchVal.name || "-";
-    const found = branchOptions.find((b) => b._id === branchVal);
-    return found?.branchName || found?.name || branchVal;
-  };
+const getBranchName = (branchVal) => {
+  if (!branchVal) return "-";
+
+  // If branch is a populated object
+  if (typeof branchVal === "object") {
+    return branchVal.branchName || branchVal.name || "-";
+  }
+
+  // If branch is only an ObjectId
+  const found = branchOptions.find(
+    (branch) => branch._id === branchVal
+  );
+
+  return found?.branchName || found?.name || branchVal;
+};
 
   const getTimingLabel = (timingVal) => {
     if (!timingVal) return "-";
@@ -221,6 +230,89 @@ const fetchrole = async () => {
   }
 };
 
+const fetchallstaff = async () => {
+  try {
+    const response = await getallstaff();
+
+    console.log("All Staff API Response:", response);
+
+    // Handle either a direct array or an array inside response.data
+    const staffList = Array.isArray(response)
+      ? response
+      : Array.isArray(response?.data)
+      ? response.data
+      : Array.isArray(response?.data?.data)
+      ? response.data.data
+      : [];
+
+    const formattedStaff = staffList.map((staff) => ({
+      ...staff,
+
+      // ID
+      id: staff._id,
+
+      // Basic details
+      fullname: staff.fullName || "",
+      dateofbirth: staff.dateOfBirth
+        ? staff.dateOfBirth.slice(0, 10)
+        : "",
+      phone: staff.staffPhoneNumber || "",
+      whatsapp: staff.staffWhatsAppNumber || "",
+      address: staff.staffPermanentAddress || "",
+
+      // Login details
+      officialemail: staff.officialEmail || "",
+
+      // Role
+      role:
+        typeof staff.role === "object"
+          ? staff.role?._id
+          : staff.role || "",
+      typeemply:
+        typeof staff.role === "object"
+          ? staff.role?.role || ""
+          : "",
+
+      // Branch
+      branch: staff.branch,
+
+      // Additional branches
+      allowAdditionalBranches: staff.isMultipleBranch || false,
+      additionalBranches: Array.isArray(staff.multipleBranches)
+        ? staff.multipleBranches.map((item) =>
+            typeof item === "object" ? item._id : item
+          )
+        : [],
+
+      // Professional details
+      experience: staff.yearsOfExperience || "",
+      joindate: staff.dateOfJoining
+        ? staff.dateOfJoining.slice(0, 10)
+        : "",
+      status: staff.employmentStatus || "",
+      resingnation: staff.resignationDate
+        ? staff.resignationDate.slice(0, 10)
+        : "",
+      remark: staff.remarks || "",
+
+      // Mentor details
+      mentorRole: staff.isMentor || false,
+      mentorTimings: Array.isArray(staff.time)
+        ? staff.time.map((item) =>
+            typeof item === "object" ? item._id : item
+          )
+        : [],
+    }));
+
+    setAlldata(formattedStaff);
+
+    console.log("Formatted Staff:", formattedStaff);
+  } catch (error) {
+    console.error("Error fetching all staff:", error);
+    setAlldata([]);
+  }
+};
+
   useEffect(() => {
     fetchrole();
     fetchbranch();
@@ -232,33 +324,36 @@ const fetchrole = async () => {
   // FILTER STAFF
   // =====================================
 
-  const filteredStaff = allData.filter((value) => {
-    const matchesSearch = [
-      value.fullname,
-      value.email,
-      value.typeemply,
-      value.branch,
-      value.phone
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(search.toLowerCase());
+ const filteredStaff = allData.filter((value) => {
+  const matchesSearch = [
+    value.fullname,
+    value.email,
+    value.typeemply,
+    getBranchName(value.branch),
+    value.phone
+  ]
+    .join(" ")
+    .toLowerCase()
+    .includes(search.toLowerCase());
 
-    const matchesDept =
-      departmentFilter === "all" ||
-      value.department?.toLowerCase() === departmentFilter.toLowerCase();
+  const matchesDept =
+    departmentFilter === "all" ||
+    value.department?.toLowerCase() === departmentFilter.toLowerCase();
 
-    const matchesBranch =
-      branchFilter === "all" ||
-      value.branch === branchFilter ||
-      branchLabel.toLowerCase() === branchFilter.toLowerCase();
+  const branchId =
+    typeof value.branch === "object"
+      ? value.branch?._id
+      : value.branch;
 
-    const matchesStatus =
-      statusFilter === "all" ||
-      value.status?.toLowerCase() === statusFilter.toLowerCase();
+  const matchesBranch =
+    branchFilter === "all" || branchId === branchFilter;
 
-    return matchesSearch && matchesDept && matchesBranch && matchesStatus;
-  });
+  const matchesStatus =
+    statusFilter === "all" ||
+    value.status?.toLowerCase() === statusFilter.toLowerCase();
+
+  return matchesSearch && matchesDept && matchesBranch && matchesStatus;
+});
 
   // =====================================
   // GET ROLE NAME
@@ -744,7 +839,7 @@ setActiveTab("stafflist");
     </option>
   ))}
 </select>
-                <select
+                {/* <select
                   value={branchFilter}
                   onChange={(e) => setBranchFilter(e.target.value)}
                 >
@@ -758,7 +853,7 @@ setActiveTab("stafflist");
                       </option>
                     );
                   })}
-                </select>
+                </select> */}
               </div>
 
               <div className="staffactive">
@@ -827,9 +922,9 @@ setActiveTab("stafflist");
                         {value.typeemply || getRoleName(value.role)}
                       </td>
 
-                      <td className="staffbranchname">
-                        {value.branch}
-                      </td>
+                  <td className="staffbranchname">
+  {getBranchName(value.branch)}
+</td>
 
                       <td>
                         {value.mentorRole && (
