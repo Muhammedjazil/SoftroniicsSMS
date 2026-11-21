@@ -15,7 +15,7 @@ import {
 } from "react-icons/fi";
 
 import "./internmanagement.css";
-
+import AdminService from "../../../services/admin-api-services/AdminService";
 // =====================================
 // INITIAL FORM DATA
 // =====================================
@@ -192,6 +192,8 @@ const SelectField = ({
 
 export const Internmanagement = () => {
 
+ const {takebranch,fetchallstaff}=AdminService()
+
   const [activeTab, setActiveTab] = useState("list");
 
   const [students, setStudents] = useState(() => {
@@ -218,16 +220,38 @@ export const Internmanagement = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const[branch,setBranch]=useState([])
+  const[roles,setRoules]=useState([])
   // =====================================
   // SAVE TO LOCAL STORAGE
   // =====================================
+
+  const handleallbranch=async()=>{
+    let response=await takebranch()
+       setBranch(response)
+       console.log(response);
+       
+  }
+
+  const handleallstaff=async()=>{
+    let response=await fetchallstaff();
+    setRoules(response)
+    console.log(response);
+    
+
+  }
+
+  useEffect(()=>{
+handleallbranch();
+handleallstaff();
+  },[])
 
   useEffect(() => {
     localStorage.setItem(
       "internStudents",
       JSON.stringify(students)
     );
+    
   }, [students]);
 
   // =====================================
@@ -934,20 +958,25 @@ export const Internmanagement = () => {
               required
             />
 
-            <SelectField
-              {...fieldProps}
-              label="Branch"
-              name="branch"
-              placeholder="Choose Branch"
-              options={[
-                "calicut",
-                "kochi",
-                "malappuram",
-                "trivandrum",
-                "bangalore"
-              ]}
-              required
-            />
+          <div className="intern-field">
+  <label htmlFor="branch">Branch <span className="intern-required">*</span></label>
+
+  <select
+    id="branch"
+    name="branch"
+    value={formData.branch}
+    onChange={handleChange}
+    required
+  >
+    <option value="">Choose Branch</option>
+
+    {branch.map((item) => (
+      <option key={item._id} value={item._id}>
+        {item.branchName}
+      </option>
+    ))}
+  </select>
+</div>
 
             <InputField
               {...fieldProps}
@@ -992,7 +1021,7 @@ export const Internmanagement = () => {
               ]}
             />
 
-            <SelectField
+            {/* <SelectField
               {...fieldProps}
               label="Career Advisor"
               name="careerAdvisor"
@@ -1003,7 +1032,25 @@ export const Internmanagement = () => {
                 "Rahul",
                 "Anjali"
               ]}
-            />
+            /> */}
+      <div className="intern-field">
+  <label htmlFor="careerAdvisor">Career Advisor</label>
+
+  <select
+    id="careerAdvisor"
+    name="careerAdvisor"
+    value={formData.careerAdvisor}
+    onChange={handleChange}
+  >
+    <option value="">Choose Career Advisor</option>
+
+    {roles.map((item) => (
+      <option key={item._id} value={item._id}>
+        {item.role}
+      </option>
+    ))}
+  </select>
+</div>
 
             <SelectField
               {...fieldProps}

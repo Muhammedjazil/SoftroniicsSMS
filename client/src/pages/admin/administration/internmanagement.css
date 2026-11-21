@@ -992,3 +992,41 @@
     }
 
 }
+
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+  background: white;
+}
+.form-group label{
+    font-size: 14px;
+}
+
+.intern-field input,
+.intern-field select {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid #e0e3e7;
+    border-radius: 6px;
+    outline: none;
+    background: #ffffff;
+    font-size: 13px;
+    color: #273747;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.intern-field select {
+    cursor: pointer;
+}
+
+.intern-field input:focus,
+.intern-field select:focus {
+    border-color: #ff790e;
+    box-shadow: 0 0 0 2px rgba(255, 121, 14, 0.08);
+}
