@@ -284,40 +284,7 @@ const Leaverequest = () => {
                 HEADER
             ================================= */}
 
-            <div className="leaverequest-header">
-
-                <div className="leaverequest-heading">
-
-                    <h2>Leave Requests</h2>
-
-                    <p>
-                        Leave Requests <span>&gt;</span> leaveList
-                    </p>
-
-                </div>
-
-
-                {/* ADMIN PROFILE */}
-
-                <div className="leaverequest-admin-profile">
-
-                    <div className="leaverequest-admin-icon">
-                        <MdPersonOutline />
-                    </div>
-
-                    <div className="leaverequest-admin-info">
-
-                        <h4>Priyesh</h4>
-
-                        <p>Super Admin</p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
+           
             {/* =================================
                 MAIN CONTENT
             ================================= */}

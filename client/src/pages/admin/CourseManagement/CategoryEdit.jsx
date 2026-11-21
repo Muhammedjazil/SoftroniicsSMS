@@ -131,21 +131,7 @@ const CategoryEdit = () => {
       <main className="course-management-main">
 
         {/* HEADER */}
-        <header className="course-top-header">
-          <div>
-            <h2>Category</h2>
-            <p>Course management &gt; View Category</p>
-          </div>
-
-          <div className="admin-profile">
-            <UserRound size={17} />
-
-            <div>
-              <h4>Priyesh</h4>
-              <p>Super Admin</p>
-            </div>
-          </div>
-        </header>
+        
 
         {/* EDIT FORM */}
         <section className="category-details-container">

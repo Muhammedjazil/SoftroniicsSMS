@@ -1,15 +1,18 @@
-const express=require("express");
-const router=express.Router();
-const {createnewrole,takeallrole,updaterole,roleremove,changestatus}=require("../Controllers/roleController")
+const express = require("express");
+const router = express.Router();
+const { checkAuth, checkPermission } = require("../Middleware/checkAuth");
+const {
+  createnewrole,
+  takeallrole,
+  updaterole,
+  roleremove,
+  changestatus,
+} = require("../Controllers/roleController");
 
-router.post("/",createnewrole)
+router.post("/", checkAuth, checkPermission("roleManagement", "addRole"), createnewrole);
+router.get("/", checkAuth, checkPermission("roleManagement", "viewRole"), takeallrole);
+router.put("/:id", checkAuth, checkPermission("roleManagement", "editRole"), updaterole);
+router.delete("/:id", checkAuth, checkPermission("roleManagement", "deleteRole"), roleremove);
+router.put("/status/:id", checkAuth, checkPermission("roleManagement", "editRole"), changestatus);
 
-router.get("/",takeallrole)
-
-router.put("/:id/",updaterole)
-
-router.delete("/:id",roleremove)
-
-router.put("/status/:id",changestatus)
-
-module.exports=router
+module.exports = router;

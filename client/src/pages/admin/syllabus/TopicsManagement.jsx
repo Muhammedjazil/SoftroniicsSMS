@@ -209,30 +209,7 @@ const TopicManagement = () => {
   return (
     <div className="tpc-mgmt-container">
       {/* Header */}
-      <header className="tpc-mgmt-header">
-        <div className="tpc-mgmt-title-group">
-          <h1 className="tpc-mgmt-heading">Topics Management</h1>
-          <nav className="tpc-mgmt-breadcrumb">
-            <span>Topics Management</span>
-            <span className="tpc-mgmt-breadcrumb-separator">&gt;</span>
-            <span>
-              {activeTab === 'topics' && 'topics-list'}
-              {activeTab === 'new-topic' && 'new-topic'}
-              {activeTab === 'edit-topic' && 'edit-topic'}
-            </span>
-          </nav>
-        </div>
-
-        <div className="tpc-mgmt-profile-card">
-          <div className="tpc-mgmt-profile-avatar">
-            <LuUser />
-          </div>
-          <div className="tpc-mgmt-profile-info">
-            <span className="tpc-mgmt-username">vijitha</span>
-            <span className="tpc-mgmt-role">super admin</span>
-          </div>
-        </div>
-      </header>
+     
 
       {/* Outer Toolbar */}
       <div className="tpc-mgmt-toolbar">

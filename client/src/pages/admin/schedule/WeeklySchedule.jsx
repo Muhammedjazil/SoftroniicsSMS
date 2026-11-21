@@ -366,27 +366,7 @@ const WeeklySchedule = () => {
 
   return (
     <div className="wk-sched-container">
-      {/* Header */}
-      <header className="wk-sched-header">
-        <div className="wk-sched-title-group">
-          <h1 className="wk-sched-heading">Batch Management</h1>
-          <nav className="wk-sched-breadcrumb">
-            <span>Batch Management</span>
-            <span className="wk-sched-breadcrumb-separator">&gt;</span>
-            <span>weekly-schedule</span>
-          </nav>
-        </div>
-
-        <div className="wk-sched-profile-card">
-          <div className="wk-sched-profile-avatar">
-            <LuUser />
-          </div>
-          <div className="wk-sched-profile-info">
-            <span className="wk-sched-username">vijitha</span>
-            <span className="wk-sched-role">super admin</span>
-          </div>
-        </div>
-      </header>
+      
 
       {/* Main Split Workspace */}
       <div className="wk-sched-workspace">

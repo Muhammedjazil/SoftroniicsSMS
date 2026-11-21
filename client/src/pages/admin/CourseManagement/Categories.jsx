@@ -195,24 +195,7 @@ const Categories = () => {
   return (
     <div className="categories-page">
 
-      {/* HEADER */}
-      <div className="categories-header">
-        <div>
-          <h2>Category</h2>
-          <p>
-            Course management &gt;{" "}
-            {activeTab === "newCategory" ? "Add Category" : "Category"}
-          </p>
-        </div>
-
-        <div className="admin-profile">
-          <UserRound size={17} />
-          <div>
-            <h4>Priyesh</h4>
-            <p>Super Admin</p>
-          </div>
-        </div>
-      </div>
+     
 
       {/* MAIN CONTAINER */}
       <div className="categories-container">
