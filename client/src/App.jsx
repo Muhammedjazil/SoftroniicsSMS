@@ -1,5 +1,11 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
+
+// =====================================
+// AUTH / REGISTER
+// =====================================
+
+import Login from "./pages/Register/Login";
 
 // =====================================
 // ADMIN LAYOUT
@@ -79,6 +85,55 @@ import ViewCourse from "./pages/admin/CourseManagement/ViewCourse";
 import EditCourse from "./pages/admin/CourseManagement/EditCourse";
 import CategoryEdit from "./pages/admin/CourseManagement/CategoryEdit";
 // =====================================
+// AUTH HELPERS & ROUTE GUARDS
+// =====================================
+
+const getStoredAuth = () => {
+  try {
+    const token = localStorage.getItem("SMStoken");
+    const rawUser = localStorage.getItem("user");
+    const user = rawUser ? JSON.parse(rawUser) : null;
+    return { token, user };
+  } catch {
+    return { token: null, user: null };
+  }
+};
+
+const ProtectedRoute = ({ children, allowedTypes }) => {
+  const { token, user } = getStoredAuth();
+
+  if (!token || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedTypes && !allowedTypes.includes(user.userType)) {
+    return (
+      <Navigate
+        to={user.userType === "intern" ? "/internweekly" : "/dashboard"}
+        replace
+      />
+    );
+  }
+
+  return children;
+};
+
+const PublicLoginRoute = ({ children }) => {
+  const { token, user } = getStoredAuth();
+
+  if (token && user) {
+    return (
+      <Navigate
+        to={user.userType === "intern" ? "/internweekly" : "/dashboard"}
+        replace
+      />
+    );
+  }
+
+  return children;
+};
+
+// =====================================
 // APP COMPONENT
 // =====================================
 
@@ -87,17 +142,31 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* =================================
-                    ADMIN ROUTES
+                    PUBLIC LOGIN ROUTES
                 ================================= */}
 
         <Route
           path="/"
           element={
-            <Adminlayout>
-              <Rolemanagement />
-            </Adminlayout>
+            <PublicLoginRoute>
+              <Login />
+            </PublicLoginRoute>
           }
         />
+
+        <Route
+          path="/login"
+          element={
+            <PublicLoginRoute>
+              <Login />
+            </PublicLoginRoute>
+          }
+        />
+
+        {/* =================================
+                    ADMIN & STAFF ROUTES
+                ================================= */}
+
         <Route
           path="/courses/:id"
           element={
@@ -135,9 +204,11 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <Adminlayout>
-              <Dashboard />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Dashboard />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
         {/* COURSE MANAGEMENT */}
@@ -163,27 +234,33 @@ function App() {
         <Route
           path="/rolemanagement"
           element={
-            <Adminlayout>
-              <Rolemanagement />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Rolemanagement />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/staffmanagement"
           element={
-            <Adminlayout>
-              <Staffmanagement />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Staffmanagement />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/internmanagement"
           element={
-            <Adminlayout>
-              <Internmanagement />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Internmanagement />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
@@ -192,36 +269,44 @@ function App() {
         <Route
           path="/batchmanagement"
           element={
-            <Adminlayout>
-              <BatchManagement />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <BatchManagement />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/mentorbatches"
           element={
-            <Adminlayout>
-              <MentorBatches />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <MentorBatches />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/timingsmanagement"
           element={
-            <Adminlayout>
-              <TimingsManagement />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <TimingsManagement />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/weeklyschedule"
           element={
-            <Adminlayout>
-              <WeeklySchedule />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <WeeklySchedule />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
@@ -230,18 +315,22 @@ function App() {
         <Route
           path="/branch"
           element={
-            <Adminlayout>
-              <Branch />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Branch />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/notification"
           element={
-            <Adminlayout>
-              <Notification />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Notification />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
@@ -250,27 +339,33 @@ function App() {
         <Route
           path="/taskevaluation"
           element={
-            <Adminlayout>
-              <Taskevaluation />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Taskevaluation />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/taskmaterial"
           element={
-            <Adminlayout>
-              <Taskmaterial />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Taskmaterial />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/tasks"
           element={
-            <Adminlayout>
-              <Tasks />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Tasks />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
@@ -279,18 +374,22 @@ function App() {
         <Route
           path="/attendancestudent"
           element={
-            <Adminlayout>
-              <Attendancestudent />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Attendancestudent />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/leaverequest"
           element={
-            <Adminlayout>
-              <Leaverequest />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <Leaverequest />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
@@ -299,18 +398,22 @@ function App() {
         <Route
           path="/modulemanagement"
           element={
-            <Adminlayout>
-              <ModuleManagement />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <ModuleManagement />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/topicsmanagement"
           element={
-            <Adminlayout>
-              <TopicsManagement />
-            </Adminlayout>
+            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+              <Adminlayout>
+                <TopicsManagement />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
 
@@ -321,56 +424,71 @@ function App() {
         <Route
           path="/internnotification"
           element={
-            <Internlayout>
-              <Internnotification />
-            </Internlayout>
+            <ProtectedRoute allowedTypes={["intern"]}>
+              <Internlayout>
+                <Internnotification />
+              </Internlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/interntask"
           element={
-            <Internlayout>
-              <Intrentask />
-            </Internlayout>
+            <ProtectedRoute allowedTypes={["intern"]}>
+              <Internlayout>
+                <Intrentask />
+              </Internlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/internattendance"
           element={
-            <Internlayout>
-              <Internattendance />
-            </Internlayout>
+            <ProtectedRoute allowedTypes={["intern"]}>
+              <Internlayout>
+                <Internattendance />
+              </Internlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/internweekly"
           element={
-            <Internlayout>
-              <InternWeeklySchedule />
-            </Internlayout>
+            <ProtectedRoute allowedTypes={["intern"]}>
+              <Internlayout>
+                <InternWeeklySchedule />
+              </Internlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/internweeklycard"
           element={
-            <Internlayout>
-              <WeeklyCard />
-            </Internlayout>
+            <ProtectedRoute allowedTypes={["intern"]}>
+              <Internlayout>
+                <WeeklyCard />
+              </Internlayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/internmonthlycard"
           element={
-            <Internlayout>
-              <Internmonthlycard />
-            </Internlayout>
+            <ProtectedRoute allowedTypes={["intern"]}>
+              <Internlayout>
+                <Internmonthlycard />
+              </Internlayout>
+            </ProtectedRoute>
           }
         />
+
+        {/* Fallback for unknown URLs */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
