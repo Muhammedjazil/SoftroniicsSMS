@@ -1472,45 +1472,6 @@ const Taskmaterial = () => {
                 HEADER
             ========================================= */}
 
-            <div className="tasks-material-header">
-
-                <div className="tasks-material-header-title">
-
-                    <h2>Material</h2>
-
-                    <p>
-                        Material
-                        <span> › </span>
-                        {tasksMaterialMode === "list"
-                            ? "materialList"
-                            : tasksMaterialMode === "create"
-                                ? "new-material"
-                                : tasksMaterialMode === "view"
-                                    ? "view-material"
-                                    : "edit-material"}
-                    </p>
-
-                </div>
-
-
-                <div className="tasks-material-admin-profile">
-
-                    <div className="tasks-material-admin-avatar">
-                        <MdPersonOutline />
-                    </div>
-
-                    <div className="tasks-material-admin-info">
-
-                        <h4>vijitha</h4>
-
-                        <p>super admin</p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
 
             {/* =========================================
                 TOP NAVIGATION

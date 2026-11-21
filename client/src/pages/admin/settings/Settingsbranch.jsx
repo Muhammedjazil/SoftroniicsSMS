@@ -254,27 +254,7 @@ const handleDelete = async (id) => {
           HEADER
       ===================================== */}
 
-      <div className="branchheadsection">
-
-        <div className="branchhead">
-          <h2>Settings</h2>
-          <p>Settings &gt; Branch</p>
-        </div>
-
-        <div className="branchprofile">
-
-          <div className="branchproficon">
-            <FiUser />
-          </div>
-
-          <div className="branchprofdata">
-            <h5>Preyesh</h5>
-            <h6>Super Admin</h6>
-          </div>
-
-        </div>
-
-      </div>
+      
 
 
       {/* =====================================

@@ -1,92 +1,52 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
+import { checkUserPermission } from "./hooks/usePermission";
 
-// =====================================
 // AUTH / REGISTER
-// =====================================
-
 import Login from "./pages/Register/Login";
 
-// =====================================
-// ADMIN LAYOUT
-// =====================================
-
+// LAYOUTS
 import Adminlayout from "./components/Layout/Adminlayout";
-
-// =====================================
-// INTERN LAYOUT
-// =====================================
-
 import { Internlayout } from "./components/Layout/Internlayout";
 
-// =====================================
-// ADMIN PAGES - ADMINISTRATION
-// =====================================
-
+// ADMIN PAGES
 import { Rolemanagement } from "./pages/admin/administration/Rolemanagement";
 import { Staffmanagement } from "./pages/admin/administration/Staffmanagement";
 import { Internmanagement } from "./pages/admin/administration/Internmanagement";
-
-// =====================================
-// ADMIN PAGES - SCHEDULE
-// =====================================
 
 import BatchManagement from "./pages/admin/schedule/BatchManagement";
 import MentorBatches from "./pages/admin/schedule/MentorBatches";
 import TimingsManagement from "./pages/admin/schedule/TimingsManagement";
 import WeeklySchedule from "./pages/admin/schedule/WeeklySchedule";
 
-// =====================================
-// ADMIN PAGES - SETTINGS
-// =====================================
-
 import { Branch } from "./pages/admin/settings/Settingsbranch";
 import { Notification } from "./pages/admin/settings/Setingsnotification";
-
-// =====================================
-// ADMIN PAGES - TASK MANAGEMENT
-// =====================================
 
 import Taskevaluation from "./pages/admin/Taskmanagement/Taskevaluation";
 import Taskmaterial from "./pages/admin/Taskmanagement/Taskmaterial";
 import Tasks from "./pages/admin/Taskmanagement/Tasks";
 
-// =====================================
-// ADMIN PAGES - ATTENDANCE
-// =====================================
-
 import Attendancestudent from "./pages/admin/Attendance/Attendancestudent";
 import Leaverequest from "./pages/admin/Attendance/Leaverequest";
-
-// =====================================
-// ADMIN PAGES - SYLLABUS
-// =====================================
 
 import ModuleManagement from "./pages/admin/syllabus/ModuleManagement";
 import TopicsManagement from "./pages/admin/syllabus/TopicsManagement";
 
-// =====================================
-// INTERN PAGES
-// =====================================
-
-import { Internnotification } from "./pages/intern/Internnotification";
-import { Intrentask } from "./pages/intern/interntask";
-
-import Internattendance from "./pages/intern/Internattendance";
-import Internmonthlycard from "./pages/intern/Internmonthlycard";
-import InternWeeklySchedule from "./pages/intern/InternWeeklySchedule";
-import WeeklyCard from "./pages/intern/WeeklyCard";
 import Dashboard from "./pages/admin/Dashboard/Dashboard";
 import Categories from "./pages/admin/CourseManagement/Categories";
 import Course from "./pages/admin/CourseManagement/Course";
 import CategoryView from "./pages/admin/CourseManagement/CategoryView";
-
 import ViewCourse from "./pages/admin/CourseManagement/ViewCourse";
 import EditCourse from "./pages/admin/CourseManagement/EditCourse";
 import CategoryEdit from "./pages/admin/CourseManagement/CategoryEdit";
-// =====================================
-// AUTH HELPERS & ROUTE GUARDS
-// =====================================
+
+// INTERN PAGES
+import { Internnotification } from "./pages/intern/Internnotification";
+import { Intrentask } from "./pages/intern/interntask";
+import Internattendance from "./pages/intern/Internattendance";
+import Internmonthlycard from "./pages/intern/Internmonthlycard";
+import InternWeeklySchedule from "./pages/intern/InternWeeklySchedule";
+import WeeklyCard from "./pages/intern/WeeklyCard";
 
 const getStoredAuth = () => {
   try {
@@ -99,7 +59,7 @@ const getStoredAuth = () => {
   }
 };
 
-const ProtectedRoute = ({ children, allowedTypes }) => {
+const ProtectedRoute = ({ children, allowedTypes, module, action }) => {
   const { token, user } = getStoredAuth();
 
   if (!token || !user) {
@@ -113,6 +73,11 @@ const ProtectedRoute = ({ children, allowedTypes }) => {
         replace
       />
     );
+  }
+
+  // Enforce module/action permission for staff users
+  if (module && action && !checkUserPermission(user, module, action)) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
@@ -133,18 +98,11 @@ const PublicLoginRoute = ({ children }) => {
   return children;
 };
 
-// =====================================
-// APP COMPONENT
-// =====================================
-
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* =================================
-                    PUBLIC LOGIN ROUTES
-                ================================= */}
-
+        {/* PUBLIC LOGIN ROUTES */}
         <Route
           path="/"
           element={
@@ -153,7 +111,6 @@ function App() {
             </PublicLoginRoute>
           }
         />
-
         <Route
           path="/login"
           element={
@@ -163,44 +120,7 @@ function App() {
           }
         />
 
-        {/* =================================
-                    ADMIN & STAFF ROUTES
-                ================================= */}
-
-        <Route
-          path="/course/:id"
-          element={
-            <Adminlayout>
-              <ViewCourse />
-            </Adminlayout>
-          }
-        />
-
-        <Route
-          path="/course/:id/edit"
-          element={
-            <Adminlayout>
-              <EditCourse />
-            </Adminlayout>
-          }
-        />
-        <Route
-          path="/course"
-          element={
-            <Adminlayout>
-              <Course />
-            </Adminlayout>
-          }
-        />
-
-        <Route
-          path="/categories"
-          element={
-            <Adminlayout>
-              <Categories />
-            </Adminlayout>
-          }
-        />
+        {/* DASHBOARD */}
         <Route
           path="/dashboard"
           element={
@@ -211,52 +131,130 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* COURSE MANAGEMENT */}
+
+        {/* COURSE & CATEGORY MANAGEMENT */}
+        <Route
+          path="/course"
+          element={
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="courseManagement"
+              action="viewCourse"
+            >
+              <Adminlayout>
+                <Course />
+              </Adminlayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/course/:id"
+          element={
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="courseManagement"
+              action="viewCourse"
+            >
+              <Adminlayout>
+                <ViewCourse />
+              </Adminlayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/course/:id/edit"
+          element={
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="courseManagement"
+              action="editCourse"
+            >
+              <Adminlayout>
+                <EditCourse />
+              </Adminlayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/categories"
+          element={
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="categoryManagement"
+              action="viewCategory"
+            >
+              <Adminlayout>
+                <Categories />
+              </Adminlayout>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/categories/view/:id"
           element={
-            <Adminlayout>
-              <CategoryView />
-            </Adminlayout>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="categoryManagement"
+              action="viewCategory"
+            >
+              <Adminlayout>
+                <CategoryView />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
-
         <Route
           path="/categories/edit/:id"
           element={
-            <Adminlayout>
-              <CategoryEdit />
-            </Adminlayout>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="categoryManagement"
+              action="editCategory"
+            >
+              <Adminlayout>
+                <CategoryEdit />
+              </Adminlayout>
+            </ProtectedRoute>
           }
         />
-        {/* ADMINISTRATION */}
 
+        {/* ADMINISTRATION */}
         <Route
           path="/rolemanagement"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="roleManagement"
+              action="viewRole"
+            >
               <Adminlayout>
                 <Rolemanagement />
               </Adminlayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/staffmanagement"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="staffManagement"
+              action="viewStaff"
+            >
               <Adminlayout>
                 <Staffmanagement />
               </Adminlayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/internmanagement"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="studentManagement"
+              action="viewStudent"
+            >
               <Adminlayout>
                 <Internmanagement />
               </Adminlayout>
@@ -265,44 +263,56 @@ function App() {
         />
 
         {/* SCHEDULE */}
-
         <Route
           path="/batchmanagement"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="batchManagement"
+              action="viewBatch"
+            >
               <Adminlayout>
                 <BatchManagement />
               </Adminlayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/mentorbatches"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="mentorManagement"
+              action="viewMentor"
+            >
               <Adminlayout>
                 <MentorBatches />
               </Adminlayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/timingsmanagement"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="scheduleTiming"
+              action="viewTiming"
+            >
               <Adminlayout>
                 <TimingsManagement />
               </Adminlayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/weeklyschedule"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="weeklySchedule"
+              action="viewSchedule"
+            >
               <Adminlayout>
                 <WeeklySchedule />
               </Adminlayout>
@@ -311,22 +321,28 @@ function App() {
         />
 
         {/* SETTINGS */}
-
         <Route
           path="/branch"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="branchManagement"
+              action="viewBranch"
+            >
               <Adminlayout>
                 <Branch />
               </Adminlayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/notification"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="notificationManagement"
+              action="viewNotification"
+            >
               <Adminlayout>
                 <Notification />
               </Adminlayout>
@@ -335,33 +351,42 @@ function App() {
         />
 
         {/* TASK MANAGEMENT */}
-
         <Route
           path="/taskevaluation"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="taskManagement"
+              action="viewTask"
+            >
               <Adminlayout>
                 <Taskevaluation />
               </Adminlayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/taskmaterial"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="materialManagement"
+              action="viewMaterial"
+            >
               <Adminlayout>
                 <Taskmaterial />
               </Adminlayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/tasks"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="taskManagement"
+              action="viewTask"
+            >
               <Adminlayout>
                 <Tasks />
               </Adminlayout>
@@ -370,22 +395,28 @@ function App() {
         />
 
         {/* ATTENDANCE */}
-
         <Route
           path="/attendancestudent"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="attendanceManagement"
+              action="viewAttendance"
+            >
               <Adminlayout>
                 <Attendancestudent />
               </Adminlayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/leaverequest"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="leaveManagement"
+              action="viewLeave"
+            >
               <Adminlayout>
                 <Leaverequest />
               </Adminlayout>
@@ -394,22 +425,28 @@ function App() {
         />
 
         {/* SYLLABUS */}
-
         <Route
           path="/modulemanagement"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="moduleManagement"
+              action="viewModule"
+            >
               <Adminlayout>
                 <ModuleManagement />
               </Adminlayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/topicsmanagement"
           element={
-            <ProtectedRoute allowedTypes={["admin", "staff"]}>
+            <ProtectedRoute
+              allowedTypes={["admin", "staff"]}
+              module="topicManagement"
+              action="viewTopic"
+            >
               <Adminlayout>
                 <TopicsManagement />
               </Adminlayout>
@@ -417,10 +454,7 @@ function App() {
           }
         />
 
-        {/* =================================
-                    INTERN ROUTES
-                ================================= */}
-
+        {/* INTERN ROUTES */}
         <Route
           path="/internnotification"
           element={
@@ -431,7 +465,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/interntask"
           element={
@@ -442,7 +475,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/internattendance"
           element={
@@ -453,7 +485,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/internweekly"
           element={
@@ -464,7 +495,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/internweeklycard"
           element={
@@ -475,7 +505,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/internmonthlycard"
           element={
@@ -487,7 +516,7 @@ function App() {
           }
         />
 
-        {/* Fallback for unknown URLs */}
+        {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

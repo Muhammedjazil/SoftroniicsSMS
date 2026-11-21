@@ -328,44 +328,6 @@ const Attendancestudent = () => {
                 HEADER
             ===================================== */}
 
-            <div className="attendance-student-header">
-
-                <div className="attendance-student-header-title">
-
-                    <h2>Attendance</h2>
-
-                    <p>
-                        Attendance
-                        <span> &gt; </span>
-                        {attendanceStudentActiveTab === "student"
-                            ? "Student Attendance"
-                            : "Report"}
-                    </p>
-
-                </div>
-
-
-                {/* ADMIN PROFILE */}
-
-                <div className="attendance-student-admin-profile">
-
-                    <div className="attendance-student-admin-icon">
-                        <MdPersonOutline />
-                    </div>
-
-                    <div className="attendance-student-admin-info">
-
-                        <h4>vijitha</h4>
-
-                        <p>super admin</p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
             {/* =====================================
                 MAIN CONTENT
             ===================================== */}

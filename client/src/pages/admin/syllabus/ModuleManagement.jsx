@@ -266,31 +266,7 @@ const SyllabusManagement = () => {
 
   return (
     <div className="syl-mgmt-container">
-      {/* Header */}
-      <header className="syl-mgmt-header">
-        <div className="syl-mgmt-title-group">
-          <h1 className="syl-mgmt-heading">Modules Management</h1>
-          <nav className="syl-mgmt-breadcrumb">
-            <span>Modules Management</span>
-            <span className="syl-mgmt-breadcrumb-separator">&gt;</span>
-            <span>
-              {activeTab === 'modules' && 'modules-list'}
-              {activeTab === 'new-module' && 'new-module'}
-              {activeTab === 'edit-module' && 'edit-module'}
-            </span>
-          </nav>
-        </div>
-
-        <div className="syl-mgmt-profile-card">
-          <div className="syl-mgmt-profile-avatar">
-            <LuUser />
-          </div>
-          <div className="syl-mgmt-profile-info">
-            <span className="syl-mgmt-username">vijitha</span>
-            <span className="syl-mgmt-role">super admin</span>
-          </div>
-        </div>
-      </header>
+      
 
       {/* Outer Toolbar */}
       <div className="syl-mgmt-toolbar">

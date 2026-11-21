@@ -1,19 +1,18 @@
-
 import { useState, useEffect } from "react";
 import AdminService from "../../../services/admin-api-services/AdminService";
+import usePermission from "../../../hooks/usePermission";
 import {
   FiUser,
   FiDownload,
   FiChevronRight,
   FiChevronLeft,
-  FiSearch
+  FiSearch,
 } from "react-icons/fi";
 
 import "./Rolemanagement.css";
-import axios from "axios";
 
 // =====================================
-// PERMISSION GROUPS
+// PERMISSION GROUPS (MATCHES roleModel.js)
 // =====================================
 
 const privilegeGroups = [
@@ -24,8 +23,18 @@ const privilegeGroups = [
       { label: "Add Student", key: "addStudent" },
       { label: "View Student", key: "viewStudent" },
       { label: "Edit Student", key: "editStudent" },
-      { label: "Delete Student", key: "deleteStudent" }
-    ]
+      { label: "Delete Student", key: "deleteStudent" },
+    ],
+  },
+  {
+    id: "staffManagement",
+    title: "Staff Management",
+    items: [
+      { label: "Add Staff", key: "addStaff" },
+      { label: "View Staff", key: "viewStaff" },
+      { label: "Edit Staff", key: "editStaff" },
+      { label: "Delete Staff", key: "deleteStaff" },
+    ],
   },
   {
     id: "mentorManagement",
@@ -34,8 +43,8 @@ const privilegeGroups = [
       { label: "Add Mentor", key: "addMentor" },
       { label: "View Mentor", key: "viewMentor" },
       { label: "Edit Mentor", key: "editMentor" },
-      { label: "Delete Mentor", key: "deleteMentor" }
-    ]
+      { label: "Delete Mentor", key: "deleteMentor" },
+    ],
   },
   {
     id: "mentorCard",
@@ -44,8 +53,8 @@ const privilegeGroups = [
       { label: "Add Mentor Card", key: "addMentorCard" },
       { label: "View Mentor Card", key: "viewMentorCard" },
       { label: "Edit Mentor Card", key: "editMentorCard" },
-      { label: "Delete Mentor Card", key: "deleteMentorCard" }
-    ]
+      { label: "Delete Mentor Card", key: "deleteMentorCard" },
+    ],
   },
   {
     id: "courseManagement",
@@ -54,8 +63,8 @@ const privilegeGroups = [
       { label: "Add Course", key: "addCourse" },
       { label: "View Course", key: "viewCourse" },
       { label: "Edit Course", key: "editCourse" },
-      { label: "Delete Course", key: "deleteCourse" }
-    ]
+      { label: "Delete Course", key: "deleteCourse" },
+    ],
   },
   {
     id: "categoryManagement",
@@ -64,8 +73,8 @@ const privilegeGroups = [
       { label: "Add Category", key: "addCategory" },
       { label: "View Category", key: "viewCategory" },
       { label: "Edit Category", key: "editCategory" },
-      { label: "Delete Category", key: "deleteCategory" }
-    ]
+      { label: "Delete Category", key: "deleteCategory" },
+    ],
   },
   {
     id: "moduleManagement",
@@ -74,8 +83,8 @@ const privilegeGroups = [
       { label: "Add Module", key: "addModule" },
       { label: "View Module", key: "viewModule" },
       { label: "Edit Module", key: "editModule" },
-      { label: "Delete Module", key: "deleteModule" }
-    ]
+      { label: "Delete Module", key: "deleteModule" },
+    ],
   },
   {
     id: "topicManagement",
@@ -84,8 +93,8 @@ const privilegeGroups = [
       { label: "Add Topic", key: "addTopic" },
       { label: "View Topic", key: "viewTopic" },
       { label: "Edit Topic", key: "editTopic" },
-      { label: "Delete Topic", key: "deleteTopic" }
-    ]
+      { label: "Delete Topic", key: "deleteTopic" },
+    ],
   },
   {
     id: "taskManagement",
@@ -95,8 +104,8 @@ const privilegeGroups = [
       { label: "View Task", key: "viewTask" },
       { label: "Edit Task", key: "editTask" },
       { label: "Delete Task", key: "deleteTask" },
-      { label: "Download Task", key: "downloadTask" }
-    ]
+      { label: "Download Task", key: "downloadTask" },
+    ],
   },
   {
     id: "materialManagement",
@@ -105,8 +114,8 @@ const privilegeGroups = [
       { label: "Add Material", key: "addMaterial" },
       { label: "View Material", key: "viewMaterial" },
       { label: "Edit Material", key: "editMaterial" },
-      { label: "Delete Material", key: "deleteMaterial" }
-    ]
+      { label: "Delete Material", key: "deleteMaterial" },
+    ],
   },
   {
     id: "weeklySchedule",
@@ -115,8 +124,8 @@ const privilegeGroups = [
       { label: "Add Schedule", key: "addSchedule" },
       { label: "View Schedule", key: "viewSchedule" },
       { label: "Edit Schedule", key: "editSchedule" },
-      { label: "Delete Schedule", key: "deleteSchedule" }
-    ]
+      { label: "Delete Schedule", key: "deleteSchedule" },
+    ],
   },
   {
     id: "scheduleTiming",
@@ -125,8 +134,8 @@ const privilegeGroups = [
       { label: "Add Timing", key: "addTiming" },
       { label: "View Timing", key: "viewTiming" },
       { label: "Edit Timing", key: "editTiming" },
-      { label: "Delete Timing", key: "deleteTiming" }
-    ]
+      { label: "Delete Timing", key: "deleteTiming" },
+    ],
   },
   {
     id: "batchManagement",
@@ -135,8 +144,48 @@ const privilegeGroups = [
       { label: "Add Batch", key: "addBatch" },
       { label: "View Batch", key: "viewBatch" },
       { label: "Edit Batch", key: "editBatch" },
-      { label: "Delete Batch", key: "deleteBatch" }
-    ]
+      { label: "Delete Batch", key: "deleteBatch" },
+    ],
+  },
+  {
+    id: "attendanceManagement",
+    title: "Student Attendance",
+    items: [
+      { label: "Add Attendance", key: "addAttendance" },
+      { label: "View Attendance", key: "viewAttendance" },
+      { label: "Edit Attendance", key: "editAttendance" },
+      { label: "Delete Attendance", key: "deleteAttendance" },
+    ],
+  },
+  {
+    id: "leaveManagement",
+    title: "Leave Request",
+    items: [
+      { label: "Add Leave", key: "addLeave" },
+      { label: "View Leave", key: "viewLeave" },
+      { label: "Edit Leave", key: "editLeave" },
+      { label: "Delete Leave", key: "deleteLeave" },
+    ],
+  },
+  {
+    id: "branchManagement",
+    title: "Branch Management",
+    items: [
+      { label: "Add Branch", key: "addBranch" },
+      { label: "View Branch", key: "viewBranch" },
+      { label: "Edit Branch", key: "editBranch" },
+      { label: "Delete Branch", key: "deleteBranch" },
+    ],
+  },
+  {
+    id: "notificationManagement",
+    title: "Notification Management",
+    items: [
+      { label: "Add Notification", key: "addNotification" },
+      { label: "View Notification", key: "viewNotification" },
+      { label: "Edit Notification", key: "editNotification" },
+      { label: "Delete Notification", key: "deleteNotification" },
+    ],
   },
   {
     id: "staticPage",
@@ -145,8 +194,8 @@ const privilegeGroups = [
       { label: "Add Page", key: "addPage" },
       { label: "View Page", key: "viewPage" },
       { label: "Edit Page", key: "editPage" },
-      { label: "Delete Page", key: "deletePage" }
-    ]
+      { label: "Delete Page", key: "deletePage" },
+    ],
   },
   {
     id: "roleManagement",
@@ -155,9 +204,9 @@ const privilegeGroups = [
       { label: "Add Role", key: "addRole" },
       { label: "View Role", key: "viewRole" },
       { label: "Edit Role", key: "editRole" },
-      { label: "Delete Role", key: "deleteRole" }
-    ]
-  }
+      { label: "Delete Role", key: "deleteRole" },
+    ],
+  },
 ];
 
 // =====================================
@@ -169,8 +218,7 @@ const flattenPermissions = (savedPermissions = {}) => {
 
   privilegeGroups.forEach((group) => {
     group.items.forEach((item) => {
-      formatted[item.key] =
-        !!savedPermissions?.[group.id]?.[item.key];
+      formatted[item.key] = !!savedPermissions?.[group.id]?.[item.key];
     });
   });
 
@@ -188,8 +236,7 @@ const formatPermissions = (permissions = {}) => {
     formatted[group.id] = {};
 
     group.items.forEach((item) => {
-      formatted[group.id][item.key] =
-        !!permissions[item.key];
+      formatted[group.id][item.key] = !!permissions[item.key];
     });
   });
 
@@ -201,21 +248,24 @@ const formatPermissions = (permissions = {}) => {
 // =====================================
 
 export const Rolemanagement = () => {
-
   const {
     newrolecreate,
     takeroles,
     Updaterole,
     roleremove,
-    changestatus
+    changestatus,
   } = AdminService();
+
+  const { user, can } = usePermission();
+  const canAddRole = can("roleManagement", "addRole");
+  const canEditRole = can("roleManagement", "editRole");
+  const canDeleteRole = can("roleManagement", "deleteRole");
 
   // =====================================
   // STATES
   // =====================================
 
   const [activeTab, setActiveTab] = useState("Roles");
-
   const [roles, setRoles] = useState([]);
 
   const [roleName, setRoleName] = useState("");
@@ -229,7 +279,6 @@ export const Rolemanagement = () => {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Roles");
-
   const [loading, setLoading] = useState(false);
 
   // =====================================
@@ -237,7 +286,6 @@ export const Rolemanagement = () => {
   // =====================================
 
   const [currentPage, setCurrentPage] = useState(1);
-
   const rolesPerPage = 6;
 
   // =====================================
@@ -247,24 +295,11 @@ export const Rolemanagement = () => {
   const fetchRoles = async () => {
     try {
       setLoading(true);
-
       const response = await takeroles();
-
-      console.log("Fetched roles:", response);
-
       setRoles(Array.isArray(response) ? response : []);
-
     } catch (error) {
-      console.log(
-        "Fetch roles error:",
-        error.response?.data || error
-      );
-
-      alert(
-        error.response?.data?.message ||
-        "Unable to fetch roles"
-      );
-
+      console.log("Fetch roles error:", error.response?.data || error);
+      alert(error.response?.data?.message || "Unable to fetch roles");
     } finally {
       setLoading(false);
     }
@@ -291,6 +326,7 @@ export const Rolemanagement = () => {
   // =====================================
 
   const handleNewRole = () => {
+    if (!canAddRole) return;
     resetForm();
     setSelectedRole(null);
     setActiveTab("New Role");
@@ -320,6 +356,7 @@ export const Rolemanagement = () => {
   // =====================================
 
   const handleEdit = (value) => {
+    if (!canEditRole) return;
 
     setSelectedRole(value);
     setEditingRoleId(value._id);
@@ -327,14 +364,10 @@ export const Rolemanagement = () => {
     setRoleName(value.role || "");
     setDescription(value.description || "");
 
-    const savedPermissions = flattenPermissions(
-      value.permissions
-    );
-
+    const savedPermissions = flattenPermissions(value.permissions);
     setPermissions(savedPermissions);
 
     const groupStatus = {};
-
     privilegeGroups.forEach((group) => {
       groupStatus[group.id] = group.items.every(
         (item) => !!savedPermissions[item.key]
@@ -342,7 +375,6 @@ export const Rolemanagement = () => {
     });
 
     setEnabledGroups(groupStatus);
-
     setActiveTab("New Role");
   };
 
@@ -351,16 +383,13 @@ export const Rolemanagement = () => {
   // =====================================
 
   const handlePermission = (permission) => {
-
     setPermissions((prev) => {
-
       const updated = {
         ...prev,
-        [permission]: !prev[permission]
+        [permission]: !prev[permission],
       };
 
       const groupStatus = {};
-
       privilegeGroups.forEach((group) => {
         groupStatus[group.id] = group.items.every(
           (item) => !!updated[item.key]
@@ -368,7 +397,6 @@ export const Rolemanagement = () => {
       });
 
       setEnabledGroups(groupStatus);
-
       return updated;
     });
   };
@@ -378,28 +406,21 @@ export const Rolemanagement = () => {
   // =====================================
 
   const handleGroupToggle = (groupId) => {
-
-    const groupData = privilegeGroups.find(
-      (item) => item.id === groupId
-    );
-
+    const groupData = privilegeGroups.find((item) => item.id === groupId);
     if (!groupData) return;
 
     const isEnabled = !enabledGroups[groupId];
 
     setEnabledGroups((prev) => ({
       ...prev,
-      [groupId]: isEnabled
+      [groupId]: isEnabled,
     }));
 
     setPermissions((prev) => {
-
       const updated = { ...prev };
-
       groupData.items.forEach((item) => {
         updated[item.key] = isEnabled;
       });
-
       return updated;
     });
   };
@@ -409,9 +430,18 @@ export const Rolemanagement = () => {
   // =====================================
 
   const handleCreateRole = async () => {
-
     if (!roleName.trim() || !description.trim()) {
       alert("Please enter role name and description");
+      return;
+    }
+
+    if (editingRoleId !== null && !canEditRole) {
+      alert("You do not have permission to edit roles.");
+      return;
+    }
+
+    if (editingRoleId === null && !canAddRole) {
+      alert("You do not have permission to create roles.");
       return;
     }
 
@@ -421,36 +451,22 @@ export const Rolemanagement = () => {
       const roleData = {
         role: roleName.trim(),
         description: description.trim(),
-        permissions: formatPermissions(permissions)
+        permissions: formatPermissions(permissions),
       };
 
       if (editingRoleId !== null) {
-
         await Updaterole(editingRoleId, roleData);
-
         alert("Role updated successfully!");
-
       } else {
-
         await newrolecreate(roleData);
-
         alert("Role created successfully");
-
       }
 
       await fetchRoles();
-
       handleCancel();
-
     } catch (error) {
-
       console.log("Create / Update role error:", error);
-
-      alert(
-        error.response?.data?.message ||
-        "Failed to save role"
-      );
-
+      alert(error.response?.data?.message || "Failed to save role");
     } finally {
       setLoading(false);
     }
@@ -461,7 +477,6 @@ export const Rolemanagement = () => {
   // =====================================
 
   const filteredRoles = roles.filter((role) => {
-
     const matchesSearch =
       role.role?.toLowerCase().includes(search.toLowerCase()) ||
       role.description?.toLowerCase().includes(search.toLowerCase());
@@ -478,37 +493,19 @@ export const Rolemanagement = () => {
   // PAGINATION CALCULATIONS
   // =====================================
 
-  const totalPages = Math.ceil(
-    filteredRoles.length / rolesPerPage
-  );
-
+  const totalPages = Math.ceil(filteredRoles.length / rolesPerPage);
   const startIndex = (currentPage - 1) * rolesPerPage;
-
   const endIndex = startIndex + rolesPerPage;
-
-  const currentRoles = filteredRoles.slice(
-    startIndex,
-    endIndex
-  );
-
-  // =====================================
-  // RESET PAGE WHEN SEARCH / FILTER CHANGES
-  // =====================================
+  const currentRoles = filteredRoles.slice(startIndex, endIndex);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter]);
 
-  // =====================================
-  // CORRECT PAGE AFTER DELETING ROLE
-  // =====================================
-
   useEffect(() => {
-
     if (totalPages > 0 && currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
-
   }, [currentPage, totalPages]);
 
   // =====================================
@@ -516,44 +513,32 @@ export const Rolemanagement = () => {
   // =====================================
 
   const handleExport = () => {
-
-    const headers = [
-      "Role",
-      "Description",
-      "Status",
-      "Created At"
-    ];
+    const headers = ["Role", "Description", "Status", "Created At"];
 
     const rows = filteredRoles.map((role) => [
       role.role,
       role.description,
       role.isActive ? "Active" : "Inactive",
-      role.createdAt
-        ? new Date(role.createdAt).toLocaleDateString()
-        : "-"
+      role.createdAt ? new Date(role.createdAt).toLocaleDateString() : "-",
     ]);
 
     const csv = [headers, ...rows]
       .map((row) =>
-        row.map((value) =>
-          `"${String(value ?? "").replace(/"/g, '""')}"`
-        ).join(",")
+        row
+          .map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`)
+          .join(",")
       )
       .join("\n");
 
     const blob = new Blob([csv], {
-      type: "text/csv;charset=utf-8;"
+      type: "text/csv;charset=utf-8;",
     });
 
     const url = URL.createObjectURL(blob);
-
     const link = document.createElement("a");
-
     link.href = url;
     link.download = "roles.csv";
-
     link.click();
-
     URL.revokeObjectURL(url);
   };
 
@@ -562,24 +547,16 @@ export const Rolemanagement = () => {
   // =====================================
 
   const handledelete = async (id) => {
+    if (!canDeleteRole) return;
+    if (!window.confirm("Are you sure you want to delete this role?")) return;
 
     try {
-
       await roleremove(id);
-
       alert("Role removed successfully!");
-
       await fetchRoles();
-
     } catch (error) {
-
       console.log("Delete role error:", error);
-
-      alert(
-        error.response?.data?.message ||
-        "Role not deleted!"
-      );
-
+      alert(error.response?.data?.message || "Role not deleted!");
     }
   };
 
@@ -588,87 +565,31 @@ export const Rolemanagement = () => {
   // =====================================
 
   const handlestatus = async (id) => {
+    if (!canEditRole) return;
 
     try {
-
       await changestatus(id);
-
       await fetchRoles();
-
     } catch (error) {
-
       console.log("Status update error:", error);
-
-      alert(
-        error.response?.data?.message ||
-        "Status not updated!"
-      );
-
+      alert(error.response?.data?.message || "Status not updated!");
     }
   };
-
-
 
   // =====================================
   // JSX
   // =====================================
 
   return (
-
     <div className="Rolemanagement">
-
       {/* HEADER */}
-
-      <div className="Rolemanagement-role">
-
-        <div className="Rolemanagement-name">
-
-          <h2>Role Management</h2>
-
-          <p>
-            Role Management
-            <FiChevronRight />
-
-            {activeTab === "Roles"
-              ? "Roles"
-              : activeTab === "View Role"
-                ? "View Role"
-                : editingRoleId !== null
-                  ? "Edit Role"
-                  : "New Role"
-            }
-
-          </p>
-
-        </div>
-
-        {/* PROFILE */}
-
-        <div className="Rolemanagement-profile">
-
-          <div className="Rolemanagement-profile-icon">
-            <FiUser />
-          </div>
-
-          <div className="Rolemanagement-profiledetails">
-            <h5>Priyesh</h5>
-            <p>Super Admin</p>
-          </div>
-
-        </div>
-
-      </div>
+     
 
       {/* MAIN CARD */}
-
       <div className="Rolemanagement-hero">
-
         {/* TOP TABS */}
-
         <div className="Rolemanagement-hero0">
-
           <div className="Rolemanagement-hero1">
-
             <button
               className={activeTab === "Roles" ? "active" : ""}
               onClick={handleCancel}
@@ -676,15 +597,15 @@ export const Rolemanagement = () => {
               Roles
             </button>
 
-            <button
-              className={activeTab === "New Role" ? "active" : ""}
-              onClick={handleNewRole}
-            >
-              New Role
-            </button>
-
+            {(canAddRole || editingRoleId !== null) && (
+              <button
+                className={activeTab === "New Role" ? "active" : ""}
+                onClick={handleNewRole}
+              >
+                {editingRoleId !== null ? "Edit Role" : "New Role"}
+              </button>
+            )}
           </div>
-
         </div>
 
         {/* =====================================
@@ -692,24 +613,17 @@ export const Rolemanagement = () => {
         ===================================== */}
 
         {activeTab === "Roles" && (
-
           <>
-
             {/* TABLE CONTROLS */}
-
             <div className="Rolemanagement-table-controls">
-
               <div className="Rolemanagement-search">
-
                 <FiSearch />
-
                 <input
                   type="text"
                   placeholder="Search Roles"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
-
               </div>
 
               <select
@@ -717,11 +631,9 @@ export const Rolemanagement = () => {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-
                 <option value="All Roles">All Roles</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
-
               </select>
 
               <button
@@ -731,17 +643,12 @@ export const Rolemanagement = () => {
                 <FiDownload />
                 Export
               </button>
-
             </div>
 
             {/* TABLE */}
-
             <div className="Rolemanagement-hero-table">
-
               <table>
-
                 <thead>
-
                   <tr>
                     <th>#</th>
                     <th>ROLE</th>
@@ -750,41 +657,26 @@ export const Rolemanagement = () => {
                     <th>CREATED AT</th>
                     <th>ACTIONS</th>
                   </tr>
-
                 </thead>
 
                 <tbody>
-
                   {loading ? (
-
                     <tr>
                       <td colSpan="6" className="Rolemanagement-empty">
                         Loading roles...
                       </td>
                     </tr>
-
                   ) : filteredRoles.length > 0 ? (
-
                     currentRoles.map((value, index) => (
-
                       <tr key={value._id}>
+                        <td>{startIndex + index + 1}</td>
 
-                        <td>
-                          {startIndex + index + 1}
-                        </td>
+                        <td className="role-name">{value.role}</td>
 
-                        <td className="role-name">
-                          {value.role}
-                        </td>
-
-                        <td>
-                          {value.description}
-                        </td>
+                        <td>{value.description}</td>
 
                         {/* STATUS */}
-
                         <td>
-
                           <span
                             className={
                               value.isActive
@@ -792,19 +684,20 @@ export const Rolemanagement = () => {
                                 : "Rolemanagement-status inactive-status"
                             }
                           >
-
                             <button
+                              type="button"
+                              disabled={!canEditRole}
+                              style={{
+                                cursor: canEditRole ? "pointer" : "default",
+                              }}
                               onClick={() => handlestatus(value._id)}
                             >
                               {value.isActive ? "Active" : "Inactive"}
                             </button>
-
                           </span>
-
                         </td>
 
                         {/* CREATED DATE */}
-
                         <td>
                           {value.createdAt
                             ? new Date(value.createdAt).toLocaleDateString()
@@ -812,11 +705,8 @@ export const Rolemanagement = () => {
                         </td>
 
                         {/* ACTIONS */}
-
                         <td>
-
                           <div className="Rolemanagement-actions">
-
                             <button
                               type="button"
                               className="view-action"
@@ -825,49 +715,41 @@ export const Rolemanagement = () => {
                               View
                             </button>
 
-                            <button
-                              type="button"
-                              className="edit-action"
-                              onClick={() => handleEdit(value)}
-                            >
-                              Edit
-                            </button>
+                            {canEditRole && (
+                              <button
+                                type="button"
+                                className="edit-action"
+                                onClick={() => handleEdit(value)}
+                              >
+                                Edit
+                              </button>
+                            )}
 
-                            <button
-                              type="button"
-                              onClick={() => handledelete(value._id)}
-                            >
-                              Delete
-                            </button>
-
+                            {canDeleteRole && (
+                              <button
+                                type="button"
+                                onClick={() => handledelete(value._id)}
+                              >
+                                Delete
+                              </button>
+                            )}
                           </div>
-
                         </td>
-
                       </tr>
-
                     ))
-
                   ) : (
-
                     <tr>
                       <td colSpan="6" className="Rolemanagement-empty">
                         No Roles Found
                       </td>
                     </tr>
-
                   )}
-
                 </tbody>
-
               </table>
-
             </div>
 
             {/* PAGINATION */}
-
             <div className="Rolemanagement-pagination">
-
               <span>
                 Showing{" "}
                 {filteredRoles.length === 0 ? 0 : startIndex + 1}
@@ -890,17 +772,12 @@ export const Rolemanagement = () => {
 
               <button
                 onClick={() => setCurrentPage((prev) => prev + 1)}
-                disabled={
-                  totalPages === 0 || currentPage >= totalPages
-                }
+                disabled={totalPages === 0 || currentPage >= totalPages}
               >
                 <FiChevronRight />
               </button>
-
             </div>
-
           </>
-
         )}
 
         {/* =====================================
@@ -908,55 +785,33 @@ export const Rolemanagement = () => {
         ===================================== */}
 
         {activeTab === "View Role" && selectedRole && (
-
           <div className="Rolemanagement-newtask">
-
-            {/* VIEW HEADING */}
-
             <div className="Rolemanagement-create-heading">
-
               <h3>View Role</h3>
-
-              <p>
-                View role details and assigned permissions
-              </p>
-
+              <p>View role details and assigned permissions</p>
             </div>
 
-            {/* ROLE DETAILS */}
-
             <div className="Rolemanagement-newtask-details">
-
               <div className="Rolemanagement-newtask-field">
-
                 <label>Role</label>
-
                 <input
                   type="text"
                   value={selectedRole.role || ""}
                   readOnly
                 />
-
               </div>
 
               <div className="Rolemanagement-newtask-field">
-
                 <label>Description</label>
-
                 <input
                   type="text"
                   value={selectedRole.description || ""}
                   readOnly
                 />
-
               </div>
-
             </div>
 
-            {/* STATUS AND CREATED DATE */}
-
             <div className="Rolemanagement-view-details">
-
               <div>
                 <strong>Status:</strong>{" "}
                 {selectedRole.isActive ? "Active" : "Inactive"}
@@ -968,41 +823,23 @@ export const Rolemanagement = () => {
                   ? new Date(selectedRole.createdAt).toLocaleDateString()
                   : "-"}
               </div>
-
             </div>
 
-            {/* ALL PERMISSIONS */}
-
-            <h3 className="Rolemanagement-newtask-heading">
-              All Permissions
-            </h3>
-
-            {/* READ ONLY PERMISSION GRID */}
+            <h3 className="Rolemanagement-newtask-heading">All Permissions</h3>
 
             <div className="Rolemanagement-newtask-grid">
-
               {privilegeGroups.map((group) => (
-
-                <div
-                  className="Rolemanagement-newtask-card"
-                  key={group.id}
-                >
-
+                <div className="Rolemanagement-newtask-card" key={group.id}>
                   <div className="Rolemanagement-newtask-cardheader">
-
                     <h4>{group.title}</h4>
-
                   </div>
 
                   <div className="Rolemanagement-newtask-options">
-
                     {group.items.map((item) => (
-
                       <label
                         className="Rolemanagement-newtask-option"
                         key={item.key}
                       >
-
                         <input
                           type="checkbox"
                           checked={
@@ -1010,25 +847,15 @@ export const Rolemanagement = () => {
                           }
                           readOnly
                         />
-
                         <span>{item.label}</span>
-
                       </label>
-
                     ))}
-
                   </div>
-
                 </div>
-
               ))}
-
             </div>
 
-            {/* VIEW BUTTONS */}
-
             <div className="Rolemanagement-newtask-buttons">
-
               <button
                 className="Rolemanagement-newtask-cancel"
                 onClick={handleCancel}
@@ -1036,17 +863,16 @@ export const Rolemanagement = () => {
                 Back
               </button>
 
-              <button
-                className="Rolemanagement-newtask-create"
-                onClick={() => handleEdit(selectedRole)}
-              >
-                Edit Role
-              </button>
-
+              {canEditRole && (
+                <button
+                  className="Rolemanagement-newtask-create"
+                  onClick={() => handleEdit(selectedRole)}
+                >
+                  Edit Role
+                </button>
+              )}
             </div>
-
           </div>
-
         )}
 
         {/* =====================================
@@ -1054,134 +880,78 @@ export const Rolemanagement = () => {
         ===================================== */}
 
         {activeTab === "New Role" && (
-
           <div className="Rolemanagement-newtask">
-
-            {/* FORM HEADING */}
-
             <div className="Rolemanagement-create-heading">
-
               <h3>
-                {editingRoleId !== null
-                  ? "Edit Role"
-                  : "Create New Role"
-                }
+                {editingRoleId !== null ? "Edit Role" : "Create New Role"}
               </h3>
-
-              <p>
-                Set permissions for a specific role
-              </p>
-
+              <p>Set permissions for a specific role</p>
             </div>
 
-            {/* ROLE AND DESCRIPTION */}
-
             <div className="Rolemanagement-newtask-details">
-
               <div className="Rolemanagement-newtask-field">
-
                 <label>
                   Role <span className="required-star">*</span>
                 </label>
-
                 <input
                   type="text"
                   placeholder="Enter Role Name"
                   value={roleName}
                   onChange={(e) => setRoleName(e.target.value)}
                 />
-
               </div>
 
               <div className="Rolemanagement-newtask-field">
-
                 <label>
                   Description <span className="required-star">*</span>
                 </label>
-
                 <input
                   type="text"
                   placeholder="Enter Description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
-
               </div>
-
             </div>
 
-            {/* ALL PERMISSIONS */}
-
-            <h3 className="Rolemanagement-newtask-heading">
-              All Permissions
-            </h3>
-
-            {/* PERMISSION GRID */}
+            <h3 className="Rolemanagement-newtask-heading">All Permissions</h3>
 
             <div className="Rolemanagement-newtask-grid">
-
               {privilegeGroups.map((group) => (
-
-                <div
-                  className="Rolemanagement-newtask-card"
-                  key={group.id}
-                >
-
+                <div className="Rolemanagement-newtask-card" key={group.id}>
                   <div className="Rolemanagement-newtask-cardheader">
-
                     <h4>{group.title}</h4>
 
-                    {/* GROUP SWITCH */}
-
                     <label className="Rolemanagement-newtask-switch">
-
                       <input
                         type="checkbox"
                         checked={!!enabledGroups[group.id]}
                         onChange={() => handleGroupToggle(group.id)}
                       />
-
                       <span className="Rolemanagement-newtask-slider"></span>
-
                     </label>
-
                   </div>
 
-                  {/* PERMISSION CHECKBOXES */}
-
                   <div className="Rolemanagement-newtask-options">
-
                     {group.items.map((item) => (
-
                       <label
                         className="Rolemanagement-newtask-option"
                         key={item.key}
                       >
-
                         <input
                           type="checkbox"
                           checked={!!permissions[item.key]}
                           onChange={() => handlePermission(item.key)}
                         />
-
                         <span>{item.label}</span>
-
                       </label>
-
                     ))}
-
                   </div>
-
                 </div>
-
               ))}
-
             </div>
 
-            {/* BOTTOM BUTTONS */}
-
             <div className="Rolemanagement-newtask-buttons">
-
               <button
                 className="Rolemanagement-newtask-cancel"
                 onClick={handleCancel}
@@ -1198,21 +968,15 @@ export const Rolemanagement = () => {
                 {loading
                   ? "Please Wait..."
                   : editingRoleId !== null
-                    ? "Update Role"
-                    : "Create Role"
-                }
+                  ? "Update Role"
+                  : "Create Role"}
               </button>
-
             </div>
-
           </div>
-
         )}
-
       </div>
-
     </div>
-
   );
-
 };
+
+export default Rolemanagement;

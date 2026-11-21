@@ -521,31 +521,7 @@ handleallstaff();
 
       {/* HEADER */}
 
-      <div className="intern-header">
-
-        <div className="intern-heading">
-          <h2>Student Management</h2>
-
-          <p>
-            Student Management
-            <FiChevronRight />
-            {activeTab === "list" ? "Students List" : editingId ? "Edit Student" : "New Student"}
-          </p>
-        </div>
-
-        <div className="intern-admin">
-          <div className="intern-admin-icon">
-            <FiUser />
-          </div>
-
-          <div>
-            <strong>Vijitha</strong>
-            <span>Super Admin</span>
-          </div>
-        </div>
-
-      </div>
-
+      
       {/* MAIN CARD */}
 
       <div className="intern-hero">
