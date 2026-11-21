@@ -192,7 +192,7 @@ const SelectField = ({
 
 export const Internmanagement = () => {
 
- const {takebranch,fetchallstaff}=AdminService()
+ const {takebranch,getallstaff}=AdminService()
 
   const [activeTab, setActiveTab] = useState("list");
 
@@ -234,7 +234,7 @@ export const Internmanagement = () => {
   }
 
   const handleallstaff=async()=>{
-    let response=await fetchallstaff();
+    let response=await getallstaff();
     setRoules(response)
     console.log(response);
     
@@ -1046,7 +1046,7 @@ handleallstaff();
 
     {roles.map((item) => (
       <option key={item._id} value={item._id}>
-        {item.role}
+        {item.fullName}
       </option>
     ))}
   </select>

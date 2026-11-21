@@ -1214,55 +1214,39 @@ setActiveTab("stafflist");
 
                   {/* BRANCH */}
 
-                  <div className="staffprofessionalfield">
-                    <label>Branch <span>*</span></label>
+                 <div className="staffprofessionalfield">
+  <label>
+    Branch <span>*</span>
+  </label>
 
-                  <select
-  required
-  name="branch"
-  value={formData.branch}
-  onChange={handlecreate}
->
-  <option value="">Choose Branch</option>
+  <select
+    required
+    name="branch"
+    value={formData.branch}
+    onChange={handlecreate}
+  >
+    <option value="">Choose Branch</option>
 
-  {branchOptions.map((branch) => (
-    <option key={branch._id} value={branch._id}>
-      {branch.branchName}
-    </option>
-  ))}
-</select>
-                    <select
-                      required
-                      name="branch"
-                      value={formData.branch}
-                      onChange={handlecreate}
-                    >
-                      <option value="">Choose Branch</option>
+    {branchOptions.map((branch) => (
+      <option key={branch._id} value={branch._id}>
+        {branch.branchName}
+      </option>
+    ))}
+  </select>
 
-                      {branchOptions.map((branch) => {
-                        const bId = typeof branch === "object" ? branch._id : branch;
-                        const bName = typeof branch === "object" ? branch.branchName : branch;
-                        return (
-                          <option key={bId} value={bId}>
-                            {bName}
-                          </option>
-                        );
-                      })}
-                    </select>
+  <div className="staffcheckbox">
+    <input
+      type="checkbox"
+      id="additionalBranch"
+      checked={formData.allowAdditionalBranches}
+      onChange={handleAdditionalBranchToggle}
+    />
 
-                    <div className="staffcheckbox">
-                      <input
-                        type="checkbox"
-                        id="additionalBranch"
-                        checked={formData.allowAdditionalBranches}
-                        onChange={handleAdditionalBranchToggle}
-                      />
-
-                      <label htmlFor="additionalBranch">
-                        Allow Additional Branches
-                      </label>
-                    </div>
-                  </div>
+    <label htmlFor="additionalBranch">
+      Allow Additional Branches
+    </label>
+  </div>
+</div>
 
                   {/* ADDITIONAL BRANCHES */}
 {formData.allowAdditionalBranches && (
@@ -1298,7 +1282,7 @@ setActiveTab("stafflist");
     </div>
   </div>
 )}
-                  {formData.allowAdditionalBranches && (
+                  {/* {formData.allowAdditionalBranches && (
                     <div
                       className="staff-additional-branches"
                       style={{ gridColumn: "1 / -1" }}
@@ -1338,7 +1322,7 @@ setActiveTab("stafflist");
                           })}
                       </div>
                     </div>
-                  )}
+                  )} */}
 
                   {/* EXPERIENCE */}
 
@@ -1482,7 +1466,7 @@ setActiveTab("stafflist");
     </option>
   ))}
 </select>
-                        <select
+                        {/* <select
                           value={selectedTiming}
                           onChange={handleTimingChange}
                         >
@@ -1503,13 +1487,13 @@ setActiveTab("stafflist");
                               </option>
                             );
                           })}
-                        </select>
+                        </select> */}
                       </div>
 
                       <div className="staff-selected-timings">
                         <label>Selected Timings</label>
 
-                       <div className="staff-timing-chips">
+                       {/* <div className="staff-timing-chips">
   {formData.mentorTimings.length > 0 ? (
     formData.mentorTimings.map((timingId) => {
       const timing = timingOptions.find(
@@ -1542,7 +1526,7 @@ setActiveTab("stafflist");
       No timings selected
     </p>
   )}
-</div>
+</div> */}
                         <div className="staff-timing-chips">
                           {formData.mentorTimings.length > 0 ? (
                             formData.mentorTimings.map((timing) => {
@@ -1760,10 +1744,10 @@ setActiveTab("stafflist");
                   <p>{view.department || "-"}</p>
                 </div>
 
-                <div className="staffviewfield">
-                  <h4>Branch</h4>
-                  <p>{view.branch || "-"}</p>
-                </div>
+             <div className="staffviewfield">
+  <h4>Branch</h4>
+  <p>{getBranchName(view.branch)}</p>
+</div>
 
                 <div className="staffviewfield">
                   <h4>Employee Type</h4>
