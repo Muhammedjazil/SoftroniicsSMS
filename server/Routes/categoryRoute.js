@@ -1,6 +1,6 @@
-
 const express = require("express");
 const router = express.Router();
+const { checkAuth, checkPermission } = require("../Middleware/checkAuth");
 
 const {
   createCategory,
@@ -11,18 +11,18 @@ const {
 } = require("../Controllers/categoryController");
 
 // Create a new category
-router.post("/", createCategory);
+router.post("/", checkAuth, checkPermission("categoryManagement", "addCategory"), createCategory);
 
-// Get all categories
-router.get("/", getCategories);
+// Get all categories (kept accessible to authenticated users so Course dropdowns work)
+router.get("/", checkAuth, getCategories);
 
 // Get a single category by ID
-router.get("/:id", getCategoryById);
+router.get("/:id", checkAuth, checkPermission("categoryManagement", "viewCategory"), getCategoryById);
 
 // Update category
-router.put("/:id", updateCategory);
+router.put("/:id", checkAuth, checkPermission("categoryManagement", "editCategory"), updateCategory);
 
 // Delete category (soft delete)
-router.delete("/:id", deleteCategory);
+router.delete("/:id", checkAuth, checkPermission("categoryManagement", "deleteCategory"), deleteCategory);
 
 module.exports = router;

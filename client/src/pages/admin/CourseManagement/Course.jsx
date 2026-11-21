@@ -234,13 +234,13 @@ const CourseManagement = () => {
 
   // VIEW COURSE
   const handleView = (course) => {
-    navigate(`/courses/${course._id}`);
-  };
+  navigate(`/course/${course._id}`);
+};
 
   // EDIT COURSE
-  const handleEdit = (course) => {
-    navigate(`/courses/${course._id}/edit`);
-  };
+ const handleEdit = (course) => {
+  navigate(`/course/${course._id}/edit`);
+};
 
   // DELETE COURSE
   const handleDelete = async (id) => {

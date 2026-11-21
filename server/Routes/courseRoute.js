@@ -1,6 +1,6 @@
-
 const express = require("express");
 const router = express.Router();
+const { checkAuth, checkPermission } = require("../Middleware/checkAuth");
 
 const {
   createCourse,
@@ -10,10 +10,10 @@ const {
   deleteCourse,
 } = require("../Controllers/courseController");
 
-router.post("/", createCourse);
-router.get("/", getCourses);
-router.get("/:id", getCourseById);
-router.put("/:id", updateCourse);
-router.delete("/:id", deleteCourse);
+router.post("/", checkAuth, checkPermission("courseManagement", "addCourse"), createCourse);
+router.get("/", checkAuth, getCourses);
+router.get("/:id", checkAuth, checkPermission("courseManagement", "viewCourse"), getCourseById);
+router.put("/:id", checkAuth, checkPermission("courseManagement", "editCourse"), updateCourse);
+router.delete("/:id", checkAuth, checkPermission("courseManagement", "deleteCourse"), deleteCourse);
 
 module.exports = router;
