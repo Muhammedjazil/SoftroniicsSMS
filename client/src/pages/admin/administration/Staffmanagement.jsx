@@ -519,16 +519,97 @@ const fetchallstaff = async () => {
   // ADD TIMING
   // =====================================
 
+  // Convert time range into minutes
+const getTimeRange = (timeSlot) => {
+  if (!timeSlot) return null;
+
+  const matches = timeSlot.match(
+    /(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/gi
+  );
+
+  if (!matches || matches.length !== 2) return null;
+
+  const convertToMinutes = (time) => {
+    const match = time.match(
+      /(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i
+    );
+
+    if (!match) return null;
+
+    let hours = Number(match[1]);
+    const minutes = Number(match[2] || 0);
+    const period = match[3].toUpperCase();
+
+    if (hours < 1 || hours > 12 || minutes > 59) return null;
+
+    if (period === "PM" && hours !== 12) hours += 12;
+    if (period === "AM" && hours === 12) hours = 0;
+
+    return hours * 60 + minutes;
+  };
+
+  const start = convertToMinutes(matches[0]);
+  const end = convertToMinutes(matches[1]);
+
+  if (start === null || end === null || end <= start) {
+    return null;
+  }
+
+  return { start, end };
+};
+
  const handleTimingChange = (e) => {
   const timingId = e.target.value;
 
   if (!timingId) return;
 
+  // Get selected timing details
+  const selectedTime = timingOptions.find(
+    (timing) => timing._id === timingId
+  );
+
+  if (!selectedTime) return;
+
+  const newRange = getTimeRange(selectedTime.timeSlot);
+
+  if (!newRange) {
+    alert("Invalid timing format. Please check the timing.");
+    setSelectedTiming("");
+    return;
+  }
+
+  // Check against already selected timings
+  const hasConflict = formData.mentorTimings.some((existingId) => {
+    const existingTime = timingOptions.find(
+      (timing) => timing._id === existingId
+    );
+
+    if (!existingTime) return false;
+
+    const existingRange = getTimeRange(existingTime.timeSlot);
+
+    if (!existingRange) return false;
+
+    // Check whether timings overlap
+    return (
+      newRange.start < existingRange.end &&
+      newRange.end > existingRange.start
+    );
+  });
+
+  if (hasConflict) {
+    alert(
+      `Time Conflict! ${selectedTime.timeSlot} overlaps with an already selected timing.`
+    );
+
+    setSelectedTiming("");
+    return;
+  }
+
+  // Add timing if no conflict
   setFormData((prev) => ({
     ...prev,
-    mentorTimings: prev.mentorTimings.includes(timingId)
-      ? prev.mentorTimings
-      : [...prev.mentorTimings, timingId],
+    mentorTimings: [...prev.mentorTimings, timingId]
   }));
 
   setSelectedTiming("");
