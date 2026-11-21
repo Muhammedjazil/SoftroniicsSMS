@@ -182,32 +182,7 @@ const TimingsManagement = () => {
 
   return (
     <div className="tmg-mgmt-container">
-      <header className="tmg-mgmt-header">
-        <div className="tmg-mgmt-title-group">
-          <h1 className="tmg-mgmt-heading">Settings</h1>
-          <nav className="tmg-mgmt-breadcrumb">
-            <span>Settings</span>
-            <span className="tmg-mgmt-breadcrumb-separator">&gt;</span>
-            <span>
-              {activeTab === 'timings'
-                ? 'timings'
-                : activeTab === 'edit-timing'
-                ? 'edit-timing'
-                : 'new-timing'}
-            </span>
-          </nav>
-        </div>
-
-        <div className="tmg-mgmt-profile-card">
-          <div className="tmg-mgmt-profile-avatar">
-            <LuUser />
-          </div>
-          <div className="tmg-mgmt-profile-info">
-            <span className="tmg-mgmt-username">vijitha</span>
-            <span className="tmg-mgmt-role">super admin</span>
-          </div>
-        </div>
-      </header>
+     
 
       <div className="tmg-mgmt-toolbar">
         <div className="tmg-mgmt-tab-group">

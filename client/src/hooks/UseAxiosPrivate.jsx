@@ -14,7 +14,9 @@ const useAxiosPrivate = () => {
         if (!config.headers["Authorization"]) {
           const token = localStorage.getItem("SMStoken");
           if (token) {
-            config.headers["Authorization"] = token;
+            config.headers["Authorization"] = token.startsWith("Bearer ")
+              ? token
+              : `Bearer ${token}`;
           }
         }
 
@@ -25,7 +27,16 @@ const useAxiosPrivate = () => {
 
     const responseIntercept = axiosPrivate.interceptors.response.use(
       (response) => response,
-      async (error) => Promise.reject(error)
+      async (error) => {
+        if (error?.response?.status === 401) {
+          localStorage.removeItem("SMStoken");
+          localStorage.removeItem("user");
+          if (window.location.pathname !== "/login") {
+            window.location.href = "/login";
+          }
+        }
+        return Promise.reject(error);
+      }
     );
 
     return () => {

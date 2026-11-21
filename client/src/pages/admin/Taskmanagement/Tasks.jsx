@@ -1393,47 +1393,7 @@ const Tasks = () => {
 
             {/* HEADER */}
 
-            <div className="tasks-header">
-
-                <div className="tasks-header-title">
-
-                    <h2>Task Management</h2>
-
-                    <p>
-                        Task Management
-                        <span> › </span>
-                        {tasksMode === "list"
-                            ? "tasks-list"
-                            : tasksMode === "create"
-                                ? "new-task"
-                                : tasksMode === "edit"
-                                    ? "edit-task"
-                                    : "view-task"}
-                    </p>
-
-                </div>
-
-
-                {/* ADMIN PROFILE */}
-
-                <div className="tasks-admin-profile">
-
-                    <div className="tasks-admin-avatar">
-                        <MdPersonOutline />
-                    </div>
-
-                    <div className="tasks-admin-info">
-
-                        <h4>Priyesh</h4>
-
-                        <p>Super Admin</p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+            
 
             {/* TOP NAVIGATION */}
 

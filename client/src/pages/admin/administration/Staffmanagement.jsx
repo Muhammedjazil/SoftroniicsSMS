@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import {
   FiUser,
   FiChevronRight,
@@ -8,12 +7,12 @@ import {
   FiArrowLeft,
   FiX,
   FiClock,
-  FiDownload
+  FiDownload,
 } from "react-icons/fi";
 
-import react from "../../../assets/react.svg";
 import "./staffmanagement.css";
 import AdminService from "../../../services/admin-api-services/AdminService";
+import usePermission from "../../../hooks/usePermission";
 
 const initialForm = {
   fullname: "",
@@ -45,110 +44,35 @@ const initialForm = {
   conformpassword: "",
 
   mentorRole: false,
-  mentorTimings: []
+  mentorTimings: [],
 };
-
-// =====================================
-// SAMPLE STAFF DATA
-// =====================================
-
-const sampleStaff = [
-  {
-    id: 1,
-    fullname: "Ananya Sharma",
-    dateofbirth: "1994-06-15",
-    gender: "Female",
-    email: "ananya.sharma@gmail.com",
-    officialemail: "ananya@softroniics.com",
-    phone: "9847123450",
-    whatsapp: "9847123450",
-    address: "Green Valley Apt 4B",
-    district: "Kozhikode",
-    state: "Kerala",
-    photo: null,
-    department: "uiux",
-    branch: "calicut",
-    allowAdditionalBranches: true,
-    additionalBranches: ["kochi"],
-    typeemply: "Senior UI/UX Mentor",
-    experience: "5",
-    joindate: "2023-01-10",
-    status: "Active",
-    resingnation: "",
-    resume: null,
-    remark: "Lead mentor for UI/UX batches",
-    mentorRole: true,
-    mentorTimings: ["09:30 AM - 12:00 PM", "02:00 PM - 05:00 PM"]
-  },
-  {
-    id: 2,
-    fullname: "Rahul Varma",
-    dateofbirth: "1992-09-22",
-    gender: "Male",
-    email: "rahul.varma@gmail.com",
-    officialemail: "rahul@softroniics.com",
-    phone: "9746234561",
-    whatsapp: "9746234561",
-    address: "Civil Station Road",
-    district: "Kozhikode",
-    state: "Kerala",
-    photo: null,
-    department: "mern",
-    branch: "calicut",
-    allowAdditionalBranches: false,
-    additionalBranches: [],
-    typeemply: "Full Stack Developer",
-    experience: "4",
-    joindate: "2023-03-15",
-    status: "Active",
-    resingnation: "",
-    resume: null,
-    remark: "MERN Stack instructor",
-    mentorRole: true,
-    mentorTimings: ["11:00 AM - 01:30 PM"]
-  },
-  {
-    id: 3,
-    fullname: "Priya Nair",
-    dateofbirth: "1995-12-05",
-    gender: "Female",
-    email: "priya.nair@gmail.com",
-    officialemail: "priya@softroniics.com",
-    phone: "9447345672",
-    whatsapp: "9447345672",
-    address: "Palakkad Town",
-    district: "Palakkad",
-    state: "Kerala",
-    photo: null,
-    department: "python",
-    branch: "palakkad",
-    allowAdditionalBranches: false,
-    additionalBranches: [],
-    typeemply: "Python Instructor",
-    experience: "3",
-    joindate: "2023-06-01",
-    status: "Active",
-    resingnation: "",
-    resume: null,
-    remark: "Django and Python lead",
-    mentorRole: false,
-    mentorTimings: []
-  }
-];
 
 // =====================================
 // MAIN COMPONENT
 // =====================================
 
 export const Staffmanagement = () => {
-  const { takeroletitle, takebranch, taketiming } = AdminService();
+  const {
+    takeroletitle,
+    takebranch,
+    taketiming,
+    createstaff,
+    getallstaff,
+    updatestaff,
+    staffremove,
+  } = AdminService();
+
+  const { user, can } = usePermission();
+  const canAddStaff = can("staffManagement", "addStaff");
+  const canEditStaff = can("staffManagement", "editStaff");
+  const canDeleteStaff = can("staffManagement", "deleteStaff");
 
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [branchFilter, setBranchFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const [allData, setAlldata] = useState(sampleStaff);
+  const [allData, setAlldata] = useState([]);
   const [roles, setRoles] = useState([]);
 
   const [formData, setFormData] = useState({ ...initialForm });
@@ -160,6 +84,11 @@ export const Staffmanagement = () => {
 
   const [branchOptions, setBranchOptions] = useState([]);
   const [timingOptions, setTimingOptions] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const staffPerPage = 8;
 
   // =====================================
   // HELPERS TO RESOLVE OBJECTS OR STRINGS
@@ -167,8 +96,12 @@ export const Staffmanagement = () => {
 
   const getBranchName = (branchVal) => {
     if (!branchVal) return "-";
-    if (typeof branchVal === "object") return branchVal.branchName || branchVal.name || "-";
-    const found = branchOptions.find((b) => b._id === branchVal);
+
+    if (typeof branchVal === "object") {
+      return branchVal.branchName || branchVal.name || "-";
+    }
+
+    const found = branchOptions.find((branch) => branch._id === branchVal);
     return found?.branchName || found?.name || branchVal;
   };
 
@@ -187,49 +120,109 @@ export const Staffmanagement = () => {
     try {
       const response = await takeroletitle();
       setRoles(Array.isArray(response) ? response : []);
-      console.log("Fetched Roles:", response);
     } catch (error) {
       console.error("Error fetching roles:", error);
+      setRoles([]);
     }
   };
 
   const fetchbranch = async () => {
     try {
       const response = await takebranch();
-      setBranchOptions(Array.isArray(response) ? response : response?.data || []);
+      setBranchOptions(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Error fetching branches:", error);
+      setBranchOptions([]);
     }
   };
 
-  const fetchtiming = async () => {
+  const fetchtiming = async (branchId) => {
     try {
-      const response = await taketiming();
-      setTimingOptions(Array.isArray(response) ? response : response?.data || []);
+      if (!branchId) {
+        setTimingOptions([]);
+        return;
+      }
+
+      const response = await taketiming(branchId);
+      setTimingOptions(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Error fetching timings:", error);
+      setTimingOptions([]);
+    }
+  };
+
+  const fetchallstaff = async () => {
+    try {
+      const response = await getallstaff();
+
+      const staffList = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response?.data?.data)
+        ? response.data.data
+        : [];
+
+      const formattedStaff = staffList.map((staff) => ({
+        ...staff,
+        id: staff._id,
+        fullname: staff.fullName || "",
+        dateofbirth: staff.dateOfBirth ? staff.dateOfBirth.slice(0, 10) : "",
+        phone: staff.staffPhoneNumber || "",
+        whatsapp: staff.staffWhatsAppNumber || "",
+        address: staff.staffPermanentAddress || "",
+        officialemail: staff.officialEmail || "",
+        role:
+          typeof staff.role === "object" ? staff.role?._id : staff.role || "",
+        typeemply:
+          typeof staff.role === "object" ? staff.role?.role || "" : "",
+        branch: staff.branch,
+        allowAdditionalBranches: staff.isMultipleBranch || false,
+        additionalBranches: Array.isArray(staff.multipleBranches)
+          ? staff.multipleBranches.map((item) =>
+              typeof item === "object" ? item._id : item
+            )
+          : [],
+        experience: staff.yearsOfExperience || "",
+        joindate: staff.dateOfJoining ? staff.dateOfJoining.slice(0, 10) : "",
+        status: staff.employmentStatus || "",
+        resingnation: staff.resignationDate
+          ? staff.resignationDate.slice(0, 10)
+          : "",
+        remark: staff.remarks || "",
+        mentorRole: staff.isMentor || false,
+        mentorTimings: Array.isArray(staff.time)
+          ? staff.time.map((item) =>
+              typeof item === "object" ? item._id : item
+            )
+          : [],
+      }));
+
+      setAlldata(formattedStaff);
+    } catch (error) {
+      console.error("Error fetching all staff:", error);
+      setAlldata([]);
     }
   };
 
   useEffect(() => {
     fetchrole();
     fetchbranch();
-    fetchtiming();
+    fetchallstaff();
   }, []);
 
   // =====================================
-  // FILTER STAFF
+  // FILTER & PAGINATE STAFF
   // =====================================
 
   const filteredStaff = allData.filter((value) => {
-    const branchLabel = getBranchName(value.branch);
-
     const matchesSearch = [
       value.fullname,
       value.email,
+      value.officialemail,
       value.typeemply,
-      branchLabel,
-      value.phone
+      getBranchName(value.branch),
+      value.phone,
     ]
       .join(" ")
       .toLowerCase()
@@ -239,10 +232,11 @@ export const Staffmanagement = () => {
       departmentFilter === "all" ||
       value.department?.toLowerCase() === departmentFilter.toLowerCase();
 
+    const branchId =
+      typeof value.branch === "object" ? value.branch?._id : value.branch;
+
     const matchesBranch =
-      branchFilter === "all" ||
-      value.branch === branchFilter ||
-      branchLabel.toLowerCase() === branchFilter.toLowerCase();
+      branchFilter === "all" || branchId === branchFilter;
 
     const matchesStatus =
       statusFilter === "all" ||
@@ -250,6 +244,21 @@ export const Staffmanagement = () => {
 
     return matchesSearch && matchesDept && matchesBranch && matchesStatus;
   });
+
+  const totalPages = Math.ceil(filteredStaff.length / staffPerPage);
+  const startIndex = (currentPage - 1) * staffPerPage;
+  const endIndex = startIndex + staffPerPage;
+  const currentStaff = filteredStaff.slice(startIndex, endIndex);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, departmentFilter, branchFilter, statusFilter]);
+
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   // =====================================
   // GET ROLE NAME
@@ -278,7 +287,7 @@ export const Staffmanagement = () => {
       "Role",
       "Department",
       "Branch",
-      "Status"
+      "Status",
     ];
 
     const rows = filteredStaff.map((staff) => [
@@ -289,7 +298,7 @@ export const Staffmanagement = () => {
       staff.typeemply || getRoleName(staff.role),
       staff.department,
       getBranchName(staff.branch),
-      staff.status
+      staff.status,
     ]);
 
     const csvContent =
@@ -312,17 +321,13 @@ export const Staffmanagement = () => {
   };
 
   // =====================================
-  // RESET FORM
+  // RESET FORM & TAB SWITCHERS
   // =====================================
 
   const resetForm = () => {
     setFormData({ ...initialForm });
     setSelectedTiming("");
   };
-
-  // =====================================
-  // STAFF LIST
-  // =====================================
 
   const handlestafflist = () => {
     setActiveTab("stafflist");
@@ -331,11 +336,8 @@ export const Staffmanagement = () => {
     resetForm();
   };
 
-  // =====================================
-  // NEW STAFF
-  // =====================================
-
   const handlenewstaff = () => {
+    if (!canAddStaff) return;
     resetForm();
     setEditId(null);
     setView(null);
@@ -347,21 +349,37 @@ export const Staffmanagement = () => {
   // =====================================
 
   const handlecreate = (e) => {
-    const { name, value, type, files, checked } = e.target;
+    const { name, value, type, checked, files } = e.target;
+
+    if (name === "branch") {
+      setFormData((prev) => ({
+        ...prev,
+        branch: value,
+        mentorTimings: [],
+        additionalBranches: prev.additionalBranches.filter((id) => id !== value),
+      }));
+
+      setSelectedTiming("");
+      fetchtiming(value);
+      return;
+    }
+
+    if (type === "file") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0] || null,
+      }));
+      return;
+    }
 
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        type === "file"
-          ? files[0]
-          : type === "checkbox"
-          ? checked
-          : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   // =====================================
-  // ADDITIONAL BRANCH TOGGLE
+  // ADDITIONAL BRANCHES & MENTOR ROLE
   // =====================================
 
   const handleAdditionalBranchToggle = (e) => {
@@ -370,13 +388,9 @@ export const Staffmanagement = () => {
     setFormData((prev) => ({
       ...prev,
       allowAdditionalBranches: checked,
-      additionalBranches: checked ? prev.additionalBranches : []
+      additionalBranches: checked ? prev.additionalBranches : [],
     }));
   };
-
-  // =====================================
-  // ADDITIONAL BRANCH SELECTION
-  // =====================================
 
   const handleAdditionalBranchChange = (e) => {
     const { value, checked } = e.target;
@@ -388,14 +402,10 @@ export const Staffmanagement = () => {
 
       return {
         ...prev,
-        additionalBranches: updatedBranches
+        additionalBranches: updatedBranches,
       };
     });
   };
-
-  // =====================================
-  // MENTOR ROLE
-  // =====================================
 
   const handleMentorRole = (e) => {
     const checked = e.target.checked;
@@ -403,41 +413,99 @@ export const Staffmanagement = () => {
     setFormData((prev) => ({
       ...prev,
       mentorRole: checked,
-      mentorTimings: checked ? prev.mentorTimings : []
+      mentorTimings: checked ? prev.mentorTimings : [],
     }));
 
     setSelectedTiming("");
   };
 
   // =====================================
-  // ADD TIMING
+  // TIMING VALIDATION & SELECTION
   // =====================================
+
+  const getTimeRange = (timeSlot) => {
+    if (!timeSlot) return null;
+
+    const matches = timeSlot.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/gi);
+    if (!matches || matches.length !== 2) return null;
+
+    const convertToMinutes = (time) => {
+      const match = time.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i);
+      if (!match) return null;
+
+      let hours = Number(match[1]);
+      const minutes = Number(match[2] || 0);
+      const period = match[3].toUpperCase();
+
+      if (hours < 1 || hours > 12 || minutes > 59) return null;
+
+      if (period === "PM" && hours !== 12) hours += 12;
+      if (period === "AM" && hours === 12) hours = 0;
+
+      return hours * 60 + minutes;
+    };
+
+    const start = convertToMinutes(matches[0]);
+    const end = convertToMinutes(matches[1]);
+
+    if (start === null || end === null || end <= start) {
+      return null;
+    }
+
+    return { start, end };
+  };
 
   const handleTimingChange = (e) => {
-    const timing = e.target.value;
+    const timingId = e.target.value;
+    if (!timingId) return;
 
-    if (!timing) return;
+    const selectedTime = timingOptions.find(
+      (timing) => timing._id === timingId
+    );
+    if (!selectedTime) return;
+
+    const newRange = getTimeRange(selectedTime.timeSlot);
+    if (!newRange) {
+      alert("Invalid timing format. Please check the timing.");
+      setSelectedTiming("");
+      return;
+    }
+
+    const hasConflict = formData.mentorTimings.some((existingId) => {
+      const existingTime = timingOptions.find(
+        (timing) => timing._id === existingId
+      );
+      if (!existingTime) return false;
+
+      const existingRange = getTimeRange(existingTime.timeSlot);
+      if (!existingRange) return false;
+
+      return (
+        newRange.start < existingRange.end &&
+        newRange.end > existingRange.start
+      );
+    });
+
+    if (hasConflict) {
+      alert(
+        `Time Conflict! ${selectedTime.timeSlot} overlaps with an already selected timing.`
+      );
+      setSelectedTiming("");
+      return;
+    }
 
     setFormData((prev) => ({
       ...prev,
-      mentorTimings: prev.mentorTimings.includes(timing)
-        ? prev.mentorTimings
-        : [...prev.mentorTimings, timing]
+      mentorTimings: [...prev.mentorTimings, timingId],
     }));
 
     setSelectedTiming("");
   };
 
-  // =====================================
-  // REMOVE TIMING
-  // =====================================
-
-  const removeTiming = (timingToRemove) => {
+  const removeTiming = (timingId) => {
     setFormData((prev) => ({
       ...prev,
-      mentorTimings: prev.mentorTimings.filter(
-        (timing) => timing !== timingToRemove
-      )
+      mentorTimings: prev.mentorTimings.filter((id) => id !== timingId),
     }));
   };
 
@@ -448,53 +516,105 @@ export const Staffmanagement = () => {
   const handleCreateStaff = async (e) => {
     e.preventDefault();
 
-    // Password validation
-    if (editId === null || formData.password || formData.conformpassword) {
-      if (formData.password !== formData.conformpassword) {
-        alert("Password and Confirm Password do not match!");
-        return;
-      }
+    if (editId !== null && !canEditStaff) {
+      alert("You do not have permission to edit staff.");
+      return;
     }
 
-    // Required field validation
+    if (editId === null && !canAddStaff) {
+      alert("You do not have permission to add staff.");
+      return;
+    }
+
+    if (formData.password !== formData.conformpassword) {
+      alert("Password and Confirm Password do not match!");
+      return;
+    }
+
     if (!formData.role) {
       alert("Please select a role");
       return;
     }
 
-    if (editId !== null) {
-      setAlldata((prev) =>
-        prev.map((item) =>
-          item.id === editId
-            ? {
-                ...formData,
-                id: editId,
-                typeemply: getRoleName(formData.role)
-              }
-            : item
-        )
-      );
-
-      alert("Staff updated successfully!");
-    } else {
-      const newStaff = {
-        ...formData,
-        id: Date.now(),
-        typeemply: getRoleName(formData.role)
-      };
-
-      setAlldata((prev) => [...prev, newStaff]);
-      alert("Staff created successfully!");
+    if (formData.mentorRole && formData.mentorTimings.length === 0) {
+      alert("Please select at least one mentor timing");
+      return;
     }
 
-    resetForm();
-    setEditId(null);
-    setView(null);
-    setActiveTab("stafflist");
+    try {
+      setSubmitting(true);
+      const data = new FormData();
+
+      // Basic Details
+      data.append("fullname", formData.fullname);
+      data.append("dateofbirth", formData.dateofbirth);
+      data.append("gender", formData.gender);
+      data.append("email", formData.email);
+      data.append("phone", formData.phone);
+      data.append("whatsapp", formData.whatsapp);
+      data.append("address", formData.address);
+      data.append("district", formData.district);
+      data.append("state", formData.state);
+
+      // Professional Details
+      data.append("department", formData.department);
+      data.append("branch", formData.branch);
+      data.append("allowAdditionalBranches", formData.allowAdditionalBranches);
+      data.append(
+        "additionalBranches",
+        JSON.stringify(formData.additionalBranches)
+      );
+
+      data.append("role", formData.role);
+      data.append("experience", formData.experience);
+      data.append("joindate", formData.joindate);
+      data.append("status", formData.status);
+      data.append("resingnation", formData.resingnation);
+      data.append("remark", formData.remark);
+
+      // Mentor Details
+      data.append("mentorRole", formData.mentorRole);
+      data.append("mentorTimings", JSON.stringify(formData.mentorTimings));
+
+      // Login Details
+      data.append("officialemail", formData.officialemail);
+      data.append("password", formData.password);
+
+      // File uploads
+      if (formData.photo) {
+        data.append("photo", formData.photo);
+      }
+
+      if (formData.resume) {
+        data.append("resume", formData.resume);
+      }
+
+      if (editId !== null) {
+        await updatestaff(editId, data);
+        alert("Staff updated successfully!");
+      } else {
+        await createstaff(data);
+        alert("Staff created successfully!");
+      }
+
+      await fetchallstaff();
+      resetForm();
+      setEditId(null);
+      setView(null);
+      setActiveTab("stafflist");
+    } catch (error) {
+      console.error("Create/Update Staff Error:", error.response?.data || error);
+      alert(
+        error.response?.data?.message ||
+          "Failed to save staff. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // =====================================
-  // VIEW STAFF
+  // VIEW, EDIT & DELETE STAFF
   // =====================================
 
   const handleview = (value) => {
@@ -502,40 +622,58 @@ export const Staffmanagement = () => {
     setActiveTab("staffview");
   };
 
-  // =====================================
-  // EDIT STAFF
-  // =====================================
+  const openEditForm = (staffRecord) => {
+    if (!canEditStaff || !staffRecord) return;
 
-  const staffedit = () => {
-    if (!view) return;
+    const branchId =
+      typeof staffRecord.branch === "object"
+        ? staffRecord.branch?._id
+        : staffRecord.branch;
+
+    setView(staffRecord);
 
     setFormData({
       ...initialForm,
-      ...view,
-      role: view.role || "",
-      additionalBranches: view.additionalBranches || [],
-      allowAdditionalBranches: view.allowAdditionalBranches || false,
-      mentorTimings: view.mentorTimings || []
+      ...staffRecord,
+      branch: branchId || "",
+      role:
+        typeof staffRecord.role === "object"
+          ? staffRecord.role?._id
+          : staffRecord.role || "",
+      photo: null,
+      resume: null,
+      additionalBranches: staffRecord.additionalBranches || [],
+      allowAdditionalBranches: staffRecord.allowAdditionalBranches || false,
+      mentorTimings: staffRecord.mentorTimings || [],
+      password: "",
+      conformpassword: "",
     });
 
     setSelectedTiming("");
-    setEditId(view.id);
+
+    if (branchId) {
+      fetchtiming(branchId);
+    }
+
+    setEditId(staffRecord.id);
     setActiveTab("newstaff");
   };
 
-  // =====================================
-  // DELETE STAFF
-  // =====================================
+  const handleDelete = async (id) => {
+    if (!canDeleteStaff) return;
+    if (!window.confirm("Are you sure you want to delete this staff member?")) {
+      return;
+    }
 
-  const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this staff?"
-    );
-
-    if (!confirmDelete) return;
-
-    setAlldata((prev) => prev.filter((item) => item.id !== id));
-    setView(null);
+    try {
+      await staffremove(id);
+      alert("Staff removed successfully!");
+      setAlldata((prev) => prev.filter((item) => item.id !== id));
+      setView(null);
+    } catch (error) {
+      console.error("Delete Staff Error:", error);
+      alert(error.response?.data?.message || "Failed to delete staff.");
+    }
   };
 
   // =====================================
@@ -544,48 +682,14 @@ export const Staffmanagement = () => {
 
   return (
     <div className="staffmanagement">
-
       {/* HEADER */}
-
-      <div className="stafffirst">
-        <div className="staffhead">
-          <h2>Staff Management</h2>
-
-          <p>
-            Staff Management
-            <FiChevronRight />
-
-            {activetap === "stafflist"
-              ? "Staff List"
-              : activetap === "newstaff"
-              ? editId !== null
-                ? "Edit Staff"
-                : "New Staff"
-              : "Staff Details"}
-          </p>
-        </div>
-
-        <div className="staffadminprofile">
-          <div className="stafficon">
-            <FiUser />
-          </div>
-
-          <div className="staffadminname">
-            <h5>Vijitha</h5>
-            <p>Super Admin</p>
-          </div>
-        </div>
-      </div>
+    
 
       {/* MAIN CARD */}
-
       <div className="stafffull">
-
         {/* TOP TABS */}
-
         <div className="staff-hero0">
           <div className="staff-hero1">
-
             <button
               type="button"
               className={activetap === "stafflist" ? "active" : ""}
@@ -594,14 +698,15 @@ export const Staffmanagement = () => {
               Staff List
             </button>
 
-            <button
-              type="button"
-              className={activetap === "newstaff" ? "active" : ""}
-              onClick={handlenewstaff}
-            >
-              {editId !== null ? "Edit Staff" : "New Staff"}
-            </button>
-
+            {(canAddStaff || editId !== null) && (
+              <button
+                type="button"
+                className={activetap === "newstaff" ? "active" : ""}
+                onClick={handlenewstaff}
+              >
+                {editId !== null ? "Edit Staff" : "New Staff"}
+              </button>
+            )}
           </div>
         </div>
 
@@ -612,10 +717,8 @@ export const Staffmanagement = () => {
         {activetap === "stafflist" && (
           <>
             <div className="staffherosection">
-
               <div className="staffsearch">
                 <FiSearch />
-
                 <input
                   type="text"
                   placeholder="Search Staff"
@@ -643,15 +746,11 @@ export const Staffmanagement = () => {
                   onChange={(e) => setBranchFilter(e.target.value)}
                 >
                   <option value="all">All Branches</option>
-                  {branchOptions.map((branch) => {
-                    const bId = typeof branch === "object" ? branch._id : branch;
-                    const bName = typeof branch === "object" ? branch.branchName : branch;
-                    return (
-                      <option key={bId} value={bId}>
-                        {bName}
-                      </option>
-                    );
-                  })}
+                  {branchOptions.map((branch) => (
+                    <option key={branch._id} value={branch._id}>
+                      {branch.branchName}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -680,7 +779,6 @@ export const Staffmanagement = () => {
             </div>
 
             {/* STAFF TABLE */}
-
             <div className="stafftable">
               <table>
                 <thead>
@@ -695,7 +793,7 @@ export const Staffmanagement = () => {
                 </thead>
 
                 <tbody className="stafftabledetails">
-                  {filteredStaff.map((value) => (
+                  {currentStaff.map((value) => (
                     <tr key={value.id}>
                       <td>
                         <div className="staffnamecell">
@@ -717,9 +815,7 @@ export const Staffmanagement = () => {
                         </div>
                       </td>
 
-                      <td>
-                        {value.typeemply || getRoleName(value.role)}
-                      </td>
+                      <td>{value.typeemply || getRoleName(value.role)}</td>
 
                       <td className="staffbranchname">
                         {getBranchName(value.branch)}
@@ -727,10 +823,7 @@ export const Staffmanagement = () => {
 
                       <td>
                         {value.mentorRole && (
-                          <button
-                            type="button"
-                            className="staffbatches"
-                          >
+                          <button type="button" className="staffbatches">
                             View Batches
                           </button>
                         )}
@@ -738,7 +831,6 @@ export const Staffmanagement = () => {
 
                       <td>
                         <div className="staffactions">
-
                           <button
                             type="button"
                             className="staffviewbtn"
@@ -747,34 +839,25 @@ export const Staffmanagement = () => {
                             View
                           </button>
 
-                          <button
-                            type="button"
-                            className="staffedit"
-                            onClick={() => {
-                              setView(value);
-                              setFormData({
-                                ...initialForm,
-                                ...value,
-                                role: value.role || "",
-                                additionalBranches:
-                                  value.additionalBranches || [],
-                                mentorTimings: value.mentorTimings || []
-                              });
-                              setEditId(value.id);
-                              setActiveTab("newstaff");
-                            }}
-                          >
-                            Edit
-                          </button>
+                          {canEditStaff && (
+                            <button
+                              type="button"
+                              className="staffedit"
+                              onClick={() => openEditForm(value)}
+                            >
+                              Edit
+                            </button>
+                          )}
 
-                          <button
-                            type="button"
-                            className="staffdelete"
-                            onClick={() => handleDelete(value.id)}
-                          >
-                            Delete
-                          </button>
-
+                          {canDeleteStaff && (
+                            <button
+                              type="button"
+                              className="staffdelete"
+                              onClick={() => handleDelete(value.id)}
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -791,13 +874,32 @@ export const Staffmanagement = () => {
               </table>
 
               <div className="staffpagination">
-                <span>{filteredStaff.length} Staff</span>
+                <span>
+                  Showing{" "}
+                  {filteredStaff.length === 0 ? 0 : startIndex + 1}
+                  {" - "}
+                  {Math.min(endIndex, filteredStaff.length)}
+                  {" of "}
+                  {filteredStaff.length} Staff
+                </span>
 
-                <button type="button" disabled>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  disabled={currentPage === 1}
+                >
                   <FiChevronLeft />
                 </button>
 
-                <button type="button" disabled>
+                <span>
+                  Page {currentPage} of {Math.max(totalPages, 1)}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  disabled={totalPages === 0 || currentPage >= totalPages}
+                >
                   <FiChevronRight />
                 </button>
               </div>
@@ -806,33 +908,27 @@ export const Staffmanagement = () => {
         )}
 
         {/* =====================================
-            NEW STAFF FORM
+            NEW / EDIT STAFF FORM
         ===================================== */}
 
         {activetap === "newstaff" && (
           <div className="newstaff">
-
             <div className="staff-create-heading">
               <h3>
                 {editId !== null ? "Edit Staff" : "Create New Staff"}
               </h3>
-
-              <p>
-                Fill in staff details and configure permissions
-              </p>
+              <p>Fill in staff details and assign a role & credentials</p>
             </div>
 
             <form onSubmit={handleCreateStaff}>
-
               {/* BASIC DETAILS */}
-
               <h3>Basic Details</h3>
 
               <div className="staff-newstaff">
-
                 <div className="stafffield">
-                  <label>Full Name <span>*</span></label>
-
+                  <label>
+                    Full Name <span>*</span>
+                  </label>
                   <input
                     type="text"
                     name="fullname"
@@ -844,8 +940,9 @@ export const Staffmanagement = () => {
                 </div>
 
                 <div className="stafffield">
-                  <label>Date of Birth <span>*</span></label>
-
+                  <label>
+                    Date of Birth <span>*</span>
+                  </label>
                   <input
                     type="date"
                     name="dateofbirth"
@@ -856,8 +953,9 @@ export const Staffmanagement = () => {
                 </div>
 
                 <div className="stafffield">
-                  <label>Gender <span>*</span></label>
-
+                  <label>
+                    Gender <span>*</span>
+                  </label>
                   <select
                     name="gender"
                     value={formData.gender}
@@ -872,8 +970,9 @@ export const Staffmanagement = () => {
                 </div>
 
                 <div className="stafffield">
-                  <label>Email Address <span>*</span></label>
-
+                  <label>
+                    Email Address <span>*</span>
+                  </label>
                   <input
                     type="email"
                     name="email"
@@ -885,8 +984,9 @@ export const Staffmanagement = () => {
                 </div>
 
                 <div className="stafffield">
-                  <label>Staff Phone Number <span>*</span></label>
-
+                  <label>
+                    Staff Phone Number <span>*</span>
+                  </label>
                   <input
                     type="tel"
                     name="phone"
@@ -899,7 +999,6 @@ export const Staffmanagement = () => {
 
                 <div className="stafffield">
                   <label>Staff WhatsApp Number</label>
-
                   <input
                     type="tel"
                     name="whatsapp"
@@ -911,7 +1010,6 @@ export const Staffmanagement = () => {
 
                 <div className="stafffield">
                   <label>Staff Permanent Address</label>
-
                   <input
                     type="text"
                     name="address"
@@ -923,7 +1021,6 @@ export const Staffmanagement = () => {
 
                 <div className="stafffield">
                   <label>District</label>
-
                   <input
                     type="text"
                     name="district"
@@ -935,7 +1032,6 @@ export const Staffmanagement = () => {
 
                 <div className="stafffield">
                   <label>State</label>
-
                   <input
                     type="text"
                     name="state"
@@ -952,7 +1048,6 @@ export const Staffmanagement = () => {
                       (Photo format: JPG/PNG only)
                     </span>
                   </label>
-
                   <input
                     type="file"
                     name="photo"
@@ -960,25 +1055,23 @@ export const Staffmanagement = () => {
                     onChange={handlecreate}
                   />
                 </div>
-
               </div>
 
               {/* PROFESSIONAL DETAILS */}
-
               <div className="staffpersonaldetails">
-
                 <h3>Professional Details</h3>
 
                 <div className="staffprofessionalgrid">
-
+                  {/* DEPARTMENT */}
                   <div className="staffprofessionalfield">
-                    <label>Department <span>*</span></label>
-
+                    <label>
+                      Department <span>*</span>
+                    </label>
                     <select
-                      required
                       name="department"
                       value={formData.department}
                       onChange={handlecreate}
+                      required
                     >
                       <option value="">Choose Department</option>
                       <option value="uiux">UI/UX</option>
@@ -989,10 +1082,10 @@ export const Staffmanagement = () => {
                   </div>
 
                   {/* ROLE */}
-
                   <div className="staffprofessionalfield">
-                    <label>Type of Employee <span>*</span></label>
-
+                    <label>
+                      Assigned Role <span>*</span>
+                    </label>
                     <select
                       required
                       name="role"
@@ -1000,7 +1093,6 @@ export const Staffmanagement = () => {
                       onChange={handlecreate}
                     >
                       <option value="">Choose Role</option>
-
                       {roles.map((value) => (
                         <option key={value._id} value={value._id}>
                           {value.role}
@@ -1010,10 +1102,10 @@ export const Staffmanagement = () => {
                   </div>
 
                   {/* BRANCH */}
-
                   <div className="staffprofessionalfield">
-                    <label>Branch <span>*</span></label>
-
+                    <label>
+                      Branch <span>*</span>
+                    </label>
                     <select
                       required
                       name="branch"
@@ -1021,16 +1113,11 @@ export const Staffmanagement = () => {
                       onChange={handlecreate}
                     >
                       <option value="">Choose Branch</option>
-
-                      {branchOptions.map((branch) => {
-                        const bId = typeof branch === "object" ? branch._id : branch;
-                        const bName = typeof branch === "object" ? branch.branchName : branch;
-                        return (
-                          <option key={bId} value={bId}>
-                            {bName}
-                          </option>
-                        );
-                      })}
+                      {branchOptions.map((branch) => (
+                        <option key={branch._id} value={branch._id}>
+                          {branch.branchName}
+                        </option>
+                      ))}
                     </select>
 
                     <div className="staffcheckbox">
@@ -1040,7 +1127,6 @@ export const Staffmanagement = () => {
                         checked={formData.allowAdditionalBranches}
                         onChange={handleAdditionalBranchToggle}
                       />
-
                       <label htmlFor="additionalBranch">
                         Allow Additional Branches
                       </label>
@@ -1048,7 +1134,6 @@ export const Staffmanagement = () => {
                   </div>
 
                   {/* ADDITIONAL BRANCHES */}
-
                   {formData.allowAdditionalBranches && (
                     <div
                       className="staff-additional-branches"
@@ -1056,46 +1141,38 @@ export const Staffmanagement = () => {
                     >
                       <div className="staff-additional-heading">
                         <strong>Additional Branches</strong>
-
                         <span>
-                          (Select all additional branches this staff member can access)
+                          (Select all additional branches this staff member can
+                          access)
                         </span>
                       </div>
 
                       <div className="staff-additional-options">
                         {branchOptions
-                          .filter((branch) => {
-                            const bId = typeof branch === "object" ? branch._id : branch;
-                            return bId !== formData.branch;
-                          })
-                          .map((branch) => {
-                            const bId = typeof branch === "object" ? branch._id : branch;
-                            const bName = typeof branch === "object" ? branch.branchName : branch;
-                            return (
-                              <label
-                                key={bId}
-                                className="staff-additional-option"
-                              >
-                                <input
-                                  type="checkbox"
-                                  value={bId}
-                                  checked={formData.additionalBranches.includes(bId)}
-                                  onChange={handleAdditionalBranchChange}
-                                />
-
-                                <span>{bName}</span>
-                              </label>
-                            );
-                          })}
+                          .filter((branch) => branch._id !== formData.branch)
+                          .map((branch) => (
+                            <label
+                              key={branch._id}
+                              className="staff-additional-option"
+                            >
+                              <input
+                                type="checkbox"
+                                value={branch._id}
+                                checked={formData.additionalBranches.includes(
+                                  branch._id
+                                )}
+                                onChange={handleAdditionalBranchChange}
+                              />
+                              <span>{branch.branchName}</span>
+                            </label>
+                          ))}
                       </div>
                     </div>
                   )}
 
                   {/* EXPERIENCE */}
-
                   <div className="staffprofessionalfield">
                     <label>Years of Experience</label>
-
                     <input
                       type="number"
                       min="0"
@@ -1107,10 +1184,10 @@ export const Staffmanagement = () => {
                   </div>
 
                   {/* JOINING DATE */}
-
                   <div className="staffprofessionalfield">
-                    <label>Date of Joining <span>*</span></label>
-
+                    <label>
+                      Date of Joining <span>*</span>
+                    </label>
                     <input
                       type="date"
                       required
@@ -1121,10 +1198,10 @@ export const Staffmanagement = () => {
                   </div>
 
                   {/* EMPLOYMENT STATUS */}
-
                   <div className="staffprofessionalfield">
-                    <label>Employment Status <span>*</span></label>
-
+                    <label>
+                      Employment Status <span>*</span>
+                    </label>
                     <select
                       required
                       name="status"
@@ -1139,13 +1216,11 @@ export const Staffmanagement = () => {
                   </div>
 
                   {/* RESIGNATION DATE */}
-
                   <div className="staffprofessionalfield">
                     <label>
                       Resignation Date{" "}
                       <span className="optional">(Only If Inactive)</span>
                     </label>
-
                     <input
                       type="date"
                       name="resingnation"
@@ -1155,7 +1230,6 @@ export const Staffmanagement = () => {
                   </div>
 
                   {/* RESUME */}
-
                   <div className="staffprofessionalfield">
                     <label>
                       Resume{" "}
@@ -1163,7 +1237,6 @@ export const Staffmanagement = () => {
                         (Upload PDF only Max 5MB)
                       </span>
                     </label>
-
                     <input
                       type="file"
                       name="resume"
@@ -1173,13 +1246,11 @@ export const Staffmanagement = () => {
                   </div>
 
                   {/* REMARKS */}
-
                   <div className="staffprofessionalfield">
                     <label>
                       Remarks/Notes{" "}
                       <span className="optional">(Optional)</span>
                     </label>
-
                     <input
                       type="text"
                       placeholder="Enter Any Remarks or notes"
@@ -1188,13 +1259,10 @@ export const Staffmanagement = () => {
                       onChange={handlecreate}
                     />
                   </div>
-
                 </div>
 
                 {/* MENTOR ROLE */}
-
                 <div className="staffmentor-section">
-
                   <div className="staffcheckbox staffmentorcheck">
                     <input
                       type="checkbox"
@@ -1203,62 +1271,51 @@ export const Staffmanagement = () => {
                       checked={formData.mentorRole}
                       onChange={handleMentorRole}
                     />
-
-                    <label htmlFor="mentorRole">
-                      Enable Mentor Role
-                    </label>
+                    <label htmlFor="mentorRole">Enable Mentor Role</label>
                   </div>
 
                   {formData.mentorRole && (
                     <div className="staff-mentor-timings">
-
                       <div className="staff-timing-select">
                         <label>Select Timings</label>
-
                         <select
                           value={selectedTiming}
                           onChange={handleTimingChange}
                         >
-                          <option value="">
-                            -- Select a Timing --
-                          </option>
-
-                          {timingOptions.map((timing) => {
-                            const tId = typeof timing === "object" ? timing._id : timing;
-                            const tLabel = typeof timing === "object" ? timing.timeSlot : timing;
-                            return (
-                              <option
-                                key={tId}
-                                value={tId}
-                                disabled={formData.mentorTimings.includes(tId)}
-                              >
-                                {tLabel}
-                              </option>
-                            );
-                          })}
+                          <option value="">-- Select a Timing --</option>
+                          {timingOptions.map((timing) => (
+                            <option
+                              key={timing._id}
+                              value={timing._id}
+                              disabled={formData.mentorTimings.includes(
+                                timing._id
+                              )}
+                            >
+                              {timing.timeSlot}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
                       <div className="staff-selected-timings">
                         <label>Selected Timings</label>
-
                         <div className="staff-timing-chips">
                           {formData.mentorTimings.length > 0 ? (
                             formData.mentorTimings.map((timing) => {
-                              const tKey = typeof timing === "object" ? timing._id : timing;
+                              const tKey =
+                                typeof timing === "object"
+                                  ? timing._id
+                                  : timing;
                               return (
-                                <div
-                                  className="staff-timing-chip"
-                                  key={tKey}
-                                >
+                                <div className="staff-timing-chip" key={tKey}>
                                   <FiClock />
-
                                   <span>{getTimingLabel(timing)}</span>
-
                                   <button
                                     type="button"
                                     onClick={() => removeTiming(timing)}
-                                    aria-label={`Remove ${getTimingLabel(timing)}`}
+                                    aria-label={`Remove ${getTimingLabel(
+                                      timing
+                                    )}`}
                                   >
                                     <FiX />
                                   </button>
@@ -1272,21 +1329,18 @@ export const Staffmanagement = () => {
                           )}
                         </div>
                       </div>
-
                     </div>
                   )}
-
                 </div>
               </div>
 
               {/* LOGIN DETAILS */}
-
               <div className="stafflogindetails">
                 <div className="stafflogin">
-
                   <div className="stafflog">
-                    <label>Staff Official Email Address <span>*</span></label>
-
+                    <label>
+                      Staff Official Email Address <span>*</span>
+                    </label>
                     <input
                       type="email"
                       placeholder="Enter Staff Official Email Address"
@@ -1298,11 +1352,16 @@ export const Staffmanagement = () => {
                   </div>
 
                   <div className="stafflog">
-                    <label>Create Password <span>*</span></label>
-
+                    <label>
+                      Create Password {editId === null && <span>*</span>}
+                    </label>
                     <input
                       type="password"
-                      placeholder="Enter staff Password"
+                      placeholder={
+                        editId !== null
+                          ? "Leave blank to keep current password"
+                          : "Enter staff Password"
+                      }
                       name="password"
                       value={formData.password}
                       onChange={handlecreate}
@@ -1311,8 +1370,9 @@ export const Staffmanagement = () => {
                   </div>
 
                   <div className="stafflog">
-                    <label>Confirm Password <span>*</span></label>
-
+                    <label>
+                      Confirm Password {editId === null && <span>*</span>}
+                    </label>
                     <input
                       type="password"
                       placeholder="Enter Staff Confirm Password"
@@ -1322,18 +1382,16 @@ export const Staffmanagement = () => {
                       required={editId === null}
                     />
                   </div>
-
                 </div>
               </div>
 
               {/* FORM BUTTONS */}
-
               <div className="staffformbutton">
-
                 <button
                   type="button"
                   className="staffformbuttoncancel"
                   onClick={handlestafflist}
+                  disabled={submitting}
                 >
                   Cancel
                 </button>
@@ -1345,12 +1403,15 @@ export const Staffmanagement = () => {
                       ? "staffbtnupdate"
                       : "staffformbuttoncreate"
                   }
+                  disabled={submitting}
                 >
-                  {editId !== null ? "Update" : "Create Staff"}
+                  {submitting
+                    ? "Please Wait..."
+                    : editId !== null
+                    ? "Update"
+                    : "Create Staff"}
                 </button>
-
               </div>
-
             </form>
           </div>
         )}
@@ -1361,7 +1422,6 @@ export const Staffmanagement = () => {
 
         {activetap === "staffview" && view && (
           <div className="staffview">
-
             <div className="staffviewheader">
               <h1>{view.fullname}</h1>
 
@@ -1375,13 +1435,11 @@ export const Staffmanagement = () => {
             </div>
 
             {/* BASIC DETAILS */}
-
             <div className="staffbasicdetails">
               <h3 className="staffviewtitle">Basic Details</h3>
 
               <div className="staffpersonal">
                 <div className="staffviewdetailsgrid">
-
                   <div className="staffviewfield">
                     <h4>Full Name</h4>
                     <p>{view.fullname || "-"}</p>
@@ -1400,6 +1458,11 @@ export const Staffmanagement = () => {
                   <div className="staffviewfield">
                     <h4>Email Address</h4>
                     <p>{view.email || "-"}</p>
+                  </div>
+
+                  <div className="staffviewfield">
+                    <h4>Official Login Email</h4>
+                    <p>{view.officialemail || "-"}</p>
                   </div>
 
                   <div className="staffviewfield">
@@ -1426,31 +1489,28 @@ export const Staffmanagement = () => {
                     <h4>State</h4>
                     <p>{view.state || "-"}</p>
                   </div>
-
                 </div>
 
-                <div className="staffper3">
-                  <img
-                    src={
-                      view.photo instanceof File
-                        ? URL.createObjectURL(view.photo)
-                        : view.photo || react
-                    }
-                    alt="Staff"
-                  />
-                </div>
+                {view.photo && (
+                  <div className="staffper3">
+                    <img
+                      src={
+                        view.photo.startsWith("http")
+                          ? view.photo
+                          : `http://localhost:7000/uploads/${view.photo}`
+                      }
+                      alt={view.fullname || "Staff"}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
             {/* PROFESSIONAL DETAILS */}
-
             <div className="staffprofessionalview">
-              <h3 className="staffviewtitle">
-                Professional Details
-              </h3>
+              <h3 className="staffviewtitle">Professional Details</h3>
 
               <div className="staffviewdetailsgrid">
-
                 <div className="staffviewfield">
                   <h4>ID</h4>
                   <p>{view.id || "-"}</p>
@@ -1467,10 +1527,8 @@ export const Staffmanagement = () => {
                 </div>
 
                 <div className="staffviewfield">
-                  <h4>Employee Type</h4>
-                  <p>
-                    {view.typeemply || getRoleName(view.role)}
-                  </p>
+                  <h4>Assigned Role</h4>
+                  <p>{view.typeemply || getRoleName(view.role)}</p>
                 </div>
 
                 <div className="staffviewfield">
@@ -1490,35 +1548,27 @@ export const Staffmanagement = () => {
 
                 <div className="staffviewfield">
                   <h4>Employment Status</h4>
-                  <p className="staffviewstatus">
-                    {view.status || "-"}
-                  </p>
+                  <p className="staffviewstatus">{view.status || "-"}</p>
                 </div>
 
                 <div className="staffviewfield">
                   <h4>Remarks/Notes</h4>
                   <p>{view.remark || "-"}</p>
                 </div>
-
               </div>
 
               {/* ADDITIONAL BRANCHES */}
-
               {view.allowAdditionalBranches && (
                 <div className="staff-view-mentor">
-                  <h3 className="staffviewtitle">
-                    Additional Branches
-                  </h3>
+                  <h3 className="staffviewtitle">Additional Branches</h3>
 
                   <div className="staff-additional-options">
                     {(view.additionalBranches || []).length > 0 ? (
                       view.additionalBranches.map((branch) => {
-                        const bKey = typeof branch === "object" ? branch._id : branch;
+                        const bKey =
+                          typeof branch === "object" ? branch._id : branch;
                         return (
-                          <div
-                            className="staff-additional-option"
-                            key={bKey}
-                          >
+                          <div className="staff-additional-option" key={bKey}>
                             <span>{getBranchName(branch)}</span>
                           </div>
                         );
@@ -1531,12 +1581,9 @@ export const Staffmanagement = () => {
               )}
 
               {/* MENTOR TIMINGS */}
-
               {view.mentorRole && (
                 <div className="staff-view-mentor">
-                  <h3 className="staffviewtitle">
-                    Mentor Role & Timings
-                  </h3>
+                  <h3 className="staffviewtitle">Mentor Role & Timings</h3>
 
                   <p>
                     Mentor Role: <strong>Enabled</strong>
@@ -1545,12 +1592,10 @@ export const Staffmanagement = () => {
                   <div className="staff-timing-chips">
                     {(view.mentorTimings || []).length > 0 ? (
                       view.mentorTimings.map((timing) => {
-                        const tKey = typeof timing === "object" ? timing._id : timing;
+                        const tKey =
+                          typeof timing === "object" ? timing._id : timing;
                         return (
-                          <div
-                            className="staff-timing-chip"
-                            key={tKey}
-                          >
+                          <div className="staff-timing-chip" key={tKey}>
                             <FiClock />
                             <span>{getTimingLabel(timing)}</span>
                           </div>
@@ -1565,15 +1610,16 @@ export const Staffmanagement = () => {
             </div>
 
             {/* BOTTOM BUTTONS */}
-
             <div className="staffviewbuttons">
-              <button
-                type="button"
-                className="staffviewedit"
-                onClick={staffedit}
-              >
-                Edit
-              </button>
+              {canEditStaff && (
+                <button
+                  type="button"
+                  className="staffviewedit"
+                  onClick={() => openEditForm(view)}
+                >
+                  Edit
+                </button>
+              )}
 
               <button
                 type="button"
@@ -1583,10 +1629,8 @@ export const Staffmanagement = () => {
                 Print
               </button>
             </div>
-
           </div>
         )}
-
       </div>
     </div>
   );

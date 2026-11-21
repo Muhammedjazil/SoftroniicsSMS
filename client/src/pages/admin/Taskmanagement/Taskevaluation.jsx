@@ -320,47 +320,7 @@ const Taskevaluation = () => {
         <div className="tasks-evaluation-page">
 
 
-            {/* =========================================
-                HEADER
-            ========================================= */}
-
-            <div className="tasks-evaluation-header">
-
-                <div className="tasks-evaluation-header-title">
-
-                    <h2>Task Evaluation</h2>
-
-                    <p>
-                        Task Evaluation
-                        <span> &gt; </span>
-                        submissions-list
-                    </p>
-
-                </div>
-
-
-                {/* ADMIN PROFILE */}
-
-                <div className="tasks-evaluation-admin-profile">
-
-                    <div className="tasks-evaluation-admin-avatar">
-
-                        <MdPersonOutline />
-
-                    </div>
-
-                    <div className="tasks-evaluation-admin-info">
-
-                        <h4>vijitha</h4>
-
-                        <p>super admin</p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+          
 
             {/* =========================================
                 TOP NAVIGATION

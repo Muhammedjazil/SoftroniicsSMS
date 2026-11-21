@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './WeeklySchedule.css';
 import { LuUser, LuSearch, LuEye, LuX } from 'react-icons/lu';
 import { FiChevronDown, FiEdit3, FiCalendar } from 'react-icons/fi';
-import AdminService from "../../../services/admin-api-services/AdminService"
+import AdminService from "../../../services/admin-api-services/AdminService";
 
 const WeeklySchedule = () => {
   const {
@@ -49,7 +49,7 @@ const WeeklySchedule = () => {
           setBranchFilter(calicut ? calicut._id : rawBranches[0]._id);
         }
       } catch (err) {
-        console.error('Failed to load branches:', err);
+        console.error('Failed to load branches:', err.response?.data || err.message);
       }
     };
     loadBranches();
@@ -71,7 +71,10 @@ const WeeklySchedule = () => {
       setSubjects(data.subjects || []);
       setScheduleData(data.scheduleMap || {});
     } catch (err) {
-      console.error('Failed to load weekly schedule matrix:', err);
+      console.error(
+        'Failed to load weekly schedule matrix:',
+        err.response?.data || err.message
+      );
     } finally {
       setLoading(false);
     }
@@ -101,8 +104,11 @@ const WeeklySchedule = () => {
     b.name.toLowerCase().includes(batchSearch.toLowerCase().trim())
   );
 
-  // Persist a single cell change to backend
-  const persistCell = async ({ mentorId, timeId, day, batchId, subjectId, note }) => {
+  // Persist a single cell change to backend and rollback UI on failure
+  const persistCell = async (
+    { mentorId, timeId, day, batchId, subjectId, note },
+    previousCellState = null
+  ) => {
     try {
       await saveweeklyschedulecell({
         startDate,
@@ -115,7 +121,33 @@ const WeeklySchedule = () => {
         note,
       });
     } catch (err) {
-      console.error('Failed to save cell:', err);
+      const serverMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message;
+      console.error('Failed to save cell:', {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: serverMsg,
+      });
+
+      // Revert optimistic UI update if save failed
+      if (previousCellState !== null) {
+        const cellKey = `${mentorId}_${timeId}_${day}`;
+        setScheduleData((prev) => {
+          if (previousCellState === undefined) {
+            const copy = { ...prev };
+            delete copy[cellKey];
+            return copy;
+          }
+          return {
+            ...prev,
+            [cellKey]: previousCellState,
+          };
+        });
+      }
+
+      alert(`Failed to save schedule cell: ${serverMsg}`);
     }
   };
 
@@ -134,9 +166,17 @@ const WeeklySchedule = () => {
     const raw = e.dataTransfer.getData('application/json');
     if (!raw) return;
 
-    const droppedBatch = JSON.parse(raw);
+    let droppedBatch;
+    try {
+      droppedBatch = JSON.parse(raw);
+    } catch {
+      console.error('Invalid drag payload:', raw);
+      return;
+    }
+
     const cellKey = `${mentorId}_${timeId}_${day}`;
-    const existing = scheduleData[cellKey] || {
+    const previousState = scheduleData[cellKey];
+    const existing = previousState || {
       batchId: null,
       batchName: null,
       subjectId: '',
@@ -154,14 +194,17 @@ const WeeklySchedule = () => {
       [cellKey]: updatedCell,
     }));
 
-    await persistCell({
-      mentorId,
-      timeId,
-      day,
-      batchId: updatedCell.batchId,
-      subjectId: updatedCell.subjectId,
-      note: updatedCell.note,
-    });
+    await persistCell(
+      {
+        mentorId,
+        timeId,
+        day,
+        batchId: updatedCell.batchId,
+        subjectId: updatedCell.subjectId,
+        note: updatedCell.note,
+      },
+      previousState
+    );
   };
 
   const handleRemoveAssignedBatch = async (mentorId, timeId, day) => {
@@ -180,19 +223,23 @@ const WeeklySchedule = () => {
       [cellKey]: updatedCell,
     }));
 
-    await persistCell({
-      mentorId,
-      timeId,
-      day,
-      batchId: null,
-      subjectId: updatedCell.subjectId,
-      note: updatedCell.note,
-    });
+    await persistCell(
+      {
+        mentorId,
+        timeId,
+        day,
+        batchId: null,
+        subjectId: updatedCell.subjectId,
+        note: updatedCell.note,
+      },
+      existing
+    );
   };
 
   const handleSubjectChange = async (mentorId, timeId, day, subjectId) => {
     const cellKey = `${mentorId}_${timeId}_${day}`;
-    const existing = scheduleData[cellKey] || {
+    const previousState = scheduleData[cellKey];
+    const existing = previousState || {
       batchId: null,
       batchName: null,
       subjectId: '',
@@ -206,14 +253,17 @@ const WeeklySchedule = () => {
       [cellKey]: updatedCell,
     }));
 
-    await persistCell({
-      mentorId,
-      timeId,
-      day,
-      batchId: updatedCell.batchId,
-      subjectId: updatedCell.subjectId,
-      note: updatedCell.note,
-    });
+    await persistCell(
+      {
+        mentorId,
+        timeId,
+        day,
+        batchId: updatedCell.batchId,
+        subjectId: updatedCell.subjectId,
+        note: updatedCell.note,
+      },
+      previousState
+    );
   };
 
   const handleNoteChange = (cellKey, note) => {
@@ -262,12 +312,21 @@ const WeeklySchedule = () => {
         setStartDate(dt.toISOString().split('T')[0]);
       }
     } catch (err) {
-      console.error('Failed to advance week:', err);
+      const serverMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message;
+      console.error('Failed to advance week:', err.response?.data || err.message);
+      alert(`Failed to advance schedule week: ${serverMsg}`);
     }
   };
 
   const handleExportCSV = () => {
-    const headers = ['Mentor', 'Time Slot', ...days.flatMap((d) => [d, `${d} Subject`, `${d} Note`])];
+    const headers = [
+      'Mentor',
+      'Time Slot',
+      ...days.flatMap((d) => [d, `${d} Subject`, `${d} Note`]),
+    ];
     const rows = [];
 
     mentors.forEach((mentor) => {
@@ -291,7 +350,9 @@ const WeeklySchedule = () => {
     const csvContent =
       'data:text/csv;charset=utf-8,' +
       [headers, ...rows]
-        .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .map((r) =>
+          r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')
+        )
         .join('\n');
 
     const encodedUri = encodeURI(csvContent);
@@ -305,27 +366,7 @@ const WeeklySchedule = () => {
 
   return (
     <div className="wk-sched-container">
-      {/* Header */}
-      <header className="wk-sched-header">
-        <div className="wk-sched-title-group">
-          <h1 className="wk-sched-heading">Batch Management</h1>
-          <nav className="wk-sched-breadcrumb">
-            <span>Batch Management</span>
-            <span className="wk-sched-breadcrumb-separator">&gt;</span>
-            <span>weekly-schedule</span>
-          </nav>
-        </div>
-
-        <div className="wk-sched-profile-card">
-          <div className="wk-sched-profile-avatar">
-            <LuUser />
-          </div>
-          <div className="wk-sched-profile-info">
-            <span className="wk-sched-username">vijitha</span>
-            <span className="wk-sched-role">super admin</span>
-          </div>
-        </div>
-      </header>
+      
 
       {/* Main Split Workspace */}
       <div className="wk-sched-workspace">
@@ -445,13 +486,19 @@ const WeeklySchedule = () => {
               <tbody className="wk-sched-tbody">
                 {loading ? (
                   <tr>
-                    <td colSpan={2 + days.length * 2} className="wk-sched-no-timings">
+                    <td
+                      colSpan={2 + days.length * 2}
+                      className="wk-sched-no-timings"
+                    >
                       Loading weekly schedule...
                     </td>
                   </tr>
                 ) : mentors.length === 0 ? (
                   <tr>
-                    <td colSpan={2 + days.length * 2} className="wk-sched-no-timings">
+                    <td
+                      colSpan={2 + days.length * 2}
+                      className="wk-sched-no-timings"
+                    >
                       No mentors found for this branch
                     </td>
                   </tr>
@@ -462,7 +509,10 @@ const WeeklySchedule = () => {
                         <tr key={mentor._id}>
                           <td className="wk-sched-mentor-cell">{mentor.name}</td>
                           <td className="wk-sched-time-cell">-</td>
-                          <td colSpan={days.length * 2} className="wk-sched-no-timings">
+                          <td
+                            colSpan={days.length * 2}
+                            className="wk-sched-no-timings"
+                          >
                             No timings assigned for this branch
                           </td>
                         </tr>
