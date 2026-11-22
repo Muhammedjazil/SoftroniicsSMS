@@ -445,37 +445,7 @@ export const Notification = () => {
 
     <div className="notification">
 
-      {/* =====================================
-          HEADER
-      ===================================== */}
-
-      <div className="notificationsect1">
-
-        <div className="notificationsec2">
-
-          <h2>Settings</h2>
-
-          <p>Settings &gt; Notification</p>
-
-        </div>
-
-        <div className="notificationsec3">
-
-          <div className="notificationicon">
-            <FiUser />
-          </div>
-
-          <div className="notificationuserdetails">
-
-            <h5>Priyesh</h5>
-
-            <h6>Super Admin</h6>
-
-          </div>
-
-        </div>
-
-      </div>
+     
 
       {/* =====================================
           MAIN CONTAINER

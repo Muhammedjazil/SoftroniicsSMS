@@ -38,21 +38,6 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="dashboard-main">
 
-        <header className="dashboard-header">
-          <div>
-            <h1>Dashboard</h1>
-            <p>Dashboard</p>
-          </div>
-
-          <div className="admin-profile">
-            <UserRound size={17} />
-
-            <div>
-              <h4>Priyesh</h4>
-              <p>Super Admin</p>
-            </div>
-          </div>
-        </header>
 
         <section className="dashboard-content">
 
