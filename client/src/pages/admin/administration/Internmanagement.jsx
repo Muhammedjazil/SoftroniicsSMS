@@ -192,7 +192,7 @@ const SelectField = ({
 
 export const Internmanagement = () => {
 
- const {takebranch,getallstaff}=AdminService()
+ const {takebranch,getallstaff,takecourses}=AdminService()
 
   const [activeTab, setActiveTab] = useState("list");
 
@@ -222,6 +222,7 @@ export const Internmanagement = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const[branch,setBranch]=useState([])
   const[roles,setRoules]=useState([])
+  const[course,setCourse]=useState([])
   // =====================================
   // SAVE TO LOCAL STORAGE
   // =====================================
@@ -241,9 +242,17 @@ export const Internmanagement = () => {
 
   }
 
+  const handleallcourse=async()=>{
+    let response=await takecourses();
+    setCourse(response)
+    console.log(response);
+    
+  }
+
   useEffect(()=>{
 handleallbranch();
 handleallstaff();
+handleallcourse();
   },[])
 
   useEffect(() => {
