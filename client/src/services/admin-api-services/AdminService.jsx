@@ -312,48 +312,100 @@ const AdminService = () => {
   };
 
   // Get all tasks
-const taketasks = async () => {
-  const response = await axiosPrivate.get("/taskmanagement");
-  return response.data;
-};
+  const taketasks = async () => {
+    const response = await axiosPrivate.get("/taskmanagement");
+    return response.data;
+  };
 
-// Get task by ID
-const taketaskbyid = async (id) => {
-  const response = await axiosPrivate.get(`/taskmanagement/${id}`);
-  return response.data;
-};
+  // Get task by ID
+  const taketaskbyid = async (id) => {
+    const response = await axiosPrivate.get(`/taskmanagement/${id}`);
+    return response.data;
+  };
 
-// Get dropdown data
-const gettaskdropdowns = async () => {
-  const response = await axiosPrivate.get("/taskmanagement/dropdowns");
-  return response.data;
-};
+  // Get dropdown data
+  const gettaskdropdowns = async () => {
+    const response = await axiosPrivate.get("/taskmanagement/dropdowns");
+    return response.data;
+  };
 
-// Create task
-const createtask = async (formData) => {
-  const response = await axiosPrivate.post(
-    "/taskmanagement",
-    formData
-  );
-  return response.data;
-};
+  // Create task
+  const createtask = async (formData) => {
+    const response = await axiosPrivate.post(
+      "/taskmanagement",
+      formData
+    );
+    return response.data;
+  };
 
-// Update task
-const updatetask = async (id, formData) => {
-  const response = await axiosPrivate.put(
-    `/taskmanagement/${id}`,
-    formData
-  );
-  return response.data;
-};
+  // Update task
+  const updatetask = async (id, formData) => {
+    const response = await axiosPrivate.put(
+      `/taskmanagement/${id}`,
+      formData
+    );
+    return response.data;
+  };
 
-// Permanently delete task
-const removetask = async (id) => {
-  const response = await axiosPrivate.delete(
-    `/taskmanagement/${id}`
-  );
-  return response.data;
-};
+  // Permanently delete task
+  const removetask = async (id) => {
+    const response = await axiosPrivate.delete(
+      `/taskmanagement/${id}`
+    );
+    return response.data;
+  };
+
+
+  // =====================================================
+  // MATERIAL MANAGEMENT
+  // =====================================================
+
+  // Get all materials
+  const takematerials = async () => {
+    const response = await axiosPrivate.get("/materialmanagement");
+    return response.data;
+  };
+
+  // Get material by ID
+  const takematerialbyid = async (id) => {
+    const response = await axiosPrivate.get(`/materialmanagement/${id}`);
+    return response.data;
+  };
+
+  // Get material dropdown data
+  const getmaterialdropdowns = async () => {
+    const response = await axiosPrivate.get(
+      "/materialmanagement/dropdowns"
+    );
+    return response.data;
+  };
+
+  // Create material
+  const creatematerial = async (formData) => {
+    const response = await axiosPrivate.post(
+      "/materialmanagement",
+      formData
+    );
+    return response.data;
+  };
+
+  // Update material
+  const updatematerial = async (id, formData) => {
+    const response = await axiosPrivate.put(
+      `/materialmanagement/${id}`,
+      formData
+    );
+    return response.data;
+  };
+
+  // Permanently delete material
+  const removematerial = async (id) => {
+    const response = await axiosPrivate.delete(
+      `/materialmanagement/${id}`
+    );
+    return response.data;
+  };
+
 
   return {
     newrolecreate,
@@ -407,11 +459,17 @@ const removetask = async (id) => {
     updatestaff,
     staffremove,
     taketasks,
-  taketaskbyid,
-  gettaskdropdowns,
-  createtask,
-  updatetask,
-  removetask
+    taketaskbyid,
+    gettaskdropdowns,
+    createtask,
+    updatetask,
+    removetask,
+    takematerials,
+    takematerialbyid,
+    getmaterialdropdowns,
+    creatematerial,
+    updatematerial,
+    removematerial
   };
 };
 

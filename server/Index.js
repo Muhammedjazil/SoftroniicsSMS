@@ -17,7 +17,8 @@ const courseRoute = require("./Routes/courseRoute");
 const moduleRoute = require("./Routes/moduleRoute");
 const topicRoute = require("./Routes/topicRoute");
 const internScheduleRoute = require("./Routes/internScheduleRoute");
-const taskRoute = require("./Routes/taskRoute")
+const taskRoute = require("./Routes/taskRoute");
+const materialRoute = require("./Routes/materialRoute");
 
 const app = express();
 const PORT = process.env.PORT || 7000;
@@ -42,6 +43,7 @@ app.use("/modulemanagement", moduleRoute);
 app.use("/topicmanagement", topicRoute);
 app.use("/internschedule", internScheduleRoute);
 app.use("/taskmanagement", taskRoute);
+app.use("/materialmanagement", materialRoute);
 
 app.listen(PORT, () => {
   console.log(`server running on http://localhost:${PORT}`);
