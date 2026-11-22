@@ -192,7 +192,7 @@ const SelectField = ({
 
 export const Internmanagement = () => {
 
- const {takebranch,getallstaff}=AdminService()
+ const {takebranch,getallstaff,takebatches}=AdminService()
 
   const [activeTab, setActiveTab] = useState("list");
 
@@ -222,6 +222,8 @@ export const Internmanagement = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const[branch,setBranch]=useState([])
   const[roles,setRoules]=useState([])
+  const [batches, setBatches] = useState([]);
+const [batchLoading, setBatchLoading] = useState(false);
   // =====================================
   // SAVE TO LOCAL STORAGE
   // =====================================
@@ -241,6 +243,42 @@ export const Internmanagement = () => {
 
   }
 
+  // =====================================
+// FETCH BATCHES BASED ON SELECTED BRANCH
+// =====================================
+
+useEffect(() => {
+  if (!formData.branch) {
+    setBatches([]);
+    return;
+  }
+
+  const fetchBatches = async () => {
+    try {
+      setBatchLoading(true);
+
+      const response = await takebatches({
+        branch: formData.branch
+      });
+
+      const batchList = Array.isArray(response)
+        ? response
+        : response?.data || [];
+
+      setBatches(batchList);
+
+    } catch (error) {
+      console.error("Error fetching branch batches:", error);
+      setBatches([]);
+    } finally {
+      setBatchLoading(false);
+    }
+  };
+
+  fetchBatches();
+
+}, [formData.branch]);
+
   useEffect(()=>{
 handleallbranch();
 handleallstaff();
@@ -258,14 +296,17 @@ handleallstaff();
   // HANDLE INPUT CHANGE
   // =====================================
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+ const handleChange = (e) => {
+  const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+
+    // Clear selected batch when branch changes
+    ...(name === "branch" ? { batch: "" } : {})
+  }));
+};
 
   // =====================================
   // HANDLE FILE UPLOAD
@@ -993,21 +1034,36 @@ handleallstaff();
               type="date"
             />
 
-            <SelectField
-              {...fieldProps}
-              label="Batch"
-              name="batch"
-              placeholder="Choose Batch"
-              options={[
-                "PY-01",
-                "PY-02",
-                "PY-03",
-                "MERN-01",
-                "MERN-02",
-                "UIUX-01"
-              ]}
-              required
-            />
+           <div className="intern-field">
+  <label htmlFor="batch">
+    Batch <span className="intern-required">*</span>
+  </label>
+
+  <select
+    id="batch"
+    name="batch"
+    value={formData.batch}
+    onChange={handleChange}
+    disabled={!formData.branch || batchLoading}
+    required
+  >
+    <option value="">
+      {!formData.branch
+        ? "Select Branch First"
+        : batchLoading
+        ? "Loading Batches..."
+        : batches.length === 0
+        ? "No Batches Available"
+        : "Choose Batch"}
+    </option>
+
+    {batches.map((item) => (
+      <option key={item._id} value={item._id}>
+        {item.batchName}
+      </option>
+    ))}
+  </select>
+</div>
 
             <SelectField
               {...fieldProps}
