@@ -224,6 +224,7 @@ export const Internmanagement = () => {
   const[roles,setRoules]=useState([])
   const [batches, setBatches] = useState([]);
 const [batchLoading, setBatchLoading] = useState(false);
+const[course,setCourse]=useState([])
   // =====================================
   // SAVE TO LOCAL STORAGE
   // =====================================
@@ -278,6 +279,11 @@ useEffect(() => {
   fetchBatches();
 
 }, [formData.branch]);
+
+
+const handleallcourse=async()=>{
+  let response=await 
+}
 
   useEffect(()=>{
 handleallbranch();
