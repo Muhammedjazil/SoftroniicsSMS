@@ -43,28 +43,7 @@ export const Internnotification = () => {
 
   return (
     <div className="wk-card-container">
-      {/* Header */}
-      <header className="wk-card-header">
-        <div className="wk-card-title-group">
-          <h1 className="wk-card-heading">Notifications</h1>
-          <nav className="wk-card-breadcrumb">
-            <span>Notifications</span>
-            <span className="wk-card-breadcrumb-sep">&gt;</span>
-            <span>All Notifications</span>
-          </nav>
-        </div>
-
-        <div className="wk-card-profile-card">
-          <div className="wk-card-profile-avatar">
-            <LuUser />
-          </div>
-          <div className="wk-card-profile-info">
-            <span className="wk-card-username">MUHAMMED JAZIL K</span>
-            <span className="wk-card-role">Intern</span>
-          </div>
-        </div>
-      </header>
-
+    
       {/* Main Content Body */}
       <div className="wk-card-body">
         {/* Filter and Search Bar */}

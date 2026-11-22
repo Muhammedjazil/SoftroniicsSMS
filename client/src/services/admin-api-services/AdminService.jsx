@@ -584,7 +584,7 @@ const handledeleteintern=async(id)=>{
     createintern,
       getallinterns,
       updateintern,
-      handledeleteintern
+      handledeleteintern,
     taketasks,
     taketaskbyid,
     gettaskdropdowns,
