@@ -59,56 +59,56 @@ const initialForm = {
 // SAMPLE STUDENTS
 // =====================================
 
-const sampleStudents = [
-  {
-    id: 1,
-    fullName: "MUHAMMED RAFAN",
-    phone: "9946188074",
-    email: "rafan@gmail.com",
-    course: "DATA SCIENCE & AI ENGINEERING",
-    branch: "calicut",
-    batch: "PY-01",
-    courseStatus: "Ongoing",
-    gender: "Male",
-    studentEmail: "rafan@gmail.com"
-  },
-  {
-    id: 2,
-    fullName: "ASWIN M",
-    phone: "7736325109",
-    email: "aswin@gmail.com",
-    course: "DATA SCIENCE & AI ENGINEERING",
-    branch: "calicut",
-    batch: "PY-01",
-    courseStatus: "Ongoing",
-    gender: "Male",
-    studentEmail: "aswin@gmail.com"
-  },
-  {
-    id: 3,
-    fullName: "SUJITH KRISHNA",
-    phone: "9847503679",
-    email: "sujith@gmail.com",
-    course: "UI/UX DESIGNING",
-    branch: "calicut",
-    batch: "PY-01",
-    courseStatus: "Ongoing",
-    gender: "Male",
-    studentEmail: "sujith@gmail.com"
-  },
-  {
-    id: 4,
-    fullName: "ASHIDOSH",
-    phone: "7428719860",
-    email: "ashidosh@gmail.com",
-    course: "UI/UX DESIGNING",
-    branch: "calicut",
-    batch: "PY-01",
-    courseStatus: "Ongoing",
-    gender: "Male",
-    studentEmail: "ashidosh@gmail.com"
-  }
-];
+// const sampleStudents = [
+//   {
+//     id: 1,
+//     fullName: "MUHAMMED RAFAN",
+//     phone: "9946188074",
+//     email: "rafan@gmail.com",
+//     course: "DATA SCIENCE & AI ENGINEERING",
+//     branch: "calicut",
+//     batch: "PY-01",
+//     courseStatus: "Ongoing",
+//     gender: "Male",
+//     studentEmail: "rafan@gmail.com"
+//   },
+//   {
+//     id: 2,
+//     fullName: "ASWIN M",
+//     phone: "7736325109",
+//     email: "aswin@gmail.com",
+//     course: "DATA SCIENCE & AI ENGINEERING",
+//     branch: "calicut",
+//     batch: "PY-01",
+//     courseStatus: "Ongoing",
+//     gender: "Male",
+//     studentEmail: "aswin@gmail.com"
+//   },
+//   {
+//     id: 3,
+//     fullName: "SUJITH KRISHNA",
+//     phone: "9847503679",
+//     email: "sujith@gmail.com",
+//     course: "UI/UX DESIGNING",
+//     branch: "calicut",
+//     batch: "PY-01",
+//     courseStatus: "Ongoing",
+//     gender: "Male",
+//     studentEmail: "sujith@gmail.com"
+//   },
+//   {
+//     id: 4,
+//     fullName: "ASHIDOSH",
+//     phone: "7428719860",
+//     email: "ashidosh@gmail.com",
+//     course: "UI/UX DESIGNING",
+//     branch: "calicut",
+//     batch: "PY-01",
+//     courseStatus: "Ongoing",
+//     gender: "Male",
+//     studentEmail: "ashidosh@gmail.com"
+//   }
+// ];
 
 // =====================================
 // INPUT FIELD COMPONENT
@@ -192,21 +192,11 @@ const SelectField = ({
 
 export const Internmanagement = () => {
 
- const {takebranch,getallstaff}=AdminService()
+ const {takebranch,getallstaff,takebatches,takecourses,createintern,getallinterns,updateintern,handledeleteintern}=AdminService()
 
   const [activeTab, setActiveTab] = useState("list");
 
-  const [students, setStudents] = useState(() => {
-    try {
-      const saved = localStorage.getItem("internStudents");
-
-      return saved !== null
-        ? JSON.parse(saved)
-        : sampleStudents;
-    } catch {
-      return sampleStudents;
-    }
-  });
+ const [students, setStudents] = useState([]);
 
   const [formData, setFormData] = useState({ ...initialForm });
 
@@ -222,6 +212,9 @@ export const Internmanagement = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const[branch,setBranch]=useState([])
   const[roles,setRoules]=useState([])
+  const[course,setCourse]=useState([])
+  const [batches, setBatches] = useState([]);
+const [batchLoading, setBatchLoading] = useState(false);
   // =====================================
   // SAVE TO LOCAL STORAGE
   // =====================================
@@ -241,70 +234,134 @@ export const Internmanagement = () => {
 
   }
 
+ const handleallcourse = async () => {
+  try {
+    const response = await takecourses();
+
+    const courseList = Array.isArray(response)
+      ? response
+      : response?.courses || [];
+
+    setCourse(courseList);
+
+    console.log("Courses fetched:", courseList);
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    setCourse([]);
+  }
+};
+  // =====================================
+// FETCH BATCHES BASED ON SELECTED BRANCH
+// =====================================
+
+useEffect(() => {
+  if (!formData.branch) {
+    setBatches([]);
+    return;
+  }
+
+  const fetchBatches = async () => {
+    try {
+      setBatchLoading(true);
+
+      console.log("Selected Branch ID:", formData.branch);
+
+     console.log("Selected Branch ID:", formData.branch);
+console.log("Branch type:", typeof formData.branch);
+
+const response = await takebatches({
+  branch: formData.branch
+});
+
+console.log("Batch API Response:", response);
+
+      console.log("Batch API Response:", response);
+
+      const batchList = Array.isArray(response)
+        ? response
+        : response?.batches || response?.data?.batches || [];
+
+      setBatches(batchList);
+
+    } catch (error) {
+      console.error("Error fetching branch batches:", error);
+      console.error("Backend error:", error.response?.data);
+      setBatches([]);
+    } finally {
+      setBatchLoading(false);
+    }
+  };
+
+  fetchBatches();
+}, [formData.branch]);
+
   useEffect(()=>{
 handleallbranch();
 handleallstaff();
+handleallcourse();
+handleAllInterns();
   },[])
 
-  useEffect(() => {
-    localStorage.setItem(
-      "internStudents",
-      JSON.stringify(students)
-    );
-    
-  }, [students]);
+ 
 
   // =====================================
   // HANDLE INPUT CHANGE
   // =====================================
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+const handleChange = (e) => {
+  const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  if (name === "branch") {
+    console.log("Selected branch value:", value);
+  }
+
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+    ...(name === "branch" ? { batch: "" } : {})
+  }));
+};
 
   // =====================================
   // HANDLE FILE UPLOAD
   // =====================================
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
 
-    if (!files || !files[0]) return;
+const handleFileChange = (e) => {
+  const { name, files } = e.target;
 
-    const file = files[0];
+  if (!files || !files[0]) return;
 
-    if (name === "photo") {
-      if (!["image/jpeg", "image/png"].includes(file.type)) {
-        alert("Please upload JPG or PNG image only");
-        e.target.value = "";
-        return;
-      }
+  const file = files[0];
+
+  if (name === "photo") {
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      alert("Please upload JPG or PNG image only");
+      e.target.value = "";
+      return;
+    }
+  }
+
+  if (name === "resume") {
+    if (file.type !== "application/pdf") {
+      alert("Please upload PDF file only");
+      e.target.value = "";
+      return;
     }
 
-    if (name === "resume") {
-      if (file.type !== "application/pdf") {
-        alert("Please upload PDF file only");
-        e.target.value = "";
-        return;
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Resume must be less than 5MB");
-        e.target.value = "";
-        return;
-      }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Resume must be less than 5MB");
+      e.target.value = "";
+      return;
     }
+  }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: file.name
-    }));
-  };
+  setFormData((prev) => ({
+    ...prev,
+    [name]: file
+  }));
+};
+
 
   // =====================================
   // OPEN NEW STUDENT
@@ -334,84 +391,208 @@ handleallstaff();
   // CREATE / UPDATE STUDENT
   // =====================================
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
 
-    if (
-      !editingId ||
-      formData.password ||
-      formData.confirmPassword
-    ) {
-      if (formData.password !== formData.confirmPassword) {
-        alert("Password and Confirm Password do not match!");
-        return;
-      }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (formData.password !== formData.confirmPassword) {
+    alert("Password and Confirm Password do not match!");
+    return;
+  }
+
+  try {
+    const data = new FormData();
+
+    data.append("fullName", formData.fullName.trim());
+    data.append("dob", formData.dob);
+    data.append("gender", formData.gender);
+    data.append("email", formData.email);
+    data.append("phone", formData.phone);
+    data.append("whatsapp", formData.whatsapp);
+    data.append("guardianName", formData.guardianName);
+    data.append("fatherName", formData.fatherName);
+    data.append("motherName", formData.motherName);
+    data.append("parentPhone", formData.parentPhone);
+    data.append("address", formData.address);
+    data.append("district", formData.district);
+    data.append("state", formData.state);
+
+    data.append("course", formData.course);
+    data.append("branch", formData.branch);
+    data.append("startDate", formData.startDate);
+    data.append("completionDate", formData.completionDate);
+    data.append("batch", formData.batch);
+
+    data.append("courseStatus", formData.courseStatus);
+    data.append("careerAdvisor", formData.careerAdvisor);
+    data.append("syllabusStatus", formData.syllabusStatus);
+    data.append("remarks", formData.remarks);
+
+    data.append("placementStatus", formData.placementStatus);
+    data.append("linkedin", formData.linkedin);
+    data.append("portfolio", formData.portfolio);
+    data.append("companyName", formData.companyName);
+    data.append("jobRole", formData.jobRole);
+
+    data.append("studentEmail", formData.studentEmail);
+
+    if (formData.password) {
+      data.append("password", formData.password);
     }
 
-    const studentData = {
-      ...formData,
-      id: editingId || Date.now(),
-      fullName: formData.fullName.trim().toUpperCase(),
+    if (formData.photo instanceof File) {
+      data.append("photo", formData.photo);
+    }
 
-      // Do not save plain-text passwords in LocalStorage.
-      password: "",
-      confirmPassword: ""
-    };
+    if (formData.resume instanceof File) {
+      data.append("resume", formData.resume);
+    }
+
+    let response;
 
     if (editingId) {
-      setStudents((prev) =>
-        prev.map((student) =>
-          student.id === editingId
-            ? { ...student, ...studentData }
-            : student
-        )
-      );
+      // UPDATE EXISTING INTERN IN DATABASE
+      response = await updateintern(editingId, data);
 
       alert("Student updated successfully!");
     } else {
-      setStudents((prev) => [
-        studentData,
-        ...prev
-      ]);
+      // CREATE NEW INTERN IN DATABASE
+      response = await createintern(data);
 
-      alert("New student added successfully!");
+      alert("Student created successfully!");
     }
+
+    // Refresh student list using latest backend data
+    await handleAllInterns();
 
     setFormData({ ...initialForm });
     setEditingId(null);
     setActiveTab("list");
-  };
+
+  } catch (error) {
+    console.error("Save student error:", error);
+    console.error("Backend error:", error.response?.data);
+
+    alert(
+      error.response?.data?.message ||
+      "Unable to save student. Please try again."
+    );
+  }
+};
+
+
+const handleAllInterns = async () => {
+  try {
+    const response = await getallinterns();
+
+    console.log("Intern API Response:", response);
+
+    const internList = response.interns || response.data?.interns || [];
+
+    const formattedStudents = internList.map((intern) => ({
+      id: intern._id,
+
+      // Basic Details
+      fullName: intern.fullName || "",
+      dob: intern.dateOfBirth?.split("T")[0] || "",
+      gender: intern.gender || "",
+      email: intern.email || "",
+      phone: intern.internPhoneNumber || "",
+      whatsapp: intern.internWhatsAppNumber || "",
+      guardianName: intern.guardianName || "",
+      fatherName: intern.fatherName || "",
+      motherName: intern.motherName || "",
+      parentPhone: intern.guardianParentPhone || "",
+      address: intern.internPermanentAddress || "",
+      district: intern.district || "",
+      state: intern.state || "",
+      photo: intern.photo || "",
+
+      // Course
+      course: intern.course?.courseName || "",
+      courseId: intern.course?._id || "",
+
+      // Branch
+      branch: intern.branch?.branchName || "",
+      branchId: intern.branch?._id || "",
+
+      // Batch
+      batch: intern.batch?.batchName || "",
+      batchId: intern.batch?._id || "",
+
+      // Academic Details
+      startDate: intern.courseStartedDate?.split("T")[0] || "",
+      completionDate: intern.completionDate?.split("T")[0] || "",
+      courseStatus: intern.courseStatus || "",
+
+      // Career Advisor
+      careerAdvisor: intern.careerAdvisor?.fullName || "",
+      careerAdvisorId: intern.careerAdvisor?._id || "",
+
+      syllabusStatus: intern.internSyllabusStatus || "",
+      remarks: intern.remarks || "",
+
+      // Placement Details
+      placementStatus: intern.placementStatus || "",
+      linkedin: intern.linkedin || "",
+      portfolio: intern.portfolio || "",
+      companyName: intern.companyName || "",
+      jobRole: intern.jobRole || "",
+      resume: intern.resume || "",
+
+      // Login Details
+      studentEmail: intern.officialEmail || ""
+    }));
+
+    setStudents(formattedStudents);
+
+  } catch (error) {
+    console.error("Fetch Interns Error:", error);
+    console.error("Error Response:", error.response?.data);
+    console.error("Status:", error.response?.status);
+
+    alert(error.response?.data?.message || error.message);
+  }
+};
+
+
 
   // =====================================
   // EDIT STUDENT
   // =====================================
 
-  const handleEdit = (student) => {
-    setFormData({
-      ...initialForm,
-      ...student,
-      password: "",
-      confirmPassword: ""
-    });
+ const handleEdit = (student) => {
+  setFormData({
+    ...initialForm,
+    ...student,
 
-    setEditingId(student.id);
-    setSelectedStudent(null);
-    setActiveTab("new");
-  };
+    course: student.courseId || "",
+    branch: student.branchId || "",
+    batch: student.batchId || "",
+    careerAdvisor: student.careerAdvisorId || "",
+
+    password: "",
+    confirmPassword: ""
+  });
+
+  setEditingId(student.id);
+  setSelectedStudent(null);
+  setActiveTab("new");
+};
 
   // =====================================
   // DELETE STUDENT
   // =====================================
 
-  const handleDelete = (id) => {
+  const handleDelete = async(id) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this student?"
     );
 
     if (confirmDelete) {
-      setStudents((prev) =>
-        prev.filter((student) => student.id !== id)
-      );
+      
+      let response=await handledeleteintern(id)
+      await handleAllInterns()
 
       setSelectedStudent(null);
     }
@@ -898,7 +1079,7 @@ handleallstaff();
               </label>
 
               <label className="intern-file-upload">
-                <span>{formData.photo || "Upload Photo"}</span>
+              <span>{formData.photo?.name || formData.photo || "Upload Photo"}</span>
                 <FiUpload />
 
                 <input
@@ -918,21 +1099,27 @@ handleallstaff();
 
           <div className="intern-form-grid">
 
-            <SelectField
-              {...fieldProps}
-              label="Course"
-              name="course"
-              placeholder="Choose Course"
-              options={[
-                "DATA SCIENCE & AI ENGINEERING",
-                "UI/UX DESIGNING",
-                "MERN STACK DEVELOPMENT",
-                "PYTHON FULL STACK",
-                "DIGITAL MARKETING",
-                "FLUTTER DEVELOPMENT"
-              ]}
-              required
-            />
+          <div className="intern-field">
+  <label htmlFor="course">
+    Course <span className="intern-required">*</span>
+  </label>
+
+  <select
+    id="course"
+    name="course"
+    value={formData.course}
+    onChange={handleChange}
+    required
+  >
+    <option value="">Choose Course</option>
+
+    {course.map((item) => (
+      <option key={item._id} value={item._id}>
+        {item.courseName}
+      </option>
+    ))}
+  </select>
+</div>
 
           <div className="intern-field">
   <label htmlFor="branch">Branch <span className="intern-required">*</span></label>
@@ -969,21 +1156,36 @@ handleallstaff();
               type="date"
             />
 
-            <SelectField
-              {...fieldProps}
-              label="Batch"
-              name="batch"
-              placeholder="Choose Batch"
-              options={[
-                "PY-01",
-                "PY-02",
-                "PY-03",
-                "MERN-01",
-                "MERN-02",
-                "UIUX-01"
-              ]}
-              required
-            />
+           <div className="intern-field">
+  <label htmlFor="batch">
+    Batch <span className="intern-required">*</span>
+  </label>
+
+  <select
+    id="batch"
+    name="batch"
+    value={formData.batch}
+    onChange={handleChange}
+    disabled={!formData.branch || batchLoading}
+    required
+  >
+    <option value="">
+      {!formData.branch
+        ? "Select Branch First"
+        : batchLoading
+        ? "Loading Batches..."
+        : batches.length === 0
+        ? "No Batches Available"
+        : "Choose Batch"}
+    </option>
+
+    {batches.map((item) => (
+      <option key={item._id} value={item._id}>
+        {item.batchName}
+      </option>
+    ))}
+  </select>
+</div>
 
             <SelectField
               {...fieldProps}
@@ -1028,17 +1230,19 @@ handleallstaff();
   </select>
 </div>
 
-            <SelectField
-              {...fieldProps}
-              label="Student Syllabus Status"
-              name="syllabusStatus"
-              placeholder="Choose Syllabus Status"
-              options={[
-                "Not Started",
-                "In Progress",
-                "Completed"
-              ]}
-            />
+           <SelectField
+  {...fieldProps}
+  label="Student Syllabus Status"
+  name="syllabusStatus"
+  placeholder="Choose Syllabus Status"
+  options={[
+    "Not Started",
+    "Learning",
+    "mini Project",
+    "Main Project"
+  ]}
+/>
+            
 
             <InputField
               {...fieldProps}
@@ -1064,11 +1268,13 @@ handleallstaff();
               label="Placement Status"
               name="placementStatus"
               placeholder="Choose Placement Status"
-              options={[
-                "Not Placed",
-                "Placed",
-                "Looking for Opportunity"
-              ]}
+             options={[
+  "To be started",
+  "In Progress",
+  "Offer Declined",
+  "Placed",
+  "Not Placed"
+]}
             />
 
             <InputField
@@ -1110,7 +1316,7 @@ handleallstaff();
               </label>
 
               <label className="intern-file-upload">
-                <span>{formData.resume || "Upload resume"}</span>
+               <span>{formData.resume?.name || formData.resume || "Upload resume"}</span>
                 <FiUpload />
 
                 <input

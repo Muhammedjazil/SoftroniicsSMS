@@ -25,7 +25,11 @@ const internSchema = new mongoose.Schema({
   branch: { type: mongoose.Schema.Types.ObjectId, ref: "Branch" , required: true},
   courseStartedDate: { type: Date, required: true },
   completionDate: { type: Date },
-  batch: { type: String , required: true},
+ batch: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Batch",
+  required: true
+},
   courseStatus: { type: String, enum: ["Inactive","Ongoing","Pause", "Dropped", "Completed", "Long leave"], default: "Ongoing" },
   careerAdvisor: { type: mongoose.Schema.Types.ObjectId, ref: "Staff" },
   remarks: { type: String },

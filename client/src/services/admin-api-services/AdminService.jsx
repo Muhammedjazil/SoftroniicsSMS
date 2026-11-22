@@ -311,6 +311,34 @@ const AdminService = () => {
     return response.data;
   };
 
+  
+const createintern = async (internData) => {
+  const response = await axiosPrivate.post(
+    "/internmanagement",
+    internData
+  );
+
+  return response.data;
+};
+const getallinterns = async () => {
+  const response = await axiosPrivate.get("/internmanagement");
+  return response.data;
+};
+
+
+const updateintern = async (id, data) => {
+  const response = await axiosPrivate.put(
+    `/internmanagement/${id}`,
+    data
+  );
+  return response.data;
+};
+
+const handledeleteintern=async(id)=>{
+  let response=await axiosPrivate.delete(`/internmanagement/${id}`)
+  return response.data;
+}
+   
   // Get all tasks
   const taketasks = async () => {
     const response = await axiosPrivate.get("/taskmanagement");
@@ -553,6 +581,10 @@ const AdminService = () => {
     getallstaff,
     updatestaff,
     staffremove,
+    createintern,
+      getallinterns,
+      updateintern,
+      handledeleteintern
     taketasks,
     taketaskbyid,
     gettaskdropdowns,
