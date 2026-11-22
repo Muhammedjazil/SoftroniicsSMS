@@ -245,7 +245,7 @@ export const Internmanagement = () => {
   const handleallcourse=async()=>{
     let response=await takecourses();
     setCourse(response)
-    console.log(response);
+    console.log("courses",response);
     
   }
 
