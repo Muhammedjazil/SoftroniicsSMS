@@ -311,6 +311,50 @@ const AdminService = () => {
     return response.data;
   };
 
+  // Get all tasks
+const taketasks = async () => {
+  const response = await axiosPrivate.get("/taskmanagement");
+  return response.data;
+};
+
+// Get task by ID
+const taketaskbyid = async (id) => {
+  const response = await axiosPrivate.get(`/taskmanagement/${id}`);
+  return response.data;
+};
+
+// Get dropdown data
+const gettaskdropdowns = async () => {
+  const response = await axiosPrivate.get("/taskmanagement/dropdowns");
+  return response.data;
+};
+
+// Create task
+const createtask = async (formData) => {
+  const response = await axiosPrivate.post(
+    "/taskmanagement",
+    formData
+  );
+  return response.data;
+};
+
+// Update task
+const updatetask = async (id, formData) => {
+  const response = await axiosPrivate.put(
+    `/taskmanagement/${id}`,
+    formData
+  );
+  return response.data;
+};
+
+// Permanently delete task
+const removetask = async (id) => {
+  const response = await axiosPrivate.delete(
+    `/taskmanagement/${id}`
+  );
+  return response.data;
+};
+
   return {
     newrolecreate,
     takeroles,
@@ -362,6 +406,12 @@ const AdminService = () => {
     getallstaff,
     updatestaff,
     staffremove,
+    taketasks,
+  taketaskbyid,
+  gettaskdropdowns,
+  createtask,
+  updatetask,
+  removetask
   };
 };
 

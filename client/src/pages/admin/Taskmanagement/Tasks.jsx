@@ -1,8 +1,8 @@
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
 import {
     MdPersonOutline,
-    MdKeyboardArrowDown,
     MdFileDownload,
     MdUploadFile,
     MdSearch,
@@ -13,156 +13,120 @@ import {
     MdArrowBack
 } from "react-icons/md";
 
+import AdminService from "../../../services/admin-api-services/AdminService";
 import "./Tasks.css";
 
 // =====================================================
-// 1. INITIAL TASK DATA
-// =====================================================
-
-const tasksInitialData = [
-    {
-        id: 1,
-        title: "Course Deadline Approaching",
-        type: "Daily Task",
-        module: "UI/UX",
-        mentor: "John",
-        startDate: "2025-02-07",
-        dueDate: "2025-02-10",
-        totalMarks: "10",
-        description: "Complete the course tasks before the deadline.",
-        attachments: ["task.pdf"],
-        status: "Active",
-        branches: ["Calicut"],
-        audience: "Course",
-        batches: [],
-        courses: ["UI/UX Designing 3 M"],
-        interns: [],
-        achievedMarks: "9",
-        answer: "",
-        uploads: []
-    },
-    {
-        id: 2,
-        title: "Create a simple python code",
-        type: "Weekly Task",
-        module: "Python",
-        mentor: "Priyesh",
-        startDate: "2025-02-07",
-        dueDate: "2025-02-10",
-        totalMarks: "10",
-        description: "Create a simple Python program.",
-        attachments: [],
-        status: "Pending",
-        branches: ["Kochi"],
-        audience: "Individual Interns",
-        batches: [],
-        courses: [],
-        interns: ["John", "Thomson"],
-        achievedMarks: "",
-        answer: "",
-        uploads: []
-    },
-    {
-        id: 3,
-        title: "Onam Festival celebration",
-        type: "Weekly Task",
-        module: "General",
-        mentor: "Arjun",
-        startDate: "2025-02-07",
-        dueDate: "2025-02-10",
-        totalMarks: "10",
-        description: "Prepare for the Onam Festival celebration.",
-        attachments: [],
-        status: "Inactive",
-        branches: ["Calicut", "Kochi"],
-        audience: "All Interns",
-        batches: [],
-        courses: [],
-        interns: [],
-        achievedMarks: "",
-        answer: "",
-        uploads: []
-    }
-];
-
-
-// =====================================================
-// 2. DROPDOWN DATA
-// =====================================================
-
-const tasksBranches = [
-    "Calicut",
-    "Kochi",
-    "Kozhikode",
-    "Trivandrum",
-    "Bangalore"
-];
-
-const tasksMentors = [
-    "Thomas",
-    "John",
-    "Priyesh",
-    "Arjun"
-];
-
-const tasksBatches = [
-    "UI/UX_JUN_R0_B1_2025",
-    "UI/UX_JUN_R0_B2_2025",
-    "MERN_JUL_R0_B1_2025",
-    "PYTHON_AUG_R0_B1_2025"
-];
-
-const tasksCourses = [
-    "UI/UX 3M",
-    "UI/UX 1M",
-    "MERN Stack 6M",
-    "Python Full Stack 6M"
-];
-
-const tasksInterns = [
-    "John",
-    "Thomson",
-    "Arun",
-    "Rahul",
-    "Akhil"
-];
-
-const tasksAudienceOptions = [
-    "All Interns",
-    "Batches",
-    "Course",
-    "Individual Interns"
-];
-
-
-// =====================================================
-// 3. EMPTY FORM DATA
+// CONSTANTS
 // =====================================================
 
 const tasksEmptyForm = {
     title: "",
-    type: "",
+    taskType: "",
     module: "",
-    mentor: "",
+    assignedMentor: "",
     startDate: "",
     dueDate: "",
     totalMarks: "",
     description: "",
-    attachments: [],
-    status: "",
-    branches: [],
+    status: "Pending",
+    branch: [],
     audience: "",
     batches: [],
+    categories: [],
     courses: [],
-    interns: [],
-    achievedMarks: "",
-    answer: "",
-    uploads: []
+    individualInterns: []
 };
 
+const taskTypes = [
+    "Daily Task",
+    "Weekly Task",
+    "Monthly Task",
+    "Other"
+];
+
+const taskStatuses = [
+    "Pending",
+    "In Progress",
+    "Completed",
+    "Cancelled"
+];
+
+const audienceOptions = [
+    "All interns",
+    "By batches",
+    "By Courses",
+    "By Category",
+    "Individual interns"
+];
 
 // =====================================================
-// 4. TASK FORM COMPONENT
+// HELPER FUNCTIONS
+// =====================================================
+
+const getId = (item) => {
+    if (!item) return "";
+    return String(item._id || item.id || item);
+};
+
+const getName = (item, fields = []) => {
+    if (!item) return "";
+
+    for (const field of fields) {
+        if (item[field]) return item[field];
+    }
+
+    return "";
+};
+
+const getArray = (response, keys = []) => {
+    if (Array.isArray(response)) return response;
+
+    for (const key of keys) {
+        if (Array.isArray(response?.[key])) {
+            return response[key];
+        }
+    }
+
+    return [];
+};
+
+const getDateValue = (date) => {
+    if (!date) return "";
+
+    return new Date(date).toISOString().split("T")[0];
+};
+
+const getAudienceLabel = (task) => {
+    if (task.audience === "By batches") {
+        return (task.batches || [])
+            .map(item => item.batchName || item)
+            .join(", ");
+    }
+
+    if (task.audience === "By Courses") {
+        return (task.courses || [])
+            .map(item => item.courseName || item)
+            .join(", ");
+    }
+
+    if (task.audience === "By Category") {
+        return (task.categories || [])
+            .map(item => item.categoryName || item)
+            .join(", ");
+    }
+
+    if (task.audience === "Individual interns") {
+        return (task.individualInterns || [])
+            .map(item => item.fullName || item)
+            .join(", ");
+    }
+
+    return "All interns";
+};
+
+// =====================================================
+// TASK FORM COMPONENT
 // =====================================================
 
 const TasksForm = ({
@@ -171,27 +135,26 @@ const TasksForm = ({
     setTasksFormData,
     tasksOnSubmit,
     tasksOnCancel,
-    tasksOnDelete
+    tasksOnDelete,
+    dropdowns,
+    selectedTask,
+    attachment,
+    setAttachment,
+    loading
 }) => {
 
     const tasksIsView = tasksMode === "view";
 
-    const [tasksInternSearch, setTasksInternSearch] = useState("");
+    const [internSearch, setInternSearch] = useState("");
 
-    // Update field
-
-    const tasksUpdateField = (field, value) => {
+    const updateField = (field, value) => {
         setTasksFormData(prev => ({
             ...prev,
             [field]: value
         }));
     };
 
-
-    // Add multiple selected items
-
-    const tasksAddItem = (field, value) => {
-
+    const addItem = (field, value) => {
         if (!value) return;
 
         setTasksFormData(prev => ({
@@ -202,81 +165,86 @@ const TasksForm = ({
         }));
     };
 
-
-    // Remove selected item
-
-    const tasksRemoveItem = (field, value) => {
-
+    const removeItem = (field, value) => {
         setTasksFormData(prev => ({
             ...prev,
             [field]: prev[field].filter(item => item !== value)
         }));
     };
 
-
-    // Handle branch selection
-
-    const tasksHandleBranch = (value) => {
-
+    const handleBranch = (value) => {
         if (!value) return;
 
         setTasksFormData(prev => ({
             ...prev,
-            branches: prev.branches.includes(value)
-                ? prev.branches
-                : [...prev.branches, value],
+            branch: prev.branch.includes(value)
+                ? prev.branch
+                : [...prev.branch, value],
+
             audience: "",
             batches: [],
+            categories: [],
             courses: [],
-            interns: []
+            individualInterns: []
         }));
     };
 
-
-    // Handle audience selection
-
-    const tasksHandleAudience = (value) => {
-
+    const handleAudience = (value) => {
         setTasksFormData(prev => ({
             ...prev,
             audience: value,
             batches: [],
+            categories: [],
             courses: [],
-            interns: []
+            individualInterns: []
         }));
 
-        setTasksInternSearch("");
+        setInternSearch("");
     };
 
-
-    // File upload
-
-    const tasksHandleFiles = (field, files) => {
-
-        if (!files || files.length === 0) return;
-
-        const tasksNewFiles = Array.from(files).map(file => file.name);
-
-        setTasksFormData(prev => ({
-            ...prev,
-            [field]: [...prev[field], ...tasksNewFiles]
-        }));
-    };
-
-
-    // Filter interns
-
-    const tasksFilteredInterns = tasksInterns.filter(intern =>
-        intern.toLowerCase().includes(tasksInternSearch.toLowerCase()) &&
-        !tasksFormData.interns.includes(intern)
+    const selectedBranches = dropdowns.branches.filter(item =>
+        tasksFormData.branch.includes(getId(item))
     );
 
+    const availableBatches = dropdowns.batches.filter(item =>
+        tasksFormData.branch.includes(getId(item.branch)) &&
+        !tasksFormData.batches.includes(getId(item))
+    );
 
-    // Render selected items
+    const availableCategories = dropdowns.categories.filter(item =>
+        (item.branch || []).some(branch =>
+            tasksFormData.branch.includes(getId(branch))
+        ) &&
+        !tasksFormData.categories.includes(getId(item))
+    );
 
-    const tasksRenderSelectedItems = (field, heading) => {
+    const availableCourses = dropdowns.courses.filter(item => {
+        const category = item.category;
 
-        if (!tasksFormData[field].length) return null;
+        const selectedCategory = dropdowns.categories.find(
+            cat => getId(cat) === getId(category)
+        );
+
+        return (
+            selectedCategory &&
+            (selectedCategory.branch || []).some(branch =>
+                tasksFormData.branch.includes(getId(branch))
+            ) &&
+            !tasksFormData.courses.includes(getId(item))
+        );
+    });
+
+    const availableInterns = dropdowns.interns.filter(item =>
+        tasksFormData.branch.includes(getId(item.branch)) &&
+        !tasksFormData.individualInterns.includes(getId(item)) &&
+        (item.fullName || "")
+            .toLowerCase()
+            .includes(internSearch.toLowerCase())
+    );
+
+    const selectedItems = (field, data, nameField, heading) => {
+
+        if (!tasksFormData[field]?.length) return null;
 
         return (
             <div className="tasks-added-section">
@@ -285,32 +253,37 @@ const TasksForm = ({
 
                 <div className="tasks-selected-list">
 
-                    {tasksFormData[field].map(item => (
+                    {tasksFormData[field].map(id => {
 
-                        <div className="tasks-selected-item" key={item}>
+                        const item = data.find(
+                            element => getId(element) === id
+                        );
 
-                            <span>{item}</span>
+                        return (
+                            <div className="tasks-selected-item" key={id}>
 
-                            {!tasksIsView && (
-                                <button
-                                    type="button"
-                                    onClick={() => tasksRemoveItem(field, item)}
-                                    aria-label={`Remove ${item}`}
-                                >
-                                    <MdClose />
-                                </button>
-                            )}
+                                <span>
+                                    {item?.[nameField] || id}
+                                </span>
 
-                        </div>
+                                {!tasksIsView && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeItem(field, id)}
+                                    >
+                                        <MdClose />
+                                    </button>
+                                )}
 
-                    ))}
+                            </div>
+                        );
+                    })}
 
                 </div>
 
             </div>
         );
     };
-
 
     return (
 
@@ -319,7 +292,7 @@ const TasksForm = ({
             onSubmit={tasksOnSubmit}
         >
 
-            {/* VIEW HEADER */}
+            {/* HEADER */}
 
             {tasksMode !== "create" && (
 
@@ -340,99 +313,49 @@ const TasksForm = ({
 
             )}
 
-
             {/* TASK DETAILS */}
 
             <h3 className="tasks-section-heading">
                 Task Details
             </h3>
 
-
             <div className="tasks-form-grid">
-
-                {/* TITLE */}
 
                 <div className="tasks-form-group">
 
-                    <label>Title <span className="tasks-required">*</span></label>
+                    <label>
+                        Title <span className="tasks-required">*</span>
+                    </label>
 
                     <input
                         type="text"
                         placeholder="Enter Task Title"
                         value={tasksFormData.title}
-                        onChange={e => tasksUpdateField("title", e.target.value)}
+                        onChange={e => updateField("title", e.target.value)}
                         disabled={tasksIsView}
                         required
                     />
 
                 </div>
 
-
-                {/* TASK TYPE */}
-
                 <div className="tasks-form-group">
 
-                    <label>Task Type <span className="tasks-required">*</span></label>
+                    <label>
+                        Task Type <span className="tasks-required">*</span>
+                    </label>
 
                     <select
-                        value={tasksFormData.type}
-                        onChange={e => tasksUpdateField("type", e.target.value)}
+                        value={tasksFormData.taskType}
+                        onChange={e => updateField("taskType", e.target.value)}
                         disabled={tasksIsView}
                         required
                     >
+
                         <option value="">Choose Task Type</option>
-                        <option value="Daily Task">Daily Task</option>
-                        <option value="Weekly Task">Weekly Task</option>
-                        <option value="Assignment">Assignment</option>
-                        <option value="Project">Project</option>
-                    </select>
 
-                </div>
-
-
-                {/* MODULE */}
-
-                <div className="tasks-form-group">
-
-                    <label>Module <span className="tasks-required">*</span></label>
-
-                    <select
-                        value={tasksFormData.module}
-                        onChange={e => tasksUpdateField("module", e.target.value)}
-                        disabled={tasksIsView}
-                        required
-                    >
-                        <option value="">Choose Module</option>
-                        <option value="Figma">Figma</option>
-                        <option value="HTML">HTML</option>
-                        <option value="CSS">CSS</option>
-                        <option value="JavaScript">JavaScript</option>
-                        <option value="React">React</option>
-                        <option value="Node JS">Node JS</option>
-                        <option value="Python">Python</option>
-                        <option value="General">General</option>
-                    </select>
-
-                </div>
-
-
-                {/* MENTOR */}
-
-                <div className="tasks-form-group">
-
-                    <label>Assigned Mentor <span className="tasks-required">*</span></label>
-
-                    <select
-                        value={tasksFormData.mentor}
-                        onChange={e => tasksUpdateField("mentor", e.target.value)}
-                        disabled={tasksIsView}
-                        required
-                    >
-                        <option value="">Choose Mentor</option>
-
-                        {tasksMentors.map(mentor => (
-                            <option key={mentor} value={mentor}>
-                                {mentor}
+                        {taskTypes.map(type => (
+                            <option key={type} value={type}>
+                                {type}
                             </option>
                         ))}
 
@@ -440,42 +363,92 @@ const TasksForm = ({
 
                 </div>
 
+                <div className="tasks-form-group">
 
-                {/* START DATE */}
+                    <label>
+                        Module <span className="tasks-required">*</span>
+                    </label>
+
+                    <select
+                        value={tasksFormData.module}
+                        onChange={e => updateField("module", e.target.value)}
+                        disabled={tasksIsView}
+                        required
+                    >
+
+                        <option value="">Choose Module</option>
+
+                        {dropdowns.modules.map(item => (
+                            <option
+                                key={getId(item)}
+                                value={item.moduleName}
+                            >
+                                {item.moduleName}
+                            </option>
+                        ))}
+
+                    </select>
+
+                </div>
 
                 <div className="tasks-form-group">
 
-                    <label>Start Date <span className="tasks-required">*</span></label>
+                    <label>
+                        Assigned Mentor <span className="tasks-required">*</span>
+                    </label>
+
+                    <select
+                        value={tasksFormData.assignedMentor}
+                        onChange={e =>
+                            updateField("assignedMentor", e.target.value)
+                        }
+                        disabled={tasksIsView}
+                        required
+                    >
+
+                        <option value="">Choose Mentor</option>
+
+                        {dropdowns.mentors.map(item => (
+                            <option key={getId(item)} value={getId(item)}>
+                                {getName(item, ["fullName", "name", "email"])}
+                            </option>
+                        ))}
+
+                    </select>
+
+                </div>
+
+                <div className="tasks-form-group">
+
+                    <label>
+                        Start Date <span className="tasks-required">*</span>
+                    </label>
 
                     <input
                         type="date"
                         value={tasksFormData.startDate}
-                        onChange={e => tasksUpdateField("startDate", e.target.value)}
+                        onChange={e => updateField("startDate", e.target.value)}
                         disabled={tasksIsView}
                         required
                     />
 
                 </div>
 
-
-                {/* DUE DATE */}
-
                 <div className="tasks-form-group">
 
-                    <label>Due Date <span className="tasks-required">*</span></label>
+                    <label>
+                        Due Date <span className="tasks-required">*</span>
+                    </label>
 
                     <input
                         type="date"
                         value={tasksFormData.dueDate}
-                        onChange={e => tasksUpdateField("dueDate", e.target.value)}
+                        onChange={e => updateField("dueDate", e.target.value)}
                         disabled={tasksIsView}
                         required
                     />
 
                 </div>
-
-
-                {/* TOTAL MARKS */}
 
                 <div className="tasks-form-group">
 
@@ -484,46 +457,77 @@ const TasksForm = ({
                     <input
                         type="number"
                         min="0"
-                        placeholder="Enter Total Marks"
                         value={tasksFormData.totalMarks}
-                        onChange={e => tasksUpdateField("totalMarks", e.target.value)}
+                        onChange={e => updateField("totalMarks", e.target.value)}
                         disabled={tasksIsView}
                     />
 
                 </div>
 
+                <div className="tasks-form-group">
 
-                {/* DESCRIPTION */}
+                    <label>Status</label>
+
+                    <select
+                        value={tasksFormData.status}
+                        onChange={e => updateField("status", e.target.value)}
+                        disabled={tasksIsView}
+                    >
+
+                        {taskStatuses.map(status => (
+                            <option key={status} value={status}>
+                                {status}
+                            </option>
+                        ))}
+
+                    </select>
+
+                </div>
 
                 <div className="tasks-form-group tasks-full-width">
 
-                    <label>Description <span className="tasks-required">*</span></label>
+                    <label>
+                        Description <span className="tasks-required">*</span>
+                    </label>
 
                     <textarea
                         rows="4"
                         placeholder="Enter Task Description"
                         value={tasksFormData.description}
-                        onChange={e => tasksUpdateField("description", e.target.value)}
+                        onChange={e => updateField("description", e.target.value)}
                         disabled={tasksIsView}
                         required
                     />
 
                 </div>
 
-
-                {/* ATTACHMENTS */}
+                {/* ATTACHMENT */}
 
                 <div className="tasks-form-group">
 
                     <label>
-                        Attachments
-                        <span className="tasks-optional"> (Optional - JPG/PNG/PDF only)</span>
+                        Attachment
+                        <span className="tasks-optional">
+                            {" "}(Optional - JPG/PNG/PDF)
+                        </span>
                     </label>
 
                     {tasksIsView ? (
 
                         <div className="tasks-readonly-file">
-                            {tasksFormData.attachments.join(", ") || "No attachments"}
+
+                            {tasksFormData.attachments
+                                ? (
+                                    <a
+                                        href={`http://localhost:7000${tasksFormData.attachments}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        View Attachment
+                                    </a>
+                                )
+                                : "No attachment"}
+
                         </div>
 
                     ) : (
@@ -531,19 +535,21 @@ const TasksForm = ({
                         <label className="tasks-upload-box">
 
                             <span>
-                                {tasksFormData.attachments.length
-                                    ? tasksFormData.attachments.join(", ")
-                                    : "Upload Attachment"}
+                                {attachment?.name ||
+                                    (tasksFormData.attachments
+                                        ? "Existing attachment selected"
+                                        : "Upload Attachment")}
                             </span>
 
                             <MdUploadFile />
 
                             <input
                                 type="file"
-                                accept=".jpg,.jpeg,.png,.pdf"
-                                multiple
+                                accept=".jpg,.jpeg,.png,.webp,.pdf"
                                 hidden
-                                onChange={e => tasksHandleFiles("attachments", e.target.files)}
+                                onChange={e =>
+                                    setAttachment(e.target.files[0] || null)
+                                }
                             />
 
                         </label>
@@ -552,51 +558,39 @@ const TasksForm = ({
 
                 </div>
 
+            </div>
 
-                {/* STATUS */}
+            {/* BRANCHES */}
 
-                <div className="tasks-form-group">
+            <div className="tasks-section-divider"></div>
 
-                    <label>Status</label>
+            <h3 className="tasks-section-heading">
+                Branch Details
+            </h3>
 
-                    <select
-                        value={tasksFormData.status}
-                        onChange={e => tasksUpdateField("status", e.target.value)}
-                        disabled={tasksIsView}
-                    >
-                        <option value="">Choose Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Inactive">Inactive</option>
-                        <option value="Complete">Complete</option>
-                    </select>
-
-                </div>
-
-
-                {/* BRANCHES */}
+            <div className="tasks-form-grid">
 
                 <div className="tasks-form-group">
 
-                    <label>Branches <span className="tasks-required">*</span></label>
+                    <label>
+                        Branches <span className="tasks-required">*</span>
+                    </label>
 
                     <select
                         value=""
-                        onChange={e => tasksHandleBranch(e.target.value)}
+                        onChange={e => handleBranch(e.target.value)}
                         disabled={tasksIsView}
-                        required={!tasksFormData.branches.length}
                     >
-                        <option value="">
-                            {tasksFormData.branches.length
-                                ? "Add More Branches"
-                                : "Select Branches"}
-                        </option>
 
-                        {tasksBranches
-                            .filter(branch => !tasksFormData.branches.includes(branch))
-                            .map(branch => (
-                                <option key={branch} value={branch}>
-                                    {branch}
+                        <option value="">Select Branch</option>
+
+                        {dropdowns.branches
+                            .filter(item =>
+                                !tasksFormData.branch.includes(getId(item))
+                            )
+                            .map(item => (
+                                <option key={getId(item)} value={getId(item)}>
+                                    {item.branchName}
                                 </option>
                             ))}
 
@@ -606,10 +600,7 @@ const TasksForm = ({
 
             </div>
 
-
-            {/* SELECTED BRANCHES */}
-
-            {tasksFormData.branches.length > 0 && (
+            {selectedBranches.length > 0 && (
 
                 <div className="tasks-added-section tasks-branch-section">
 
@@ -617,28 +608,36 @@ const TasksForm = ({
 
                     <div className="tasks-selected-list">
 
-                        {tasksFormData.branches.map(branch => (
+                        {selectedBranches.map(item => (
 
-                            <div className="tasks-selected-item" key={branch}>
+                            <div
+                                className="tasks-selected-item"
+                                key={getId(item)}
+                            >
 
-                                <span>{branch}</span>
+                                <span>{item.branchName}</span>
 
                                 {!tasksIsView && (
+
                                     <button
                                         type="button"
                                         onClick={() => {
                                             setTasksFormData(prev => ({
                                                 ...prev,
-                                                branches: prev.branches.filter(item => item !== branch),
+                                                branch: prev.branch.filter(
+                                                    id => id !== getId(item)
+                                                ),
                                                 audience: "",
                                                 batches: [],
+                                                categories: [],
                                                 courses: [],
-                                                interns: []
+                                                individualInterns: []
                                             }));
                                         }}
                                     >
                                         <MdClose />
                                     </button>
+
                                 )}
 
                             </div>
@@ -651,16 +650,12 @@ const TasksForm = ({
 
             )}
 
-
-            {/* DIVIDER */}
+            {/* AUDIENCE */}
 
             <div className="tasks-section-divider"></div>
 
-
-            {/* AUDIENCE DETAILS */}
-
             <h3 className="tasks-section-heading tasks-audience-heading">
-                Task Details
+                Audience Details
             </h3>
 
             <div className="tasks-audience-grid">
@@ -670,7 +665,7 @@ const TasksForm = ({
                     <label>
                         Audience
 
-                        {!tasksFormData.branches.length && (
+                        {!tasksFormData.branch.length && (
                             <span className="tasks-select-warning">
                                 (Select branches first)
                             </span>
@@ -680,17 +675,14 @@ const TasksForm = ({
 
                     <select
                         value={tasksFormData.audience}
-                        onChange={e => tasksHandleAudience(e.target.value)}
-                        disabled={tasksIsView || !tasksFormData.branches.length}
+                        onChange={e => handleAudience(e.target.value)}
+                        disabled={tasksIsView || !tasksFormData.branch.length}
+                        required
                     >
 
-                        <option value="">
-                            {tasksFormData.branches.length
-                                ? "Choose Audience"
-                                : "Choose branches first"}
-                        </option>
+                        <option value="">Choose Audience</option>
 
-                        {tasksAudienceOptions.map(option => (
+                        {audienceOptions.map(option => (
                             <option key={option} value={option}>
                                 {option}
                             </option>
@@ -700,10 +692,9 @@ const TasksForm = ({
 
                 </div>
 
+                {/* BATCHES */}
 
-                {/* BATCH SELECTION */}
-
-                {tasksFormData.audience === "Batches" && (
+                {tasksFormData.audience === "By batches" && (
 
                     <div className="tasks-form-group">
 
@@ -712,17 +703,16 @@ const TasksForm = ({
                         <select
                             value=""
                             disabled={tasksIsView}
-                            onChange={e => tasksAddItem("batches", e.target.value)}
+                            onChange={e => addItem("batches", e.target.value)}
                         >
+
                             <option value="">Select Batch</option>
 
-                            {tasksBatches
-                                .filter(item => !tasksFormData.batches.includes(item))
-                                .map(item => (
-                                    <option key={item} value={item}>
-                                        {item}
-                                    </option>
-                                ))}
+                            {availableBatches.map(item => (
+                                <option key={getId(item)} value={getId(item)}>
+                                    {item.batchName}
+                                </option>
+                            ))}
 
                         </select>
 
@@ -730,10 +720,39 @@ const TasksForm = ({
 
                 )}
 
+                {/* CATEGORIES */}
 
-                {/* COURSE SELECTION */}
+                {tasksFormData.audience === "By Category" && (
 
-                {tasksFormData.audience === "Course" && (
+                    <div className="tasks-form-group">
+
+                        <label>Select Categories</label>
+
+                        <select
+                            value=""
+                            disabled={tasksIsView}
+                            onChange={e =>
+                                addItem("categories", e.target.value)
+                            }
+                        >
+
+                            <option value="">Select Category</option>
+
+                            {availableCategories.map(item => (
+                                <option key={getId(item)} value={getId(item)}>
+                                    {item.categoryName}
+                                </option>
+                            ))}
+
+                        </select>
+
+                    </div>
+
+                )}
+
+                {/* COURSES */}
+
+                {tasksFormData.audience === "By Courses" && (
 
                     <div className="tasks-form-group">
 
@@ -742,17 +761,16 @@ const TasksForm = ({
                         <select
                             value=""
                             disabled={tasksIsView}
-                            onChange={e => tasksAddItem("courses", e.target.value)}
+                            onChange={e => addItem("courses", e.target.value)}
                         >
+
                             <option value="">Select Course</option>
 
-                            {tasksCourses
-                                .filter(item => !tasksFormData.courses.includes(item))
-                                .map(item => (
-                                    <option key={item} value={item}>
-                                        {item}
-                                    </option>
-                                ))}
+                            {availableCourses.map(item => (
+                                <option key={getId(item)} value={getId(item)}>
+                                    {item.courseName}
+                                </option>
+                            ))}
 
                         </select>
 
@@ -760,10 +778,9 @@ const TasksForm = ({
 
                 )}
 
+                {/* INDIVIDUAL INTERNS */}
 
-                {/* INDIVIDUAL INTERN */}
-
-                {tasksFormData.audience === "Individual Interns" && (
+                {tasksFormData.audience === "Individual interns" && (
 
                     <div className="tasks-form-group">
 
@@ -774,35 +791,38 @@ const TasksForm = ({
                             <input
                                 type="text"
                                 placeholder="Search Intern"
-                                value={tasksInternSearch}
+                                value={internSearch}
                                 disabled={tasksIsView}
-                                onChange={e => setTasksInternSearch(e.target.value)}
+                                onChange={e => setInternSearch(e.target.value)}
                             />
 
                             <MdSearch />
 
                         </div>
 
-                        {!tasksIsView && tasksInternSearch && (
+                        {!tasksIsView && internSearch && (
 
                             <div className="tasks-intern-results">
 
-                                {tasksFilteredInterns.map(intern => (
+                                {availableInterns.map(item => (
 
                                     <button
                                         type="button"
-                                        key={intern}
+                                        key={getId(item)}
                                         onClick={() => {
-                                            tasksAddItem("interns", intern);
-                                            setTasksInternSearch("");
+                                            addItem(
+                                                "individualInterns",
+                                                getId(item)
+                                            );
+                                            setInternSearch("");
                                         }}
                                     >
-                                        {intern}
+                                        {item.fullName}
                                     </button>
 
                                 ))}
 
-                                {tasksFilteredInterns.length === 0 && (
+                                {availableInterns.length === 0 && (
                                     <p>No interns found</p>
                                 )}
 
@@ -816,103 +836,41 @@ const TasksForm = ({
 
             </div>
 
-
             {/* SELECTED AUDIENCE */}
 
-            {tasksFormData.audience === "Batches" &&
-                tasksRenderSelectedItems("batches", "Added Batches")}
+            {tasksFormData.audience === "By batches" &&
+                selectedItems(
+                    "batches",
+                    dropdowns.batches,
+                    "batchName",
+                    "Added Batches"
+                )}
 
-            {tasksFormData.audience === "Course" &&
-                tasksRenderSelectedItems("courses", "Added Courses")}
+            {tasksFormData.audience === "By Category" &&
+                selectedItems(
+                    "categories",
+                    dropdowns.categories,
+                    "categoryName",
+                    "Added Categories"
+                )}
 
-            {tasksFormData.audience === "Individual Interns" &&
-                tasksRenderSelectedItems("interns", "Added Interns")}
+            {tasksFormData.audience === "By Courses" &&
+                selectedItems(
+                    "courses",
+                    dropdowns.courses,
+                    "courseName",
+                    "Added Courses"
+                )}
 
+            {tasksFormData.audience === "Individual interns" &&
+                selectedItems(
+                    "individualInterns",
+                    dropdowns.interns,
+                    "fullName",
+                    "Added Interns"
+                )}
 
-            {/* INTERN ANSWER */}
-
-            {(tasksMode === "view" || tasksMode === "edit") && (
-
-                <>
-
-                    <div className="tasks-section-divider"></div>
-
-                    <h3 className="tasks-section-heading">
-                        Interns Answer
-                    </h3>
-
-                    <div className="tasks-form-grid">
-
-                        <div className="tasks-form-group">
-
-                            <label>Achieved Marks</label>
-
-                            <input
-                                type="number"
-                                min="0"
-                                value={tasksFormData.achievedMarks}
-                                placeholder="Enter Achieved Marks"
-                                onChange={e => tasksUpdateField("achievedMarks", e.target.value)}
-                                disabled={tasksIsView}
-                            />
-
-                        </div>
-
-                        <div className="tasks-form-group tasks-full-width">
-
-                            <label>Answer</label>
-
-                            <textarea
-                                rows="3"
-                                value={tasksFormData.answer}
-                                placeholder="Intern Answer"
-                                onChange={e => tasksUpdateField("answer", e.target.value)}
-                                disabled={tasksIsView}
-                            />
-
-                        </div>
-
-                        <div className="tasks-form-group">
-
-                            <label>Uploads</label>
-
-                            {tasksIsView ? (
-
-                                <div className="tasks-readonly-file">
-                                    {tasksFormData.uploads.join(", ") || "No uploads"}
-                                </div>
-
-                            ) : (
-
-                                <label className="tasks-upload-box">
-
-                                    <span>
-                                        {tasksFormData.uploads.join(", ") || "Upload Files"}
-                                    </span>
-
-                                    <MdUploadFile />
-
-                                    <input
-                                        type="file"
-                                        multiple
-                                        hidden
-                                        onChange={e => tasksHandleFiles("uploads", e.target.files)}
-                                    />
-
-                                </label>
-
-                            )}
-
-                        </div>
-
-                    </div>
-
-                </>
-
-            )}
-
-
-            {/* FORM BUTTONS */}
+            {/* BUTTONS */}
 
             <div className="tasks-form-buttons">
 
@@ -931,14 +889,14 @@ const TasksForm = ({
                         <button
                             type="submit"
                             className="tasks-create-btn"
+                            disabled={loading}
                         >
-                            Create Task
+                            {loading ? "Creating..." : "Create Task"}
                         </button>
 
                     </>
 
                 )}
-
 
                 {tasksMode === "view" && (
 
@@ -964,7 +922,6 @@ const TasksForm = ({
 
                 )}
 
-
                 {tasksMode === "edit" && (
 
                     <>
@@ -980,8 +937,9 @@ const TasksForm = ({
                         <button
                             type="submit"
                             className="tasks-create-btn"
+                            disabled={loading}
                         >
-                            Save
+                            {loading ? "Saving..." : "Save"}
                         </button>
 
                     </>
@@ -991,18 +949,25 @@ const TasksForm = ({
             </div>
 
         </form>
-
     );
 };
 
-
 // =====================================================
-// 5. MAIN TASK COMPONENT
+// MAIN TASK COMPONENT
 // =====================================================
 
 const Tasks = () => {
 
-    const [tasksList, setTasksList] = useState(tasksInitialData);
+    const {
+        taketasks,
+        taketaskbyid,
+        gettaskdropdowns,
+        createtask,
+        updatetask,
+        removetask
+    } = AdminService();
+
+    const [tasksList, setTasksList] = useState([]);
 
     const [tasksMode, setTasksMode] = useState("list");
 
@@ -1012,26 +977,160 @@ const Tasks = () => {
         ...tasksEmptyForm
     });
 
-    // List filters
+    const [dropdowns, setDropdowns] = useState({
+        branches: [],
+        mentors: [],
+        batches: [],
+        categories: [],
+        courses: [],
+        interns: [],
+        modules: []
+    });
+
+    const [attachment, setAttachment] = useState(null);
+
+    const [loading, setLoading] = useState(false);
+
+    const [pageLoading, setPageLoading] = useState(true);
+
+    // FILTERS
 
     const [tasksSearch, setTasksSearch] = useState("");
-
     const [tasksTypeFilter, setTasksTypeFilter] = useState("all");
-
     const [tasksStatusFilter, setTasksStatusFilter] = useState("all");
-
     const [tasksAudienceFilter, setTasksAudienceFilter] = useState("all");
-
     const [tasksBranchFilter, setTasksBranchFilter] = useState("all");
 
-    const tasksSelected = tasksList.find(
-        task => task.id === tasksSelectedId
-    );
+    // =====================================================
+    // FETCH TASKS
+    // =====================================================
 
+    const fetchTasks = async () => {
 
-    // =================================================
+        try {
+
+            const response = await taketasks();
+
+            setTasksList(
+                getArray(response, ["tasks", "data"])
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Fetch Tasks Error:",
+                error.response?.data || error
+            );
+
+            alert(
+                error.response?.data?.message ||
+                "Unable to fetch tasks"
+            );
+
+        }
+
+    };
+
+    // =====================================================
+    // FETCH DROPDOWNS
+    // =====================================================
+
+    const fetchDropdowns = async () => {
+
+        try {
+
+            const response = await gettaskdropdowns();
+
+            setDropdowns({
+                branches: getArray(response, ["branches"]),
+                mentors: getArray(response, ["mentors"]),
+                batches: getArray(response, ["batches"]),
+                categories: getArray(response, ["categories"]),
+                courses: getArray(response, ["courses"]),
+                interns: getArray(response, ["interns"]),
+                modules: getArray(response, ["modules"])
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Dropdown Error:",
+                error.response?.data || error
+            );
+
+            alert(
+                error.response?.data?.message ||
+                "Unable to fetch dropdown data"
+            );
+
+        }
+
+    };
+
+    // =====================================================
+    // INITIAL LOAD
+    // =====================================================
+
+    useEffect(() => {
+
+        const loadData = async () => {
+
+            setPageLoading(true);
+
+            await Promise.all([
+                fetchTasks(),
+                fetchDropdowns()
+            ]);
+
+            setPageLoading(false);
+        };
+
+        loadData();
+
+    }, []);
+
+    // =====================================================
+    // NORMALIZE TASK DATA
+    // =====================================================
+
+    const normalizeTask = (task) => {
+
+        return {
+            ...task,
+
+            taskType: task.taskType || "",
+
+            assignedMentor: getId(task.assignedMentor),
+
+            module: task.module || "",
+
+            startDate: getDateValue(task.startDate),
+
+            dueDate: getDateValue(task.dueDate),
+
+            totalMarks: task.totalMarks ?? "",
+
+            status: task.status || "Pending",
+
+            branch: (task.branch || []).map(getId),
+
+            batches: (task.batches || []).map(getId),
+
+            categories: (task.categories || []).map(getId),
+
+            courses: (task.courses || []).map(getId),
+
+            individualInterns: (
+                task.individualInterns || []
+            ).map(getId),
+
+            attachments: task.attachments || null
+        };
+    };
+
+    // =====================================================
     // OPEN NEW TASK
-    // =================================================
+    // =====================================================
 
     const tasksHandleNew = () => {
 
@@ -1039,189 +1138,306 @@ const Tasks = () => {
             ...tasksEmptyForm
         });
 
+        setAttachment(null);
+
         setTasksSelectedId(null);
 
         setTasksMode("create");
     };
 
-
-    // =================================================
+    // =====================================================
     // VIEW TASK
-    // =================================================
+    // =====================================================
 
-    const tasksHandleView = (task) => {
+    const tasksHandleView = async (task) => {
 
-        setTasksSelectedId(task.id);
+        try {
 
-        setTasksFormData({
-            ...task,
-            branches: [...task.branches],
-            batches: [...task.batches],
-            courses: [...task.courses],
-            interns: [...task.interns],
-            attachments: [...task.attachments],
-            uploads: [...task.uploads]
-        });
+            setLoading(true);
 
-        setTasksMode("view");
+            const response = await taketaskbyid(task._id);
+
+            const selectedTask = response.task;
+
+            setTasksSelectedId(selectedTask._id);
+
+            setTasksFormData({
+                ...tasksEmptyForm,
+                ...normalizeTask(selectedTask)
+            });
+
+            setAttachment(null);
+
+            setTasksMode("view");
+
+        } catch (error) {
+
+            console.error(
+                "View Task Error:",
+                error.response?.data || error
+            );
+
+            alert("Unable to open task");
+
+        } finally {
+
+            setLoading(false);
+
+        }
     };
 
-
-    // =================================================
+    // =====================================================
     // EDIT TASK
-    // =================================================
+    // =====================================================
 
-    const tasksHandleEdit = (task) => {
+    const tasksHandleEdit = async (task) => {
 
-        tasksHandleView(task);
+        await tasksHandleView(task);
 
         setTasksMode("edit");
     };
 
+    // =====================================================
+    // BUILD FORMDATA
+    // =====================================================
 
-    // =================================================
-    // CREATE / UPDATE TASK
-    // =================================================
+    const buildTaskFormData = () => {
 
-    const tasksHandleSubmit = (e) => {
+        const formData = new FormData();
 
-        e.preventDefault();
+        formData.append("title", tasksFormData.title);
+        formData.append("taskType", tasksFormData.taskType);
+        formData.append("module", tasksFormData.module);
+        formData.append("assignedMentor", tasksFormData.assignedMentor);
+        formData.append("startDate", tasksFormData.startDate);
+        formData.append("dueDate", tasksFormData.dueDate);
+        formData.append("description", tasksFormData.description);
+        formData.append("totalMarks", tasksFormData.totalMarks || 0);
+        formData.append("status", tasksFormData.status);
+        formData.append("audience", tasksFormData.audience);
+
+        formData.append(
+            "branch",
+            JSON.stringify(tasksFormData.branch)
+        );
+
+        formData.append(
+            "batches",
+            JSON.stringify(tasksFormData.batches)
+        );
+
+        formData.append(
+            "categories",
+            JSON.stringify(tasksFormData.categories)
+        );
+
+        formData.append(
+            "courses",
+            JSON.stringify(tasksFormData.courses)
+        );
+
+        formData.append(
+            "individualInterns",
+            JSON.stringify(tasksFormData.individualInterns)
+        );
+
+        if (attachment) {
+            formData.append("attachments", attachment);
+        }
+
+        return formData;
+    };
+
+    // =====================================================
+    // VALIDATE FORM
+    // =====================================================
+
+    const validateTask = () => {
 
         if (
-            tasksFormData.startDate &&
             tasksFormData.dueDate &&
+            tasksFormData.startDate &&
             tasksFormData.dueDate < tasksFormData.startDate
         ) {
             alert("Due Date cannot be earlier than Start Date.");
-            return;
+            return false;
         }
 
-        if (
-            tasksFormData.totalMarks !== "" &&
-            tasksFormData.achievedMarks !== "" &&
-            Number(tasksFormData.achievedMarks) > Number(tasksFormData.totalMarks)
-        ) {
-            alert("Achieved Marks cannot exceed Total Marks.");
-            return;
-        }
-
-        if (tasksFormData.branches.length === 0) {
+        if (!tasksFormData.branch.length) {
             alert("Please select at least one branch.");
-            return;
+            return false;
         }
 
         if (!tasksFormData.audience) {
             alert("Please select an audience.");
-            return;
+            return false;
         }
 
         if (
-            tasksFormData.audience === "Batches" &&
-            tasksFormData.batches.length === 0
+            tasksFormData.audience === "By batches" &&
+            !tasksFormData.batches.length
         ) {
             alert("Please select at least one batch.");
-            return;
+            return false;
         }
 
         if (
-            tasksFormData.audience === "Course" &&
-            tasksFormData.courses.length === 0
+            tasksFormData.audience === "By Courses" &&
+            !tasksFormData.courses.length
         ) {
             alert("Please select at least one course.");
-            return;
+            return false;
         }
 
         if (
-            tasksFormData.audience === "Individual Interns" &&
-            tasksFormData.interns.length === 0
+            tasksFormData.audience === "By Category" &&
+            !tasksFormData.categories.length
+        ) {
+            alert("Please select at least one category.");
+            return false;
+        }
+
+        if (
+            tasksFormData.audience === "Individual interns" &&
+            !tasksFormData.individualInterns.length
         ) {
             alert("Please select at least one intern.");
-            return;
+            return false;
         }
 
-        const tasksData = {
-            ...tasksFormData
-        };
-
-        if (tasksMode === "create") {
-
-            const tasksNewItem = {
-                ...tasksData,
-                id: Date.now()
-            };
-
-            setTasksList(prev => [
-                ...prev,
-                tasksNewItem
-            ]);
-
-        } else {
-
-            setTasksList(prev =>
-                prev.map(task =>
-                    task.id === tasksSelectedId
-                        ? { ...task, ...tasksData }
-                        : task
-                )
-            );
-
-        }
-
-        setTasksMode("list");
-
-        setTasksSelectedId(null);
-
-        setTasksFormData({
-            ...tasksEmptyForm
-        });
+        return true;
     };
 
+    // =====================================================
+    // CREATE / UPDATE TASK
+    // =====================================================
 
-    // =================================================
+    const tasksHandleSubmit = async (e) => {
+
+        e.preventDefault();
+
+        if (!validateTask()) return;
+
+        try {
+
+            setLoading(true);
+
+            const formData = buildTaskFormData();
+
+            if (tasksMode === "create") {
+
+                await createtask(formData);
+
+                alert("Task created successfully.");
+
+            } else {
+
+                await updatetask(tasksSelectedId, formData);
+
+                alert("Task updated successfully.");
+
+            }
+
+            await fetchTasks();
+
+            setTasksMode("list");
+
+            setTasksSelectedId(null);
+
+            setTasksFormData({
+                ...tasksEmptyForm
+            });
+
+            setAttachment(null);
+
+        } catch (error) {
+
+            console.error(
+                "Save Task Error:",
+                error.response?.data || error
+            );
+
+            alert(
+                error.response?.data?.message ||
+                "Unable to save task"
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+
+    // =====================================================
     // DELETE TASK
-    // =================================================
+    // =====================================================
 
-    const tasksHandleDelete = (id) => {
+    const tasksHandleDelete = async (id) => {
 
         const confirmed = window.confirm(
-            "Are you sure you want to delete this task?"
+            "Are you sure you want to permanently delete this task?"
         );
 
         if (!confirmed) return;
 
-        setTasksList(prev =>
-            prev.filter(task => task.id !== id)
-        );
+        try {
 
-        setTasksMode("list");
+            setLoading(true);
 
-        setTasksSelectedId(null);
+            await removetask(id);
+
+            alert("Task permanently deleted.");
+
+            await fetchTasks();
+
+            setTasksMode("list");
+
+            setTasksSelectedId(null);
+
+            setTasksFormData({
+                ...tasksEmptyForm
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Delete Task Error:",
+                error.response?.data || error
+            );
+
+            alert(
+                error.response?.data?.message ||
+                "Unable to delete task"
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
     };
 
-
-    // =================================================
+    // =====================================================
     // CANCEL / BACK
-    // =================================================
+    // =====================================================
 
     const tasksHandleCancel = () => {
 
         if (tasksMode === "edit") {
 
             const originalTask = tasksList.find(
-                task => task.id === tasksSelectedId
+                task => task._id === tasksSelectedId
             );
 
             if (originalTask) {
 
                 setTasksFormData({
-                    ...originalTask,
-                    branches: [...originalTask.branches],
-                    batches: [...originalTask.batches],
-                    courses: [...originalTask.courses],
-                    interns: [...originalTask.interns],
-                    attachments: [...originalTask.attachments],
-                    uploads: [...originalTask.uploads]
+                    ...tasksEmptyForm,
+                    ...normalizeTask(originalTask)
                 });
+
+                setAttachment(null);
 
                 setTasksMode("view");
 
@@ -1236,40 +1452,55 @@ const Tasks = () => {
         setTasksFormData({
             ...tasksEmptyForm
         });
+
+        setAttachment(null);
     };
 
-
-    // =================================================
+    // =====================================================
     // FILTER TASKS
-    // =================================================
+    // =====================================================
 
     const tasksFilteredList = useMemo(() => {
 
         return tasksList.filter(task => {
 
+            const mentorName = getName(
+                task.assignedMentor,
+                ["fullName", "name", "email"]
+            );
+
+            const branchNames = (task.branch || [])
+                .map(item => item.branchName || "")
+                .join(" ");
+
             const searchMatch = [
                 task.title,
-                task.mentor,
+                mentorName,
                 task.module,
-                task.type
-            ].join(" ").toLowerCase()
+                task.taskType,
+                branchNames
+            ]
+                .join(" ")
+                .toLowerCase()
                 .includes(tasksSearch.toLowerCase());
 
             const typeMatch =
                 tasksTypeFilter === "all" ||
-                task.type === tasksTypeFilter;
+                task.taskType === tasksTypeFilter;
 
             const statusMatch =
                 tasksStatusFilter === "all" ||
-                task.status.toLowerCase() === tasksStatusFilter;
+                task.status === tasksStatusFilter;
 
             const audienceMatch =
                 tasksAudienceFilter === "all" ||
-                task.audience.toLowerCase() === tasksAudienceFilter.toLowerCase();
+                task.audience === tasksAudienceFilter;
 
             const branchMatch =
                 tasksBranchFilter === "all" ||
-                task.branches.includes(tasksBranchFilter);
+                (task.branch || []).some(
+                    item => getId(item) === tasksBranchFilter
+                );
 
             return (
                 searchMatch &&
@@ -1278,7 +1509,6 @@ const Tasks = () => {
                 audienceMatch &&
                 branchMatch
             );
-
         });
 
     }, [
@@ -1290,14 +1520,13 @@ const Tasks = () => {
         tasksBranchFilter
     ]);
 
-
-    // =================================================
+    // =====================================================
     // EXPORT CSV
-    // =================================================
+    // =====================================================
 
     const tasksHandleExport = () => {
 
-        if (tasksFilteredList.length === 0) {
+        if (!tasksFilteredList.length) {
             alert("No tasks available to export.");
             return;
         }
@@ -1316,33 +1545,43 @@ const Tasks = () => {
             "Selected Audience"
         ];
 
-        const rows = tasksFilteredList.map(task => [
+        const rows = tasksFilteredList.map(task => {
 
-            task.title,
-            task.type,
-            task.module,
-            task.mentor,
-            task.startDate,
-            task.dueDate,
-            task.totalMarks,
-            task.status,
-            task.branches.join("; "),
-            task.audience,
+            const mentorName = getName(
+                task.assignedMentor,
+                ["fullName", "name", "email"]
+            );
 
-            [
-                ...task.batches,
-                ...task.courses,
-                ...task.interns
-            ].join("; ")
+            const selectedAudience = [
+                ...(task.batches || []).map(item => item.batchName),
+                ...(task.categories || []).map(item => item.categoryName),
+                ...(task.courses || []).map(item => item.courseName),
+                ...(task.individualInterns || []).map(item => item.fullName)
+            ].filter(Boolean).join("; ");
 
-        ]);
+            return [
+                task.title,
+                task.taskType,
+                task.module,
+                mentorName,
+                getDateValue(task.startDate),
+                getDateValue(task.dueDate),
+                task.totalMarks,
+                task.status,
+                (task.branch || [])
+                    .map(item => item.branchName)
+                    .join("; "),
+                task.audience,
+                selectedAudience
+            ];
+        });
 
         const csv = [
             headers,
             ...rows
         ].map(row =>
             row.map(value =>
-                `"${String(value || "").replace(/"/g, '""')}"`
+                `"${String(value ?? "").replace(/"/g, '""')}"`
             ).join(",")
         ).join("\n");
 
@@ -1356,7 +1595,6 @@ const Tasks = () => {
         const link = document.createElement("a");
 
         link.href = url;
-
         link.download = "tasks.csv";
 
         document.body.appendChild(link);
@@ -1368,10 +1606,9 @@ const Tasks = () => {
         URL.revokeObjectURL(url);
     };
 
-
-    // =================================================
+    // =====================================================
     // RESET FILTERS
-    // =================================================
+    // =====================================================
 
     const tasksResetFilters = () => {
 
@@ -1382,18 +1619,34 @@ const Tasks = () => {
         setTasksBranchFilter("all");
     };
 
+    // =====================================================
+    // SELECTED TASK
+    // =====================================================
 
-    // =================================================
-    // MAIN JSX
-    // =================================================
+    const tasksSelected = tasksList.find(
+        task => task._id === tasksSelectedId
+    );
+
+    // =====================================================
+    // RENDER
+    // =====================================================
+
+    if (pageLoading) {
+
+        return (
+            <div className="tasks-page">
+                <div className="tasks-empty-state">
+                    Loading tasks...
+                </div>
+            </div>
+        );
+    }
 
     return (
 
         <div className="tasks-page">
 
             {/* HEADER */}
-
-            
 
             {/* TOP NAVIGATION */}
 
@@ -1403,7 +1656,11 @@ const Tasks = () => {
 
                     <button
                         type="button"
-                        className={tasksMode === "list" ? "tasks-tab-active" : ""}
+                        className={
+                            tasksMode === "list"
+                                ? "tasks-tab-active"
+                                : ""
+                        }
                         onClick={() => {
                             setTasksMode("list");
                             setTasksSelectedId(null);
@@ -1414,14 +1671,17 @@ const Tasks = () => {
 
                     <button
                         type="button"
-                        className={tasksMode === "create" ? "tasks-tab-active" : ""}
+                        className={
+                            tasksMode === "create"
+                                ? "tasks-tab-active"
+                                : ""
+                        }
                         onClick={tasksHandleNew}
                     >
                         New Task
                     </button>
 
                 </div>
-
 
                 <button
                     type="button"
@@ -1433,7 +1693,6 @@ const Tasks = () => {
                 </button>
 
             </div>
-
 
             {/* TASK LIST */}
 
@@ -1453,70 +1712,94 @@ const Tasks = () => {
                                 type="text"
                                 placeholder="Search Tasks"
                                 value={tasksSearch}
-                                onChange={e => setTasksSearch(e.target.value)}
+                                onChange={e =>
+                                    setTasksSearch(e.target.value)
+                                }
                             />
 
                             {tasksSearch && (
+
                                 <button
                                     type="button"
                                     onClick={() => setTasksSearch("")}
                                 >
                                     <MdClose />
                                 </button>
+
                             )}
 
                         </div>
 
-
                         <select
                             value={tasksTypeFilter}
-                            onChange={e => setTasksTypeFilter(e.target.value)}
+                            onChange={e =>
+                                setTasksTypeFilter(e.target.value)
+                            }
                         >
-                            <option value="all">All Types</option>
-                            <option value="Daily Task">Daily Task</option>
-                            <option value="Weekly Task">Weekly Task</option>
-                            <option value="Assignment">Assignment</option>
-                            <option value="Project">Project</option>
-                        </select>
 
+                            <option value="all">All Types</option>
+
+                            {taskTypes.map(type => (
+                                <option key={type} value={type}>
+                                    {type}
+                                </option>
+                            ))}
+
+                        </select>
 
                         <select
                             value={tasksStatusFilter}
-                            onChange={e => setTasksStatusFilter(e.target.value)}
+                            onChange={e =>
+                                setTasksStatusFilter(e.target.value)
+                            }
                         >
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="pending">Pending</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="complete">Complete</option>
-                        </select>
 
+                            <option value="all">All Status</option>
+
+                            {taskStatuses.map(status => (
+                                <option key={status} value={status}>
+                                    {status}
+                                </option>
+                            ))}
+
+                        </select>
 
                         <select
                             value={tasksAudienceFilter}
-                            onChange={e => setTasksAudienceFilter(e.target.value)}
+                            onChange={e =>
+                                setTasksAudienceFilter(e.target.value)
+                            }
                         >
+
                             <option value="all">All Audience</option>
-                            {tasksAudienceOptions.map(item => (
+
+                            {audienceOptions.map(item => (
                                 <option key={item} value={item}>
                                     {item}
                                 </option>
                             ))}
-                        </select>
 
+                        </select>
 
                         <select
                             value={tasksBranchFilter}
-                            onChange={e => setTasksBranchFilter(e.target.value)}
+                            onChange={e =>
+                                setTasksBranchFilter(e.target.value)
+                            }
                         >
+
                             <option value="all">All Branches</option>
-                            {tasksBranches.map(item => (
-                                <option key={item} value={item}>
-                                    {item}
+
+                            {dropdowns.branches.map(item => (
+                                <option
+                                    key={getId(item)}
+                                    value={getId(item)}
+                                >
+                                    {item.branchName}
                                 </option>
                             ))}
-                        </select>
 
+                        </select>
 
                         <button
                             type="button"
@@ -1527,7 +1810,6 @@ const Tasks = () => {
                         </button>
 
                     </div>
-
 
                     {/* TABLE */}
 
@@ -1554,12 +1836,11 @@ const Tasks = () => {
 
                                 </thead>
 
-
                                 <tbody>
 
                                     {tasksFilteredList.map((task, index) => (
 
-                                        <tr key={task.id}>
+                                        <tr key={task._id}>
 
                                             <td>{index + 1}</td>
 
@@ -1567,23 +1848,42 @@ const Tasks = () => {
                                                 {task.title}
                                             </td>
 
-                                            <td>{task.type}</td>
-
-                                            <td>{task.mentor}</td>
-
-                                            <td>{task.startDate || "-"}</td>
-
-                                            <td>{task.dueDate || "-"}</td>
+                                            <td>{task.taskType}</td>
 
                                             <td>
-                                                <span className={`tasks-status tasks-status-${task.status.toLowerCase()}`}>
+                                                {getName(
+                                                    task.assignedMentor,
+                                                    ["fullName", "name", "email"]
+                                                )}
+                                            </td>
+
+                                            <td>
+                                                {getDateValue(task.startDate) || "-"}
+                                            </td>
+
+                                            <td>
+                                                {getDateValue(task.dueDate) || "-"}
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    className={`tasks-status tasks-status-${(
+                                                        task.status || ""
+                                                    ).toLowerCase().replace(/\s+/g, "-")}`}
+                                                >
                                                     {task.status}
                                                 </span>
+
                                             </td>
 
                                             <td>{task.audience || "-"}</td>
 
-                                            <td>{task.branches.join(", ") || "-"}</td>
+                                            <td>
+                                                {(task.branch || [])
+                                                    .map(item => item.branchName)
+                                                    .join(", ") || "-"}
+                                            </td>
 
                                             <td>
 
@@ -1592,7 +1892,9 @@ const Tasks = () => {
                                                     <button
                                                         type="button"
                                                         title="View"
-                                                        onClick={() => tasksHandleView(task)}
+                                                        onClick={() =>
+                                                            tasksHandleView(task)
+                                                        }
                                                     >
                                                         <MdVisibility />
                                                     </button>
@@ -1600,7 +1902,9 @@ const Tasks = () => {
                                                     <button
                                                         type="button"
                                                         title="Edit"
-                                                        onClick={() => tasksHandleEdit(task)}
+                                                        onClick={() =>
+                                                            tasksHandleEdit(task)
+                                                        }
                                                     >
                                                         <MdEdit />
                                                     </button>
@@ -1609,7 +1913,9 @@ const Tasks = () => {
                                                         type="button"
                                                         title="Delete"
                                                         className="tasks-delete-icon"
-                                                        onClick={() => tasksHandleDelete(task.id)}
+                                                        onClick={() =>
+                                                            tasksHandleDelete(task._id)
+                                                        }
                                                     >
                                                         <MdDelete />
                                                     </button>
@@ -1640,7 +1946,6 @@ const Tasks = () => {
 
                     )}
 
-
                     {/* RESULT COUNT */}
 
                     <div className="tasks-list-footer">
@@ -1655,7 +1960,6 @@ const Tasks = () => {
 
             )}
 
-
             {/* CREATE TASK */}
 
             {tasksMode === "create" && (
@@ -1668,12 +1972,15 @@ const Tasks = () => {
                         setTasksFormData={setTasksFormData}
                         tasksOnSubmit={tasksHandleSubmit}
                         tasksOnCancel={tasksHandleCancel}
+                        dropdowns={dropdowns}
+                        attachment={attachment}
+                        setAttachment={setAttachment}
+                        loading={loading}
                     />
 
                 </div>
 
             )}
-
 
             {/* VIEW TASK */}
 
@@ -1686,13 +1993,19 @@ const Tasks = () => {
                         tasksFormData={tasksFormData}
                         setTasksFormData={setTasksFormData}
                         tasksOnCancel={tasksHandleCancel}
-                        tasksOnDelete={() => tasksHandleDelete(tasksSelected.id)}
+                        tasksOnDelete={() =>
+                            tasksHandleDelete(tasksSelected._id)
+                        }
+                        dropdowns={dropdowns}
+                        selectedTask={tasksSelected}
+                        attachment={attachment}
+                        setAttachment={setAttachment}
+                        loading={loading}
                     />
 
                 </div>
 
             )}
-
 
             {/* EDIT TASK */}
 
@@ -1706,6 +2019,11 @@ const Tasks = () => {
                         setTasksFormData={setTasksFormData}
                         tasksOnSubmit={tasksHandleSubmit}
                         tasksOnCancel={tasksHandleCancel}
+                        dropdowns={dropdowns}
+                        selectedTask={tasksSelected}
+                        attachment={attachment}
+                        setAttachment={setAttachment}
+                        loading={loading}
                     />
 
                 </div>
@@ -1713,9 +2031,7 @@ const Tasks = () => {
             )}
 
         </div>
-
     );
-
 };
 
 export default Tasks;
