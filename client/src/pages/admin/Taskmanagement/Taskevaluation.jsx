@@ -1,659 +1,512 @@
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import {
-    MdPersonOutline,
-    MdAssignment,
-    MdFileDownload,
-    MdSearch,
-    MdVisibility,
-    MdClose
+  MdAssignment,
+  MdFileDownload,
+  MdSearch,
+  MdVisibility,
+  MdClose
 } from "react-icons/md";
 
+import AdminService from "../../../services/admin-api-services/AdminService";
 import "./Taskevaluation.css";
 
-
-// =====================================================
-// SAMPLE DATA
-// Replace with backend API data later
-// =====================================================
-
-const tasksEvaluationModules = [
-    {
-        id: "module-1",
-        name: "Frontend Development",
-        tasks: [
-            {
-                id: "task-1",
-                title: "HTML and CSS Assignment"
-            },
-            {
-                id: "task-2",
-                title: "JavaScript Assignment"
-            },
-            {
-                id: "task-3",
-                title: "React Project"
-            }
-        ]
-    },
-    {
-        id: "module-2",
-        name: "Backend Development",
-        tasks: [
-            {
-                id: "task-4",
-                title: "Node.js Assignment"
-            },
-            {
-                id: "task-5",
-                title: "Express.js Project"
-            },
-            {
-                id: "task-6",
-                title: "MongoDB Assignment"
-            }
-        ]
-    },
-    {
-        id: "module-3",
-        name: "Python Development",
-        tasks: [
-            {
-                id: "task-7",
-                title: "Python Basics"
-            },
-            {
-                id: "task-8",
-                title: "Python Mini Project"
-            }
-        ]
-    }
-];
-
-
-// Initially empty.
-// Replace with API submissions after integration.
-
-const tasksEvaluationInitialSubmissions = [];
-
-
-// =====================================================
-// MAIN COMPONENT
-// =====================================================
+const API_ORIGIN =
+  import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
+  "http://localhost:7000";
 
 const Taskevaluation = () => {
+  const {
+    takeevaluationmodules,
+    takeevaluationtasks,
+    takesubmissions,
+    gradesubmission
+  } = AdminService();
 
-    // -------------------------------------------------
-    // STATES
-    // -------------------------------------------------
+  const [modules, setModules] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [submissions, setSubmissions] = useState([]);
 
-    const [tasksEvaluationSelectedModule, setTasksEvaluationSelectedModule] =
-        useState("all");
+  const [selectedModule, setSelectedModule] = useState("all");
+  const [selectedTask, setSelectedTask] = useState("");
 
-    const [tasksEvaluationSelectedTask, setTasksEvaluationSelectedTask] =
-        useState("");
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const [tasksEvaluationSubmissions, setTasksEvaluationSubmissions] =
-        useState(tasksEvaluationInitialSubmissions);
+  // LOAD MODULES AND TASKS
+  useEffect(() => {
+    const loadModules = async () => {
+      try {
+        setLoading(true);
 
-    const [tasksEvaluationSearch, setTasksEvaluationSearch] =
-        useState("");
+        const response = await takeevaluationmodules();
+        setModules(response.modules || []);
 
-
-    // -------------------------------------------------
-    // GET AVAILABLE TASKS
-    // -------------------------------------------------
-
-    const tasksEvaluationAvailableTasks = useMemo(() => {
-
-        if (tasksEvaluationSelectedModule === "all") {
-
-            return tasksEvaluationModules.flatMap(module =>
-                module.tasks.map(task => ({
-                    ...task,
-                    moduleName: module.name,
-                    moduleId: module.id
-                }))
-            );
-
-        }
-
-        const selectedModule = tasksEvaluationModules.find(
-            module => module.id === tasksEvaluationSelectedModule
+        const taskResponse = await takeevaluationtasks("all");
+        setTasks(taskResponse.tasks || []);
+      } catch (error) {
+        console.error(
+          "Task Evaluation Initial Load Error:",
+          error.response?.data || error
         );
 
-        if (!selectedModule) return [];
-
-        return selectedModule.tasks.map(task => ({
-            ...task,
-            moduleName: selectedModule.name,
-            moduleId: selectedModule.id
-        }));
-
-    }, [tasksEvaluationSelectedModule]);
-
-
-    // -------------------------------------------------
-    // SELECTED TASK
-    // -------------------------------------------------
-
-    const tasksEvaluationCurrentTask =
-        tasksEvaluationAvailableTasks.find(
-            task => task.id === tasksEvaluationSelectedTask
+        alert(
+          error.response?.data?.message ||
+          "Unable to load evaluation data"
         );
-
-
-    // -------------------------------------------------
-    // FILTER SUBMISSIONS
-    // -------------------------------------------------
-
-    const tasksEvaluationFilteredSubmissions = useMemo(() => {
-
-        return tasksEvaluationSubmissions.filter(submission => {
-
-            const searchText = [
-
-                submission.internName,
-                submission.internId,
-                submission.taskName,
-                submission.status
-
-            ].join(" ").toLowerCase();
-
-            return searchText.includes(
-                tasksEvaluationSearch.toLowerCase()
-            );
-
-        });
-
-    }, [
-        tasksEvaluationSubmissions,
-        tasksEvaluationSearch
-    ]);
-
-
-    // =================================================
-    // MODULE CHANGE
-    // =================================================
-
-    const tasksEvaluationHandleModuleChange = (e) => {
-
-        setTasksEvaluationSelectedModule(e.target.value);
-
-        // Reset selected task when module changes
-        setTasksEvaluationSelectedTask("");
-
-        setTasksEvaluationSubmissions([]);
-
-        setTasksEvaluationSearch("");
-
+      } finally {
+        setLoading(false);
+      }
     };
 
-
-    // =================================================
-    // TASK CHANGE
-    // =================================================
-
-    const tasksEvaluationHandleTaskChange = (e) => {
-
-        const taskId = e.target.value;
-
-        setTasksEvaluationSelectedTask(taskId);
-
-        setTasksEvaluationSearch("");
-
-        // Clear previous task submissions.
-        // Load the selected task's submissions from API here.
-
-        setTasksEvaluationSubmissions([]);
-
-    };
-
-
-    // =================================================
-    // EXPORT SUBMISSIONS
-    // =================================================
-
-    const tasksEvaluationHandleExport = () => {
-
-        if (!tasksEvaluationFilteredSubmissions.length) {
-
-            alert("No submissions available to export.");
-
-            return;
-
-        }
-
-        const headers = [
-            "Intern Name",
-            "Intern ID",
-            "Task",
-            "Submitted Date",
-            "Status",
-            "Marks"
-        ];
-
-        const rows = tasksEvaluationFilteredSubmissions.map(
-            submission => [
-
-                submission.internName,
-                submission.internId,
-                submission.taskName,
-                submission.submittedDate,
-                submission.status,
-                submission.marks ?? ""
-
-            ]
-        );
-
-        const csv = [
-
-            headers,
-            ...rows
-
-        ].map(row =>
-
-            row.map(value =>
-                `"${String(value ?? "").replace(/"/g, '""')}"`
-            ).join(",")
-
-        ).join("\n");
-
-
-        const blob = new Blob(
-
-            ["\uFEFF" + csv],
-
-            { type: "text/csv;charset=utf-8;" }
-
-        );
-
-        const url = URL.createObjectURL(blob);
-
-        const link = document.createElement("a");
-
-        link.href = url;
-
-        link.download = "task-evaluation-submissions.csv";
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        document.body.removeChild(link);
-
-        URL.revokeObjectURL(url);
-
-    };
-
-
-    // =================================================
-    // VIEW SUBMISSION
-    // =================================================
-
-    const tasksEvaluationHandleView = (submission) => {
-
-        if (submission.fileUrl) {
-
-            window.open(
-                submission.fileUrl,
-                "_blank",
-                "noopener,noreferrer"
-            );
-
-        } else {
-
-            alert("Submission file is not available.");
-
-        }
-
-    };
-
-
-    // =================================================
-    // MAIN JSX
-    // =================================================
-
-    return (
-
-        <div className="tasks-evaluation-page">
-
-
-          
-
-            {/* =========================================
-                TOP NAVIGATION
-            ========================================= */}
-
-            <div className="tasks-evaluation-top-navigation">
-
-                <button
-                    type="button"
-                    className="tasks-evaluation-tab-active"
-                >
-                    Submissions List
-                </button>
-
-
-                <button
-                    type="button"
-                    className="tasks-evaluation-export-btn"
-                    onClick={tasksEvaluationHandleExport}
-                    disabled={!tasksEvaluationFilteredSubmissions.length}
-                >
-
-                    <MdFileDownload />
-
-                    Export
-
-                </button>
-
-            </div>
-
-
-            {/* =========================================
-                MAIN CONTENT
-            ========================================= */}
-
-            <div className="tasks-evaluation-content-container">
-
-
-                {/* =====================================
-                    FILTER SECTION
-                ===================================== */}
-
-                <div className="tasks-evaluation-filter-container">
-
-
-                    {/* MODULE FILTER */}
-
-                    <div className="tasks-evaluation-filter-group">
-
-                        <label htmlFor="tasks-evaluation-module">
-
-                            FILTER BY MODULE
-
-                        </label>
-
-                        <select
-                            id="tasks-evaluation-module"
-                            value={tasksEvaluationSelectedModule}
-                            onChange={tasksEvaluationHandleModuleChange}
-                        >
-
-                            <option value="all">
-                                All Modules
-                            </option>
-
-                            {tasksEvaluationModules.map(module => (
-
-                                <option
-                                    key={module.id}
-                                    value={module.id}
-                                >
-                                    {module.name}
-                                </option>
-
-                            ))}
-
-                        </select>
-
-                    </div>
-
-
-                    {/* TASK FILTER */}
-
-                    <div className="tasks-evaluation-filter-group">
-
-                        <label htmlFor="tasks-evaluation-task">
-
-                            SELECT TASK TO VIEW SUBMISSIONS
-
-                        </label>
-
-                        <select
-                            id="tasks-evaluation-task"
-                            value={tasksEvaluationSelectedTask}
-                            onChange={tasksEvaluationHandleTaskChange}
-                        >
-
-                            <option value="">
-                                Choose Task
-                            </option>
-
-                            {tasksEvaluationAvailableTasks.map(task => (
-
-                                <option
-                                    key={task.id}
-                                    value={task.id}
-                                >
-                                    {task.title}
-                                </option>
-
-                            ))}
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-                {/* =====================================
-                    NO TASK SELECTED
-                ===================================== */}
-
-                {!tasksEvaluationSelectedTask && (
-
-                    <div className="tasks-evaluation-empty-container">
-
-                        <div className="tasks-evaluation-empty-content">
-
-                            <MdAssignment className="tasks-evaluation-empty-icon" />
-
-                            <h3>No task selected</h3>
-
-                            <p>
-                                Please choose a task from the dropdown list above
-                                to load its submissions.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                )}
-
-
-                {/* =====================================
-                    SELECTED TASK - SUBMISSIONS
-                ===================================== */}
-
-                {tasksEvaluationSelectedTask && (
-
-                    <div className="tasks-evaluation-submissions-container">
-
-
-                        {/* SELECTED TASK HEADER */}
-
-                        <div className="tasks-evaluation-submissions-header">
-
-                            <div>
-
-                                <h3>
-                                    {tasksEvaluationCurrentTask?.title}
-                                </h3>
-
-                                <p>
-                                    {tasksEvaluationCurrentTask?.moduleName}
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        {/* SEARCH */}
-
-                        <div className="tasks-evaluation-search-container">
-
-                            <div className="tasks-evaluation-search-box">
-
-                                <MdSearch />
-
-                                <input
-                                    id="tasks-evaluation-search"
-                                    type="text"
-                                    placeholder="Search Interns"
-                                    value={tasksEvaluationSearch}
-                                    onChange={e =>
-                                        setTasksEvaluationSearch(
-                                            e.target.value
-                                        )
-                                    }
-                                />
-
-                                {tasksEvaluationSearch && (
-
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setTasksEvaluationSearch("")
-                                        }
-                                    >
-                                        <MdClose />
-                                    </button>
-
-                                )}
-
-                            </div>
-
-                        </div>
-
-
-                        {/* SUBMISSION TABLE */}
-
-                        {tasksEvaluationFilteredSubmissions.length > 0 ? (
-
-                            <div className="tasks-evaluation-table-wrapper">
-
-                                <table className="tasks-evaluation-table">
-
-                                    <thead>
-
-                                        <tr>
-
-                                            <th>#</th>
-
-                                            <th>Intern Name</th>
-
-                                            <th>Intern ID</th>
-
-                                            <th>Submitted Date</th>
-
-                                            <th>Status</th>
-
-                                            <th>Marks</th>
-
-                                            <th>Actions</th>
-
-                                        </tr>
-
-                                    </thead>
-
-
-                                    <tbody>
-
-                                        {tasksEvaluationFilteredSubmissions.map(
-                                            (submission, index) => (
-
-                                                <tr key={submission.id}>
-
-                                                    <td>{index + 1}</td>
-
-                                                    <td className="tasks-evaluation-intern-name">
-                                                        {submission.internName}
-                                                    </td>
-
-                                                    <td>
-                                                        {submission.internId}
-                                                    </td>
-
-                                                    <td>
-                                                        {submission.submittedDate}
-                                                    </td>
-
-                                                    <td>
-
-                                                        <span
-                                                            className={`tasks-evaluation-status tasks-evaluation-status-${submission.status?.toLowerCase().replace(/\s+/g, "-")}`}
-                                                        >
-                                                            {submission.status}
-                                                        </span>
-
-                                                    </td>
-
-                                                    <td>
-                                                        {submission.marks ?? "-"}
-                                                    </td>
-
-                                                    <td>
-
-                                                        <button
-                                                            type="button"
-                                                            className="tasks-evaluation-view-btn"
-                                                            title="View Submission"
-                                                            onClick={() =>
-                                                                tasksEvaluationHandleView(
-                                                                    submission
-                                                                )
-                                                            }
-                                                        >
-
-                                                            <MdVisibility />
-
-                                                        </button>
-
-                                                    </td>
-
-                                                </tr>
-
-                                            )
-                                        )}
-
-                                    </tbody>
-
-                                </table>
-
-                            </div>
-
-                        ) : (
-
-                            <div className="tasks-evaluation-no-submissions">
-
-                                <MdAssignment />
-
-                                <h3>No submissions available</h3>
-
-                                <p>
-                                    There are currently no submissions for this task.
-                                </p>
-
-                            </div>
-
-                        )}
-
-                    </div>
-
-                )}
-
-            </div>
+    loadModules();
+  }, []);
+
+  // MODULE CHANGE
+  const handleModuleChange = async (e) => {
+    const module = e.target.value;
+
+    setSelectedModule(module);
+    setSelectedTask("");
+    setSubmissions([]);
+    setSearch("");
+
+    try {
+      setLoading(true);
+
+      const response = await takeevaluationtasks(module);
+      setTasks(response.tasks || []);
+    } catch (error) {
+      console.error(
+        "Fetch Evaluation Tasks Error:",
+        error.response?.data || error
+      );
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to load tasks"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // TASK CHANGE
+  const handleTaskChange = async (e) => {
+    const taskId = e.target.value;
+
+    setSelectedTask(taskId);
+    setSubmissions([]);
+    setSearch("");
+
+    if (!taskId) return;
+
+    try {
+      setLoading(true);
+
+      const response = await takesubmissions(taskId);
+      setSubmissions(response.submissions || []);
+    } catch (error) {
+      console.error(
+        "Fetch Submissions Error:",
+        error.response?.data || error
+      );
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to load submissions"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // SEARCH FILTER
+  const filteredSubmissions = useMemo(() => {
+    const searchText = search.toLowerCase();
+
+    return submissions.filter((submission) => {
+      const intern = submission.intern || {};
+
+      const text = [
+        intern.fullName,
+        intern.admissionNumber,
+        intern.email,
+        submission.status
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return text.includes(searchText);
+    });
+  }, [submissions, search]);
+
+  // OPEN SUBMISSION FILE
+  const handleView = (submission) => {
+    const file = submission.attachments?.[0];
+
+    if (!file) {
+      alert("No submission attachment available.");
+      return;
+    }
+
+    const fileUrl = file.startsWith("http")
+      ? file
+      : `${API_ORIGIN}${file.startsWith("/") ? "" : "/"}${file}`;
+
+    window.open(fileUrl, "_blank", "noopener,noreferrer");
+  };
+
+  // EVALUATE SUBMISSION
+  const handleEvaluate = async (submission) => {
+    const task = tasks.find(
+      (item) => item._id === selectedTask
+    );
+
+    const marksInput = window.prompt(
+      `Enter marks (out of ${task?.totalMarks ?? 0}):`,
+      submission.achievedMarks ?? 0
+    );
+
+    if (marksInput === null) return;
+
+    const marks = Number(marksInput);
+
+    if (
+      !Number.isFinite(marks) ||
+      marks < 0 ||
+      marks > Number(task?.totalMarks ?? 0)
+    ) {
+      alert(`Enter marks between 0 and ${task?.totalMarks ?? 0}.`);
+      return;
+    }
+
+    const feedback = window.prompt(
+      "Enter feedback for the intern:",
+      submission.feedback || ""
+    );
+
+    if (feedback === null) return;
+
+    try {
+      setLoading(true);
+
+      await gradesubmission(submission._id, {
+        achievedMarks: marks,
+        feedback,
+        status: "Graded"
+      });
+
+      const response = await takesubmissions(selectedTask);
+      setSubmissions(response.submissions || []);
+
+      alert("Submission evaluated successfully.");
+    } catch (error) {
+      console.error(
+        "Evaluate Submission Error:",
+        error.response?.data || error
+      );
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to evaluate submission"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // EXPORT CSV
+  const handleExport = () => {
+    if (!filteredSubmissions.length) {
+      alert("No submissions available to export.");
+      return;
+    }
+
+    const headers = [
+      "Intern Name",
+      "Intern ID",
+      "Email",
+      "Submitted Date",
+      "Status",
+      "Marks",
+      "Feedback"
+    ];
+
+    const rows = filteredSubmissions.map((submission) => {
+      const intern = submission.intern || {};
+
+      return [
+        intern.fullName || "",
+        intern.admissionNumber || intern._id || "",
+        intern.email || "",
+        submission.createdAt
+          ? new Date(submission.createdAt).toLocaleString()
+          : "",
+        submission.status || "",
+        submission.achievedMarks ?? "",
+        submission.feedback || ""
+      ];
+    });
+
+    const csv = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((value) =>
+            `"${String(value ?? "").replace(/"/g, '""')}"`
+          )
+          .join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob(
+      ["\uFEFF" + csv],
+      { type: "text/csv;charset=utf-8;" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "task-evaluation-submissions.csv";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  };
+
+  const selectedTaskData = tasks.find(
+    (task) => task._id === selectedTask
+  );
+
+  return (
+    <div className="tasks-evaluation-page">
+
+      <div className="tasks-evaluation-top-navigation">
+        <button
+          type="button"
+          className="tasks-evaluation-tab-active"
+        >
+          Submissions List
+        </button>
+
+        <button
+          type="button"
+          className="tasks-evaluation-export-btn"
+          onClick={handleExport}
+          disabled={!filteredSubmissions.length}
+        >
+          <MdFileDownload />
+          Export
+        </button>
+      </div>
+
+      <div className="tasks-evaluation-content-container">
+
+        {/* FILTERS */}
+        <div className="tasks-evaluation-filter-container">
+
+          <div className="tasks-evaluation-filter-group">
+            <label htmlFor="tasks-evaluation-module">
+              FILTER BY MODULE
+            </label>
+
+            <select
+              id="tasks-evaluation-module"
+              value={selectedModule}
+              onChange={handleModuleChange}
+            >
+              <option value="all">All Modules</option>
+
+              {modules.map((module) => (
+                <option key={module} value={module}>
+                  {module}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="tasks-evaluation-filter-group">
+            <label htmlFor="tasks-evaluation-task">
+              SELECT TASK TO VIEW SUBMISSIONS
+            </label>
+
+            <select
+              id="tasks-evaluation-task"
+              value={selectedTask}
+              onChange={handleTaskChange}
+            >
+              <option value="">Choose Task</option>
+
+              {tasks.map((task) => (
+                <option key={task._id} value={task._id}>
+                  {task.title}
+                </option>
+              ))}
+            </select>
+          </div>
 
         </div>
 
-    );
+        {/* NO TASK SELECTED */}
+        {!selectedTask && (
+          <div className="tasks-evaluation-empty-container">
+            <div className="tasks-evaluation-empty-content">
+              <MdAssignment className="tasks-evaluation-empty-icon" />
 
+              <h3>No task selected</h3>
+
+              <p>
+                Please choose a task from the dropdown list above
+                to load its submissions.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* SELECTED TASK */}
+        {selectedTask && (
+          <div className="tasks-evaluation-submissions-container">
+
+            <div className="tasks-evaluation-submissions-header">
+              <div>
+                <h3>{selectedTaskData?.title}</h3>
+                <p>{selectedTaskData?.module}</p>
+                <p>
+                  Total Marks: {selectedTaskData?.totalMarks ?? 0}
+                </p>
+              </div>
+            </div>
+
+            {/* SEARCH */}
+            <div className="tasks-evaluation-search-container">
+              <div className="tasks-evaluation-search-box">
+                <MdSearch />
+
+                <input
+                  type="text"
+                  placeholder="Search Interns"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                  >
+                    <MdClose />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {loading ? (
+              <p>Loading submissions...</p>
+            ) : filteredSubmissions.length > 0 ? (
+
+              <div className="tasks-evaluation-table-wrapper">
+                <table className="tasks-evaluation-table">
+
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Intern Name</th>
+                      <th>Intern ID</th>
+                      <th>Submitted Date</th>
+                      <th>Status</th>
+                      <th>Marks</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredSubmissions.map((submission, index) => {
+                      const intern = submission.intern || {};
+
+                      return (
+                        <tr key={submission._id}>
+                          <td>{index + 1}</td>
+
+                          <td className="tasks-evaluation-intern-name">
+                            {intern.fullName || "Unknown Intern"}
+                          </td>
+
+                          <td>
+                            {intern.admissionNumber || intern._id || "-"}
+                          </td>
+
+                          <td>
+                            {submission.createdAt
+                              ? new Date(
+                                  submission.createdAt
+                                ).toLocaleDateString()
+                              : "-"}
+                          </td>
+
+                          <td>
+                            <span
+                              className={`tasks-evaluation-status tasks-evaluation-status-${(
+                                submission.status || ""
+                              ).toLowerCase().replace(/\s+/g, "-")}`}
+                            >
+                              {submission.status}
+                            </span>
+                          </td>
+
+                          <td>
+                            {submission.achievedMarks ?? 0}
+                            {" / "}
+                            {selectedTaskData?.totalMarks ?? 0}
+                          </td>
+
+                          <td>
+                            <button
+                              type="button"
+                              className="tasks-evaluation-view-btn"
+                              title="View Submission"
+                              onClick={() => handleView(submission)}
+                            >
+                              <MdVisibility />
+                            </button>
+
+                            <button
+                              type="button"
+                              className="tasks-evaluation-view-btn"
+                              title="Evaluate Submission"
+                              onClick={() => handleEvaluate(submission)}
+                              disabled={loading}
+                            >
+                              Evaluate
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+
+                </table>
+              </div>
+
+            ) : (
+              <div className="tasks-evaluation-no-submissions">
+                <MdAssignment />
+                <h3>No submissions available</h3>
+                <p>
+                  There are currently no submissions for this task.
+                </p>
+              </div>
+            )}
+
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
 };
 
 export default Taskevaluation;

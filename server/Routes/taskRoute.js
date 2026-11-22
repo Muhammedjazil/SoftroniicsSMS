@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const taskController = require("../Controllers/taskController");
+const taskSubmissionController = require("../Controllers/taskSubmissionController");
 const taskUpload = require("../Middleware/taskUpload");
 
 console.log("TASK ROUTE LOADED:", __filename);
@@ -33,5 +34,27 @@ router.put(
 
 // Permanently delete task
 router.delete("/:id", taskController.deleteTask);
+
+// Task Evaluation routes
+router.get(
+  "/evaluation/modules",
+  taskSubmissionController.getEvaluationModules
+);
+
+router.get(
+  "/evaluation/tasks",
+  taskSubmissionController.getEvaluationTasks
+);
+
+router.get(
+  "/:taskId/submissions",
+  taskSubmissionController.getTaskSubmissions
+);
+
+router.put(
+  "/submissions/:submissionId/grade",
+  taskSubmissionController.gradeSubmission
+);
+
 
 module.exports = router;

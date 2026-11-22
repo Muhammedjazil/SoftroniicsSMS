@@ -407,6 +407,48 @@ const AdminService = () => {
   };
 
 
+  // =====================================================
+  // TASK EVALUATION
+  // =====================================================
+
+  // Get module names for Task Evaluation
+  const takeevaluationmodules = async () => {
+    const response = await axiosPrivate.get(
+      "/taskmanagement/evaluation/modules"
+    );
+    return response.data;
+  };
+
+  // Get tasks by module
+  const takeevaluationtasks = async (module) => {
+    const response = await axiosPrivate.get(
+      "/taskmanagement/evaluation/tasks",
+      {
+        params: { module }
+      }
+    );
+    return response.data;
+  };
+
+  // Get submissions for a task
+  const takesubmissions = async (taskId) => {
+    const response = await axiosPrivate.get(
+      `/taskmanagement/${taskId}/submissions`
+    );
+    return response.data;
+  };
+
+  // Grade or reject a submission
+  const gradesubmission = async (submissionId, data) => {
+    const response = await axiosPrivate.put(
+      `/taskmanagement/submissions/${submissionId}/grade`,
+      data
+    );
+    return response.data;
+  };
+
+
+
   return {
     newrolecreate,
     takeroles,
@@ -469,7 +511,11 @@ const AdminService = () => {
     getmaterialdropdowns,
     creatematerial,
     updatematerial,
-    removematerial
+    removematerial,
+    takeevaluationmodules,
+takeevaluationtasks,
+takesubmissions,
+gradesubmission
   };
 };
 
