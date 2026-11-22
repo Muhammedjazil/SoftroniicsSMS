@@ -339,6 +339,197 @@ const handledeleteintern=async(id)=>{
   return response.data;
 }
    
+  // Get all tasks
+  const taketasks = async () => {
+    const response = await axiosPrivate.get("/taskmanagement");
+    return response.data;
+  };
+
+  // Get task by ID
+  const taketaskbyid = async (id) => {
+    const response = await axiosPrivate.get(`/taskmanagement/${id}`);
+    return response.data;
+  };
+
+  // Get dropdown data
+  const gettaskdropdowns = async () => {
+    const response = await axiosPrivate.get("/taskmanagement/dropdowns");
+    return response.data;
+  };
+
+  // Create task
+  const createtask = async (formData) => {
+    const response = await axiosPrivate.post(
+      "/taskmanagement",
+      formData
+    );
+    return response.data;
+  };
+
+  // Update task
+  const updatetask = async (id, formData) => {
+    const response = await axiosPrivate.put(
+      `/taskmanagement/${id}`,
+      formData
+    );
+    return response.data;
+  };
+
+  // Permanently delete task
+  const removetask = async (id) => {
+    const response = await axiosPrivate.delete(
+      `/taskmanagement/${id}`
+    );
+    return response.data;
+  };
+
+
+  // =====================================================
+  // MATERIAL MANAGEMENT
+  // =====================================================
+
+  // Get all materials
+  const takematerials = async () => {
+    const response = await axiosPrivate.get("/materialmanagement");
+    return response.data;
+  };
+
+  // Get material by ID
+  const takematerialbyid = async (id) => {
+    const response = await axiosPrivate.get(`/materialmanagement/${id}`);
+    return response.data;
+  };
+
+  // Get material dropdown data
+  const getmaterialdropdowns = async () => {
+    const response = await axiosPrivate.get(
+      "/materialmanagement/dropdowns"
+    );
+    return response.data;
+  };
+
+  // Create material
+  const creatematerial = async (formData) => {
+    const response = await axiosPrivate.post(
+      "/materialmanagement",
+      formData
+    );
+    return response.data;
+  };
+
+  // Update material
+  const updatematerial = async (id, formData) => {
+    const response = await axiosPrivate.put(
+      `/materialmanagement/${id}`,
+      formData
+    );
+    return response.data;
+  };
+
+  // Permanently delete material
+  const removematerial = async (id) => {
+    const response = await axiosPrivate.delete(
+      `/materialmanagement/${id}`
+    );
+    return response.data;
+  };
+
+
+  // =====================================================
+  // TASK EVALUATION
+  // =====================================================
+
+  // Get module names for Task Evaluation
+  const takeevaluationmodules = async () => {
+    const response = await axiosPrivate.get(
+      "/taskmanagement/evaluation/modules"
+    );
+    return response.data;
+  };
+
+  // Get tasks by module
+  const takeevaluationtasks = async (module) => {
+    const response = await axiosPrivate.get(
+      "/taskmanagement/evaluation/tasks",
+      {
+        params: { module }
+      }
+    );
+    return response.data;
+  };
+
+  // Get submissions for a task
+  const takesubmissions = async (taskId) => {
+    const response = await axiosPrivate.get(
+      `/taskmanagement/${taskId}/submissions`
+    );
+    return response.data;
+  };
+
+  // Grade or reject a submission
+  const gradesubmission = async (submissionId, data) => {
+    const response = await axiosPrivate.put(
+      `/taskmanagement/submissions/${submissionId}/grade`,
+      data
+    );
+    return response.data;
+  };
+
+
+  // =====================================
+  // NOTIFICATION MANAGEMENT
+  // =====================================
+
+  // Get all notifications
+  const takenotifications = async () => {
+    const response = await axiosPrivate.get("/notificationmanagement");
+    return response.data;
+  };
+
+  // Get notification by ID
+  const takenotificationbyid = async (id) => {
+    const response = await axiosPrivate.get(
+      `/notificationmanagement/${id}`
+    );
+    return response.data;
+  };
+
+  // Get notification dropdown data
+  const getnotificationdropdowns = async () => {
+    const response = await axiosPrivate.get(
+      "/notificationmanagement/dropdowns"
+    );
+    return response.data;
+  };
+
+  // Create notification
+  const createnotification = async (data) => {
+    const response = await axiosPrivate.post(
+      "/notificationmanagement",
+      data
+    );
+    return response.data;
+  };
+
+  // Update notification
+  const updatenotification = async (id, data) => {
+    const response = await axiosPrivate.put(
+      `/notificationmanagement/${id}`,
+      data
+    );
+    return response.data;
+  };
+
+  // Permanently delete notification
+  const removenotification = async (id) => {
+    const response = await axiosPrivate.delete(
+      `/notificationmanagement/${id}`
+    );
+    return response.data;
+  };
+
+
+
   return {
     newrolecreate,
     takeroles,
@@ -394,6 +585,28 @@ const handledeleteintern=async(id)=>{
       getallinterns,
       updateintern,
       handledeleteintern
+    taketasks,
+    taketaskbyid,
+    gettaskdropdowns,
+    createtask,
+    updatetask,
+    removetask,
+    takematerials,
+    takematerialbyid,
+    getmaterialdropdowns,
+    creatematerial,
+    updatematerial,
+    removematerial,
+    takeevaluationmodules,
+    takeevaluationtasks,
+    takesubmissions,
+    gradesubmission,
+    takenotifications,
+    takenotificationbyid,
+    getnotificationdropdowns,
+    createnotification,
+    updatenotification,
+    removenotification,
   };
 };
 

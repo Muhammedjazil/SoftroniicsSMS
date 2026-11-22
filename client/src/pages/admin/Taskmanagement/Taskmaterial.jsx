@@ -1,1900 +1,1588 @@
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-    MdPersonOutline,
-    MdSearch,
-    MdClose,
-    MdVisibility,
-    MdEdit,
-    MdDelete,
-    MdArrowBack,
-    MdFileDownload,
-    MdUploadFile,
-    MdKeyboardArrowDown,
-    MdCheck
+  MdSearch,
+  MdClose,
+  MdVisibility,
+  MdEdit,
+  MdDelete,
+  MdArrowBack,
+  MdFileDownload,
+  MdUploadFile,
+  MdKeyboardArrowDown,
 } from "react-icons/md";
 
+import AdminService from "../../../services/admin-api-services/AdminService";
 import "./Taskmaterial.css";
 
-
-// =====================================================
-// SAMPLE DATA - REPLACE WITH API DATA LATER
-// =====================================================
-
-const tasksMaterialMentors = [
-    "Akhil C V",
-    "Priyesh",
-    "John",
-    "Arjun",
-    "Thomas"
+const AUDIENCE_TYPES = [
+  "All interns",
+  "By batches",
+  "By Courses",
+  "By Category",
+  "Individual interns",
 ];
 
-const tasksMaterialBranches = [
-    "calicut",
-    "kochi",
-    "palakkad",
-    "sulthan bathery"
-];
-
-const tasksMaterialCategories = [
-    "UI/UX Designing",
-    "Web Development",
-    "Python Development",
-    "Digital Marketing",
-    "Data Analytics"
-];
-
-const tasksMaterialCourses = [
-    "UI/UX 3M",
-    "UI/UX 1M",
-    "MERN Stack 6M",
-    "Python Full Stack 6M",
-    "Digital Marketing 3M"
-];
-
-const tasksMaterialInterns = [
-    "John - UI/UX 3M",
-    "Thomson - Python Full Stack 6M",
-    "Arun - MERN Stack 6M",
-    "Rahul - UI/UX 1M",
-    "Akhil - Python Full Stack 6M"
-];
-
-const tasksMaterialAudienceTypes = [
-    "By Category",
-    "By Courses",
-    "Individual Interns"
-];
-
-const tasksMaterialEmptyForm = {
-    title: "",
-    mentor: "",
-    attachments: [],
-    allowDownload: true,
-    branches: [],
-    audienceType: "",
-    selectedAudience: []
+const EMPTY_FORM = {
+  title: "",
+  mentor: "",
+  attachment: null,
+  existingAttachment: "",
+  allowDownload: true,
+  branches: [],
+  audience: "",
+  batches: [],
+  categories: [],
+  courses: [],
+  individualInterns: [],
 };
 
-const tasksMaterialInitialData = [];
+const getId = (item) =>
+  typeof item === "object" && item !== null
+    ? item._id || item.id || ""
+    : item || "";
 
+const getName = (item, fields = []) => {
+  if (!item) return "";
 
-// =====================================================
-// MAIN COMPONENT
-// =====================================================
+  if (typeof item === "string") return item;
+
+  for (const field of fields) {
+    if (item[field]) return item[field];
+  }
+
+  return "";
+};
+
+const getArray = (response, key) => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.[key])) return response[key];
+  if (Array.isArray(response?.data?.[key])) return response.data[key];
+  return [];
+};
+
+const getFileName = (filePath) => {
+  if (!filePath) return "";
+  return filePath.split("/").pop();
+};
 
 const Taskmaterial = () => {
+  const {
+    takematerials,
+    takematerialbyid,
+    getmaterialdropdowns,
+    creatematerial,
+    updatematerial,
+    removematerial,
+  } = AdminService();
 
-    // -------------------------------------------------
-    // MAIN STATES
-    // -------------------------------------------------
+  const [materials, setMaterials] = useState([]);
 
-    const [tasksMaterialList, setTasksMaterialList] =
-        useState(tasksMaterialInitialData);
+  const [dropdowns, setDropdowns] = useState({
+    branches: [],
+    mentors: [],
+    batches: [],
+    categories: [],
+    courses: [],
+    interns: [],
+  });
 
-    const [tasksMaterialMode, setTasksMaterialMode] =
-        useState("list");
+  const [mode, setMode] = useState("list");
+  const [selectedId, setSelectedId] = useState(null);
+  const [formData, setFormData] = useState({ ...EMPTY_FORM });
 
-    const [tasksMaterialFormData, setTasksMaterialFormData] =
-        useState({ ...tasksMaterialEmptyForm });
+  const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
 
-    const [tasksMaterialSelectedId, setTasksMaterialSelectedId] =
-        useState(null);
+  const [search, setSearch] = useState("");
+  const [audienceFilter, setAudienceFilter] = useState("all");
+  const [mentorFilter, setMentorFilter] = useState("all");
+  const [branchFilter, setBranchFilter] = useState("all");
 
-    // Search and filters
+  const [branchDropdown, setBranchDropdown] = useState(false);
+  const [audienceDropdown, setAudienceDropdown] = useState(false);
+  const [internSearch, setInternSearch] = useState("");
+  const [selectionValue, setSelectionValue] = useState("");
 
-    const [tasksMaterialSearch, setTasksMaterialSearch] =
-        useState("");
+  const selectedMaterial = materials.find(
+    (item) => getId(item) === selectedId
+  );
 
-    const [tasksMaterialAudienceFilter, setTasksMaterialAudienceFilter] =
-        useState("all");
+  // =====================================================
+  // FETCH MATERIALS
+  // =====================================================
 
-    const [tasksMaterialMentorFilter, setTasksMaterialMentorFilter] =
-        useState("all");
+  const fetchMaterials = async () => {
+    try {
+      const response = await takematerials();
+      setMaterials(getArray(response, "materials"));
+    } catch (error) {
+      console.error(
+        "Fetch Materials Error:",
+        error.response?.data || error
+      );
 
-    const [tasksMaterialBranchFilter, setTasksMaterialBranchFilter] =
-        useState("all");
+      alert(
+        error.response?.data?.message ||
+        "Unable to fetch materials"
+      );
+    }
+  };
 
-    // Dropdown states
+  // =====================================================
+  // FETCH DROPDOWNS
+  // =====================================================
 
-    const [tasksMaterialBranchDropdown, setTasksMaterialBranchDropdown] =
-        useState(false);
+  const fetchDropdowns = async () => {
+    try {
+      const response = await getmaterialdropdowns();
 
-    const [tasksMaterialAudienceDropdown, setTasksMaterialAudienceDropdown] =
-        useState(false);
+      setDropdowns({
+        branches: getArray(response, "branches"),
+        mentors: getArray(response, "mentors"),
+        batches: getArray(response, "batches"),
+        categories: getArray(response, "categories"),
+        courses: getArray(response, "courses"),
+        interns: getArray(response, "interns"),
+      });
+    } catch (error) {
+      console.error(
+        "Material Dropdown Error:",
+        error.response?.data || error
+      );
 
-    const [tasksMaterialInternSearch, setTasksMaterialInternSearch] =
-        useState("");
+      alert(
+        error.response?.data?.message ||
+        "Unable to fetch material dropdown data"
+      );
+    }
+  };
 
-    const [tasksMaterialSelectionValue, setTasksMaterialSelectionValue] =
-        useState("");
+  // =====================================================
+  // INITIAL LOAD
+  // =====================================================
 
+  useEffect(() => {
+    const loadData = async () => {
+      setPageLoading(true);
 
-    // -------------------------------------------------
-    // SELECTED MATERIAL
-    // -------------------------------------------------
+      await Promise.all([
+        fetchMaterials(),
+        fetchDropdowns(),
+      ]);
 
-    const tasksMaterialSelected = tasksMaterialList.find(
-        item => item.id === tasksMaterialSelectedId
+      setPageLoading(false);
+    };
+
+    loadData();
+  }, []);
+
+  // =====================================================
+  // UPDATE FIELD
+  // =====================================================
+
+  const updateField = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // =====================================================
+  // RESET FORM
+  // =====================================================
+
+  const resetForm = () => {
+    setFormData({ ...EMPTY_FORM });
+    setSelectedId(null);
+    setInternSearch("");
+    setSelectionValue("");
+    setBranchDropdown(false);
+    setAudienceDropdown(false);
+  };
+
+  // =====================================================
+  // BRANCH SELECTION
+  // =====================================================
+
+  const toggleBranch = (branchId) => {
+    setFormData((prev) => {
+      const exists = prev.branches.includes(branchId);
+
+      return {
+        ...prev,
+        branches: exists
+          ? prev.branches.filter((id) => id !== branchId)
+          : [...prev.branches, branchId],
+
+        audience: "",
+        batches: [],
+        categories: [],
+        courses: [],
+        individualInterns: [],
+      };
+    });
+
+    setSelectionValue("");
+    setInternSearch("");
+  };
+
+  // =====================================================
+  // BRANCH FILTERED DROPDOWNS
+  // =====================================================
+
+  const selectedBatches = useMemo(() => {
+    return dropdowns.batches.filter((item) =>
+      formData.branches.includes(getId(item.branch))
+    );
+  }, [dropdowns.batches, formData.branches]);
+
+  const selectedCategories = useMemo(() => {
+    return dropdowns.categories.filter((item) => {
+      const branches = Array.isArray(item.branch)
+        ? item.branch.map(getId)
+        : [getId(item.branch)];
+
+      return branches.some((id) => formData.branches.includes(id));
+    });
+  }, [dropdowns.categories, formData.branches]);
+
+  const selectedCourses = useMemo(() => {
+    const categoryIds = selectedCategories.map(getId);
+
+    return dropdowns.courses.filter((item) =>
+      categoryIds.includes(getId(item.category))
+    );
+  }, [dropdowns.courses, selectedCategories]);
+
+  const selectedInterns = useMemo(() => {
+    return dropdowns.interns.filter((item) =>
+      formData.branches.includes(getId(item.branch))
+    );
+  }, [dropdowns.interns, formData.branches]);
+
+  // =====================================================
+  // AUDIENCE OPTIONS
+  // =====================================================
+
+  const getAudienceOptions = () => {
+    switch (formData.audience) {
+      case "By batches":
+        return selectedBatches;
+
+      case "By Category":
+        return selectedCategories;
+
+      case "By Courses":
+        return selectedCourses;
+
+      case "Individual interns":
+        return selectedInterns;
+
+      default:
+        return [];
+    }
+  };
+
+  const getAudienceField = () => {
+    switch (formData.audience) {
+      case "By batches":
+        return "batches";
+
+      case "By Category":
+        return "categories";
+
+      case "By Courses":
+        return "courses";
+
+      case "Individual interns":
+        return "individualInterns";
+
+      default:
+        return null;
+    }
+  };
+
+  const getAudienceLabel = (item) => {
+    if (formData.audience === "By batches") {
+      return getName(item, ["batchName"]);
+    }
+
+    if (formData.audience === "By Category") {
+      return getName(item, ["categoryName"]);
+    }
+
+    if (formData.audience === "By Courses") {
+      return getName(item, ["courseName"]);
+    }
+
+    return getName(item, ["fullName", "email"]);
+  };
+
+  // =====================================================
+  // AUDIENCE TYPE CHANGE
+  // =====================================================
+
+  const handleAudienceType = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      audience: value,
+      batches: [],
+      categories: [],
+      courses: [],
+      individualInterns: [],
+    }));
+
+    setSelectionValue("");
+    setInternSearch("");
+  };
+
+  // =====================================================
+  // ADD / REMOVE AUDIENCE
+  // =====================================================
+
+  const addAudience = (id) => {
+    if (!id) return;
+
+    const field = getAudienceField();
+    if (!field) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      [field]: prev[field].includes(id)
+        ? prev[field]
+        : [...prev[field], id],
+    }));
+
+    setSelectionValue("");
+    setInternSearch("");
+  };
+
+  const removeAudience = (field, id) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: prev[field].filter((item) => item !== id),
+    }));
+  };
+
+  const getSelectedAudienceItems = () => {
+    const field = getAudienceField();
+    if (!field) return [];
+
+    const options = getAudienceOptions();
+
+    return formData[field]
+      .map((id) => options.find((item) => getId(item) === id))
+      .filter(Boolean);
+  };
+
+  // =====================================================
+  // FILE UPLOAD
+  // =====================================================
+
+  const handleUpload = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      alert("Only JPG, PNG, WEBP and PDF files are allowed.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    updateField("attachment", file);
+    event.target.value = "";
+  };
+
+  const downloadAttachment = (attachment) => {
+    if (!attachment) {
+      alert("Attachment is not available.");
+      return;
+    }
+
+    const url = attachment.startsWith("http")
+      ? attachment
+      : `${import.meta.env.VITE_API_URL || "http://localhost:7000"}${attachment}`;
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  // =====================================================
+  // NORMALIZE MATERIAL FOR FORM
+  // =====================================================
+
+  const normalizeMaterial = (material) => ({
+    title: material.title || "",
+    mentor: getId(material.mentor),
+    attachment: null,
+    existingAttachment: material.attachments || "",
+    allowDownload: material.allowDownload ?? true,
+    branches: (material.branch || []).map(getId),
+    audience: material.audience || "",
+    batches: (material.batches || []).map(getId),
+    categories: (material.categories || []).map(getId),
+    courses: (material.courses || []).map(getId),
+    individualInterns: (material.individualInterns || []).map(getId),
+  });
+
+  // =====================================================
+  // NEW MATERIAL
+  // =====================================================
+
+  const handleNew = () => {
+    resetForm();
+    setMode("create");
+  };
+
+  // =====================================================
+  // VIEW MATERIAL
+  // =====================================================
+
+  const handleView = async (material) => {
+    try {
+      const id = getId(material);
+      const response = await takematerialbyid(id);
+      const record = response.material || material;
+
+      setSelectedId(id);
+      setFormData(normalizeMaterial(record));
+      setMode("view");
+    } catch (error) {
+      console.error("View Material Error:", error);
+      alert(
+        error.response?.data?.message ||
+        "Unable to open material"
+      );
+    }
+  };
+
+  // =====================================================
+  // EDIT MATERIAL
+  // =====================================================
+
+  const handleEdit = async (material) => {
+    try {
+      const id = getId(material);
+      const response = await takematerialbyid(id);
+      const record = response.material || material;
+
+      setSelectedId(id);
+      setFormData(normalizeMaterial(record));
+      setMode("edit");
+    } catch (error) {
+      console.error("Edit Material Error:", error);
+      alert(
+        error.response?.data?.message ||
+        "Unable to edit material"
+      );
+    }
+  };
+
+  // =====================================================
+  // CANCEL / BACK
+  // =====================================================
+
+  const handleCancel = () => {
+    if (mode === "edit" && selectedMaterial) {
+      setFormData(normalizeMaterial(selectedMaterial));
+      setMode("view");
+      return;
+    }
+
+    resetForm();
+    setMode("list");
+  };
+
+  // =====================================================
+  // VALIDATION
+  // =====================================================
+
+  const validateForm = () => {
+    if (!formData.title.trim()) {
+      alert("Please enter material title.");
+      return false;
+    }
+
+    if (!formData.mentor) {
+      alert("Please select assigned mentor.");
+      return false;
+    }
+
+    if (!formData.attachment && !formData.existingAttachment) {
+      alert("Please upload an attachment.");
+      return false;
+    }
+
+    if (!formData.branches.length) {
+      alert("Please select at least one branch.");
+      return false;
+    }
+
+    if (!formData.audience) {
+      alert("Please select audience type.");
+      return false;
+    }
+
+    if (
+      formData.audience === "By batches" &&
+      !formData.batches.length
+    ) {
+      alert("Please select at least one batch.");
+      return false;
+    }
+
+    if (
+      formData.audience === "By Category" &&
+      !formData.categories.length
+    ) {
+      alert("Please select at least one category.");
+      return false;
+    }
+
+    if (
+      formData.audience === "By Courses" &&
+      !formData.courses.length
+    ) {
+      alert("Please select at least one course.");
+      return false;
+    }
+
+    if (
+      formData.audience === "Individual interns" &&
+      !formData.individualInterns.length
+    ) {
+      alert("Please select at least one intern.");
+      return false;
+    }
+
+    return true;
+  };
+
+  // =====================================================
+  // CREATE / UPDATE MATERIAL
+  // =====================================================
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!validateForm()) return;
+
+    const data = new FormData();
+
+    data.append("title", formData.title.trim());
+    data.append("mentor", formData.mentor);
+    data.append("audience", formData.audience);
+    data.append("allowDownload", String(formData.allowDownload));
+
+    data.append("branch", JSON.stringify(formData.branches));
+    data.append("batches", JSON.stringify(formData.batches));
+    data.append("categories", JSON.stringify(formData.categories));
+    data.append("courses", JSON.stringify(formData.courses));
+
+    data.append(
+      "individualInterns",
+      JSON.stringify(formData.individualInterns)
     );
 
-
-    // -------------------------------------------------
-    // UPDATE FORM FIELD
-    // -------------------------------------------------
-
-    const tasksMaterialUpdateField = (field, value) => {
-
-        setTasksMaterialFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-
-    };
-
-
-    // -------------------------------------------------
-    // RESET FORM
-    // -------------------------------------------------
-
-    const tasksMaterialResetForm = () => {
-
-        setTasksMaterialFormData({
-            ...tasksMaterialEmptyForm,
-            attachments: [],
-            branches: [],
-            selectedAudience: []
-        });
-
-        setTasksMaterialSelectedId(null);
-
-        setTasksMaterialInternSearch("");
-
-        setTasksMaterialSelectionValue("");
-
-        setTasksMaterialBranchDropdown(false);
-
-        setTasksMaterialAudienceDropdown(false);
-
-    };
-
-
-    // =================================================
-    // BRANCH SELECTION
-    // =================================================
-
-    const tasksMaterialToggleBranch = (branch) => {
-
-        setTasksMaterialFormData(prev => {
-
-            const isSelected = prev.branches.includes(branch);
-
-            return {
-                ...prev,
-
-                branches: isSelected
-                    ? prev.branches.filter(item => item !== branch)
-                    : [...prev.branches, branch],
-
-                // Changing branches resets the dependent audience
-                audienceType: "",
-                selectedAudience: []
-            };
-
-        });
-
-        setTasksMaterialSelectionValue("");
-
-    };
-
-
-    // =================================================
-    // AUDIENCE TYPE
-    // =================================================
-
-    const tasksMaterialHandleAudienceType = (value) => {
-
-        setTasksMaterialFormData(prev => ({
-            ...prev,
-            audienceType: value,
-            selectedAudience: []
-        }));
-
-        setTasksMaterialSelectionValue("");
-
-        setTasksMaterialInternSearch("");
-
-    };
-
-
-    // -------------------------------------------------
-    // GET AUDIENCE OPTIONS
-    // -------------------------------------------------
-
-    const tasksMaterialGetAudienceOptions = () => {
-
-        switch (tasksMaterialFormData.audienceType) {
-
-            case "By Category":
-                return tasksMaterialCategories;
-
-            case "By Courses":
-                return tasksMaterialCourses;
-
-            case "Individual Interns":
-                return tasksMaterialInterns;
-
-            default:
-                return [];
-
-        }
-
-    };
-
-
-    // -------------------------------------------------
-    // ADD SELECTED AUDIENCE
-    // -------------------------------------------------
-
-    const tasksMaterialAddAudience = (value) => {
-
-        if (!value) return;
-
-        setTasksMaterialFormData(prev => ({
-
-            ...prev,
-
-            selectedAudience: prev.selectedAudience.includes(value)
-                ? prev.selectedAudience
-                : [...prev.selectedAudience, value]
-
-        }));
-
-        setTasksMaterialSelectionValue("");
-
-        setTasksMaterialInternSearch("");
-
-    };
-
-
-    // -------------------------------------------------
-    // REMOVE SELECTED AUDIENCE
-    // -------------------------------------------------
-
-    const tasksMaterialRemoveAudience = (value) => {
-
-        setTasksMaterialFormData(prev => ({
-
-            ...prev,
-
-            selectedAudience: prev.selectedAudience.filter(
-                item => item !== value
-            )
-
-        }));
-
-    };
-
-
-    // =================================================
-    // ATTACHMENT UPLOAD
-    // =================================================
-
-    const tasksMaterialHandleUpload = (e) => {
-
-        const files = Array.from(e.target.files || []);
-
-        if (!files.length) return;
-
-        const allowedExtensions = ["jpg", "jpeg", "png", "pdf"];
-
-        const validFiles = files.filter(file => {
-
-            const extension = file.name.split(".").pop().toLowerCase();
-
-            return allowedExtensions.includes(extension);
-
-        });
-
-        if (validFiles.length !== files.length) {
-
-            alert("Only JPG, PNG and PDF files are allowed.");
-
-        }
-
-        setTasksMaterialFormData(prev => ({
-
-            ...prev,
-
-            attachments: [
-                ...prev.attachments,
-                ...validFiles
-            ]
-
-        }));
-
-        e.target.value = "";
-
-    };
-
-
-    // -------------------------------------------------
-    // REMOVE ATTACHMENT
-    // -------------------------------------------------
-
-    const tasksMaterialRemoveAttachment = (index) => {
-
-        setTasksMaterialFormData(prev => ({
-
-            ...prev,
-
-            attachments: prev.attachments.filter(
-                (_, i) => i !== index
-            )
-
-        }));
-
-    };
-
-
-    // -------------------------------------------------
-    // DOWNLOAD ATTACHMENT
-    // -------------------------------------------------
-
-    const tasksMaterialDownloadAttachment = (file) => {
-
-        if (file instanceof File) {
-
-            const url = URL.createObjectURL(file);
-
-            const link = document.createElement("a");
-
-            link.href = url;
-            link.download = file.name;
-
-            document.body.appendChild(link);
-
-            link.click();
-
-            document.body.removeChild(link);
-
-            URL.revokeObjectURL(url);
-
-        } else if (file?.url) {
-
-            window.open(file.url, "_blank", "noopener,noreferrer");
-
-        } else {
-
-            alert("This attachment is not available for download.");
-
-        }
-
-    };
-
-
-    // =================================================
-    // INTERN SEARCH
-    // =================================================
-
-    const tasksMaterialFilteredInterns = tasksMaterialInterns.filter(
-        intern =>
-
-            intern.toLowerCase().includes(
-                tasksMaterialInternSearch.toLowerCase()
-            ) &&
-
-            !tasksMaterialFormData.selectedAudience.includes(intern)
-
+    if (formData.attachment) {
+      data.append("attachments", formData.attachment);
+    }
+
+    try {
+      setLoading(true);
+
+      if (mode === "create") {
+        await creatematerial(data);
+        alert("Material created successfully.");
+      } else if (mode === "edit") {
+        await updatematerial(selectedId, data);
+        alert("Material updated successfully.");
+      }
+
+      await fetchMaterials();
+
+      resetForm();
+      setMode("list");
+    } catch (error) {
+      console.error(
+        "Save Material Error:",
+        error.response?.data || error
+      );
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to save material"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================================
+  // DELETE MATERIAL
+  // =====================================================
+
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete this material?"
     );
 
+    if (!confirmed) return;
 
-    // =================================================
-    // ADD / REMOVE SELECTED AUDIENCE UI
-    // =================================================
+    try {
+      await removematerial(id);
 
-    const tasksMaterialRenderSelectedAudience = () => {
+      alert("Material deleted successfully.");
 
-        if (!tasksMaterialFormData.selectedAudience.length) {
-            return null;
-        }
+      await fetchMaterials();
 
-        return (
+      resetForm();
+      setMode("list");
+    } catch (error) {
+      console.error(
+        "Delete Material Error:",
+        error.response?.data || error
+      );
 
-            <div className="tasks-material-selected-section">
+      alert(
+        error.response?.data?.message ||
+        "Unable to delete material"
+      );
+    }
+  };
 
-                <h4>
-                    {tasksMaterialFormData.audienceType === "By Category"
-                        ? "Selected Categories"
-                        : tasksMaterialFormData.audienceType === "By Courses"
-                            ? "Selected Courses"
-                            : "Selected Interns"}
-                </h4>
+  // =====================================================
+  // FILTER MATERIALS
+  // =====================================================
 
-                <div className="tasks-material-selected-list">
+  const filteredMaterials = useMemo(() => {
+    return materials.filter((material) => {
+      const mentorName = getName(
+        material.mentor,
+        ["fullName", "email"]
+      );
 
-                    {tasksMaterialFormData.selectedAudience.map(item => (
+      const branchNames = (material.branch || []).map((item) =>
+        getName(item, ["branchName"])
+      );
 
-                        <div
-                            className="tasks-material-selected-item"
-                            key={item}
-                        >
+      const searchContent = [
+        material.title,
+        mentorName,
+        material.audience,
+        ...branchNames,
+      ]
+        .join(" ")
+        .toLowerCase();
 
-                            <span>{item}</span>
+      const searchMatch = searchContent.includes(
+        search.toLowerCase()
+      );
 
-                            {tasksMaterialMode !== "view" && (
+      const audienceMatch =
+        audienceFilter === "all" ||
+        material.audience === audienceFilter;
 
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        tasksMaterialRemoveAudience(item)
-                                    }
-                                    aria-label={`Remove ${item}`}
-                                >
-                                    <MdClose />
-                                </button>
+      const mentorMatch =
+        mentorFilter === "all" ||
+        getId(material.mentor) === mentorFilter;
 
-                            )}
-
-                        </div>
-
-                    ))}
-
-                </div>
-
-            </div>
-
+      const branchMatch =
+        branchFilter === "all" ||
+        (material.branch || []).some(
+          (item) => getId(item) === branchFilter
         );
 
-    };
-
-
-    // =================================================
-    // NEW MATERIAL
-    // =================================================
-
-    const tasksMaterialHandleNew = () => {
-
-        tasksMaterialResetForm();
-
-        setTasksMaterialMode("create");
-
-    };
-
-
-    // =================================================
-    // VIEW MATERIAL
-    // =================================================
-
-    const tasksMaterialHandleView = (material) => {
-
-        setTasksMaterialSelectedId(material.id);
-
-        setTasksMaterialFormData({
-
-            ...tasksMaterialEmptyForm,
-            ...material,
-
-            attachments: [...material.attachments],
-            branches: [...material.branches],
-            selectedAudience: [...material.selectedAudience]
-
-        });
-
-        setTasksMaterialMode("view");
-
-    };
-
-
-    // =================================================
-    // EDIT MATERIAL
-    // =================================================
-
-    const tasksMaterialHandleEdit = (material) => {
-
-        setTasksMaterialSelectedId(material.id);
-
-        setTasksMaterialFormData({
-
-            ...tasksMaterialEmptyForm,
-            ...material,
-
-            attachments: [...material.attachments],
-            branches: [...material.branches],
-            selectedAudience: [...material.selectedAudience]
-
-        });
-
-        setTasksMaterialMode("edit");
-
-    };
-
-
-    // =================================================
-    // CANCEL / BACK
-    // =================================================
-
-    const tasksMaterialHandleCancel = () => {
-
-        if (tasksMaterialMode === "edit" && tasksMaterialSelected) {
-
-            tasksMaterialHandleView(tasksMaterialSelected);
-
-            return;
-
-        }
-
-        tasksMaterialResetForm();
-
-        setTasksMaterialMode("list");
-
-    };
-
-
-    // =================================================
-    // VALIDATION
-    // =================================================
-
-    const tasksMaterialValidateForm = () => {
-
-        if (!tasksMaterialFormData.title.trim()) {
-
-            alert("Please enter material title.");
-
-            return false;
-
-        }
-
-        if (!tasksMaterialFormData.mentor) {
-
-            alert("Please select assigned mentor.");
-
-            return false;
-
-        }
-
-        if (!tasksMaterialFormData.attachments.length) {
-
-            alert("Please upload at least one attachment.");
-
-            return false;
-
-        }
-
-        if (!tasksMaterialFormData.branches.length) {
-
-            alert("Please select at least one branch.");
-
-            return false;
-
-        }
-
-        if (!tasksMaterialFormData.audienceType) {
-
-            alert("Please select audience type.");
-
-            return false;
-
-        }
-
-        if (!tasksMaterialFormData.selectedAudience.length) {
-
-            alert("Please select at least one audience.");
-
-            return false;
-
-        }
-
-        return true;
-
-    };
-
-
-    // =================================================
-    // ADD / UPDATE MATERIAL
-    // =================================================
-
-    const tasksMaterialHandleSubmit = (e) => {
-
-        e.preventDefault();
-
-        if (!tasksMaterialValidateForm()) return;
-
-        const currentDate = new Date().toLocaleDateString("en-US", {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric"
-        });
-
-        const materialData = {
-
-            ...tasksMaterialFormData,
-
-            branches: [...tasksMaterialFormData.branches],
-            selectedAudience: [...tasksMaterialFormData.selectedAudience],
-            attachments: [...tasksMaterialFormData.attachments]
-
-        };
-
-
-        // CREATE MATERIAL
-
-        if (tasksMaterialMode === "create") {
-
-            const newMaterial = {
-
-                ...materialData,
-
-                id: Date.now(),
-
-                createdDate: currentDate
-
-            };
-
-            setTasksMaterialList(prev => [
-                ...prev,
-                newMaterial
-            ]);
-
-        }
-
-
-        // UPDATE MATERIAL
-
-        else if (tasksMaterialMode === "edit") {
-
-            setTasksMaterialList(prev =>
-
-                prev.map(item =>
-
-                    item.id === tasksMaterialSelectedId
-
-                        ? {
-                            ...item,
-                            ...materialData
-                        }
-
-                        : item
-
-                )
-
-            );
-
-        }
-
-
-        tasksMaterialResetForm();
-
-        setTasksMaterialMode("list");
-
-    };
-
-
-    // =================================================
-    // DELETE MATERIAL
-    // =================================================
-
-    const tasksMaterialHandleDelete = (id) => {
-
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this material?"
-        );
-
-        if (!confirmed) return;
-
-        setTasksMaterialList(prev =>
-
-            prev.filter(item => item.id !== id)
-
-        );
-
-        tasksMaterialResetForm();
-
-        setTasksMaterialMode("list");
-
-    };
-
-
-    // =================================================
-    // FILTER MATERIALS
-    // =================================================
-
-    const tasksMaterialFilteredList = useMemo(() => {
-
-        return tasksMaterialList.filter(material => {
-
-            const searchContent = [
-
-                material.title,
-                material.mentor,
-                material.audienceType,
-                ...material.branches,
-                ...material.selectedAudience
-
-            ].join(" ").toLowerCase();
-
-
-            const searchMatch = searchContent.includes(
-                tasksMaterialSearch.toLowerCase()
-            );
-
-
-            const audienceMatch =
-
-                tasksMaterialAudienceFilter === "all" ||
-
-                material.audienceType === tasksMaterialAudienceFilter;
-
-
-            const mentorMatch =
-
-                tasksMaterialMentorFilter === "all" ||
-
-                material.mentor === tasksMaterialMentorFilter;
-
-
-            const branchMatch =
-
-                tasksMaterialBranchFilter === "all" ||
-
-                material.branches.includes(tasksMaterialBranchFilter);
-
-
-            return (
-                searchMatch &&
-                audienceMatch &&
-                mentorMatch &&
-                branchMatch
-            );
-
-        });
-
-    }, [
-
-        tasksMaterialList,
-        tasksMaterialSearch,
-        tasksMaterialAudienceFilter,
-        tasksMaterialMentorFilter,
-        tasksMaterialBranchFilter
-
+      return (
+        searchMatch &&
+        audienceMatch &&
+        mentorMatch &&
+        branchMatch
+      );
+    });
+  }, [
+    materials,
+    search,
+    audienceFilter,
+    mentorFilter,
+    branchFilter,
+  ]);
+
+  // =====================================================
+  // EXPORT CSV
+  // =====================================================
+
+  const handleExport = () => {
+    if (!filteredMaterials.length) {
+      alert("No materials available to export.");
+      return;
+    }
+
+    const headers = [
+      "Title",
+      "Mentor",
+      "Branches",
+      "Audience",
+      "Attachment",
+      "Allow Download",
+      "Created Date",
+    ];
+
+    const rows = filteredMaterials.map((material) => [
+      material.title,
+      getName(material.mentor, ["fullName", "email"]),
+      (material.branch || [])
+        .map((item) => getName(item, ["branchName"]))
+        .join(", "),
+      material.audience,
+      getFileName(material.attachments),
+      material.allowDownload ? "Yes" : "No",
+      material.createdAt
+        ? new Date(material.createdAt).toLocaleDateString()
+        : "",
     ]);
 
-
-    // =================================================
-    // EXPORT CSV
-    // =================================================
-
-    const tasksMaterialHandleExport = () => {
-
-        if (!tasksMaterialFilteredList.length) {
-
-            alert("No materials available to export.");
-
-            return;
-
-        }
-
-        const headers = [
-
-            "Title",
-            "Mentor",
-            "Branch",
-            "Audience",
-            "Selected Audience",
-            "Attachments",
-            "Allow Interns to Download",
-            "Created Date"
-
-        ];
-
-
-        const rows = tasksMaterialFilteredList.map(material => [
-
-            material.title,
-            material.mentor,
-            material.branches.join(", "),
-            material.audienceType,
-            material.selectedAudience.join(", "),
-
-            material.attachments
-                .map(file => file.name)
-                .join(", "),
-
-            material.allowDownload ? "Yes" : "No",
-
-            material.createdDate
-
-        ]);
-
-
-        const csv = [
-
-            headers,
-            ...rows
-
-        ].map(row =>
-
-            row.map(value =>
-
-                `"${String(value ?? "").replace(/"/g, '""')}"`
-
-            ).join(",")
-
-        ).join("\n");
-
-
-        const blob = new Blob(
-
-            ["\uFEFF" + csv],
-
-            { type: "text/csv;charset=utf-8;" }
-
-        );
-
-
-        const url = URL.createObjectURL(blob);
-
-        const link = document.createElement("a");
-
-        link.href = url;
-
-        link.download = "materials.csv";
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        document.body.removeChild(link);
-
-        URL.revokeObjectURL(url);
-
-    };
-
-
-    // =================================================
-    // RENDER FORM
-    // =================================================
-
-    const tasksMaterialRenderForm = () => {
-
-        const isView = tasksMaterialMode === "view";
-
-        return (
-
-            <form
-                className="tasks-material-form"
-                onSubmit={tasksMaterialHandleSubmit}
-            >
-
-                {/* DETAIL HEADER */}
-
-                {tasksMaterialMode !== "create" && (
-
-                    <div className="tasks-material-detail-header">
-
-                        <h2>
-                            {tasksMaterialFormData.title || "Material Details"}
-                        </h2>
-
-                        <button
-                            type="button"
-                            className="tasks-material-back-btn"
-                            onClick={tasksMaterialHandleCancel}
-                        >
-                            <MdArrowBack />
-                            Back
-                        </button>
-
-                    </div>
-
-                )}
-
-
-                {/* MATERIAL DETAILS */}
-
-                <div className="tasks-material-form-section">
-
-                    <h3>Material Details</h3>
-
-                    <div className="tasks-material-section-divider"></div>
-
-
-                    <div className="tasks-material-form-grid">
-
-                        {/* TITLE */}
-
-                        <div className="tasks-material-form-group">
-
-                            <label htmlFor="tasks-material-title">
-                                Title <span>*</span>
-                            </label>
-
-                            <input
-                                id="tasks-material-title"
-                                type="text"
-                                placeholder="Enter Material Title"
-                                value={tasksMaterialFormData.title}
-                                onChange={e =>
-                                    tasksMaterialUpdateField(
-                                        "title",
-                                        e.target.value
-                                    )
-                                }
-                                disabled={isView}
-                                required
-                            />
-
-                        </div>
-
-
-                        {/* MENTOR */}
-
-                        <div className="tasks-material-form-group">
-
-                            <label htmlFor="tasks-material-mentor">
-                                Assigned Mentor <span>*</span>
-                            </label>
-
-                            <select
-                                id="tasks-material-mentor"
-                                value={tasksMaterialFormData.mentor}
-                                onChange={e =>
-                                    tasksMaterialUpdateField(
-                                        "mentor",
-                                        e.target.value
-                                    )
-                                }
-                                disabled={isView}
-                                required
-                            >
-
-                                <option value="">
-                                    Choose Mentor
-                                </option>
-
-                                {tasksMaterialMentors.map(mentor => (
-
-                                    <option key={mentor} value={mentor}>
-                                        {mentor}
-                                    </option>
-
-                                ))}
-
-                            </select>
-
-                        </div>
-
-
-                        {/* ATTACHMENTS */}
-
-                        <div className="tasks-material-form-group">
-
-                            <label htmlFor="tasks-material-attachments">
-                                Attachments <span>*</span>
-                                <small>(JPG/PNG/PDF only)</small>
-                            </label>
-
-                            {!isView ? (
-
-                                <label className="tasks-material-upload-box">
-
-                                    <span>
-                                        {tasksMaterialFormData.attachments.length
-                                            ? tasksMaterialFormData.attachments
-                                                .map(file => file.name)
-                                                .join(", ")
-                                            : "Upload Attachment (Image/PDF)"}
-                                    </span>
-
-                                    <MdUploadFile />
-
-                                    <input
-                                        id="tasks-material-attachments"
-                                        type="file"
-                                        accept=".jpg,.jpeg,.png,.pdf"
-                                        multiple
-                                        hidden
-                                        onChange={tasksMaterialHandleUpload}
-                                    />
-
-                                </label>
-
-                            ) : (
-
-                                <div className="tasks-material-readonly-files">
-
-                                    {tasksMaterialFormData.attachments.map(
-                                        (file, index) => (
-
-                                            <div key={index}>
-
-                                                <span>{file.name}</span>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        tasksMaterialDownloadAttachment(file)
-                                                    }
-                                                    title="Download"
-                                                >
-                                                    <MdFileDownload />
-                                                </button>
-
-                                            </div>
-
-                                        )
-                                    )}
-
-                                    {!tasksMaterialFormData.attachments.length && (
-                                        <span>No attachments</span>
-                                    )}
-
-                                </div>
-
-                            )}
-
-                        </div>
-
-                    </div>
-
-
-                    {/* ATTACHMENT PREVIEW */}
-
-                    {!isView &&
-                        tasksMaterialFormData.attachments.length > 0 && (
-
-                            <div className="tasks-material-attachment-list">
-
-                                {tasksMaterialFormData.attachments.map(
-                                    (file, index) => (
-
-                                        <div
-                                            className="tasks-material-attachment-item"
-                                            key={`${file.name}-${index}`}
-                                        >
-
-                                            <span>{file.name}</span>
-
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    tasksMaterialRemoveAttachment(index)
-                                                }
-                                                aria-label="Remove attachment"
-                                            >
-                                                <MdClose />
-                                            </button>
-
-                                        </div>
-
-                                    )
-                                )}
-
-                            </div>
-
-                        )}
-
-
-                    {/* DOWNLOAD PERMISSION */}
-
-                    <div className="tasks-material-download-permission">
-
-                        <input
-                            id="tasks-material-allow-download"
-                            type="checkbox"
-                            checked={tasksMaterialFormData.allowDownload}
-                            disabled={isView}
-                            onChange={e =>
-                                tasksMaterialUpdateField(
-                                    "allowDownload",
-                                    e.target.checked
-                                )
-                            }
-                        />
-
-                        <label htmlFor="tasks-material-allow-download">
-                            Allow Interns to Download
-                        </label>
-
-                    </div>
-
-                </div>
-
-
-                {/* AUDIENCE SELECTION */}
-
-                <div className="tasks-material-audience-section">
-
-                    <h3>Audience Selection</h3>
-
-                    <div className="tasks-material-section-divider"></div>
-
-
-                    <div className="tasks-material-audience-grid">
-
-                        {/* BRANCH SELECTION */}
-
-                        <div className="tasks-material-form-group">
-
-                            <label>
-                                Branches <span>*</span>
-                            </label>
-
-                            <div className="tasks-material-dropdown-wrapper">
-
-                                <button
-                                    type="button"
-                                    className="tasks-material-dropdown-trigger"
-                                    disabled={isView}
-                                    onClick={() =>
-                                        setTasksMaterialBranchDropdown(
-                                            !tasksMaterialBranchDropdown
-                                        )
-                                    }
-                                >
-
-                                    <span>
-                                        {tasksMaterialFormData.branches.length
-                                            ? tasksMaterialFormData.branches.join(", ")
-                                            : "Select Branches"}
-                                    </span>
-
-                                    <MdKeyboardArrowDown />
-
-                                </button>
-
-
-                                {tasksMaterialBranchDropdown && !isView && (
-
-                                    <div className="tasks-material-dropdown-menu">
-
-                                        {tasksMaterialBranches.map(branch => (
-
-                                            <label
-                                                className="tasks-material-dropdown-option"
-                                                key={branch}
-                                            >
-
-                                                <input
-                                                    type="checkbox"
-                                                    checked={tasksMaterialFormData.branches.includes(branch)}
-                                                    onChange={() =>
-                                                        tasksMaterialToggleBranch(branch)
-                                                    }
-                                                />
-
-                                                <span>{branch}</span>
-
-                                            </label>
-
-                                        ))}
-
-                                        <button
-                                            type="button"
-                                            className="tasks-material-dropdown-done"
-                                            onClick={() =>
-                                                setTasksMaterialBranchDropdown(false)
-                                            }
-                                        >
-                                            Done
-                                        </button>
-
-                                    </div>
-
-                                )}
-
-                            </div>
-
-                        </div>
-
-
-                        {/* AUDIENCE TYPE */}
-
-                        <div className="tasks-material-form-group">
-
-                            <label>
-                                Audience Type
-
-                                {!tasksMaterialFormData.branches.length && (
-                                    <small className="tasks-material-hint">
-                                        (Select branches first)
-                                    </small>
-                                )}
-
-                                <span>*</span>
-                            </label>
-
-                            <select
-                                id="tasks-material-audience-type"
-                                value={tasksMaterialFormData.audienceType}
-                                disabled={
-                                    isView ||
-                                    !tasksMaterialFormData.branches.length
-                                }
-                                onChange={e =>
-                                    tasksMaterialHandleAudienceType(
-                                        e.target.value
-                                    )
-                                }
-                                required
-                            >
-
-                                <option value="">
-                                    {tasksMaterialFormData.branches.length
-                                        ? "Choose Audience Type"
-                                        : "Choose branches first"}
-                                </option>
-
-                                {tasksMaterialAudienceTypes.map(type => (
-
-                                    <option key={type} value={type}>
-                                        {type}
-                                    </option>
-
-                                ))}
-
-                            </select>
-
-                        </div>
-
-
-                        {/* CATEGORY / COURSE / INTERN SELECTION */}
-
-                        {tasksMaterialFormData.audienceType && (
-
-                            <div className="tasks-material-form-group tasks-material-audience-select-group">
-
-                                <label>
-                                    {tasksMaterialFormData.audienceType === "By Category"
-                                        ? "Select Categories"
-                                        : tasksMaterialFormData.audienceType === "By Courses"
-                                            ? "Select Courses"
-                                            : "Select Interns"}
-                                </label>
-
-
-                                {tasksMaterialFormData.audienceType === "Individual Interns" ? (
-
-                                    <div className="tasks-material-intern-search-wrapper">
-
-                                        <div className="tasks-material-intern-search">
-
-                                            <input
-                                                id="tasks-material-intern-search"
-                                                type="text"
-                                                placeholder="Search Intern"
-                                                value={tasksMaterialInternSearch}
-                                                disabled={isView}
-                                                onChange={e =>
-                                                    setTasksMaterialInternSearch(
-                                                        e.target.value
-                                                    )
-                                                }
-                                            />
-
-                                            <MdSearch />
-
-                                        </div>
-
-
-                                        {!isView &&
-                                            tasksMaterialInternSearch.trim() !== "" && (
-
-                                                <div className="tasks-material-intern-results">
-
-                                                    {tasksMaterialFilteredInterns.map(intern => (
-
-                                                        <button
-                                                            type="button"
-                                                            key={intern}
-                                                            onClick={() =>
-                                                                tasksMaterialAddAudience(intern)
-                                                            }
-                                                        >
-                                                            {intern}
-                                                        </button>
-
-                                                    ))}
-
-                                                    {!tasksMaterialFilteredInterns.length && (
-                                                        <p>No interns found</p>
-                                                    )}
-
-                                                </div>
-
-                                            )}
-
-                                    </div>
-
-                                ) : (
-
-                                    <select
-                                        id="tasks-material-audience-selection"
-                                        value={tasksMaterialSelectionValue}
-                                        disabled={isView}
-                                        onChange={e => {
-
-                                            setTasksMaterialSelectionValue(
-                                                e.target.value
-                                            );
-
-                                            tasksMaterialAddAudience(
-                                                e.target.value
-                                            );
-
-                                        }}
-                                    >
-
-                                        <option value="">
-                                            {tasksMaterialFormData.audienceType === "By Category"
-                                                ? "Select Category"
-                                                : "Select Course"}
-                                        </option>
-
-                                        {tasksMaterialGetAudienceOptions()
-                                            .filter(item =>
-                                                !tasksMaterialFormData.selectedAudience.includes(item)
-                                            )
-                                            .map(item => (
-
-                                                <option key={item} value={item}>
-                                                    {item}
-                                                </option>
-
-                                            ))}
-
-                                    </select>
-
-                                )}
-
-                            </div>
-
-                        )}
-
-                    </div>
-
-
-                    {/* SELECTED AUDIENCE */}
-
-                    {tasksMaterialRenderSelectedAudience()}
-
-                </div>
-
-
-                {/* FORM BUTTONS */}
-
-                <div className="tasks-material-form-buttons">
-
-                    {tasksMaterialMode === "create" && (
-
-                        <>
-
-                            <button
-                                type="button"
-                                className="tasks-material-cancel-btn"
-                                onClick={tasksMaterialHandleCancel}
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                type="submit"
-                                className="tasks-material-primary-btn"
-                            >
-                                Add Material
-                            </button>
-
-                        </>
-
-                    )}
-
-
-                    {tasksMaterialMode === "view" && (
-
-                        <button
-                            type="button"
-                            className="tasks-material-primary-btn"
-                            onClick={() =>
-                                setTasksMaterialMode("edit")
-                            }
-                        >
-                            Edit
-                        </button>
-
-                    )}
-
-
-                    {tasksMaterialMode === "edit" && (
-
-                        <>
-
-                            <button
-                                type="button"
-                                className="tasks-material-cancel-btn"
-                                onClick={() =>
-                                    tasksMaterialHandleDelete(
-                                        tasksMaterialSelectedId
-                                    )
-                                }
-                            >
-                                Delete
-                            </button>
-
-                            <button
-                                type="submit"
-                                className="tasks-material-primary-btn"
-                            >
-                                Save
-                            </button>
-
-                        </>
-
-                    )}
-
-                </div>
-
-            </form>
-
-        );
-
-    };
-
-
-    // =================================================
-    // MAIN RETURN
-    // =================================================
+    const csv = [headers, ...rows]
+      .map((row) =>
+        row
+          .map(
+            (value) =>
+              `"${String(value ?? "").replace(/"/g, '""')}"`
+          )
+          .join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob(["\uFEFF" + csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "materials.csv";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  };
+
+  // =====================================================
+  // SELECTED AUDIENCE UI
+  // =====================================================
+
+  const renderSelectedAudience = () => {
+    const field = getAudienceField();
+
+    if (!field || !formData[field].length) return null;
+
+    const selectedItems = getSelectedAudienceItems();
 
     return (
+      <div className="tasks-material-selected-section">
+        <h4>
+          {formData.audience === "By batches"
+            ? "Selected Batches"
+            : formData.audience === "By Category"
+              ? "Selected Categories"
+              : formData.audience === "By Courses"
+                ? "Selected Courses"
+                : "Selected Interns"}
+        </h4>
 
-        <div className="tasks-material-page">
+        <div className="tasks-material-selected-list">
+          {selectedItems.map((item) => {
+            const id = getId(item);
 
-            {/* =========================================
-                HEADER
-            ========================================= */}
+            return (
+              <div
+                className="tasks-material-selected-item"
+                key={id}
+              >
+                <span>{getAudienceLabel(item)}</span>
 
+                {mode !== "view" && (
+                  <button
+                    type="button"
+                    onClick={() => removeAudience(field, id)}
+                    aria-label="Remove selection"
+                  >
+                    <MdClose />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
-            {/* =========================================
-                TOP NAVIGATION
-            ========================================= */}
+  // =====================================================
+  // RENDER FORM
+  // =====================================================
 
-            {(tasksMaterialMode === "list" ||
-                tasksMaterialMode === "create") && (
+  const renderForm = () => {
+    const isView = mode === "view";
+    const audienceOptions = getAudienceOptions();
+    const selectedField = getAudienceField();
 
-                <div className="tasks-material-top-navigation">
+    const filteredInterns = selectedInterns.filter((intern) => {
+      const name = getName(intern, ["fullName", "email"]);
 
-                    <div className="tasks-material-tabs">
+      return (
+        name.toLowerCase().includes(internSearch.toLowerCase()) &&
+        !formData.individualInterns.includes(getId(intern))
+      );
+    });
+
+    return (
+      <form
+        className="tasks-material-form"
+        onSubmit={handleSubmit}
+      >
+        {mode !== "create" && (
+          <div className="tasks-material-detail-header">
+            <h2>{formData.title || "Material Details"}</h2>
+
+            <button
+              type="button"
+              className="tasks-material-back-btn"
+              onClick={handleCancel}
+            >
+              <MdArrowBack />
+              Back
+            </button>
+          </div>
+        )}
+
+        {/* MATERIAL DETAILS */}
+
+        <div className="tasks-material-form-section">
+          <h3>Material Details</h3>
+
+          <div className="tasks-material-section-divider" />
+
+          <div className="tasks-material-form-grid">
+            {/* TITLE */}
+
+            <div className="tasks-material-form-group">
+              <label htmlFor="tasks-material-title">
+                Title <span>*</span>
+              </label>
+
+              <input
+                id="tasks-material-title"
+                type="text"
+                placeholder="Enter Material Title"
+                value={formData.title}
+                onChange={(e) =>
+                  updateField("title", e.target.value)
+                }
+                disabled={isView}
+                required
+              />
+            </div>
+
+            {/* MENTOR */}
+
+            <div className="tasks-material-form-group">
+              <label htmlFor="tasks-material-mentor">
+                Assigned Mentor <span>*</span>
+              </label>
+
+              <select
+                id="tasks-material-mentor"
+                value={formData.mentor}
+                onChange={(e) =>
+                  updateField("mentor", e.target.value)
+                }
+                disabled={isView}
+                required
+              >
+                <option value="">Choose Mentor</option>
+
+                {dropdowns.mentors.map((mentor) => (
+                  <option
+                    key={getId(mentor)}
+                    value={getId(mentor)}
+                  >
+                    {getName(mentor, ["fullName", "email"])}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* ATTACHMENT */}
+
+            <div className="tasks-material-form-group">
+              <label htmlFor="tasks-material-attachments">
+                Attachment <span>*</span>
+                <small>(JPG/PNG/WEBP/PDF only)</small>
+              </label>
+
+              {!isView ? (
+                <>
+                  <label className="tasks-material-upload-box">
+                    <span>
+                      {formData.attachment
+                        ? formData.attachment.name
+                        : formData.existingAttachment
+                          ? getFileName(formData.existingAttachment)
+                          : "Upload Attachment (Image/PDF)"}
+                    </span>
+
+                    <MdUploadFile />
+
+                    <input
+                      id="tasks-material-attachments"
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.webp,.pdf"
+                      hidden
+                      onChange={handleUpload}
+                    />
+                  </label>
+
+                  {formData.existingAttachment && !formData.attachment && (
+                    <div className="tasks-material-attachment-list">
+                      <div className="tasks-material-attachment-item">
+                        <span>
+                          Existing: {getFileName(formData.existingAttachment)}
+                        </span>
 
                         <button
-                            type="button"
-                            className={
-                                tasksMaterialMode === "list"
-                                    ? "tasks-material-tab-active"
-                                    : ""
-                            }
-                            onClick={() => {
-
-                                tasksMaterialResetForm();
-
-                                setTasksMaterialMode("list");
-
-                            }}
+                          type="button"
+                          onClick={() =>
+                            updateField("existingAttachment", "")
+                          }
                         >
-                            Material List
+                          <MdClose />
                         </button>
-
-
-                        <button
-                            type="button"
-                            className={
-                                tasksMaterialMode === "create"
-                                    ? "tasks-material-tab-active"
-                                    : ""
-                            }
-                            onClick={tasksMaterialHandleNew}
-                        >
-                            New Material
-                        </button>
-
+                      </div>
                     </div>
+                  )}
+                </>
+              ) : (
+                <div className="tasks-material-readonly-files">
+                  {formData.existingAttachment ? (
+                    <div>
+                      <span>
+                        {getFileName(formData.existingAttachment)}
+                      </span>
 
-
-                    <button
+                      <button
                         type="button"
-                        className="tasks-material-export-btn"
-                        onClick={tasksMaterialHandleExport}
-                    >
+                        onClick={() =>
+                          downloadAttachment(formData.existingAttachment)
+                        }
+                        title="Open attachment"
+                      >
                         <MdFileDownload />
-                        Export
-                    </button>
-
-                </div>
-
-            )}
-
-
-            {/* =========================================
-                MATERIAL LIST
-            ========================================= */}
-
-            {tasksMaterialMode === "list" && (
-
-                <div className="tasks-material-list-container">
-
-
-                    {/* SEARCH AND FILTERS */}
-
-                    <div className="tasks-material-filter-row">
-
-                        <div className="tasks-material-search-box">
-
-                            <MdSearch />
-
-                            <input
-                                id="tasks-material-search"
-                                type="text"
-                                placeholder="Search Materials"
-                                value={tasksMaterialSearch}
-                                onChange={e =>
-                                    setTasksMaterialSearch(e.target.value)
-                                }
-                            />
-
-                            {tasksMaterialSearch && (
-
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setTasksMaterialSearch("")
-                                    }
-                                >
-                                    <MdClose />
-                                </button>
-
-                            )}
-
-                        </div>
-
-
-                        {/* AUDIENCE FILTER */}
-
-                        <select
-                            id="tasks-material-audience-filter"
-                            value={tasksMaterialAudienceFilter}
-                            onChange={e =>
-                                setTasksMaterialAudienceFilter(e.target.value)
-                            }
-                        >
-
-                            <option value="all">All Audience</option>
-
-                            {tasksMaterialAudienceTypes.map(type => (
-
-                                <option key={type} value={type}>
-                                    {type}
-                                </option>
-
-                            ))}
-
-                        </select>
-
-
-                        {/* MENTOR FILTER */}
-
-                        <select
-                            id="tasks-material-mentor-filter"
-                            value={tasksMaterialMentorFilter}
-                            onChange={e =>
-                                setTasksMaterialMentorFilter(e.target.value)
-                            }
-                        >
-
-                            <option value="all">All Mentors</option>
-
-                            {tasksMaterialMentors.map(mentor => (
-
-                                <option key={mentor} value={mentor}>
-                                    {mentor}
-                                </option>
-
-                            ))}
-
-                        </select>
-
-
-                        {/* BRANCH FILTER */}
-
-                        <select
-                            id="tasks-material-branch-filter"
-                            value={tasksMaterialBranchFilter}
-                            onChange={e =>
-                                setTasksMaterialBranchFilter(e.target.value)
-                            }
-                        >
-
-                            <option value="all">All Branches</option>
-
-                            {tasksMaterialBranches.map(branch => (
-
-                                <option key={branch} value={branch}>
-                                    {branch}
-                                </option>
-
-                            ))}
-
-                        </select>
-
+                      </button>
                     </div>
-
-
-                    {/* TABLE */}
-
-                    {tasksMaterialFilteredList.length > 0 ? (
-
-                        <div className="tasks-material-table-wrapper">
-
-                            <table className="tasks-material-table">
-
-                                <thead>
-
-                                    <tr>
-
-                                        <th>Title</th>
-
-                                        <th>Mentor</th>
-
-                                        <th>Branch</th>
-
-                                        <th>Audience</th>
-
-                                        <th>Attachments</th>
-
-                                        <th>Created Date</th>
-
-                                        <th>Actions</th>
-
-                                    </tr>
-
-                                </thead>
-
-
-                                <tbody>
-
-                                    {tasksMaterialFilteredList.map(material => (
-
-                                        <tr key={material.id}>
-
-                                            <td className="tasks-material-title-cell">
-                                                {material.title}
-                                            </td>
-
-                                            <td>{material.mentor}</td>
-
-
-                                            <td>
-
-                                                <div className="tasks-material-branch-tags">
-
-                                                    {material.branches.map(branch => (
-
-                                                        <span key={branch}>
-                                                            {branch}
-                                                        </span>
-
-                                                    ))}
-
-                                                </div>
-
-                                            </td>
-
-
-                                            <td>
-
-                                                <span className="tasks-material-audience-badge">
-
-                                                    {material.audienceType}
-
-                                                </span>
-
-                                            </td>
-
-
-                                            {/* ATTACHMENTS */}
-
-                                            <td>
-
-                                                <div className="tasks-material-attachment-actions">
-
-                                                    <button
-                                                        type="button"
-                                                        title="View attachments"
-                                                        onClick={() =>
-                                                            tasksMaterialHandleView(material)
-                                                        }
-                                                    >
-                                                        <MdVisibility />
-                                                    </button>
-
-                                                    {material.allowDownload &&
-
-                                                        material.attachments.length > 0 && (
-
-                                                            <button
-                                                                type="button"
-                                                                title="Download attachments"
-                                                                onClick={() =>
-                                                                    material.attachments.forEach(
-                                                                        tasksMaterialDownloadAttachment
-                                                                    )
-                                                                }
-                                                            >
-                                                                <MdFileDownload />
-                                                            </button>
-
-                                                        )}
-
-                                                </div>
-
-                                            </td>
-
-
-                                            <td>
-                                                {material.createdDate || "-"}
-                                            </td>
-
-
-                                            {/* ACTIONS */}
-
-                                            <td>
-
-                                                <div className="tasks-material-action-buttons">
-
-                                                    <button
-                                                        type="button"
-                                                        title="View"
-                                                        onClick={() =>
-                                                            tasksMaterialHandleView(material)
-                                                        }
-                                                    >
-                                                        <MdVisibility />
-                                                    </button>
-
-
-                                                    <button
-                                                        type="button"
-                                                        title="Edit"
-                                                        onClick={() =>
-                                                            tasksMaterialHandleEdit(material)
-                                                        }
-                                                    >
-                                                        <MdEdit />
-                                                    </button>
-
-
-                                                    <button
-                                                        type="button"
-                                                        title="Delete"
-                                                        className="tasks-material-delete-icon"
-                                                        onClick={() =>
-                                                            tasksMaterialHandleDelete(material.id)
-                                                        }
-                                                    >
-                                                        <MdDelete />
-                                                    </button>
-
-                                                </div>
-
-                                            </td>
-
-                                        </tr>
-
-                                    ))}
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    ) : (
-
-                        <div className="tasks-material-empty-state">
-
-                            <p>
-                                No data available. Please add Material to view them here
-                            </p>
-
-                        </div>
-
-                    )}
-
-
-                    {/* TABLE FOOTER */}
-
-                    {tasksMaterialFilteredList.length > 0 && (
-
-                        <div className="tasks-material-list-footer">
-
-                            <span>
-                                {tasksMaterialFilteredList.length} materials
-                            </span>
-
-                        </div>
-
-                    )}
-
+                  ) : (
+                    <span>No attachment</span>
+                  )}
                 </div>
+              )}
+            </div>
+          </div>
 
-            )}
+          {/* DOWNLOAD PERMISSION */}
 
+          <div className="tasks-material-download-permission">
+            <input
+              id="tasks-material-allow-download"
+              type="checkbox"
+              checked={formData.allowDownload}
+              disabled={isView}
+              onChange={(e) =>
+                updateField("allowDownload", e.target.checked)
+              }
+            />
 
-            {/* =========================================
-                CREATE MATERIAL
-            ========================================= */}
-
-            {tasksMaterialMode === "create" && (
-
-                <div className="tasks-material-form-container">
-
-                    {tasksMaterialRenderForm()}
-
-                </div>
-
-            )}
-
-
-            {/* =========================================
-                VIEW MATERIAL
-            ========================================= */}
-
-            {tasksMaterialMode === "view" && tasksMaterialSelected && (
-
-                <div className="tasks-material-detail-container">
-
-                    {tasksMaterialRenderForm()}
-
-                </div>
-
-            )}
-
-
-            {/* =========================================
-                EDIT MATERIAL
-            ========================================= */}
-
-            {tasksMaterialMode === "edit" && tasksMaterialSelected && (
-
-                <div className="tasks-material-detail-container">
-
-                    {tasksMaterialRenderForm()}
-
-                </div>
-
-            )}
-
+            <label htmlFor="tasks-material-allow-download">
+              Allow Interns to Download
+            </label>
+          </div>
         </div>
 
-    );
+        {/* AUDIENCE */}
 
+        <div className="tasks-material-audience-section">
+          <h3>Audience Selection</h3>
+
+          <div className="tasks-material-section-divider" />
+
+          <div className="tasks-material-audience-grid">
+            {/* BRANCHES */}
+
+            <div className="tasks-material-form-group">
+              <label>
+                Branches <span>*</span>
+              </label>
+
+              <div className="tasks-material-dropdown-wrapper">
+                <button
+                  type="button"
+                  className="tasks-material-dropdown-trigger"
+                  disabled={isView}
+                  onClick={() =>
+                    setBranchDropdown(!branchDropdown)
+                  }
+                >
+                  <span>
+                    {formData.branches.length
+                      ? formData.branches
+                          .map((id) =>
+                            getName(
+                              dropdowns.branches.find(
+                                (item) => getId(item) === id
+                              ),
+                              ["branchName"]
+                            )
+                          )
+                          .join(", ")
+                      : "Select Branches"}
+                  </span>
+
+                  <MdKeyboardArrowDown />
+                </button>
+
+                {branchDropdown && !isView && (
+                  <div className="tasks-material-dropdown-menu">
+                    {dropdowns.branches.map((branch) => {
+                      const id = getId(branch);
+
+                      return (
+                        <label
+                          className="tasks-material-dropdown-option"
+                          key={id}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formData.branches.includes(id)}
+                            onChange={() => toggleBranch(id)}
+                          />
+
+                          <span>{branch.branchName}</span>
+                        </label>
+                      );
+                    })}
+
+                    <button
+                      type="button"
+                      className="tasks-material-dropdown-done"
+                      onClick={() => setBranchDropdown(false)}
+                    >
+                      Done
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* AUDIENCE TYPE */}
+
+            <div className="tasks-material-form-group">
+              <label>
+                Audience Type <span>*</span>
+
+                {!formData.branches.length && (
+                  <small className="tasks-material-hint">
+                    (Select branches first)
+                  </small>
+                )}
+              </label>
+
+              <select
+                value={formData.audience}
+                disabled={isView || !formData.branches.length}
+                onChange={(e) =>
+                  handleAudienceType(e.target.value)
+                }
+                required
+              >
+                <option value="">Choose Audience Type</option>
+
+                {AUDIENCE_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* AUDIENCE OPTIONS */}
+
+            {formData.audience &&
+              formData.audience !== "All interns" && (
+                <div className="tasks-material-form-group tasks-material-audience-select-group">
+                  <label>
+                    {formData.audience === "By batches"
+                      ? "Select Batches"
+                      : formData.audience === "By Category"
+                        ? "Select Categories"
+                        : formData.audience === "By Courses"
+                          ? "Select Courses"
+                          : "Select Interns"}
+                  </label>
+
+                  {formData.audience === "Individual interns" ? (
+                    <div className="tasks-material-intern-search-wrapper">
+                      <div className="tasks-material-intern-search">
+                        <input
+                          type="text"
+                          placeholder="Search Intern"
+                          value={internSearch}
+                          disabled={isView}
+                          onChange={(e) =>
+                            setInternSearch(e.target.value)
+                          }
+                        />
+
+                        <MdSearch />
+                      </div>
+
+                      {!isView && internSearch.trim() && (
+                        <div className="tasks-material-intern-results">
+                          {filteredInterns.map((intern) => (
+                            <button
+                              type="button"
+                              key={getId(intern)}
+                              onClick={() =>
+                                addAudience(getId(intern))
+                              }
+                            >
+                              {getName(intern, ["fullName", "email"])}
+                            </button>
+                          ))}
+
+                          {!filteredInterns.length && (
+                            <p>No interns found</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <select
+                      value={selectionValue}
+                      disabled={isView}
+                      onChange={(e) => {
+                        setSelectionValue(e.target.value);
+                        addAudience(e.target.value);
+                      }}
+                    >
+                      <option value="">
+                        {formData.audience === "By batches"
+                          ? "Select Batch"
+                          : formData.audience === "By Category"
+                            ? "Select Category"
+                            : "Select Course"}
+                      </option>
+
+                      {audienceOptions
+                        .filter(
+                          (item) =>
+                            !formData[selectedField].includes(getId(item))
+                        )
+                        .map((item) => (
+                          <option
+                            key={getId(item)}
+                            value={getId(item)}
+                          >
+                            {getAudienceLabel(item)}
+                          </option>
+                        ))}
+                    </select>
+                  )}
+                </div>
+              )}
+          </div>
+
+          {/* SELECTED AUDIENCE */}
+
+          {formData.audience === "All interns" && (
+            <div className="tasks-material-selected-section">
+              <h4>Audience</h4>
+              <p>All active interns in the selected branches.</p>
+            </div>
+          )}
+
+          {renderSelectedAudience()}
+        </div>
+
+        {/* BUTTONS */}
+
+        <div className="tasks-material-form-buttons">
+          {mode === "create" && (
+            <>
+              <button
+                type="button"
+                className="tasks-material-cancel-btn"
+                onClick={handleCancel}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="tasks-material-primary-btn"
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Add Material"}
+              </button>
+            </>
+          )}
+
+          {mode === "view" && (
+            <button
+              type="button"
+              className="tasks-material-primary-btn"
+              onClick={() => setMode("edit")}
+            >
+              Edit
+            </button>
+          )}
+
+          {mode === "edit" && (
+            <>
+              <button
+                type="button"
+                className="tasks-material-cancel-btn"
+                onClick={() => handleDelete(selectedId)}
+                disabled={loading}
+              >
+                Delete
+              </button>
+
+              <button
+                type="button"
+                className="tasks-material-cancel-btn"
+                onClick={handleCancel}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="tasks-material-primary-btn"
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </>
+          )}
+        </div>
+      </form>
+    );
+  };
+
+  // =====================================================
+  // MAIN RETURN
+  // =====================================================
+
+  return (
+    <div className="tasks-material-page">
+      {(mode === "list" || mode === "create") && (
+        <div className="tasks-material-top-navigation">
+          <div className="tasks-material-tabs">
+            <button
+              type="button"
+              className={
+                mode === "list"
+                  ? "tasks-material-tab-active"
+                  : ""
+              }
+              onClick={() => {
+                resetForm();
+                setMode("list");
+              }}
+            >
+              Material List
+            </button>
+
+            <button
+              type="button"
+              className={
+                mode === "create"
+                  ? "tasks-material-tab-active"
+                  : ""
+              }
+              onClick={handleNew}
+            >
+              New Material
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="tasks-material-export-btn"
+            onClick={handleExport}
+          >
+            <MdFileDownload />
+            Export
+          </button>
+        </div>
+      )}
+
+      {/* MATERIAL LIST */}
+
+      {mode === "list" && (
+        <div className="tasks-material-list-container">
+          <div className="tasks-material-filter-row">
+            <div className="tasks-material-search-box">
+              <MdSearch />
+
+              <input
+                type="text"
+                placeholder="Search Materials"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                >
+                  <MdClose />
+                </button>
+              )}
+            </div>
+
+            <select
+              value={audienceFilter}
+              onChange={(e) =>
+                setAudienceFilter(e.target.value)
+              }
+            >
+              <option value="all">All Audience</option>
+
+              {AUDIENCE_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={mentorFilter}
+              onChange={(e) =>
+                setMentorFilter(e.target.value)
+              }
+            >
+              <option value="all">All Mentors</option>
+
+              {dropdowns.mentors.map((mentor) => (
+                <option
+                  key={getId(mentor)}
+                  value={getId(mentor)}
+                >
+                  {getName(mentor, ["fullName", "email"])}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={branchFilter}
+              onChange={(e) =>
+                setBranchFilter(e.target.value)
+              }
+            >
+              <option value="all">All Branches</option>
+
+              {dropdowns.branches.map((branch) => (
+                <option
+                  key={getId(branch)}
+                  value={getId(branch)}
+                >
+                  {branch.branchName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {pageLoading ? (
+            <div className="tasks-material-empty-state">
+              <p>Loading materials...</p>
+            </div>
+          ) : filteredMaterials.length ? (
+            <div className="tasks-material-table-wrapper">
+              <table className="tasks-material-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Mentor</th>
+                    <th>Branch</th>
+                    <th>Audience</th>
+                    <th>Attachments</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {filteredMaterials.map((material) => (
+                    <tr key={getId(material)}>
+                      <td className="tasks-material-title-cell">
+                        {material.title}
+                      </td>
+
+                      <td>
+                        {getName(material.mentor, [
+                          "fullName",
+                          "email",
+                        ])}
+                      </td>
+
+                      <td>
+                        <div className="tasks-material-branch-tags">
+                          {(material.branch || []).map((branch) => (
+                            <span key={getId(branch)}>
+                              {getName(branch, ["branchName"])}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+
+                      <td>
+                        <span className="tasks-material-audience-badge">
+                          {material.audience}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="tasks-material-attachment-actions">
+                          <button
+                            type="button"
+                            title="View attachment"
+                            onClick={() =>
+                              downloadAttachment(material.attachments)
+                            }
+                          >
+                            <MdVisibility />
+                          </button>
+
+                          {material.allowDownload && (
+                            <button
+                              type="button"
+                              title="Download attachment"
+                              onClick={() =>
+                                downloadAttachment(material.attachments)
+                              }
+                            >
+                              <MdFileDownload />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+
+                      <td>
+                        {material.createdAt
+                          ? new Date(
+                              material.createdAt
+                            ).toLocaleDateString()
+                          : "-"}
+                      </td>
+
+                      <td>
+                        <div className="tasks-material-action-buttons">
+                          <button
+                            type="button"
+                            title="View"
+                            onClick={() => handleView(material)}
+                          >
+                            <MdVisibility />
+                          </button>
+
+                          <button
+                            type="button"
+                            title="Edit"
+                            onClick={() => handleEdit(material)}
+                          >
+                            <MdEdit />
+                          </button>
+
+                          <button
+                            type="button"
+                            title="Delete"
+                            className="tasks-material-delete-icon"
+                            onClick={() =>
+                              handleDelete(getId(material))
+                            }
+                          >
+                            <MdDelete />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="tasks-material-empty-state">
+              <p>
+                No data available. Please add Material to view them here.
+              </p>
+            </div>
+          )}
+
+          {filteredMaterials.length > 0 && (
+            <div className="tasks-material-list-footer">
+              <span>
+                Showing {filteredMaterials.length} of {materials.length} materials
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* CREATE */}
+
+      {mode === "create" && (
+        <div className="tasks-material-form-container">
+          {renderForm()}
+        </div>
+      )}
+
+      {/* VIEW */}
+
+      {mode === "view" && (
+        <div className="tasks-material-detail-container">
+          {renderForm()}
+        </div>
+      )}
+
+      {/* EDIT */}
+
+      {mode === "edit" && (
+        <div className="tasks-material-detail-container">
+          {renderForm()}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Taskmaterial;
