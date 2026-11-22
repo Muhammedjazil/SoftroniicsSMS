@@ -1,5 +1,4 @@
 import { NavLink, useNavigate } from "react-router-dom";
-
 import {
     FiCalendar,
     FiFileText,
@@ -13,13 +12,12 @@ import {
 import "./internnavbar.css";
 
 export const Internnavbar = () => {
-
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
+        localStorage.removeItem("SMStoken");
         localStorage.removeItem("user");
-        navigate("/");
+        navigate("/login", { replace: true });
     };
 
     const menuItems = [
@@ -67,7 +65,6 @@ export const Internnavbar = () => {
 
     return (
         <div className="internnavbar">
-
             {/* LOGO SECTION */}
             <div className="internnavbar-logo">
                 <h2>
@@ -75,14 +72,11 @@ export const Internnavbar = () => {
                 </h2>
             </div>
 
-
             {/* NAVIGATION MENU */}
             <div className="internnavbar-menu">
-
-                {menuItems.map((item, index) => (
-
+                {menuItems.map((item) => (
                     <NavLink
-                        key={index}
+                        key={item.path}
                         to={item.path}
                         className={({ isActive }) =>
                             `internnavbar-link ${
@@ -90,38 +84,23 @@ export const Internnavbar = () => {
                             }`
                         }
                     >
-
-                        <span className="internnavbar-icon">
-                            {item.icon}
-                        </span>
-
-                        <span className="internnavbar-text">
-                            {item.name}
-                        </span>
-
+                        <span className="internnavbar-icon">{item.icon}</span>
+                        <span className="internnavbar-text">{item.name}</span>
                     </NavLink>
-
                 ))}
-
             </div>
-
 
             {/* LOGOUT SECTION */}
             <div className="internnavbar-logout-section">
-
                 <button
+                    type="button"
                     className="internnavbar-logout"
                     onClick={handleLogout}
                 >
-
                     <FiLogOut className="internnavbar-icon" />
-
                     <span>Log Out</span>
-
                 </button>
-
             </div>
-
         </div>
     );
 };
