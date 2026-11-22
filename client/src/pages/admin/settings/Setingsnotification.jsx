@@ -1,8 +1,7 @@
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
-  FiUser,
   FiDownload,
   FiEye,
   FiEdit,
@@ -14,47 +13,62 @@ import {
   FiFileText
 } from "react-icons/fi";
 
+import AdminService from "../../../services/admin-api-services/AdminService";
 import "./Settingsnotification.css";
-
-// =====================================
-// SAMPLE DROPDOWN DATA
-// =====================================
-
-const batchOptions = [
-  "John - UI/UX Designing 3M",
-  "React Batch 2026",
-  "MERN Stack 2026",
-  "Python Batch 2026",
-  "Data Analytics 2026"
-];
-
-const stackOptions = [
-  "React",
-  "MERN Stack",
-  "Python",
-  "UI/UX Designing",
-  "Data Analytics"
-];
-
-const internOptions = [
-  "John",
-  "Thomson",
-  "Muhammed",
-  "Rahul",
-  "Anjali"
-];
 
 const initialForm = {
   title: "",
   content: "",
   type: "",
-  branch: "",
+  branch: [],
   audience: "",
   selectedAudience: [],
-  pushNotification: false
+  pushNotification: true
+};
+
+const notificationTypes = [
+  "Task Notification",
+  "Weekly Schedule",
+  "Common Notification",
+  "Announcement",
+  "Reminder"
+];
+
+const audienceTypes = [
+  "All interns",
+  "By batches",
+  "By Courses",
+  "By Category",
+  "Individual interns"
+];
+
+// Supports populated documents and plain ObjectId values.
+const getId = (item) => {
+  if (!item) return "";
+  return typeof item === "object" ? item._id || "" : item;
+};
+
+const getLabel = (item, fields = []) => {
+  if (!item) return "";
+
+  if (typeof item !== "object") return String(item);
+
+  for (const field of fields) {
+    if (item[field]) return item[field];
+  }
+
+  return item._id || "";
 };
 
 export const Notification = () => {
+  const {
+    takenotifications,
+    takenotificationbyid,
+    getnotificationdropdowns,
+    createnotification,
+    updatenotification,
+    removenotification
+  } = AdminService();
 
   // =====================================
   // STATES
@@ -66,24 +80,90 @@ export const Notification = () => {
 
   const [formData, setFormData] = useState(initialForm);
 
-  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const itemsPerPage = 5;
+  const [dropdowns, setDropdowns] = useState({
+    branches: [],
+    batches: [],
+    categories: [],
+    courses: [],
+    interns: []
+  });
 
+  const [loading, setLoading] = useState(false);
+
+  const itemsPerPage = 5;
   const isView = isactive === "show";
+
+  // =====================================
+  // LOAD NOTIFICATIONS
+  // =====================================
+
+  const loadNotifications = async () => {
+    try {
+      setLoading(true);
+
+      const response = await takenotifications();
+
+      setNotifications(response.notifications || []);
+    } catch (error) {
+      console.error(
+        "Fetch Notifications Error:",
+        error.response?.data || error
+      );
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to load notifications"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================
+  // LOAD DROPDOWNS
+  // =====================================
+
+  const loadDropdowns = async () => {
+    try {
+      const response = await getnotificationdropdowns();
+
+      setDropdowns({
+        branches: response.branches || [],
+        batches: response.batches || [],
+        categories: response.categories || [],
+        courses: response.courses || [],
+        interns: response.interns || []
+      });
+    } catch (error) {
+      console.error(
+        "Notification Dropdown Error:",
+        error.response?.data || error
+      );
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to load notification dropdown data"
+      );
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+    loadDropdowns();
+  }, []);
 
   // =====================================
   // HANDLE INPUT CHANGE
   // =====================================
 
   const handleChange = (e) => {
-
     const { name, value, type, checked } = e.target;
 
     if (name === "audience") {
-
       setFormData((prev) => ({
         ...prev,
         audience: value,
@@ -97,52 +177,6 @@ export const Notification = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value
     }));
-
-  };
-
-  // =====================================
-  // ADD SELECTED AUDIENCE
-  // =====================================
-
-  const handleAddAudience = (e) => {
-
-    const value = e.target.value;
-
-    if (!value) return;
-
-    setFormData((prev) => {
-
-      if (prev.selectedAudience.includes(value)) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        selectedAudience: [
-          ...prev.selectedAudience,
-          value
-        ]
-      };
-
-    });
-
-    e.target.value = "";
-
-  };
-
-  // =====================================
-  // REMOVE SELECTED AUDIENCE
-  // =====================================
-
-  const handleRemoveAudience = (value) => {
-
-    setFormData((prev) => ({
-      ...prev,
-      selectedAudience: prev.selectedAudience.filter(
-        (item) => item !== value
-      )
-    }));
-
   };
 
   // =====================================
@@ -150,21 +184,113 @@ export const Notification = () => {
   // =====================================
 
   const getAudienceOptions = () => {
-
-    if (formData.audience === "By Batch") {
-      return batchOptions;
+    if (formData.audience === "By batches") {
+      return dropdowns.batches;
     }
 
-    if (formData.audience === "By Stack") {
-      return stackOptions;
+    if (formData.audience === "By Courses") {
+      return dropdowns.courses;
     }
 
-    if (formData.audience === "Individual Interns") {
-      return internOptions;
+    if (formData.audience === "By Category") {
+      return dropdowns.categories;
+    }
+
+    if (formData.audience === "Individual interns") {
+      return dropdowns.interns;
     }
 
     return [];
+  };
 
+  const getAudienceId = (item) => getId(item);
+
+  const getAudienceLabel = (item) => {
+    if (formData.audience === "By batches") {
+      return getLabel(item, ["batchName"]);
+    }
+
+    if (formData.audience === "By Courses") {
+      return getLabel(item, ["courseName"]);
+    }
+
+    if (formData.audience === "By Category") {
+      return getLabel(item, ["categoryName"]);
+    }
+
+    if (formData.audience === "Individual interns") {
+      return getLabel(item, ["fullName", "email"]);
+    }
+
+    return "";
+  };
+
+  // =====================================
+  // ADD AUDIENCE
+  // =====================================
+
+  const handleAddAudience = (e) => {
+    const id = e.target.value;
+
+    if (!id) return;
+
+    setFormData((prev) => {
+      if (prev.selectedAudience.includes(id)) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        selectedAudience: [...prev.selectedAudience, id]
+      };
+    });
+
+    e.target.value = "";
+  };
+
+  // =====================================
+  // REMOVE AUDIENCE
+  // =====================================
+
+  const handleRemoveAudience = (id) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedAudience: prev.selectedAudience.filter(
+        (item) => item !== id
+      )
+    }));
+  };
+
+  // =====================================
+  // ADD BRANCH
+  // =====================================
+
+  const handleAddBranch = (e) => {
+    const id = e.target.value;
+
+    if (!id) return;
+
+    setFormData((prev) => {
+      if (prev.branch.includes(id)) return prev;
+
+      return {
+        ...prev,
+        branch: [...prev.branch, id]
+      };
+    });
+
+    e.target.value = "";
+  };
+
+  // =====================================
+  // REMOVE BRANCH
+  // =====================================
+
+  const handleRemoveBranch = (id) => {
+    setFormData((prev) => ({
+      ...prev,
+      branch: prev.branch.filter((item) => item !== id)
+    }));
   };
 
   // =====================================
@@ -172,13 +298,47 @@ export const Notification = () => {
   // =====================================
 
   const getSelectedAudience = (item) => {
-
-    if (item.audience === "All Interns") {
-      return "All Interns";
+    if (item.audience === "All interns") {
+      return "All interns";
     }
 
-    return item.selectedAudience.join(", ");
+    let selected = [];
 
+    if (item.audience === "By batches") {
+      selected = item.batches || [];
+      return selected
+        .map((value) => getLabel(value, ["batchName"]))
+        .join(", ");
+    }
+
+    if (item.audience === "By Courses") {
+      selected = item.courses || [];
+      return selected
+        .map((value) => getLabel(value, ["courseName"]))
+        .join(", ");
+    }
+
+    if (item.audience === "By Category") {
+      selected = item.categories || [];
+      return selected
+        .map((value) => getLabel(value, ["categoryName"]))
+        .join(", ");
+    }
+
+    if (item.audience === "Individual interns") {
+      selected = item.individualInterns || [];
+      return selected
+        .map((value) => getLabel(value, ["fullName", "email"]))
+        .join(", ");
+    }
+
+    return "-";
+  };
+
+  const getBranchText = (item) => {
+    return (item.branch || [])
+      .map((branch) => getLabel(branch, ["branchName"]))
+      .join(", ");
   };
 
   // =====================================
@@ -186,11 +346,8 @@ export const Notification = () => {
   // =====================================
 
   const resetForm = () => {
-
     setFormData({ ...initialForm });
-
-    setSelectedIndex(null);
-
+    setSelectedId(null);
   };
 
   // =====================================
@@ -198,118 +355,187 @@ export const Notification = () => {
   // =====================================
 
   const handleNew = () => {
-
     resetForm();
-
     setIsactive("Newnotification");
+  };
 
+  // =====================================
+  // CONVERT FORM TO API PAYLOAD
+  // =====================================
+
+  const getPayload = () => {
+    const payload = {
+      title: formData.title.trim(),
+      content: formData.content.trim(),
+      type: formData.type,
+      branch: formData.branch,
+      audience: formData.audience,
+      batches: [],
+      courses: [],
+      categories: [],
+      individualInterns: [],
+      pushNotification: formData.pushNotification
+    };
+
+    if (formData.audience === "By batches") {
+      payload.batches = formData.selectedAudience;
+    }
+
+    if (formData.audience === "By Courses") {
+      payload.courses = formData.selectedAudience;
+    }
+
+    if (formData.audience === "By Category") {
+      payload.categories = formData.selectedAudience;
+    }
+
+    if (formData.audience === "Individual interns") {
+      payload.individualInterns = formData.selectedAudience;
+    }
+
+    return payload;
   };
 
   // =====================================
   // PUBLISH / UPDATE
   // =====================================
 
-  const handlePublish = () => {
-
+  const handlePublish = async () => {
     if (
       !formData.title.trim() ||
       !formData.content.trim() ||
       !formData.type ||
-      !formData.branch ||
+      formData.branch.length === 0 ||
       !formData.audience
     ) {
-
       alert("Please fill all required fields");
-
       return;
-
     }
 
     if (
-      formData.audience !== "All Interns" &&
+      formData.audience !== "All interns" &&
       formData.selectedAudience.length === 0
     ) {
-
       alert("Please select at least one audience");
-
       return;
-
     }
 
-    if (selectedIndex !== null) {
+    try {
+      setLoading(true);
 
-      // UPDATE EXISTING NOTIFICATION
+      const payload = getPayload();
 
-      setNotifications((prev) =>
-        prev.map((item, index) =>
-          index === selectedIndex
-            ? { ...formData, id: item.id }
-            : item
-        )
+      if (selectedId) {
+        await updatenotification(selectedId, payload);
+        alert("Notification updated successfully!");
+      } else {
+        await createnotification(payload);
+        alert("Notification published successfully!");
+      }
+
+      await loadNotifications();
+
+      resetForm();
+      setIsactive("Notification");
+    } catch (error) {
+      console.error(
+        "Save Notification Error:",
+        error.response?.data || error
       );
 
-      alert("Notification updated successfully!");
+      alert(
+        error.response?.data?.message ||
+        "Unable to save notification"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    } else {
+  // =====================================
+  // CONVERT API RECORD TO FORM
+  // =====================================
 
-      // ADD NEW NOTIFICATION
+  const mapNotificationToForm = (item) => {
+    let selectedAudience = [];
 
-      const newNotification = {
-        ...formData,
-        id: Date.now()
-      };
-
-      setNotifications((prev) => [
-        ...prev,
-        newNotification
-      ]);
-
-      alert("Notification published successfully!");
-
+    if (item.audience === "By batches") {
+      selectedAudience = (item.batches || []).map(getId);
+    } else if (item.audience === "By Courses") {
+      selectedAudience = (item.courses || []).map(getId);
+    } else if (item.audience === "By Category") {
+      selectedAudience = (item.categories || []).map(getId);
+    } else if (item.audience === "Individual interns") {
+      selectedAudience = (item.individualInterns || []).map(getId);
     }
 
-    resetForm();
-
-    setIsactive("Notification");
-
+    return {
+      title: item.title || "",
+      content: item.content || "",
+      type: item.type || "",
+      branch: (item.branch || []).map(getId),
+      audience: item.audience || "",
+      selectedAudience,
+      pushNotification: Boolean(item.pushNotification)
+    };
   };
 
   // =====================================
   // VIEW NOTIFICATION
   // =====================================
 
-  const handleView = (index) => {
+  const handleView = async (id) => {
+    try {
+      setLoading(true);
 
-    setFormData({
-      ...notifications[index],
-      selectedAudience: [
-        ...notifications[index].selectedAudience
-      ]
-    });
+      const response = await takenotificationbyid(id);
+      const item = response.notification;
 
-    setSelectedIndex(index);
+      setFormData(mapNotificationToForm(item));
+      setSelectedId(item._id);
+      setIsactive("show");
+    } catch (error) {
+      console.error(
+        "View Notification Error:",
+        error.response?.data || error
+      );
 
-    setIsactive("show");
-
+      alert(
+        error.response?.data?.message ||
+        "Unable to open notification"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   // =====================================
   // EDIT NOTIFICATION
   // =====================================
 
-  const handleEdit = (index) => {
+  const handleEdit = async (id) => {
+    try {
+      setLoading(true);
 
-    setFormData({
-      ...notifications[index],
-      selectedAudience: [
-        ...notifications[index].selectedAudience
-      ]
-    });
+      const response = await takenotificationbyid(id);
+      const item = response.notification;
 
-    setSelectedIndex(index);
+      setFormData(mapNotificationToForm(item));
+      setSelectedId(item._id);
+      setIsactive("Newnotification");
+    } catch (error) {
+      console.error(
+        "Edit Notification Error:",
+        error.response?.data || error
+      );
 
-    setIsactive("Newnotification");
-
+      alert(
+        error.response?.data?.message ||
+        "Unable to edit notification"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   // =====================================
@@ -317,32 +543,48 @@ export const Notification = () => {
   // =====================================
 
   const handleViewEdit = () => {
-
     setIsactive("Newnotification");
-
   };
 
   // =====================================
   // DELETE NOTIFICATION
   // =====================================
 
-  const handleDelete = (id) => {
-
+  const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this notification?"
+      "Are you sure you want to permanently delete this notification?"
     );
 
     if (!confirmDelete) return;
 
-    setNotifications((prev) =>
-      prev.filter((item) => item.id !== id)
-    );
+    try {
+      setLoading(true);
 
-    if (selectedIndex !== null) {
-      resetForm();
-      setIsactive("Notification");
+      await removenotification(id);
+
+      setNotifications((prev) =>
+        prev.filter((item) => item._id !== id)
+      );
+
+      if (selectedId === id) {
+        resetForm();
+        setIsactive("Notification");
+      }
+
+      alert("Notification permanently deleted.");
+    } catch (error) {
+      console.error(
+        "Delete Notification Error:",
+        error.response?.data || error
+      );
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to delete notification"
+      );
+    } finally {
+      setLoading(false);
     }
-
   };
 
   // =====================================
@@ -350,11 +592,8 @@ export const Notification = () => {
   // =====================================
 
   const handleBack = () => {
-
     resetForm();
-
     setIsactive("Notification");
-
   };
 
   // =====================================
@@ -362,13 +601,9 @@ export const Notification = () => {
   // =====================================
 
   const handleExport = () => {
-
     if (notifications.length === 0) {
-
       alert("No notifications available to export");
-
       return;
-
     }
 
     const headers = [
@@ -382,25 +617,24 @@ export const Notification = () => {
     ];
 
     const rows = notifications.map((item) => [
-
       item.title,
       item.content,
       item.type,
-      item.branch,
+      getBranchText(item),
       item.audience,
       getSelectedAudience(item),
       item.pushNotification ? "Yes" : "No"
-
     ]);
 
-    const csv = [
-      headers,
-      ...rows
-    ].map((row) =>
-      row.map((value) =>
-        `"${String(value).replace(/"/g, '""')}"`
-      ).join(",")
-    ).join("\n");
+    const csv = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((value) =>
+            `"${String(value ?? "").replace(/"/g, '""')}"`
+          )
+          .join(",")
+      )
+      .join("\n");
 
     const blob = new Blob(
       ["\uFEFF" + csv],
@@ -408,17 +642,16 @@ export const Notification = () => {
     );
 
     const url = URL.createObjectURL(blob);
-
     const link = document.createElement("a");
 
     link.href = url;
-
     link.download = "notifications.csv";
 
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
 
     URL.revokeObjectURL(url);
-
   };
 
   // =====================================
@@ -442,31 +675,18 @@ export const Notification = () => {
   // =====================================
 
   return (
-
     <div className="notification">
-
-     
-
-      {/* =====================================
-          MAIN CONTAINER
-      ===================================== */}
 
       <div className="notificationherosection">
 
-        {/* =====================================
-            TOP TABS
-        ===================================== */}
+        {/* TOP TABS */}
 
         <div className="notificationtopbar">
 
           <div className="notfibutton">
 
             <button
-              className={
-                isactive === "Notification"
-                  ? "active"
-                  : ""
-              }
+              className={isactive === "Notification" ? "active" : ""}
               onClick={() => {
                 resetForm();
                 setIsactive("Notification");
@@ -476,11 +696,7 @@ export const Notification = () => {
             </button>
 
             <button
-              className={
-                isactive !== "Notification"
-                  ? "active"
-                  : ""
-              }
+              className={isactive !== "Notification" ? "active" : ""}
               onClick={handleNew}
             >
               New Notification
@@ -489,80 +705,57 @@ export const Notification = () => {
           </div>
 
           {isactive === "Notification" && (
-
             <button
               className="notificationexport"
               onClick={handleExport}
             >
               Export <FiDownload />
             </button>
-
           )}
 
         </div>
 
-        {/* =====================================
-            NOTIFICATION TABLE
-        ===================================== */}
+        {/* NOTIFICATION TABLE */}
 
         {isactive === "Notification" && (
-
           <>
-
             <div className="notificationtable">
 
               <table>
 
                 <thead>
-
                   <tr>
-
                     <th>#</th>
-
                     <th>Title</th>
-
                     <th>Type</th>
-
                     <th>Branch</th>
-
                     <th>Audience</th>
-
                     <th>Selected Audience</th>
-
                     <th>Actions</th>
-
                   </tr>
-
                 </thead>
 
                 <tbody>
 
-                  {currentNotifications.length === 0 ? (
-
+                  {loading ? (
                     <tr>
-
-                      <td
-                        colSpan="7"
-                        className="notificationempty"
-                      >
-
-                        <FiFileText />
-
-                        <p>No notifications available</p>
-
+                      <td colSpan="7" className="notificationempty">
+                        Loading notifications...
                       </td>
-
                     </tr>
-
+                  ) : currentNotifications.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="notificationempty">
+                        <FiFileText />
+                        <p>No notifications available</p>
+                      </td>
+                    </tr>
                   ) : (
-
                     currentNotifications.map((item, index) => {
-
                       const actualIndex = startIndex + index;
 
                       return (
-
-                        <tr key={item.id}>
+                        <tr key={item._id}>
 
                           <td>{actualIndex + 1}</td>
 
@@ -570,14 +763,12 @@ export const Notification = () => {
 
                           <td>{item.type}</td>
 
-                          <td>{item.branch}</td>
+                          <td>{getBranchText(item)}</td>
 
                           <td>{item.audience}</td>
 
                           <td className="selectedaudience">
-
-                            {getSelectedAudience(item)}
-
+                            {getSelectedAudience(item) || "-"}
                           </td>
 
                           <td className="notificationactions">
@@ -585,7 +776,7 @@ export const Notification = () => {
                             <button
                               className="viewaction"
                               title="View"
-                              onClick={() => handleView(actualIndex)}
+                              onClick={() => handleView(item._id)}
                             >
                               <FiEye />
                             </button>
@@ -593,7 +784,7 @@ export const Notification = () => {
                             <button
                               className="editaction"
                               title="Edit"
-                              onClick={() => handleEdit(actualIndex)}
+                              onClick={() => handleEdit(item._id)}
                             >
                               <FiEdit />
                             </button>
@@ -601,7 +792,7 @@ export const Notification = () => {
                             <button
                               className="deleteaction"
                               title="Delete"
-                              onClick={() => handleDelete(item.id)}
+                              onClick={() => handleDelete(item._id)}
                             >
                               <FiTrash2 />
                             </button>
@@ -609,11 +800,8 @@ export const Notification = () => {
                           </td>
 
                         </tr>
-
                       );
-
                     })
-
                   )}
 
                 </tbody>
@@ -647,14 +835,10 @@ export const Notification = () => {
               </button>
 
             </div>
-
           </>
-
         )}
 
-        {/* =====================================
-            NEW / EDIT / VIEW FORM
-        ===================================== */}
+        {/* NEW / EDIT / VIEW FORM */}
 
         {(isactive === "Newnotification" || isactive === "show") && (
 
@@ -665,17 +849,13 @@ export const Notification = () => {
             <div className="Newnotificationsect1">
 
               <div className="Newnotificationsect2">
-
                 <h2>
-
                   {isView
                     ? "Notification Details"
-                    : selectedIndex !== null
+                    : selectedId
                     ? "Edit Notification"
                     : "New Notification"}
-
                 </h2>
-
               </div>
 
               <button
@@ -737,18 +917,13 @@ export const Notification = () => {
                   onChange={handleChange}
                   disabled={isView}
                 >
-
                   <option value="">Choose Type</option>
 
-                  <option value="Reminder">Reminder</option>
-
-                  <option value="Common">Common</option>
-
-                  <option value="Announcement">Announcement</option>
-
-                  <option value="Alert">Alert</option>
-
-                  <option value="Event">Event</option>
+                  {notificationTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
 
                 </select>
 
@@ -761,25 +936,60 @@ export const Notification = () => {
                 <label>Branch</label>
 
                 <select
-                  name="branch"
-                  value={formData.branch}
-                  onChange={handleChange}
+                  value=""
+                  onChange={handleAddBranch}
                   disabled={isView}
                 >
-
                   <option value="">Choose Branch</option>
 
-                  <option value="Calicut">Calicut</option>
-
-                  <option value="Perinthalmanna">Perinthalmanna</option>
-
-                  <option value="Kochi">Kochi</option>
-
-                  <option value="Thrissur">Thrissur</option>
-
-                  <option value="Palakkad">Palakkad</option>
+                  {dropdowns.branches.map((branch) => (
+                    <option
+                      key={branch._id}
+                      value={branch._id}
+                      disabled={formData.branch.includes(branch._id)}
+                    >
+                      {branch.branchName}
+                    </option>
+                  ))}
 
                 </select>
+
+                {formData.branch.length > 0 && (
+                  <div className="addedAudience">
+
+                    <h3>Selected Branches</h3>
+
+                    <div className="audiencechips">
+
+                      {formData.branch.map((id) => {
+                        const branch = dropdowns.branches.find(
+                          (item) => item._id === id
+                        );
+
+                        return (
+                          <div className="audiencechip" key={id}>
+
+                            <span>
+                              {branch?.branchName || id}
+                            </span>
+
+                            {!isView && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveBranch(id)}
+                              >
+                                <FiX />
+                              </button>
+                            )}
+
+                          </div>
+                        );
+                      })}
+
+                    </div>
+
+                  </div>
+                )}
 
               </div>
 
@@ -798,21 +1008,11 @@ export const Notification = () => {
 
                   <option value="">Choose Audience</option>
 
-                  <option value="All Interns">
-                    All Interns
-                  </option>
-
-                  <option value="By Batch">
-                    By Batch
-                  </option>
-
-                  <option value="By Stack">
-                    By Stack
-                  </option>
-
-                  <option value="Individual Interns">
-                    Individual Interns
-                  </option>
+                  {audienceTypes.map((audience) => (
+                    <option key={audience} value={audience}>
+                      {audience}
+                    </option>
+                  ))}
 
                 </select>
 
@@ -820,23 +1020,21 @@ export const Notification = () => {
 
             </div>
 
-            {/* =====================================
-                BATCH / STACK / INTERN SELECTION
-            ===================================== */}
+            {/* AUDIENCE SELECTION */}
 
             {formData.audience !== "" &&
-              formData.audience !== "All Interns" && (
+              formData.audience !== "All interns" && (
 
               <div className="audienceinput">
 
                 <label>
-
-                  {formData.audience === "By Batch"
-                    ? "Choose Batch"
-                    : formData.audience === "By Stack"
-                    ? "Choose Stack"
-                    : "Search Interns"}
-
+                  {formData.audience === "By batches"
+                    ? "Choose Batches"
+                    : formData.audience === "By Courses"
+                    ? "Choose Courses"
+                    : formData.audience === "By Category"
+                    ? "Choose Categories"
+                    : "Select Interns"}
                 </label>
 
                 <select
@@ -847,26 +1045,22 @@ export const Notification = () => {
                 >
 
                   <option value="">
-
-                    {formData.audience === "By Batch"
-                      ? "Select Batch"
-                      : formData.audience === "By Stack"
-                      ? "Select Stack"
-                      : "Select Intern"}
-
+                    Select {formData.audience}
                   </option>
 
-                  {getAudienceOptions().map((option) => (
+                  {getAudienceOptions().map((option) => {
+                    const id = getAudienceId(option);
 
-                    <option
-                      key={option}
-                      value={option}
-                      disabled={formData.selectedAudience.includes(option)}
-                    >
-                      {option}
-                    </option>
-
-                  ))}
+                    return (
+                      <option
+                        key={id}
+                        value={id}
+                        disabled={formData.selectedAudience.includes(id)}
+                      >
+                        {getAudienceLabel(option)}
+                      </option>
+                    );
+                  })}
 
                 </select>
 
@@ -876,41 +1070,37 @@ export const Notification = () => {
 
                   <div className="addedAudience">
 
-                    <h3>
-
-                      Added {formData.audience === "By Batch"
-                        ? "Batch's"
-                        : formData.audience === "By Stack"
-                        ? "Stack's"
-                        : "Interns"}
-
-                    </h3>
+                    <h3>Selected Audience</h3>
 
                     <div className="audiencechips">
 
-                      {formData.selectedAudience.map((item) => (
+                      {formData.selectedAudience.map((id) => {
 
-                        <div
-                          className="audiencechip"
-                          key={item}
-                        >
+                        const option = getAudienceOptions().find(
+                          (item) => getAudienceId(item) === id
+                        );
 
-                          <span>{item}</span>
+                        const label = option
+                          ? getAudienceLabel(option)
+                          : id;
 
-                          {!isView && (
+                        return (
+                          <div className="audiencechip" key={id}>
 
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveAudience(item)}
-                            >
-                              <FiX />
-                            </button>
+                            <span>{label}</span>
 
-                          )}
+                            {!isView && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveAudience(id)}
+                              >
+                                <FiX />
+                              </button>
+                            )}
 
-                        </div>
-
-                      ))}
+                          </div>
+                        );
+                      })}
 
                     </div>
 
@@ -919,12 +1109,9 @@ export const Notification = () => {
                 )}
 
               </div>
-
             )}
 
-            {/* =====================================
-                PUSH NOTIFICATION
-            ===================================== */}
+            {/* PUSH NOTIFICATION */}
 
             <div className="pushnotification">
 
@@ -943,15 +1130,14 @@ export const Notification = () => {
 
             </div>
 
-            {/* =====================================
-                FORM BUTTONS
-            ===================================== */}
+            {/* FORM BUTTONS */}
 
             <div className="newnotificationbutton">
 
               <button
                 className="notificationcancel"
                 onClick={handleBack}
+                disabled={loading}
               >
                 Cancel
               </button>
@@ -970,12 +1156,13 @@ export const Notification = () => {
                 <button
                   className="notificationpublish"
                   onClick={handlePublish}
+                  disabled={loading}
                 >
-
-                  {selectedIndex !== null
+                  {loading
+                    ? "Saving..."
+                    : selectedId
                     ? "Update"
                     : "Publish"}
-
                 </button>
 
               )}
@@ -989,7 +1176,5 @@ export const Notification = () => {
       </div>
 
     </div>
-
   );
-
 };

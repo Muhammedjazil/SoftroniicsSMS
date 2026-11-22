@@ -448,6 +448,59 @@ const AdminService = () => {
   };
 
 
+  // =====================================
+  // NOTIFICATION MANAGEMENT
+  // =====================================
+
+  // Get all notifications
+  const takenotifications = async () => {
+    const response = await axiosPrivate.get("/notificationmanagement");
+    return response.data;
+  };
+
+  // Get notification by ID
+  const takenotificationbyid = async (id) => {
+    const response = await axiosPrivate.get(
+      `/notificationmanagement/${id}`
+    );
+    return response.data;
+  };
+
+  // Get notification dropdown data
+  const getnotificationdropdowns = async () => {
+    const response = await axiosPrivate.get(
+      "/notificationmanagement/dropdowns"
+    );
+    return response.data;
+  };
+
+  // Create notification
+  const createnotification = async (data) => {
+    const response = await axiosPrivate.post(
+      "/notificationmanagement",
+      data
+    );
+    return response.data;
+  };
+
+  // Update notification
+  const updatenotification = async (id, data) => {
+    const response = await axiosPrivate.put(
+      `/notificationmanagement/${id}`,
+      data
+    );
+    return response.data;
+  };
+
+  // Permanently delete notification
+  const removenotification = async (id) => {
+    const response = await axiosPrivate.delete(
+      `/notificationmanagement/${id}`
+    );
+    return response.data;
+  };
+
+
 
   return {
     newrolecreate,
@@ -513,9 +566,15 @@ const AdminService = () => {
     updatematerial,
     removematerial,
     takeevaluationmodules,
-takeevaluationtasks,
-takesubmissions,
-gradesubmission
+    takeevaluationtasks,
+    takesubmissions,
+    gradesubmission,
+    takenotifications,
+    takenotificationbyid,
+    getnotificationdropdowns,
+    createnotification,
+    updatenotification,
+    removenotification,
   };
 };
 
