@@ -2,9 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './TimingsManagement.css';
 import { LuUser } from 'react-icons/lu';
 import { FiChevronDown, FiEdit2, FiTrash2 } from 'react-icons/fi';
-import AdminService from "../../../services/admin-api-services/AdminService"
+import AdminService from "../../../services/admin-api-services/AdminService";
+import Loader from '../../../components/common/Loader';
+import { useToast } from '../../../components/common/Toast';
 
 const TimingsManagement = () => {
+  const { showToast, ToastContainer } = useToast();
   const { takebranch, taketiming, createtiming, updatetiming, removetiming } = AdminService();
 
   const [activeTab, setActiveTab] = useState('timings'); // 'timings' | 'new-timing' | 'edit-timing'
@@ -159,10 +162,12 @@ const TimingsManagement = () => {
         setTimings((prev) =>
           prev.map((t) => (t.id === editingId ? normalizeTiming(updated) : t))
         );
+        showToast('Timing updated successfully!', 'success');
       } else {
         const res = await createtiming(payload);
         const created = res?.data || res;
         setTimings((prev) => [...prev, normalizeTiming(created)]);
+        showToast('Timing created successfully!', 'success');
       }
 
       setBranchFilter(branchId);
@@ -170,7 +175,7 @@ const TimingsManagement = () => {
       setActiveTab('timings');
     } catch (error) {
       console.error('Error saving timing:', error);
-      alert(error?.response?.data?.message || 'Failed to save timing');
+      showToast(error?.response?.data?.message || 'Failed to save timing', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -185,9 +190,10 @@ const TimingsManagement = () => {
         resetForm();
         setActiveTab('timings');
       }
+      showToast('Timing deleted successfully.', 'success');
     } catch (error) {
       console.error('Error deleting timing:', error);
-      alert(error?.response?.data?.message || 'Failed to delete timing');
+      showToast(error?.response?.data?.message || 'Failed to delete timing', 'error');
     }
   };
 
@@ -197,6 +203,7 @@ const TimingsManagement = () => {
 
   return (
     <div className="tmg-mgmt-container">
+      <ToastContainer />
      
 
       <div className="tmg-mgmt-toolbar">
@@ -252,7 +259,7 @@ const TimingsManagement = () => {
             </div>
 
             {loading ? (
-              <p className="tmg-mgmt-empty-text">Loading timings...</p>
+              <Loader message="Loading timings..." minHeight="240px" />
             ) : filteredTimings.length === 0 ? (
               <p className="tmg-mgmt-empty-text">No timings added for this branch yet.</p>
             ) : (

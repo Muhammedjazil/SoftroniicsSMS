@@ -4,8 +4,11 @@ import { LuSearch, LuX } from 'react-icons/lu';
 import { HiOutlineArrowDownTray } from 'react-icons/hi2';
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import AdminService from '../../../services/admin-api-services/AdminService';
+import Loader from '../../../components/common/Loader';
+import { useToast } from '../../../components/common/Toast';
 
 const BatchManagement = () => {
+  const { showToast, ToastContainer } = useToast();
   const {
     takebatches,
     takebranch,
@@ -279,10 +282,11 @@ const BatchManagement = () => {
       const created = res?.data || res;
 
       setBatches((prev) => [normalizeBatch(created), ...prev]);
+      showToast('Batch created successfully!', 'success');
       handleBackToBatches();
     } catch (error) {
       console.error('Error creating batch:', error);
-      alert(error?.response?.data?.message || 'Failed to create batch');
+      showToast(error?.response?.data?.message || 'Failed to create batch', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -308,10 +312,11 @@ const BatchManagement = () => {
       setBatches((prev) =>
         prev.map((b) => (b.id === editingBatchId ? normalizeBatch(updated) : b))
       );
+      showToast('Batch updated successfully!', 'success');
       handleBackToBatches();
     } catch (error) {
       console.error('Error updating batch:', error);
-      alert(error?.response?.data?.message || 'Failed to update batch');
+      showToast(error?.response?.data?.message || 'Failed to update batch', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -325,15 +330,16 @@ const BatchManagement = () => {
       if (viewingBatch && viewingBatch.id === id) {
         setViewingBatch(null);
       }
+      showToast('Batch deleted successfully.', 'success');
     } catch (error) {
       console.error('Error deleting batch:', error);
-      alert(error?.response?.data?.message || 'Failed to delete batch');
+      showToast(error?.response?.data?.message || 'Failed to delete batch', 'error');
     }
   };
 
   const handleExportCSV = () => {
     if (filteredBatches.length === 0) {
-      alert('No batches to export.');
+      showToast('No batches to export.', 'warning');
       return;
     }
     const headers = ['#', 'Batch Name', 'ID', 'Branch', 'Status', 'Total Interns', 'Created Date', 'Interns'];
@@ -359,10 +365,12 @@ const BatchManagement = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showToast('Batches exported to CSV.', 'success');
   };
 
   return (
     <div className="btc-mgmt-container">
+      <ToastContainer />
       {/* Outer Toolbar */}
       <div className="btc-mgmt-toolbar">
         <div className="btc-mgmt-tab-group">
@@ -449,7 +457,7 @@ const BatchManagement = () => {
 
             {loading ? (
               <div className="btc-mgmt-content-area">
-                <p className="btc-mgmt-empty-message">Loading batches...</p>
+                <Loader message="Loading batches..." minHeight="360px" />
               </div>
             ) : filteredBatches.length === 0 ? (
               <div className="btc-mgmt-content-area">

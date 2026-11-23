@@ -3,9 +3,12 @@ import './MentorBatches.css';
 import { LuUser, LuClock, LuBriefcase, LuTag } from 'react-icons/lu';
 import { HiOutlineArrowDownTray } from 'react-icons/hi2';
 import { FiChevronDown, FiCalendar } from 'react-icons/fi';
-import AdminService from '../../../services/admin-api-services/AdminService'
+import AdminService from '../../../services/admin-api-services/AdminService';
+import Loader from '../../../components/common/Loader';
+import { useToast } from '../../../components/common/Toast';
 
 const MentorBatches = () => {
+  const { showToast, ToastContainer } = useToast();
   const { takebranch, takementors, takementorschedule } = AdminService();
 
   const [startDate, setStartDate] = useState(() => {
@@ -102,7 +105,7 @@ const MentorBatches = () => {
 
   const handleExportCSV = () => {
     if (!mentorDetails || !mentorDetails.timeline || mentorDetails.timeline.length === 0) {
-      alert('No mentor schedule data to export.');
+      showToast('No mentor schedule data to export.', 'warning');
       return;
     }
     const headers = ['Mentor', 'Primary Branch', 'Slot', 'Day', 'Class Branch', 'Batch', 'Subject', 'Status', 'Note'];
@@ -142,6 +145,7 @@ const MentorBatches = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showToast('Mentor schedule exported to CSV.', 'success');
   };
 
   const selectedMentorMeta = useMemo(
@@ -168,7 +172,7 @@ const MentorBatches = () => {
 
   return (
     <div className="mnt-btc-container">
-      
+      <ToastContainer />
 
       {/* Top Selector Bar */}
       <section className="mnt-btc-selector-card">
@@ -301,7 +305,7 @@ const MentorBatches = () => {
             </div>
 
             {loadingSchedule ? (
-              <p className="mnt-btc-inactive-text">Loading assigned batches...</p>
+              <Loader message="Loading assigned batches..." minHeight="180px" />
             ) : assignedBatches.length === 0 ? (
               <p className="mnt-btc-inactive-text">
                 No batches assigned to this mentor for the selected range.
@@ -338,7 +342,7 @@ const MentorBatches = () => {
           </div>
 
           {loadingSchedule ? (
-            <p className="mnt-btc-inactive-text">Loading schedule timeline...</p>
+            <Loader message="Loading schedule timeline..." minHeight="320px" />
           ) : timeline.length === 0 ? (
             <p className="mnt-btc-inactive-text">
               No schedule slots found for this mentor in the selected week.
