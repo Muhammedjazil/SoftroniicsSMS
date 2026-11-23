@@ -26,6 +26,8 @@ router.post(
   notificationController.createNotification
 );
 
+router.get("/my-notifications",checkAuth,notificationController.getMyNotifications)
+
 // Get notification by ID
 router.get(
   "/:id",
@@ -46,5 +48,7 @@ router.delete(
   checkAuth,
   notificationController.deleteNotification
 );
+
+
 
 module.exports = router;
