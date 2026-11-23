@@ -839,75 +839,81 @@
 }
 /* ACTIONS */
 
+/* =========================================
+   ROLE MANAGEMENT - TABLE ACTIONS
+========================================= */
+
+/* Center ACTIONS table heading */
+.Rolemanagement-hero-table thead th:last-child {
+    text-align: center !important;
+    vertical-align: middle;
+}
+
+/* Center actions table cell */
+.Rolemanagement-hero-table tbody td:last-child {
+    text-align: center !important;
+    vertical-align: middle;
+    min-width: 180px;
+}
+
+/* Arrange View, Edit, Delete horizontally */
 .Rolemanagement-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 18px;
+    width: 100%;
+    white-space: nowrap;
 }
 
+/* Common button styling */
 .Rolemanagement-actions button {
-    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 0;
+    margin: 0;
     border: none;
+    outline: none;
     background: transparent;
-    font-size: 12px;
+    font-family: inherit;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
+    transition: color 0.2s ease;
 }
 
-.Rolemanagement-actions button {
-    padding: 0;
-    border: none;
-    background: transparent;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
+/* View - Blue */
+.Rolemanagement-actions .view-action {
+    color: #1557e8;
 }
 
-.view-action {
-    color: #5279c7;
+/* Edit - Orange */
+.Rolemanagement-actions .edit-action {
+    color: #ff790e;
 }
 
-.edit-action {
-    color: #ed7819;
+/* Delete - Red */
+.Rolemanagement-actions .delete-action {
+    color: #e32626;
 }
 
-.delete-action {
-    color: #d74a43;
-}
-
-.Rolemanagement-actions button:hover {
+/* Hover effects */
+.Rolemanagement-actions .view-action:hover {
+    color: #003dbb;
     text-decoration: underline;
 }
 
-/* VIEW ROLE SECTION */
-
-.Rolemanagement-view-details {
-    display: flex;
-    align-items: center;
-    gap: 35px;
-    margin: 15px 0 22px;
-    font-size: 14px;
-    color: #444;
+.Rolemanagement-actions .edit-action:hover {
+    color: #d65e00;
+    text-decoration: underline;
 }
 
-.Rolemanagement-view-details strong {
-    color: #222;
-    font-weight: 700;
+.Rolemanagement-actions .delete-action:hover {
+    color: #bd1717;
+    text-decoration: underline;
 }
 
-/* VIEW INPUTS */
-
-.Rolemanagement-newtask-field input:read-only {
-    background-color: #f7f7f7;
-    color: #555;
-    cursor: default;
-}
-
-/* VIEW PERMISSIONS */
-
-.Rolemanagement-newtask-options input:disabled {
-    cursor: default;
-}
 
 /* VIEW RESPONSIVE */
 
@@ -993,3 +999,13 @@
     opacity: 0.4;
     cursor: not-allowed;
 }
+/* DELETE BUTTON - RED */
+.Rolemanagement-actions .delete-action {
+    color: #e32626 !important;
+}
+
+.Rolemanagement-actions .delete-action:hover {
+    color: #bd1717 !important;
+    text-decoration: underline;
+}
+

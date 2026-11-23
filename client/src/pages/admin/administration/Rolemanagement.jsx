@@ -725,14 +725,15 @@ export const Rolemanagement = () => {
                               </button>
                             )}
 
-                            {canDeleteRole && (
-                              <button
-                                type="button"
-                                onClick={() => handledelete(value._id)}
-                              >
-                                Delete
-                              </button>
-                            )}
+                         {canDeleteRole && (
+  <button
+    type="button"
+    className="delete-action"
+    onClick={() => handledelete(value._id)}
+  >
+    Delete
+  </button>
+)}
                           </div>
                         </td>
                       </tr>
