@@ -2,8 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './WeeklyCard.css';
 import { LuUser } from 'react-icons/lu';
 import UserService from '../../services/user-api-services/UserService';
+import Loader from '../../components/common/Loader';
+import { useToast } from '../../components/common/Toast';
 
 const WeeklyCard = () => {
+  const { showToast, ToastContainer } = useToast();
   const { takeinternweeklycard } = UserService();
   const [isLoading, setIsLoading] = useState(true);
   const [internData, setInternData] = useState(null);
@@ -76,7 +79,7 @@ const WeeklyCard = () => {
 
   return (
     <div className="wk-card-container">
-      
+      <ToastContainer />
 
       {/* Main Content Wrapper */}
       <div className="wk-card-body">
@@ -166,8 +169,11 @@ const WeeklyCard = () => {
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={tableColumns.length} className="wk-card-table-status">
-                      Loading your evaluation details...
+                    <td
+                      colSpan={tableColumns.length}
+                      style={{ padding: '32px 0', border: 'none', background: '#fff' }}
+                    >
+                      <Loader message="Loading weekly evaluation card..." minHeight="260px" />
                     </td>
                   </tr>
                 ) : evaluations.length === 0 ? (
