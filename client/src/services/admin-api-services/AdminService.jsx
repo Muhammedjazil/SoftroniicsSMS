@@ -337,7 +337,7 @@ const updateintern = async (id, data) => {
 const handledeleteintern=async(id)=>{
   let response=await axiosPrivate.delete(`/internmanagement/${id}`)
   return response.data;
-}
+};
    
   // Get all tasks
   const taketasks = async () => {
@@ -584,7 +584,7 @@ const handledeleteintern=async(id)=>{
     createintern,
       getallinterns,
       updateintern,
-      handledeleteintern
+      handledeleteintern,
     taketasks,
     taketaskbyid,
     gettaskdropdowns,

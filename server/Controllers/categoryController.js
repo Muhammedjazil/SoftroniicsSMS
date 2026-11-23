@@ -8,12 +8,21 @@ const createCategory = async (req, res) => {
   try {
     const { categoryName, branch } = req.body;
 
-    if (!categoryName || !branch || branch.length === 0) {
+    // Validate category name
+    if (!categoryName || !categoryName.trim()) {
       return res.status(400).json({
-        message: "Category name and branch are required",
+        message: "Category name is required",
       });
     }
 
+    // Validate branch
+    if (!Array.isArray(branch) || branch.length === 0) {
+      return res.status(400).json({
+        message: "Please select at least one branch",
+      });
+    }
+
+    // Check duplicate category
     const existingCategory = await Category.findOne({
       categoryName: categoryName.trim(),
       isDeleted: false,
@@ -25,8 +34,21 @@ const createCategory = async (req, res) => {
       });
     }
 
+    // Check whether branch IDs exist
+    const validBranches = await Branch.find({
+      _id: { $in: branch },
+      isDeleted: false,
+    });
+
+    if (validBranches.length !== branch.length) {
+      return res.status(400).json({
+        message: "One or more selected branches are invalid",
+      });
+    }
+
+    // Create category
     const category = await Category.create({
-      categoryName,
+      categoryName: categoryName.trim(),
       branch,
       courses: [],
       totalCourses: 0,
@@ -36,7 +58,10 @@ const createCategory = async (req, res) => {
       message: "Category created successfully",
       category,
     });
+
   } catch (error) {
+    console.error("Create Category Error:", error);
+
     res.status(500).json({
       message: error.message,
     });
