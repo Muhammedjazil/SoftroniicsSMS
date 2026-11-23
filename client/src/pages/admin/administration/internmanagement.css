@@ -1030,3 +1030,54 @@
     border-color: #ff790e;
     box-shadow: 0 0 0 2px rgba(255, 121, 14, 0.08);
 }
+
+/* =====================================
+   ACTIONS COLUMN ALIGNMENT
+===================================== */
+
+/* Center ACTIONS table heading */
+.intern-table thead th:last-child {
+    text-align: center !important;
+    vertical-align: middle;
+}
+
+/* Center all action buttons inside the column */
+.intern-table tbody td:last-child {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Arrange View, Edit, Delete in one row */
+.intern-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    width: 100%;
+    white-space: nowrap;
+}
+
+/* Common button styling */
+.intern-actions button {
+    border: none;
+    background: transparent;
+    padding: 4px 0;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* Individual colors */
+.intern-actions .intern-view {
+    color: #1557e8;
+}
+
+.intern-actions .intern-edit {
+    color: #ff790e;
+}
+
+.intern-actions .intern-delete {
+    color: #e32626;
+}

@@ -447,3 +447,66 @@ exports.deleteNotification = async (req, res) => {
     });
   }
 };
+
+
+// =====================================
+// GET NOTIFICATIONS FOR LOGGED-IN INTERN
+// =====================================
+
+exports.getMyNotifications = async (req, res) => {
+  try {
+    // Check whether the logged-in user is an intern
+    if (req.userType !== "intern") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Interns only.",
+      });
+    }
+
+    // Get intern ID from JWT token
+    const internId = req.userId;
+
+    if (!internId || !mongoose.Types.ObjectId.isValid(internId)) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid intern authentication",
+      });
+    }
+
+    // Fetch only notifications assigned to this intern
+    const notifications = await Notification.find({
+      interns: internId,
+      isActive: true,
+      isDeleted: false,
+    })
+      .populate("branch", "branchName")
+      .sort({ createdAt: -1 });
+
+    // Check whether each notification is read by this intern
+    const formattedNotifications = notifications.map((item) => {
+      const notification = item.toObject();
+
+      notification.isRead = item.readBy.some(
+        (id) => id.toString() === internId.toString()
+      );
+
+      return notification;
+    });
+
+    return res.status(200).json({
+      success: true,
+      count: formattedNotifications.length,
+      notifications: formattedNotifications,
+    });
+
+  } catch (error) {
+    console.error("Get Intern Notifications Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch intern notifications",
+      error: error.message,
+    });
+  }
+};
+

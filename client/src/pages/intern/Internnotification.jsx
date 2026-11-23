@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LuUser, LuSearch, LuRotateCw, LuBell } from "react-icons/lu";
 import "./Internnotification.css";
-
+import UserService from "../../services/user-api-services/UserService";
 export const Internnotification = () => {
+  const {takeallnotification}=UserService()
   const [activeTab, setActiveTab] = useState("All");
   const [search, setSearch] = useState("");
-  const [notifications] = useState([]);
-
+  const [notifications,setNotification] = useState([]);
+ 
   // Notification categories
   const tabs = [
     "All",
@@ -18,28 +19,59 @@ export const Internnotification = () => {
   ];
 
   // Filter notifications
-  const filteredNotifications = notifications.filter((item) => {
-    const matchesTab = activeTab === "All" || item.type === activeTab;
-    const matchesSearch =
-      item.title?.toLowerCase().includes(search.toLowerCase()) ||
-      item.message?.toLowerCase().includes(search.toLowerCase());
+ const filteredNotifications = notifications.filter((item) => {
+  const matchesTab =
+    activeTab === "All" ||
+    (activeTab === "Task" && item.type === "Task Notification") ||
+    (activeTab === "Schedule" && item.type === "Weekly Schedule") ||
+    (activeTab === "Common" && item.type === "Common Notification") ||
+    item.type === activeTab;
 
-    return matchesTab && matchesSearch;
-  });
+  const matchesSearch =
+    item.title?.toLowerCase().includes(search.toLowerCase()) ||
+    item.content?.toLowerCase().includes(search.toLowerCase());
+
+  return matchesTab && matchesSearch;
+});
 
   // Get notification count
-  const getCount = (tab) => {
-    if (tab === "All") {
-      return notifications.length;
-    }
-    return notifications.filter((item) => item.type === tab).length;
+ const getCount = (tab) => {
+  if (tab === "All") return notifications.length;
+
+  const typeMapping = {
+    Task: "Task Notification",
+    Schedule: "Weekly Schedule",
+    Common: "Common Notification",
   };
+
+  const backendType = typeMapping[tab] || tab;
+
+  return notifications.filter(
+    (item) => item.type === backendType
+  ).length;
+};
 
   // Refresh notifications
   const handleRefresh = () => {
     setSearch("");
     setActiveTab("All");
   };
+
+const fetchnotification = async () => {
+  try {
+    const response = await takeallnotification();
+
+    console.log("Notification API response:", response);
+
+    setNotification(response.notifications || []);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    setNotification([]);
+  }
+};
+  useEffect(()=>{
+    fetchnotification()
+  },[])
 
   return (
     <div className="wk-card-container">
@@ -117,7 +149,7 @@ export const Internnotification = () => {
                     </div>
                     <div className="int-notif-item-details">
                       <h3 className="int-notif-item-title">{item.title}</h3>
-                      <p className="int-notif-item-msg">{item.message}</p>
+                     <p className="int-notif-item-msg">{item.content}</p>
                     </div>
                   </div>
                   <span className="int-notif-tag">

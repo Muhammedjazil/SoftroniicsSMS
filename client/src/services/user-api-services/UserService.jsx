@@ -27,6 +27,14 @@ const UserService = () => {
   return {
     takeinternweeklyschedule,
     takeinternweeklycard,
+  const takeallnotification=async()=>{
+    let response=await axiosPrivate.get("/notificationmanagement/my-notifications")
+    return response.data;
+  }
+
+  return {
+    takeinternweeklyschedule,
+    takeallnotification
   };
 };
 
