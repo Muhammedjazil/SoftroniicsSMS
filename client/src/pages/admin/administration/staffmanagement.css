@@ -406,40 +406,79 @@
     background: #dcf8e6;
 }
 
+
 /* =========================================
    TABLE ACTION BUTTONS
 ========================================= */
 
+/* Center ACTIONS table heading */
+.stafftable thead th:last-child {
+    text-align: center !important;
+    vertical-align: middle;
+}
+
+/* Center action column */
+.stafftable tbody td:last-child {
+    text-align: center !important;
+    vertical-align: middle;
+    min-width: 180px;
+}
+
+/* Arrange View, Edit, Delete horizontally */
 .staffactions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 18px;
+    width: 100%;
     white-space: nowrap;
 }
 
+/* Common button styling */
 .staffactions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 0;
+    margin: 0;
     border: none;
+    outline: none;
     background: transparent;
+    font-family: inherit;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 500;
     cursor: pointer;
-    transition: 0.15s ease;
+    transition: color 0.2s ease;
 }
 
+/* View */
 .staffactions .staffviewbtn {
-    color: #5279c7;
+    color: #1557e8;
 }
 
+/* Edit */
 .staffactions .staffedit {
-    color: #ed7819;
+    color: #ff790e;
 }
 
+/* Delete */
 .staffactions .staffdelete {
-    color: #d74a43;
+    color: #e32626;
 }
 
-.staffactions button:hover {
+/* Hover effects */
+.staffactions .staffviewbtn:hover {
+    color: #003dbb;
+    text-decoration: underline;
+}
+
+.staffactions .staffedit:hover {
+    color: #d65e00;
+    text-decoration: underline;
+}
+
+.staffactions .staffdelete:hover {
+    color: #bd1717;
     text-decoration: underline;
 }
 

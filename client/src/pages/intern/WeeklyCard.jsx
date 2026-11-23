@@ -42,27 +42,7 @@ const WeeklyCard = () => {
 
   return (
     <div className="wk-card-container">
-      {/* Header */}
-      <header className="wk-card-header">
-        <div className="wk-card-title-group">
-          <h1 className="wk-card-heading">My Evaluation Card</h1>
-          <nav className="wk-card-breadcrumb">
-            <span>My Evaluation Card</span>
-            <span className="wk-card-breadcrumb-sep">&gt;</span>
-            <span>My Card</span>
-          </nav>
-        </div>
-
-        <div className="wk-card-profile-card">
-          <div className="wk-card-profile-avatar">
-            <LuUser />
-          </div>
-          <div className="wk-card-profile-info">
-            <span className="wk-card-username">SAYANTH</span>
-            <span className="wk-card-role">Intern</span>
-          </div>
-        </div>
-      </header>
+      
 
       {/* Main Content Wrapper */}
       <div className="wk-card-body">

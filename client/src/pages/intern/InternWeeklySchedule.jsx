@@ -122,27 +122,7 @@ const InternWeeklySchedule = () => {
 
   return (
     <div className="int-sched-container">
-      {/* Top Header */}
-      <header className="int-sched-header">
-        <div className="int-sched-title-group">
-          <h1 className="int-sched-heading">My Weekly Schedule</h1>
-          <nav className="int-sched-breadcrumb">
-            <span>My Weekly Schedule</span>
-            <span className="int-sched-breadcrumb-sep">&gt;</span>
-            <span>Weekly Schedule</span>
-          </nav>
-        </div>
-
-        <div className="int-sched-profile-card">
-          <div className="int-sched-profile-avatar">
-            <LuUser />
-          </div>
-          <div className="int-sched-profile-info">
-            <span className="int-sched-username">{internProfile.name}</span>
-            <span className="int-sched-role">{internProfile.role}</span>
-          </div>
-        </div>
-      </header>
+      
 
       {/* Top Banner Card: My Weekly Timeline */}
       <section className="int-sched-banner-card">

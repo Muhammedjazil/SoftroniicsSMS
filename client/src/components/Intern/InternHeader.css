@@ -1,0 +1,80 @@
+.wk-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 24px 32px 0 32px; /* matches .wk-card-container side padding */
+  margin-bottom: 8px;
+}
+
+.wk-card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wk-card-heading {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #101d2c;
+}
+
+.wk-card-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.wk-card-breadcrumb span:last-child {
+  color: #64748b;
+  font-weight: 500;
+}
+.wk-card-breadcrumb-sep {
+  color: #94a3b8;
+}
+
+.wk-card-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+}
+
+.wk-card-profile-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #edf3ff;
+  color: #3478f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.wk-card-profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.wk-card-username {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #101d2c;
+  text-transform: uppercase;
+}
+
+.wk-card-role {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+}
