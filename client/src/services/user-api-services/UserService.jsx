@@ -14,6 +14,19 @@ const UserService = () => {
     return response.data;
   };
 
+  // ======== Intern Weekly Card ======== //
+  const takeinternweeklycard = async ({ internId, email } = {}) => {
+    const params = {};
+    if (internId) params.internId = internId;
+    if (email) params.email = email;
+
+    const response = await axiosPrivate.get("/internschedule/weeklycard", { params });
+    return response.data;
+  };
+
+  return {
+    takeinternweeklyschedule,
+    takeinternweeklycard,
   const takeallnotification=async()=>{
     let response=await axiosPrivate.get("/notificationmanagement/my-notifications")
     return response.data;

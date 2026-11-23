@@ -1,6 +1,11 @@
-const { Staff } = require("../Models/staffModel"); // Adjust path to your Staff model
-const WeeklySchedule = require("../Models/weeklyScheduleModel"); // Adjust path to your WeeklySchedule model
+const { Staff } = require("../Models/staffModel");
+const WeeklySchedule = require("../Models/weeklyScheduleModel");
 const Batch = require("../Models/batchModel");
+const Timing = require("../Models/timingModel");
+const DayCombination = require("../Models/dayCombinationModel");
+const Day = require("../Models/dayModel");
+const Module = require("../Models/moduleModel");
+const Branch = require("../Models/branchModel");
 
 // Helper: Format DayCombination into readable days array & string
 const extractDaysInfo = (dayCombObj) => {
@@ -71,50 +76,80 @@ const getMentorScheduleDetails = async (req, res) => {
     const scheduleFilter = { mentor: mentorId };
 
     if (startDate) {
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-
-      const end = new Date(start);
-      end.setDate(end.getDate() + 6);
-      end.setHours(23, 59, 59, 999);
+      const [y, m, d] = startDate.split("-").map(Number);
+      const start = new Date(y, m - 1, d, 0, 0, 0, 0);
+      const end = new Date(y, m - 1, d + 6, 23, 59, 59, 999);
 
       // Overlap check: schedule starts on or before week end AND ends on or after week start
       scheduleFilter.startDate = { $lte: end };
       scheduleFilter.endDate = { $gte: start };
     }
 
+    // 3. Query WeeklySchedule & Deep Populate
+    // If a branch is specified, try branch filter first; if empty, show all mentor's slots for that week
+    let schedules = [];
     if (branchId && branchId !== "All Branches") {
-      scheduleFilter["schedule.sub_details.branch"] = branchId;
+      schedules = await WeeklySchedule.find({
+        ...scheduleFilter,
+        "schedule.sub_details.branch": branchId,
+      })
+        .populate("schedule.time", "timeSlot")
+        .populate({
+          path: "schedule.sub_details.day",
+          select: "name description dayCombination",
+          populate: { path: "dayCombination", select: "name day" },
+        })
+        .populate({
+          path: "schedule.sub_details.subject",
+          select: "moduleName subjectName title name",
+          strictPopulate: false,
+        })
+        .populate("schedule.sub_details.branch", "branchName name")
+        .populate({
+          path: "schedule.sub_details.batch",
+          select: "batchName branch status days course totalInterns",
+          populate: [
+            { path: "branch", select: "branchName name", strictPopulate: false },
+            { path: "course", select: "courseName", strictPopulate: false },
+            {
+              path: "days",
+              select: "name dayCombination",
+              populate: { path: "dayCombination", select: "name day" },
+              strictPopulate: false,
+            },
+          ],
+        });
     }
 
-    // 3. Query WeeklySchedule & Deep Populate
-    const schedules = await WeeklySchedule.find(scheduleFilter)
-      .populate("schedule.time", "timeSlot")
-      .populate({
-        path: "schedule.sub_details.day",
-        select: "name description dayCombination",
-        populate: { path: "dayCombination", select: "name day" },
-      })
-      .populate({
-        path: "schedule.sub_details.subject",
-        select: "moduleName subjectName title name",
-        strictPopulate: false,
-      })
-      .populate("schedule.sub_details.branch", "branchName name")
-      .populate({
-        path: "schedule.sub_details.batch",
-        select: "batchName branch status days course totalInterns",
-        populate: [
-          { path: "branch", select: "branchName name", strictPopulate: false },
-          { path: "course", select: "courseName", strictPopulate: false },
-          {
-            path: "days",
-            select: "name dayCombination",
-            populate: { path: "dayCombination", select: "name day" },
-            strictPopulate: false,
-          },
-        ],
-      });
+    if (schedules.length === 0) {
+      schedules = await WeeklySchedule.find(scheduleFilter)
+        .populate("schedule.time", "timeSlot")
+        .populate({
+          path: "schedule.sub_details.day",
+          select: "name description dayCombination",
+          populate: { path: "dayCombination", select: "name day" },
+        })
+        .populate({
+          path: "schedule.sub_details.subject",
+          select: "moduleName subjectName title name",
+          strictPopulate: false,
+        })
+        .populate("schedule.sub_details.branch", "branchName name")
+        .populate({
+          path: "schedule.sub_details.batch",
+          select: "batchName branch status days course totalInterns",
+          populate: [
+            { path: "branch", select: "branchName name", strictPopulate: false },
+            { path: "course", select: "courseName", strictPopulate: false },
+            {
+              path: "days",
+              select: "name dayCombination",
+              populate: { path: "dayCombination", select: "name day" },
+              strictPopulate: false,
+            },
+          ],
+        });
+    }
 
     // Today's weekday name (e.g., "Friday") for the "Today" pill
     const todayWeekday = new Date().toLocaleDateString("en-US", { weekday: "long" });

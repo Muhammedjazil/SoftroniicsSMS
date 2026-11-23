@@ -262,7 +262,111 @@ const loginUser = async (req, res) => {
   }
 };
 
+// @desc    Get fresh current user details from DB using JWT token
+// @route   GET /auth/me
+const getCurrentUser = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Authorization token missing." });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    if (decoded.userType === "intern") {
+      const internMember = await Intern.findOne({
+        _id: decoded.id,
+        isDeleted: false,
+      })
+        .populate("branch", "branchName name")
+        .populate("course", "courseName");
+
+      if (!internMember) {
+        return res.status(404).json({ message: "Intern account not found." });
+      }
+
+      if (!internMember.isActive || internMember.courseStatus === "Dropped") {
+        return res
+          .status(403)
+          .json({ message: "Your intern account is inactive. Contact Admin." });
+      }
+
+      return res.status(200).json({
+        user: {
+          _id: internMember._id,
+          name: internMember.fullName,
+          email: internMember.officialEmail,
+          personalEmail: internMember.email,
+          userType: "intern",
+          role: "Intern",
+          batch: internMember.batch,
+          branch: internMember.branch,
+          course: internMember.course,
+        },
+      });
+    }
+
+    if (decoded.userType === "staff") {
+      const staffMember = await Staff.findOne({
+        _id: decoded.id,
+        isDeleted: false,
+      })
+        .populate("role", "role permissions")
+        .populate("branch", "branchName name");
+
+      if (!staffMember) {
+        return res.status(404).json({ message: "Staff account not found." });
+      }
+
+      const roleName =
+        staffMember.role?.role || (staffMember.isMentor ? "Mentor" : "Staff");
+
+      return res.status(200).json({
+        user: {
+          _id: staffMember._id,
+          name: staffMember.fullName,
+          email: staffMember.officialEmail,
+          personalEmail: staffMember.email,
+          userType: "staff",
+          role: roleName,
+          isMentor: staffMember.isMentor,
+          branch: staffMember.branch,
+          permissions: staffMember.role?.permissions || [],
+        },
+      });
+    }
+
+    const adminUser = await User.findOne({
+      _id: decoded.id,
+      isDeleted: false,
+    }).populate("role", "role permissions");
+
+    if (!adminUser) {
+      return res.status(404).json({ message: "Admin account not found." });
+    }
+
+    return res.status(200).json({
+      user: {
+        _id: adminUser._id,
+        name: adminUser.name,
+        email: adminUser.email,
+        userType: "admin",
+        role: adminUser.role?.role || "Super Admin",
+        permissions: adminUser.role?.permissions || [],
+      },
+    });
+  } catch (error) {
+    console.error("Get current user error:", error);
+    return res.status(401).json({
+      message: "Invalid or expired token",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   registerAdmin,
   loginUser,
+  getCurrentUser,
 };

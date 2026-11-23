@@ -1,31 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './WeeklyCard.css';
 import { LuUser } from 'react-icons/lu';
+import UserService from '../../services/user-api-services/UserService';
 
 const WeeklyCard = () => {
+  const { takeinternweeklycard } = UserService();
   const [isLoading, setIsLoading] = useState(true);
   const [internData, setInternData] = useState(null);
   const [evaluations, setEvaluations] = useState([]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
+  // Resolve logged-in intern identifier from localStorage
+  const getStoredUserQuery = () => {
+    try {
+      const rawUser =
+        localStorage.getItem('user') ||
+        localStorage.getItem('intern') ||
+        localStorage.getItem('auth');
+      if (!rawUser) return {};
+      const parsed = JSON.parse(rawUser);
+      const u = parsed?.user || parsed;
+      return {
+        internId: u?._id || u?.id || '',
+        email: u?.email || u?.officialEmail || '',
+      };
+    } catch {
+      return {};
+    }
+  };
+
+  const fetchWeeklyCard = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const userQuery = getStoredUserQuery();
+      const res = await takeinternweeklycard(userQuery);
+      if (res?.intern) {
+        setInternData(res.intern);
+      }
+      setEvaluations(Array.isArray(res?.evaluations) ? res.evaluations : []);
+    } catch (err) {
+      console.error('Failed to load intern weekly card:', err);
+      const userQuery = getStoredUserQuery();
       setInternData({
-        name: 'SAYANTH',
-        initial: 'S',
+        name: 'INTERN',
+        initial: 'I',
         mode: 'FULL TIME',
-        batch: 'PY-01',
-        studentId: 'STU-001',
-        course: 'MERN 6 MONTH',
+        batch: 'BATCH',
+        studentId: userQuery.internId ? `STU-${userQuery.internId.slice(-4).toUpperCase()}` : 'STU-001',
+        course: '',
         avgTestScore: 0,
         avgProjectScore: 0,
         attendance: 0,
       });
       setEvaluations([]);
+    } finally {
       setIsLoading(false);
-    }, 1200);
-
-    return () => clearTimeout(timer);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchWeeklyCard();
+  }, [fetchWeeklyCard]);
 
   const tableColumns = [
     'WEEK',
@@ -49,23 +83,23 @@ const WeeklyCard = () => {
         {/* Intern Identity Banner */}
         <section className="wk-card-identity-card">
           <div className="wk-card-avatar-square">
-            {isLoading ? '...' : internData?.initial || 'S'}
+            {isLoading ? '...' : internData?.initial || 'I'}
           </div>
 
           <div className="wk-card-identity-details">
             <h2 className="wk-card-intern-title">
-              {isLoading ? 'Loading...' : internData?.name}
+              {isLoading ? 'Loading...' : internData?.name || 'Intern'}
             </h2>
 
             <div className="wk-card-badges-row">
               <span className="wk-card-badge wk-card-badge--indigo">
-                {isLoading ? 'FULL TIME' : internData?.mode}
+                {isLoading ? 'FULL TIME' : internData?.mode || 'FULL TIME'}
               </span>
               <span className="wk-card-badge wk-card-badge--teal">
-                {isLoading ? 'BATCH' : internData?.batch}
+                {isLoading ? 'BATCH' : internData?.batch || 'BATCH'}
               </span>
               <span className="wk-card-badge wk-card-badge--slate">
-                {isLoading ? 'STU-001' : internData?.studentId}
+                {isLoading ? 'STU-001' : internData?.studentId || 'STU-001'}
               </span>
               {!isLoading && internData?.course && (
                 <span className="wk-card-badge wk-card-badge--purple">

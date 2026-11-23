@@ -1,5 +1,37 @@
 const Batch = require("../Models/batchModel");
-const Intern = require("../Models/internModel"); // Adjust path/filename to match your Intern model
+const Intern = require("../Models/internModel");
+const Branch = require("../Models/branchModel");
+
+const INTERN_POPULATE_CONFIG = {
+  path: "interns",
+  select: "fullName admissionNumber course branch",
+  populate: { path: "course", select: "courseName name", strictPopulate: false },
+};
+
+// Helper: Keep Batch.interns and Intern.batch completely in sync
+const syncInternsToBatch = async (batchId, internIds) => {
+  if (!Array.isArray(internIds)) return;
+
+  if (internIds.length > 0) {
+    // 1. Pull these interns from any OTHER batches so stale batch memberships don't linger
+    await Batch.updateMany(
+      { _id: { $ne: batchId }, interns: { $in: internIds } },
+      { $pull: { interns: { $in: internIds } } }
+    );
+
+    // 2. Update Intern.batch to point to this batch
+    await Intern.updateMany(
+      { _id: { $in: internIds } },
+      { $set: { batch: batchId } }
+    );
+  }
+
+  // 3. Clear batch reference for any interns removed from this batch
+  await Intern.updateMany(
+    { batch: batchId, _id: { $nin: internIds } },
+    { $unset: { batch: "" } }
+  );
+};
 
 // @desc    Create a new batch
 // @route   POST /batchmanagement
@@ -11,7 +43,6 @@ const createBatch = async (req, res) => {
       return res.status(400).json({ message: "Batch name and branch are required." });
     }
 
-    // Check duplicate active batch name in the same branch
     const existingBatch = await Batch.findOne({
       batchName: batchName.trim().toUpperCase(),
       branch,
@@ -33,13 +64,11 @@ const createBatch = async (req, res) => {
 
     const savedBatch = await newBatch.save();
 
+    await syncInternsToBatch(savedBatch._id, interns);
+
     const populatedBatch = await Batch.findById(savedBatch._id)
       .populate("branch", "branchName name")
-      .populate({
-        path: "interns",
-        select: "name admissionNo admissionNumber course courseName branch",
-        populate: { path: "course", select: "courseName name", strictPopulate: false },
-      });
+      .populate(INTERN_POPULATE_CONFIG);
 
     return res.status(201).json({
       message: "Batch created successfully",
@@ -73,11 +102,7 @@ const getAllBatches = async (req, res) => {
 
     const batches = await Batch.find(filter)
       .populate("branch", "branchName name")
-      .populate({
-        path: "interns",
-        select: "name admissionNo admissionNumber course courseName branch",
-        populate: { path: "course", select: "courseName name", strictPopulate: false },
-      })
+      .populate(INTERN_POPULATE_CONFIG)
       .sort({ createdAt: -1 });
 
     return res.status(200).json(batches);
@@ -93,11 +118,7 @@ const getBatchById = async (req, res) => {
   try {
     const batch = await Batch.findOne({ _id: req.params.id, isDeleted: false })
       .populate("branch", "branchName name")
-      .populate({
-        path: "interns",
-        select: "name admissionNo admissionNumber course courseName branch",
-        populate: { path: "course", select: "courseName name", strictPopulate: false },
-      });
+      .populate(INTERN_POPULATE_CONFIG);
 
     if (!batch) {
       return res.status(404).json({ message: "Batch not found" });
@@ -130,6 +151,7 @@ const updateBatch = async (req, res) => {
     if (Array.isArray(interns)) {
       batch.interns = interns;
       batch.totalInterns = interns.length;
+      await syncInternsToBatch(batch._id, interns);
     }
     if (Array.isArray(days)) {
       batch.days = days;
@@ -139,11 +161,7 @@ const updateBatch = async (req, res) => {
 
     const updatedBatch = await Batch.findById(batch._id)
       .populate("branch", "branchName name")
-      .populate({
-        path: "interns",
-        select: "name admissionNo admissionNumber course courseName branch",
-        populate: { path: "course", select: "courseName name", strictPopulate: false },
-      });
+      .populate(INTERN_POPULATE_CONFIG);
 
     return res.status(200).json({
       message: "Batch updated successfully",
@@ -198,6 +216,11 @@ const deleteBatch = async (req, res) => {
       return res.status(404).json({ message: "Batch not found" });
     }
 
+    await Intern.updateMany(
+      { batch: batch._id },
+      { $unset: { batch: "" } }
+    );
+
     return res.status(200).json({
       message: "Batch deleted successfully",
       id: req.params.id,
@@ -217,8 +240,9 @@ const getInternsByBranch = async (req, res) => {
       branch: branchId,
       isDeleted: { $ne: true },
     })
-      .select("name admissionNo admissionNumber course courseName branch")
-      .populate({ path: "course", select: "courseName name", strictPopulate: false });
+      .select("fullName admissionNumber course branch")
+      .populate({ path: "course", select: "courseName name", strictPopulate: false })
+      .sort({ fullName: 1 });
 
     return res.status(200).json(interns);
   } catch (error) {

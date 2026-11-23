@@ -4,6 +4,8 @@ const Batch = require("../Models/batchModel");
 const Day = require("../Models/dayModel");
 const DayCombination = require("../Models/dayCombinationModel");
 const Module = require("../Models/moduleModel");
+const Timing = require("../Models/timingModel");
+const Branch = require("../Models/branchModel");
 
 const DAY_SHORT_CODE = {
   Sunday: "S",
@@ -15,15 +17,11 @@ const DAY_SHORT_CODE = {
   Saturday: "S",
 };
 
-// Helper: Normalize 7-day range from startDate string (YYYY-MM-DD)
+// Helper: Normalize 7-day range from startDate string (YYYY-MM-DD) deterministically
 const getWeekRange = (startDateStr) => {
-  const start = new Date(startDateStr);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(start);
-  end.setDate(end.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
-
+  const [y, m, d] = startDateStr.split("-").map(Number);
+  const start = new Date(y, m - 1, d, 0, 0, 0, 0);
+  const end = new Date(y, m - 1, d + 6, 23, 59, 59, 999);
   return { start, end };
 };
 
@@ -105,18 +103,31 @@ const getWeeklyScheduleMatrix = async (req, res) => {
       })
       .sort({ fullName: 1 });
 
-    // Filter each mentor's slots to the selected branch (or unassigned branch slots)
+    // Fetch all active timings for this branch as fallback slots
+    const branchTimings = await Timing.find({
+      branch: branchId,
+      isDeleted: false,
+      isActive: true,
+    }).sort({ createdAt: 1 });
+
+    const defaultBranchSlots = branchTimings.map((t) => ({
+      _id: t._id,
+      timeSlot: t.timeSlot,
+    }));
+
+    // Filter each mentor's slots to the selected branch (or fall back to branch timings)
     const mentors = mentorsRaw.map((m) => {
-      const branchSlots = (m.time || []).filter(
-        (t) => !t.branch || t.branch.toString() === branchId.toString()
-      );
+      const branchSlots = (m.time || [])
+        .filter((t) => t && t.isActive && !t.isDeleted && (!t.branch || t.branch.toString() === branchId.toString()))
+        .map((t) => ({
+          _id: t._id,
+          timeSlot: t.timeSlot,
+        }));
+
       return {
         _id: m._id,
         name: m.fullName.toUpperCase(),
-        slots: branchSlots.map((t) => ({
-          _id: t._id,
-          timeSlot: t.timeSlot,
-        })),
+        slots: branchSlots.length > 0 ? branchSlots : defaultBranchSlots,
       };
     });
 

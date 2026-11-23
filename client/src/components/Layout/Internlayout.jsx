@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Internnavbar } from "../Intern/Internnavbar";
 import InternHeader from "../Intern/InternHeader";
+import axios from "../../Axios";
 import "./Internlayout.css";
 
 const internRouteMeta = {
@@ -48,6 +50,42 @@ const internRouteMeta = {
 
 export const Internlayout = ({ children }) => {
     const { pathname } = useLocation();
+    const [isSyncing, setIsSyncing] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const syncInternProfile = async () => {
+            try {
+                const token = localStorage.getItem("SMStoken");
+                if (!token) return;
+
+                const response = await axios.get("/auth/me", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                const freshUser = response?.data?.user;
+                if (freshUser && freshUser._id) {
+                    localStorage.setItem("user", JSON.stringify(freshUser));
+                }
+            } catch (error) {
+                console.error("Failed to sync intern profile:", error);
+            } finally {
+                if (isMounted) {
+                    setIsSyncing(false);
+                }
+            }
+        };
+
+        syncInternProfile();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
     const meta = internRouteMeta[pathname] || {
         title: "Intern Portal",
         parentPath: "Dashboard",
@@ -68,7 +106,7 @@ export const Internlayout = ({ children }) => {
                     parentPath={meta.parentPath}
                     currentPath={meta.currentPath}
                 />
-                {children || <Outlet />}
+                {!isSyncing && (children || <Outlet />)}
             </div>
         </div>
     );

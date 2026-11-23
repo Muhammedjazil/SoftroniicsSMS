@@ -86,9 +86,13 @@ const WeeklySchedule = () => {
 
   const endDateFormatted = useMemo(() => {
     if (!startDate) return '';
-    const dt = new Date(startDate);
+    const [y, m, d] = startDate.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
     dt.setDate(dt.getDate() + 6);
-    return `${dt.getMonth() + 1}/${dt.getDate()}/${dt.getFullYear()}`;
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const yyyy = dt.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
   }, [startDate]);
 
   // Track which batches have at least one slot assigned (highlights green in sidebar)
@@ -307,9 +311,13 @@ const WeeklySchedule = () => {
       if (res?.nextStartDate) {
         setStartDate(res.nextStartDate);
       } else {
-        const dt = new Date(startDate);
+        const [y, m, d] = startDate.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
         dt.setDate(dt.getDate() + 7);
-        setStartDate(dt.toISOString().split('T')[0]);
+        const nextY = dt.getFullYear();
+        const nextM = String(dt.getMonth() + 1).padStart(2, '0');
+        const nextD = String(dt.getDate()).padStart(2, '0');
+        setStartDate(`${nextY}-${nextM}-${nextD}`);
       }
     } catch (err) {
       const serverMsg =
