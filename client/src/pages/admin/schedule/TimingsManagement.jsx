@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './TimingsManagement.css';
 import { LuUser } from 'react-icons/lu';
-import { FiChevronDown, FiEdit2 } from 'react-icons/fi';
+import { FiChevronDown, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import AdminService from "../../../services/admin-api-services/AdminService"
 
 const TimingsManagement = () => {
-  const { takebranch, taketiming, createtiming, updatetiming } = AdminService();
+  const { takebranch, taketiming, createtiming, updatetiming, removetiming } = AdminService();
 
   const [activeTab, setActiveTab] = useState('timings'); // 'timings' | 'new-timing' | 'edit-timing'
   const [branchFilter, setBranchFilter] = useState('');
@@ -48,7 +48,7 @@ const TimingsManagement = () => {
 
   // Normalize API Timing record
   const normalizeTiming = useCallback((item) => {
-    const parts = (item.timeSlot || '').split('-').map((p) => p.trim());
+    const parts = (item.timeSlot || '').split(/[-–—]/).map((p) => p.trim());
     const start = parts[0] ? parse12To24Hour(parts[0]) : '';
     const end = parts[1] ? parse12To24Hour(parts[1]) : '';
     const bObj = typeof item.branch === 'object' && item.branch !== null ? item.branch : null;
@@ -176,6 +176,21 @@ const TimingsManagement = () => {
     }
   };
 
+  const handleDeleteTiming = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this timing?')) return;
+    try {
+      await removetiming(id);
+      setTimings((prev) => prev.filter((t) => t.id !== id));
+      if (editingId === id) {
+        resetForm();
+        setActiveTab('timings');
+      }
+    } catch (error) {
+      console.error('Error deleting timing:', error);
+      alert(error?.response?.data?.message || 'Failed to delete timing');
+    }
+  };
+
   const filteredTimings = timings.filter((t) =>
     branchFilter ? t.branchId === branchFilter : true
   );
@@ -224,6 +239,7 @@ const TimingsManagement = () => {
                     value={branchFilter}
                     onChange={(e) => setBranchFilter(e.target.value)}
                   >
+                    <option value="">All Branches</option>
                     {branches.map((br) => (
                       <option key={br._id} value={br._id}>
                         {br.branchName || br.name}
@@ -251,6 +267,14 @@ const TimingsManagement = () => {
                       title="Edit Timing"
                     >
                       <FiEdit2 />
+                    </button>
+                    <button
+                      type="button"
+                      className="tmg-mgmt-pill-delete-btn"
+                      onClick={() => handleDeleteTiming(item.id)}
+                      title="Delete Timing"
+                    >
+                      <FiTrash2 />
                     </button>
                   </div>
                 ))}
@@ -324,6 +348,15 @@ const TimingsManagement = () => {
             </div>
 
             <div className="tmg-mgmt-form-footer">
+              {activeTab === 'edit-timing' && editingId && (
+                <button
+                  type="button"
+                  className="tmg-mgmt-delete-btn"
+                  onClick={() => handleDeleteTiming(editingId)}
+                >
+                  Delete Timing
+                </button>
+              )}
               <button
                 type="button"
                 className="tmg-mgmt-cancel-btn"

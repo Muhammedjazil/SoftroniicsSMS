@@ -28,13 +28,6 @@ const MentorBatches = () => {
         const res = await takebranch();
         const rawBranches = Array.isArray(res) ? res : res?.data || [];
         setBranches(rawBranches);
-
-        const calicut = rawBranches.find(
-          (b) => (b.branchName || b.name || '').toLowerCase() === 'calicut'
-        );
-        if (calicut) {
-          setBranchFilter(calicut._id);
-        }
       } catch (err) {
         console.error('Failed to load branches:', err);
       }
@@ -98,10 +91,58 @@ const MentorBatches = () => {
 
   const endDateFormatted = useMemo(() => {
     if (!startDate) return '';
-    const dt = new Date(startDate);
+    const [y, m, d] = startDate.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
     dt.setDate(dt.getDate() + 6);
-    return `${dt.getMonth() + 1}/${dt.getDate()}/${dt.getFullYear()}`;
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const yyyy = dt.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
   }, [startDate]);
+
+  const handleExportCSV = () => {
+    if (!mentorDetails || !mentorDetails.timeline || mentorDetails.timeline.length === 0) {
+      alert('No mentor schedule data to export.');
+      return;
+    }
+    const headers = ['Mentor', 'Primary Branch', 'Slot', 'Day', 'Class Branch', 'Batch', 'Subject', 'Status', 'Note'];
+    const rows = [];
+    const mentorName = currentMentor.name || 'Mentor';
+    const primaryBranch = currentMentor.primaryBranch || '-';
+
+    timeline.forEach((group) => {
+      if (!group.entries || group.entries.length === 0) {
+        rows.push([mentorName, primaryBranch, group.slot, '-', '-', '-', '-', 'Inactive', '']);
+      } else {
+        group.entries.forEach((entry) => {
+          rows.push([
+            mentorName,
+            primaryBranch,
+            group.slot,
+            entry.day || '-',
+            entry.branch || '-',
+            entry.batchName || '-',
+            entry.subject || '-',
+            entry.active ? 'Active' : 'Inactive',
+            entry.note || '',
+          ]);
+        });
+      }
+    });
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers, ...rows]
+        .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `mentor_schedule_${mentorName.replace(/\s+/g, '_')}_${startDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const selectedMentorMeta = useMemo(
     () => mentors.find((m) => m._id === selectedMentorId) || null,
@@ -191,7 +232,12 @@ const MentorBatches = () => {
             <FiChevronDown className="mnt-btc-select-arrow" />
           </div>
 
-          <button type="button" className="mnt-btc-download-btn" title="Export Schedule">
+          <button
+            type="button"
+            className="mnt-btc-download-btn"
+            onClick={handleExportCSV}
+            title="Export Schedule to CSV"
+          >
             <HiOutlineArrowDownTray />
           </button>
         </div>
