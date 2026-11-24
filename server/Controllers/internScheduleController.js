@@ -1,26 +1,49 @@
 const mongoose = require("mongoose");
 const Batch = require("../Models/batchModel");
-const InternModel = require("../Models/internModel");
+const Intern = require("../Models/internModel");
 const WeeklySchedule = require("../Models/weeklyScheduleModel");
+const MentorCard = require("../Models/mentorCardModel");
+const InternsAttendance = require("../Models/internsAttendanceModel");
+require("../Models/branchModel");
+require("../Models/staffModel");
+require("../Models/courseModel");
+require("../Models/timingModel");
+require("../Models/dayCombinationModel");
+require("../Models/moduleModel");
 
-// Helper: Normalize 7-day range from startDate string (YYYY-MM-DD)
+// Helper: Normalize 7-day range from startDate string (YYYY-MM-DD) in local time
 const getWeekRange = (startDateStr) => {
-  const start = new Date(startDateStr);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(start);
-  end.setDate(end.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
-
+  const [y, m, d] = startDateStr.split("-").map(Number);
+  const start = new Date(y, m - 1, d, 0, 0, 0, 0);
+  const end = new Date(y, m - 1, d + 6, 23, 59, 59, 999);
   return { start, end };
 };
 
 // Helper: Extract weekday names ("MONDAY", etc.) from DayCombination
 const extractUpperDays = (dayCombObj) => {
-  if (!dayCombObj || !Array.isArray(dayCombObj.dayCombination)) return [];
-  return dayCombObj.dayCombination
-    .map((d) => (typeof d === "object" && d !== null && d.day ? d.day.toUpperCase() : null))
-    .filter(Boolean);
+  if (!dayCombObj) return [];
+  if (typeof dayCombObj === "string") return [dayCombObj.toUpperCase()];
+
+  if (
+    Array.isArray(dayCombObj.dayCombination) &&
+    dayCombObj.dayCombination.length > 0
+  ) {
+    return dayCombObj.dayCombination
+      .map((d) => {
+        if (typeof d === "string") return d.toUpperCase();
+        if (typeof d === "object" && d !== null) {
+          return (d.day || d.name || "").toUpperCase();
+        }
+        return null;
+      })
+      .filter(Boolean);
+  }
+
+  if (dayCombObj.name) {
+    return [dayCombObj.name.toUpperCase()];
+  }
+
+  return [];
 };
 
 // @desc    Get intern profile, assigned batches, and weekly schedule slots
@@ -36,15 +59,19 @@ const getInternWeeklySchedule = async (req, res) => {
         .populate("branch", "branchName name")
         .populate("course", "courseName");
     } else if (email && email.trim()) {
-      const normalizedEmail = email.trim().toLowerCase();
+      const escapedEmail = email
+        .trim()
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       intern = await Intern.findOne({
-        $or: [{ email: normalizedEmail }, { officialEmail: normalizedEmail }],
+        $or: [
+          { email: { $regex: `^${escapedEmail}$`, $options: "i" } },
+          { officialEmail: { $regex: `^${escapedEmail}$`, $options: "i" } },
+        ],
         isDeleted: false,
       })
         .populate("branch", "branchName name")
         .populate("course", "courseName");
     } else {
-      // Fallback for dev preview if auth user isn't passed yet
       intern = await Intern.findOne({ isDeleted: false, isActive: true })
         .populate("branch", "branchName name")
         .populate("course", "courseName");
@@ -54,16 +81,17 @@ const getInternWeeklySchedule = async (req, res) => {
       return res.status(404).json({ message: "Intern profile not found." });
     }
 
-    // 2. Find all Batches belonging to this Intern
+    // 2. Find all active Batches belonging to this Intern
     const batchOrConditions = [{ interns: intern._id }];
+    const rawBatch = intern.batch ? String(intern.batch).trim() : "";
 
-    if (intern.batch && intern.batch.trim()) {
-      if (mongoose.Types.ObjectId.isValid(intern.batch.trim())) {
-        batchOrConditions.push({ _id: intern.batch.trim() });
+    if (rawBatch) {
+      if (mongoose.Types.ObjectId.isValid(rawBatch)) {
+        batchOrConditions.push({ _id: rawBatch });
       } else {
         batchOrConditions.push({
           batchName: {
-            $regex: `^${intern.batch.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+            $regex: `^${rawBatch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
             $options: "i",
           },
         });
@@ -78,7 +106,6 @@ const getInternWeeklySchedule = async (req, res) => {
     const internBranchName =
       intern.branch?.branchName || intern.branch?.name || "calicut";
 
-    // Build normalized myBatches array
     const myBatches =
       batches.length > 0
         ? batches.map((b) => ({
@@ -86,8 +113,8 @@ const getInternWeeklySchedule = async (req, res) => {
             name: b.batchName,
             branch: b.branch?.branchName || b.branch?.name || internBranchName,
           }))
-        : intern.batch
-        ? [{ id: "assigned", name: intern.batch, branch: internBranchName }]
+        : rawBatch
+        ? [{ id: "assigned", name: rawBatch, branch: internBranchName }]
         : [];
 
     const batchIds = batches.map((b) => b._id);
@@ -97,6 +124,7 @@ const getInternWeeklySchedule = async (req, res) => {
 
     if (batchIds.length > 0) {
       const scheduleFilter = {
+        isDeleted: { $ne: true },
         "schedule.sub_details.batch": { $in: batchIds },
       };
 
@@ -112,7 +140,11 @@ const getInternWeeklySchedule = async (req, res) => {
         .populate({
           path: "schedule.sub_details.day",
           select: "name dayCombination",
-          populate: { path: "dayCombination", select: "name day" },
+          populate: {
+            path: "dayCombination",
+            select: "name day",
+            strictPopulate: false,
+          },
         })
         .populate({
           path: "schedule.sub_details.subject",
@@ -172,13 +204,16 @@ const getInternWeeklySchedule = async (req, res) => {
         });
       });
 
-      weeklySlots.sort((a, b) => a.dayOrder - b.dayOrder);
+      weeklySlots.sort((a, b) => {
+        if (a.dayOrder !== b.dayOrder) return a.dayOrder - b.dayOrder;
+        return a.time.localeCompare(b.time);
+      });
     }
 
     return res.status(200).json({
       intern: {
         id: intern._id,
-        name: intern.fullName.toUpperCase(),
+        name: (intern.fullName || intern.name || "INTERN").toUpperCase(),
         role: intern.role || "Intern",
         badgeRole: (intern.role || "INTERN").toUpperCase(),
         email: intern.email || intern.officialEmail,
@@ -195,6 +230,181 @@ const getInternWeeklySchedule = async (req, res) => {
   }
 };
 
+// @desc    Get intern evaluation details, scores, and attendance for Weekly Card
+// @route   GET /internschedule/weeklycard?internId=...&email=...
+const getInternWeeklyCard = async (req, res) => {
+  try {
+    const { internId, email } = req.query;
+
+    let intern = null;
+    if (internId && mongoose.Types.ObjectId.isValid(internId)) {
+      intern = await Intern.findOne({ _id: internId, isDeleted: false })
+        .populate("branch", "branchName name")
+        .populate("course", "courseName")
+        .populate("batch", "batchName");
+    } else if (email && email.trim()) {
+      const escapedEmail = email.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      intern = await Intern.findOne({
+        $or: [
+          { email: { $regex: `^${escapedEmail}$`, $options: "i" } },
+          { officialEmail: { $regex: `^${escapedEmail}$`, $options: "i" } },
+        ],
+        isDeleted: false,
+      })
+        .populate("branch", "branchName name")
+        .populate("course", "courseName")
+        .populate("batch", "batchName");
+    } else {
+      intern = await Intern.findOne({ isDeleted: false, isActive: true })
+        .populate("branch", "branchName name")
+        .populate("course", "courseName")
+        .populate("batch", "batchName");
+    }
+
+    if (!intern) {
+      return res.status(404).json({ message: "Intern profile not found." });
+    }
+
+    // Resolve Batch Name
+    let batchName = "General";
+    if (intern.batch && typeof intern.batch === "object" && intern.batch.batchName) {
+      batchName = intern.batch.batchName;
+    } else if (intern.batch) {
+      const bDoc = await Batch.findById(intern.batch).select("batchName");
+      if (bDoc) batchName = bDoc.batchName;
+    } else {
+      const bDoc = await Batch.findOne({ interns: intern._id, isDeleted: false }).select("batchName");
+      if (bDoc) batchName = bDoc.batchName;
+    }
+
+    // Fetch Mentor Cards for this Intern
+    const cards = await MentorCard.find({
+      internId: intern._id,
+      isDeleted: { $ne: true },
+    })
+      .populate("mentorId", "fullName email officialEmail")
+      .sort({ week: 1, createdAt: 1 });
+
+    // Fetch Attendance records for overall attendance calculation
+    const attendanceRecords = await InternsAttendance.find({
+      intern: intern._id,
+    });
+
+    let overallAttendancePct = 0;
+    if (attendanceRecords.length > 0) {
+      const presentCount = attendanceRecords.filter((r) => r.status === true).length;
+      overallAttendancePct = Math.round((presentCount / attendanceRecords.length) * 100);
+    }
+
+    // Helper to format date DD/MM/YYYY
+    const formatDate = (dt) => {
+      if (!dt) return "";
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return "";
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    };
+
+    let totalTestScores = 0;
+    let testCount = 0;
+    let totalProjectScores = 0;
+    let projectCount = 0;
+
+    const evaluations = cards.map((c) => {
+      if (typeof c.test_marks === "number") {
+        const total = c.test_total && c.test_total > 0 ? c.test_total : 100;
+        const pct = Math.min(100, Math.round((c.test_marks / total) * 100));
+        totalTestScores += pct;
+        testCount++;
+      }
+
+      if (typeof c.project_marks === "number") {
+        const total = c.project_total && c.project_total > 0 ? c.project_total : 100;
+        const pct = Math.min(100, Math.round((c.project_marks / total) * 100));
+        totalProjectScores += pct;
+        projectCount++;
+      }
+
+      const dateStr =
+        c.startDate && c.endDate
+          ? `${formatDate(c.startDate)} - ${formatDate(c.endDate)}`
+          : c.startDate
+          ? formatDate(c.startDate)
+          : "-";
+
+      let testDisplay = "-";
+      if (typeof c.test_marks === "number") {
+        testDisplay = c.test_name
+          ? `${c.test_name} (${c.test_marks}/${c.test_total || 100})`
+          : `${c.test_marks}/${c.test_total || 100}`;
+      } else if (c.test_name) {
+        testDisplay = c.test_name;
+      }
+
+      let projectDisplay = "-";
+      if (typeof c.project_marks === "number") {
+        projectDisplay = c.project_name
+          ? `${c.project_name} (${c.project_marks}/${c.project_total || 100})`
+          : `${c.project_marks}/${c.project_total || 100}`;
+      } else if (c.project_name) {
+        projectDisplay = c.project_name;
+      }
+
+      let softSkillDisplay = "-";
+      if (c.isSoftSkill === true) softSkillDisplay = "Pass";
+      else if (c.isSoftSkill === false) softSkillDisplay = "Pending";
+
+      let attendanceDisplay = "-";
+      if (c.attend) {
+        attendanceDisplay = c.totalDays ? `${c.attend}/${c.totalDays} days` : c.attend;
+      }
+
+      return {
+        id: c._id,
+        week: `Week ${c.week || 1}`,
+        dates: dateStr,
+        subject: c.subject || "-",
+        topic: c.topic || "-",
+        test: testDisplay,
+        project: projectDisplay,
+        softSkill: softSkillDisplay,
+        attendance: attendanceDisplay,
+        mentor: c.mentorId?.fullName || "Mentor",
+        notes: c.note || "-",
+      };
+    });
+
+    const avgTestScore = testCount > 0 ? Math.round(totalTestScores / testCount) : 0;
+    const avgProjectScore = projectCount > 0 ? Math.round(totalProjectScores / projectCount) : 0;
+
+    const internProfile = {
+      name: (intern.fullName || intern.name || "INTERN").toUpperCase(),
+      initial: (intern.fullName || intern.name || "I").charAt(0).toUpperCase(),
+      mode: intern.courseStatus ? intern.courseStatus.toUpperCase() : "FULL TIME",
+      batch: batchName,
+      studentId: intern.admissionNumber || (intern._id ? `STU-${intern._id.toString().slice(-4).toUpperCase()}` : "STU-001"),
+      course: intern.course?.courseName || intern.course?.name || "Course",
+      avgTestScore,
+      avgProjectScore,
+      attendance: overallAttendancePct,
+    };
+
+    return res.status(200).json({
+      intern: internProfile,
+      evaluations,
+    });
+  } catch (error) {
+    console.error("Error fetching intern weekly card:", error);
+    return res.status(500).json({
+      message: "Server error while fetching intern weekly card",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getInternWeeklySchedule,
+  getInternWeeklyCard,
 };

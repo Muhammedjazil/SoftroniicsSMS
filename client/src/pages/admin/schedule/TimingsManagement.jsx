@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './TimingsManagement.css';
 import { LuUser } from 'react-icons/lu';
-import { FiChevronDown, FiEdit2 } from 'react-icons/fi';
-import AdminService from "../../../services/admin-api-services/AdminService"
+import { FiChevronDown, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import AdminService from "../../../services/admin-api-services/AdminService";
+import Loader from '../../../components/common/Loader';
+import { useToast } from '../../../components/common/Toast';
 
 const TimingsManagement = () => {
-  const { takebranch, taketiming, createtiming, updatetiming } = AdminService();
+  const { showToast, ToastContainer } = useToast();
+  const { takebranch, taketiming, createtiming, updatetiming, removetiming } = AdminService();
 
   const [activeTab, setActiveTab] = useState('timings'); // 'timings' | 'new-timing' | 'edit-timing'
   const [branchFilter, setBranchFilter] = useState('');
@@ -48,7 +51,7 @@ const TimingsManagement = () => {
 
   // Normalize API Timing record
   const normalizeTiming = useCallback((item) => {
-    const parts = (item.timeSlot || '').split('-').map((p) => p.trim());
+    const parts = (item.timeSlot || '').split(/[-–—]/).map((p) => p.trim());
     const start = parts[0] ? parse12To24Hour(parts[0]) : '';
     const end = parts[1] ? parse12To24Hour(parts[1]) : '';
     const bObj = typeof item.branch === 'object' && item.branch !== null ? item.branch : null;
@@ -159,10 +162,12 @@ const TimingsManagement = () => {
         setTimings((prev) =>
           prev.map((t) => (t.id === editingId ? normalizeTiming(updated) : t))
         );
+        showToast('Timing updated successfully!', 'success');
       } else {
         const res = await createtiming(payload);
         const created = res?.data || res;
         setTimings((prev) => [...prev, normalizeTiming(created)]);
+        showToast('Timing created successfully!', 'success');
       }
 
       setBranchFilter(branchId);
@@ -170,9 +175,25 @@ const TimingsManagement = () => {
       setActiveTab('timings');
     } catch (error) {
       console.error('Error saving timing:', error);
-      alert(error?.response?.data?.message || 'Failed to save timing');
+      showToast(error?.response?.data?.message || 'Failed to save timing', 'error');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDeleteTiming = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this timing?')) return;
+    try {
+      await removetiming(id);
+      setTimings((prev) => prev.filter((t) => t.id !== id));
+      if (editingId === id) {
+        resetForm();
+        setActiveTab('timings');
+      }
+      showToast('Timing deleted successfully.', 'success');
+    } catch (error) {
+      console.error('Error deleting timing:', error);
+      showToast(error?.response?.data?.message || 'Failed to delete timing', 'error');
     }
   };
 
@@ -182,6 +203,7 @@ const TimingsManagement = () => {
 
   return (
     <div className="tmg-mgmt-container">
+      <ToastContainer />
      
 
       <div className="tmg-mgmt-toolbar">
@@ -224,6 +246,7 @@ const TimingsManagement = () => {
                     value={branchFilter}
                     onChange={(e) => setBranchFilter(e.target.value)}
                   >
+                    <option value="">All Branches</option>
                     {branches.map((br) => (
                       <option key={br._id} value={br._id}>
                         {br.branchName || br.name}
@@ -236,7 +259,7 @@ const TimingsManagement = () => {
             </div>
 
             {loading ? (
-              <p className="tmg-mgmt-empty-text">Loading timings...</p>
+              <Loader message="Loading timings..." minHeight="240px" />
             ) : filteredTimings.length === 0 ? (
               <p className="tmg-mgmt-empty-text">No timings added for this branch yet.</p>
             ) : (
@@ -251,6 +274,14 @@ const TimingsManagement = () => {
                       title="Edit Timing"
                     >
                       <FiEdit2 />
+                    </button>
+                    <button
+                      type="button"
+                      className="tmg-mgmt-pill-delete-btn"
+                      onClick={() => handleDeleteTiming(item.id)}
+                      title="Delete Timing"
+                    >
+                      <FiTrash2 />
                     </button>
                   </div>
                 ))}
@@ -324,6 +355,15 @@ const TimingsManagement = () => {
             </div>
 
             <div className="tmg-mgmt-form-footer">
+              {activeTab === 'edit-timing' && editingId && (
+                <button
+                  type="button"
+                  className="tmg-mgmt-delete-btn"
+                  onClick={() => handleDeleteTiming(editingId)}
+                >
+                  Delete Timing
+                </button>
+              )}
               <button
                 type="button"
                 className="tmg-mgmt-cancel-btn"

@@ -3,8 +3,11 @@ import './WeeklySchedule.css';
 import { LuUser, LuSearch, LuEye, LuX } from 'react-icons/lu';
 import { FiChevronDown, FiEdit3, FiCalendar } from 'react-icons/fi';
 import AdminService from "../../../services/admin-api-services/AdminService";
+import Loader from '../../../components/common/Loader';
+import { useToast } from '../../../components/common/Toast';
 
 const WeeklySchedule = () => {
+  const { showToast, ToastContainer } = useToast();
   const {
     takebranch,
     takeweeklyschedule,
@@ -86,9 +89,13 @@ const WeeklySchedule = () => {
 
   const endDateFormatted = useMemo(() => {
     if (!startDate) return '';
-    const dt = new Date(startDate);
+    const [y, m, d] = startDate.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
     dt.setDate(dt.getDate() + 6);
-    return `${dt.getMonth() + 1}/${dt.getDate()}/${dt.getFullYear()}`;
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const yyyy = dt.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
   }, [startDate]);
 
   // Track which batches have at least one slot assigned (highlights green in sidebar)
@@ -147,7 +154,7 @@ const WeeklySchedule = () => {
         });
       }
 
-      alert(`Failed to save schedule cell: ${serverMsg}`);
+      showToast(`Failed to save schedule cell: ${serverMsg}`, 'error');
     }
   };
 
@@ -307,9 +314,14 @@ const WeeklySchedule = () => {
       if (res?.nextStartDate) {
         setStartDate(res.nextStartDate);
       } else {
-        const dt = new Date(startDate);
+        const [y, m, d] = startDate.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
         dt.setDate(dt.getDate() + 7);
-        setStartDate(dt.toISOString().split('T')[0]);
+        const nextY = dt.getFullYear();
+        const nextM = String(dt.getMonth() + 1).padStart(2, '0');
+        const nextD = String(dt.getDate()).padStart(2, '0');
+        setStartDate(`${nextY}-${nextM}-${nextD}`);
+        showToast(`Advanced to next week: ${res.weekRange || ''}`, 'success');
       }
     } catch (err) {
       const serverMsg =
@@ -317,11 +329,15 @@ const WeeklySchedule = () => {
         err.response?.data?.error ||
         err.message;
       console.error('Failed to advance week:', err.response?.data || err.message);
-      alert(`Failed to advance schedule week: ${serverMsg}`);
+      showToast(`Failed to advance schedule week: ${serverMsg}`, 'error');
     }
   };
 
   const handleExportCSV = () => {
+    if (mentors.length === 0) {
+      showToast('No mentors or schedule data to export.', 'warning');
+      return;
+    }
     const headers = [
       'Mentor',
       'Time Slot',
@@ -362,10 +378,12 @@ const WeeklySchedule = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showToast('Weekly schedule exported to CSV.', 'success');
   };
 
   return (
     <div className="wk-sched-container">
+      <ToastContainer />
       
 
       {/* Main Split Workspace */}
@@ -488,9 +506,9 @@ const WeeklySchedule = () => {
                   <tr>
                     <td
                       colSpan={2 + days.length * 2}
-                      className="wk-sched-no-timings"
+                      style={{ padding: '32px 0', border: 'none', background: '#fff' }}
                     >
-                      Loading weekly schedule...
+                      <Loader message="Loading weekly schedule..." minHeight="360px" />
                     </td>
                   </tr>
                 ) : mentors.length === 0 ? (

@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import './BatchManagement.css';
-import { LuUser, LuSearch, LuX } from 'react-icons/lu';
+import { LuSearch, LuX } from 'react-icons/lu';
 import { HiOutlineArrowDownTray } from 'react-icons/hi2';
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import AdminService from "../../../services/admin-api-services/AdminService" // Adjust path if needed
+import AdminService from '../../../services/admin-api-services/AdminService';
+import Loader from '../../../components/common/Loader';
+import { useToast } from '../../../components/common/Toast';
 
 const BatchManagement = () => {
+  const { showToast, ToastContainer } = useToast();
   const {
     takebatches,
     takebranch,
@@ -28,8 +31,10 @@ const BatchManagement = () => {
 
   // List Filter States
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('Active');
+  const [statusFilter, setStatusFilter] = useState('All Status');
   const [branchFilter, setBranchFilter] = useState('All Branches');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   // Form States
   const [formBatchName, setFormBatchName] = useState('');
@@ -44,41 +49,64 @@ const BatchManagement = () => {
   const [selectedInternObj, setSelectedInternObj] = useState(null);
   const [showInternSuggestions, setShowInternSuggestions] = useState(false);
 
-  // Helper to normalize intern fields from API
-  const normalizeIntern = (intern) => ({
-    _id: intern._id || intern.id,
-    name: intern.name || 'Unnamed Intern',
-    admissionNumber: intern.admissionNo || intern.admissionNumber || 'N/A',
-    courseName:
-      intern.course?.courseName ||
-      intern.course?.name ||
-      intern.courseName ||
-      (typeof intern.course === 'string' ? intern.course : 'N/A'),
-  });
+  const internDropdownRef = useRef(null);
+
+  // Close intern dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        internDropdownRef.current &&
+        !internDropdownRef.current.contains(event.target)
+      ) {
+        setShowInternSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Helper to normalize intern fields matching internModel.js (fullName, admissionNumber, course)
+  const normalizeIntern = useCallback(
+    (intern) => ({
+      _id: intern._id || intern.id,
+      name: intern.fullName || intern.name || 'Unnamed Intern',
+      admissionNumber: intern.admissionNumber || intern.admissionNo || 'N/A',
+      courseName:
+        intern.course?.courseName ||
+        intern.course?.name ||
+        intern.courseName ||
+        (typeof intern.course === 'string' ? intern.course : 'N/A'),
+    }),
+    []
+  );
 
   // Helper to normalize batch fields from API
-  const normalizeBatch = useCallback((b) => {
-    const branchObj = typeof b.branch === 'object' && b.branch !== null ? b.branch : null;
-    const branchId = branchObj ? branchObj._id : b.branch || '';
-    const branchLabel = branchObj
-      ? branchObj.branchName || branchObj.name || 'Unknown'
-      : b.branch || 'Unknown';
+  const normalizeBatch = useCallback(
+    (b) => {
+      const branchObj =
+        typeof b.branch === 'object' && b.branch !== null ? b.branch : null;
+      const branchId = branchObj ? branchObj._id : b.branch || '';
+      const branchLabel = branchObj
+        ? branchObj.branchName || branchObj.name || 'Unknown'
+        : b.branch || 'Unknown';
 
-    const createdDate = b.createdAt
-      ? new Date(b.createdAt).toLocaleDateString('en-US')
-      : '';
+      const createdDate = b.createdAt
+        ? new Date(b.createdAt).toLocaleDateString('en-US')
+        : '';
 
-    return {
-      id: b._id,
-      code: b._id ? b._id.slice(-6) : '',
-      name: b.batchName || '',
-      branchId,
-      branch: branchLabel,
-      status: b.status || 'Active',
-      createdAt: createdDate,
-      interns: Array.isArray(b.interns) ? b.interns.map(normalizeIntern) : [],
-    };
-  }, []);
+      return {
+        id: b._id,
+        code: b._id ? b._id.slice(-6) : '',
+        name: b.batchName || '',
+        branchId,
+        branch: branchLabel,
+        status: b.status || 'Active',
+        createdAt: createdDate,
+        interns: Array.isArray(b.interns) ? b.interns.map(normalizeIntern) : [],
+      };
+    },
+    [normalizeIntern]
+  );
 
   // Fetch initial batches and branches
   const fetchInitialData = useCallback(async () => {
@@ -89,19 +117,15 @@ const BatchManagement = () => {
         takebranch(),
       ]);
 
-      const rawBatches = Array.isArray(batchesRes) ? batchesRes : batchesRes?.data || [];
-      const rawBranches = Array.isArray(branchesRes) ? branchesRes : branchesRes?.data || [];
+      const rawBatches = Array.isArray(batchesRes)
+        ? batchesRes
+        : batchesRes?.data || [];
+      const rawBranches = Array.isArray(branchesRes)
+        ? branchesRes
+        : branchesRes?.data || [];
 
       setBatches(rawBatches.map(normalizeBatch));
       setBranches(rawBranches);
-
-      // Default to 'calicut' branch if present
-      const calicutBranch = rawBranches.find(
-        (br) => (br.branchName || br.name || '').toLowerCase() === 'calicut'
-      );
-      if (calicutBranch) {
-        setBranchFilter(calicutBranch._id);
-      }
     } catch (error) {
       console.error('Failed to load batch management data:', error);
     } finally {
@@ -132,14 +156,15 @@ const BatchManagement = () => {
     };
 
     fetchBranchInterns();
-  }, [formBranchId]);
+  }, [formBranchId, normalizeIntern]);
 
   const filteredBatches = useMemo(() => {
     return batches.filter((batch) => {
       const matchesSearch =
         batch.name.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
         batch.code.toLowerCase().includes(searchQuery.toLowerCase().trim());
-      const matchesStatus = statusFilter === 'All Status' || batch.status === statusFilter;
+      const matchesStatus =
+        statusFilter === 'All Status' || batch.status === statusFilter;
       const matchesBranch =
         branchFilter === 'All Branches' ||
         batch.branchId === branchFilter ||
@@ -148,15 +173,29 @@ const BatchManagement = () => {
     });
   }, [batches, searchQuery, statusFilter, branchFilter]);
 
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, branchFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredBatches.length / PAGE_SIZE));
+  const paginatedBatches = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredBatches.slice(start, start + PAGE_SIZE);
+  }, [filteredBatches, currentPage, PAGE_SIZE]);
+
   const branchFilteredInterns = useMemo(() => {
     if (!formBranchId) return [];
     const query = internSearch.toLowerCase().trim();
+    const addedIds = new Set(formInterns.map((item) => item._id));
+
     return branchInternsList.filter(
       (i) =>
-        i.name.toLowerCase().includes(query) ||
-        i.admissionNumber.toLowerCase().includes(query)
+        !addedIds.has(i._id) &&
+        (i.name.toLowerCase().includes(query) ||
+          i.admissionNumber.toLowerCase().includes(query))
     );
-  }, [formBranchId, branchInternsList, internSearch]);
+  }, [formBranchId, branchInternsList, internSearch, formInterns]);
 
   const resetForm = () => {
     setFormBatchName('');
@@ -194,6 +233,10 @@ const BatchManagement = () => {
     setFormBranchId(batchItem.branchId);
     setFormStatus(batchItem.status || 'Active');
     setFormInterns([...batchItem.interns]);
+    setInternSearch('');
+    setInternAdmissionNumber('');
+    setInternCourseName('');
+    setSelectedInternObj(null);
     setActiveTab('edit-batch');
   };
 
@@ -239,10 +282,11 @@ const BatchManagement = () => {
       const created = res?.data || res;
 
       setBatches((prev) => [normalizeBatch(created), ...prev]);
+      showToast('Batch created successfully!', 'success');
       handleBackToBatches();
     } catch (error) {
       console.error('Error creating batch:', error);
-      alert(error?.response?.data?.message || 'Failed to create batch');
+      showToast(error?.response?.data?.message || 'Failed to create batch', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -250,7 +294,8 @@ const BatchManagement = () => {
 
   const handleSaveEditedBatch = async (e) => {
     e.preventDefault();
-    if (!formBatchName.trim() || !formBranchId || !editingBatchId || submitting) return;
+    if (!formBatchName.trim() || !formBranchId || !editingBatchId || submitting)
+      return;
 
     setSubmitting(true);
     try {
@@ -267,38 +312,73 @@ const BatchManagement = () => {
       setBatches((prev) =>
         prev.map((b) => (b.id === editingBatchId ? normalizeBatch(updated) : b))
       );
+      showToast('Batch updated successfully!', 'success');
       handleBackToBatches();
     } catch (error) {
       console.error('Error updating batch:', error);
-      alert(error?.response?.data?.message || 'Failed to update batch');
+      showToast(error?.response?.data?.message || 'Failed to update batch', 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteBatch = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this batch?')) return;
     try {
       await removebatch(id);
       setBatches((prev) => prev.filter((b) => b.id !== id));
       if (viewingBatch && viewingBatch.id === id) {
         setViewingBatch(null);
       }
+      showToast('Batch deleted successfully.', 'success');
     } catch (error) {
       console.error('Error deleting batch:', error);
-      alert(error?.response?.data?.message || 'Failed to delete batch');
+      showToast(error?.response?.data?.message || 'Failed to delete batch', 'error');
     }
+  };
+
+  const handleExportCSV = () => {
+    if (filteredBatches.length === 0) {
+      showToast('No batches to export.', 'warning');
+      return;
+    }
+    const headers = ['#', 'Batch Name', 'ID', 'Branch', 'Status', 'Total Interns', 'Created Date', 'Interns'];
+    const rows = filteredBatches.map((b, idx) => [
+      idx + 1,
+      b.name,
+      b.code,
+      b.branch,
+      b.status,
+      b.interns.length,
+      b.createdAt,
+      b.interns.map((i) => `${i.name} (${i.admissionNumber})`).join('; '),
+    ]);
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers, ...rows]
+        .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `batches_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Batches exported to CSV.', 'success');
   };
 
   return (
     <div className="btc-mgmt-container">
-     
-
+      <ToastContainer />
       {/* Outer Toolbar */}
       <div className="btc-mgmt-toolbar">
         <div className="btc-mgmt-tab-group">
           <button
             type="button"
-            className={`btc-mgmt-tab-btn ${activeTab === 'batches' ? 'btc-mgmt-tab-btn--active' : ''}`}
+            className={`btc-mgmt-tab-btn ${
+              activeTab === 'batches' ? 'btc-mgmt-tab-btn--active' : ''
+            }`}
             onClick={handleBackToBatches}
           >
             Batches
@@ -316,7 +396,12 @@ const BatchManagement = () => {
           </button>
         </div>
 
-        <button type="button" className="btc-mgmt-export-btn">
+        <button
+          type="button"
+          className="btc-mgmt-export-btn"
+          onClick={handleExportCSV}
+          title="Export Batches to CSV"
+        >
           <HiOutlineArrowDownTray className="btc-mgmt-export-icon" />
           <span>Export</span>
         </button>
@@ -372,7 +457,7 @@ const BatchManagement = () => {
 
             {loading ? (
               <div className="btc-mgmt-content-area">
-                <p className="btc-mgmt-empty-message">Loading batches...</p>
+                <Loader message="Loading batches..." minHeight="360px" />
               </div>
             ) : filteredBatches.length === 0 ? (
               <div className="btc-mgmt-content-area">
@@ -393,12 +478,13 @@ const BatchManagement = () => {
                 </div>
 
                 <div className="btc-mgmt-table-body">
-                  {filteredBatches.map((item, idx) => {
+                  {paginatedBatches.map((item, idx) => {
                     const count = item.interns.length;
+                    const continuousIdx = (currentPage - 1) * PAGE_SIZE + idx + 1;
                     return (
                       <div key={item.id} className="btc-mgmt-table-row">
                         <div className="btc-mgmt-td" data-label="#">
-                          {idx + 1}
+                          {continuousIdx}
                         </div>
 
                         <div className="btc-mgmt-td" data-label="Batch Name">
@@ -467,12 +553,26 @@ const BatchManagement = () => {
                 </div>
 
                 <div className="btc-mgmt-pagination-bar">
-                  <span className="btc-mgmt-pagination-text">1 of 1</span>
+                  <span className="btc-mgmt-pagination-text">
+                    {currentPage} of {totalPages}
+                  </span>
                   <div className="btc-mgmt-pagination-controls">
-                    <button type="button" className="btc-mgmt-page-btn" disabled>
+                    <button
+                      type="button"
+                      className="btc-mgmt-page-btn"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage <= 1}
+                      title="Previous Page"
+                    >
                       <FiChevronLeft />
                     </button>
-                    <button type="button" className="btc-mgmt-page-btn" disabled>
+                    <button
+                      type="button"
+                      className="btc-mgmt-page-btn"
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage >= totalPages}
+                      title="Next Page"
+                    >
                       <FiChevronRight />
                     </button>
                   </div>
@@ -486,7 +586,9 @@ const BatchManagement = () => {
         {(activeTab === 'add-batch' || activeTab === 'edit-batch') && (
           <form
             className="btc-mgmt-form-layout"
-            onSubmit={activeTab === 'add-batch' ? handleCreateBatch : handleSaveEditedBatch}
+            onSubmit={
+              activeTab === 'add-batch' ? handleCreateBatch : handleSaveEditedBatch
+            }
           >
             <div className="btc-mgmt-form-body">
               <h2 className="btc-mgmt-section-heading">Batch Details</h2>
@@ -517,6 +619,8 @@ const BatchManagement = () => {
                       onChange={(e) => {
                         setFormBranchId(e.target.value);
                         setInternSearch('');
+                        setInternAdmissionNumber('');
+                        setInternCourseName('');
                         setSelectedInternObj(null);
                         setFormInterns([]);
                       }}
@@ -572,7 +676,7 @@ const BatchManagement = () => {
               </h2>
 
               <div className="btc-mgmt-form-row">
-                <div className="btc-mgmt-input-group">
+                <div className="btc-mgmt-input-group" ref={internDropdownRef}>
                   <label className="btc-mgmt-label">Search Interns</label>
                   <div className="btc-mgmt-intern-search-wrapper">
                     <LuSearch className="btc-mgmt-intern-search-icon" />
@@ -587,9 +691,19 @@ const BatchManagement = () => {
                       value={internSearch}
                       disabled={!formBranchId}
                       onFocus={() => setShowInternSuggestions(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (branchFilteredInterns.length > 0) {
+                            handleSelectInternSuggestion(branchFilteredInterns[0]);
+                          }
+                        }
+                      }}
                       onChange={(e) => {
                         setInternSearch(e.target.value);
                         setSelectedInternObj(null);
+                        setInternAdmissionNumber('');
+                        setInternCourseName('');
                         setShowInternSuggestions(true);
                       }}
                     />
