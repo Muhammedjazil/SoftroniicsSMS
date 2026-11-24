@@ -59,28 +59,7 @@ const Internmonthlycard = () => {
     return (
         <div className="wk-card-container">
             {/* Header */}
-            <header className="wk-card-header">
-                <div className="wk-card-title-group">
-                    <h1 className="wk-card-heading">My Monthly Evaluation</h1>
-                    <nav className="wk-card-breadcrumb">
-                        <span>My Monthly Evaluation</span>
-                        <span className="wk-card-breadcrumb-sep">&gt;</span>
-                        <span>Monthly Card</span>
-                    </nav>
-                </div>
-
-                <div className="wk-card-profile-card">
-                    <div className="wk-card-profile-avatar">
-                        <LuUser />
-                    </div>
-                    <div className="wk-card-profile-info">
-                        <span className="wk-card-username">
-                            {InternmonthlycardStudentData.name}
-                        </span>
-                        <span className="wk-card-role">Intern</span>
-                    </div>
-                </div>
-            </header>
+            
 
             {/* Main Content Wrapper */}
             <div className="wk-card-body">

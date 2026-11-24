@@ -35,14 +35,11 @@ import TopicsManagement from "./pages/admin/syllabus/TopicsManagement";
 import Dashboard from "./pages/admin/Dashboard/Dashboard";
 import Categories from "./pages/admin/CourseManagement/Categories";
 import Course from "./pages/admin/CourseManagement/Course";
-import CategoryView from "./pages/admin/CourseManagement/CategoryView";
-import ViewCourse from "./pages/admin/CourseManagement/ViewCourse";
-import EditCourse from "./pages/admin/CourseManagement/EditCourse";
-import CategoryEdit from "./pages/admin/CourseManagement/CategoryEdit";
+
 
 // INTERN PAGES
 import { Internnotification } from "./pages/intern/Internnotification";
-import { Intrentask } from "./pages/intern/interntask";
+import { Intrentask } from "./pages/intern/Interntask";
 import Internattendance from "./pages/intern/Internattendance";
 import Internmonthlycard from "./pages/intern/Internmonthlycard";
 import InternWeeklySchedule from "./pages/intern/InternWeeklySchedule";
@@ -147,34 +144,9 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/course/:id"
-          element={
-            <ProtectedRoute
-              allowedTypes={["admin", "staff"]}
-              module="courseManagement"
-              action="viewCourse"
-            >
-              <Adminlayout>
-                <ViewCourse />
-              </Adminlayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/course/:id/edit"
-          element={
-            <ProtectedRoute
-              allowedTypes={["admin", "staff"]}
-              module="courseManagement"
-              action="editCourse"
-            >
-              <Adminlayout>
-                <EditCourse />
-              </Adminlayout>
-            </ProtectedRoute>
-          }
-        />
+       
+        
+        {/* CATEGORY MANAGEMENT */}
         <Route
           path="/categories"
           element={
@@ -189,34 +161,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/categories/view/:id"
-          element={
-            <ProtectedRoute
-              allowedTypes={["admin", "staff"]}
-              module="categoryManagement"
-              action="viewCategory"
-            >
-              <Adminlayout>
-                <CategoryView />
-              </Adminlayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/categories/edit/:id"
-          element={
-            <ProtectedRoute
-              allowedTypes={["admin", "staff"]}
-              module="categoryManagement"
-              action="editCategory"
-            >
-              <Adminlayout>
-                <CategoryEdit />
-              </Adminlayout>
-            </ProtectedRoute>
-          }
-        />
+       
+        
 
         {/* ADMINISTRATION */}
         <Route
@@ -456,65 +402,19 @@ function App() {
 
         {/* INTERN ROUTES */}
         <Route
-          path="/internnotification"
           element={
             <ProtectedRoute allowedTypes={["intern"]}>
-              <Internlayout>
-                <Internnotification />
-              </Internlayout>
+              <Internlayout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/interntask"
-          element={
-            <ProtectedRoute allowedTypes={["intern"]}>
-              <Internlayout>
-                <Intrentask />
-              </Internlayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/internattendance"
-          element={
-            <ProtectedRoute allowedTypes={["intern"]}>
-              <Internlayout>
-                <Internattendance />
-              </Internlayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/internweekly"
-          element={
-            <ProtectedRoute allowedTypes={["intern"]}>
-              <Internlayout>
-                <InternWeeklySchedule />
-              </Internlayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/internweeklycard"
-          element={
-            <ProtectedRoute allowedTypes={["intern"]}>
-              <Internlayout>
-                <WeeklyCard />
-              </Internlayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/internmonthlycard"
-          element={
-            <ProtectedRoute allowedTypes={["intern"]}>
-              <Internlayout>
-                <Internmonthlycard />
-              </Internlayout>
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route path="/internnotification" element={<Internnotification />} />
+          <Route path="/interntask" element={<Intrentask />} />
+          <Route path="/internattendance" element={<Internattendance />} />
+          <Route path="/internweekly" element={<InternWeeklySchedule />} />
+          <Route path="/internweeklycard" element={<WeeklyCard />} />
+          <Route path="/internmonthlycard" element={<Internmonthlycard />} />
+        </Route>
 
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/login" replace />} />

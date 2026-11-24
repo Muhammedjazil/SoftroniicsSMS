@@ -21,6 +21,8 @@ const internRoute = require("./Routes/internRoute");
 const taskRoute = require("./Routes/taskRoute");
 const materialRoute = require("./Routes/materialRoute");
 const notificationRoute = require("./Routes/notificationRoute");
+const attendanceRoute = require("./Routes/attendanceRoute");
+const leaveRequestRoute = require("./Routes/leaveRequestRoute");
 
 const app = express();
 const PORT = process.env.PORT || 7000;
@@ -48,6 +50,8 @@ app.use("/internmanagement", internRoute);
 app.use("/taskmanagement", taskRoute);
 app.use("/materialmanagement", materialRoute);
 app.use("/notificationmanagement", notificationRoute);
+app.use("/attendancemanagement", attendanceRoute);
+app.use("/leaverequestmanagement", leaveRequestRoute);
 
 app.listen(PORT, () => {
   console.log(`server running on http://localhost:${PORT}`);
