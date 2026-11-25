@@ -77,6 +77,46 @@ const UserService = () => {
     }
   };
 
+  // ======== Intern Assigned Tasks ========
+const takealltask = async () => {
+  try {
+    const response = await axiosPrivate.get(
+      "/taskmanagement/my-tasks"
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// ======== Intern My Submissions ========
+const takemysubmissions = async () => {
+  try {
+    const response = await axiosPrivate.get(
+      "/taskmanagement/my-submissions"
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// ======================================
+// INTERN CREATE TASK SUBMISSION
+// ======================================
+
+const createTaskSubmission = async (formData) => {
+  try {
+    const response = await axiosPrivate.post(
+      "/taskmanagement/submissions",
+      formData
+    );
+
+    return response.data;
+
+  } catch (error) {
+    throw error.response?.data || error;
+  }
   // ======== Intern Monthly Card ======== //
 
     
@@ -105,6 +145,10 @@ const takeMyMonthlyCard = async ({ internId, email } = {}) => {
     marknotificationread,
     markallnotificationsread,
     getMyAttendance,
+    takealltask,
+    takemysubmissions,
+    createTaskSubmission
+
     takeMyMonthlyCard,
   };
 };
