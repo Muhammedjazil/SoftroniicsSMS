@@ -288,9 +288,61 @@ const getAttendanceReports = async (req, res) => {
   }
 };
 
+
+
+
+// Get attendance of the logged-in intern
+const getMyAttendance = async (req, res) => {
+    try {
+        const internId = req.userId;
+
+        const attendance = await Attendance.find({
+            intern: internId
+        })
+            .populate("branch", "name")
+            .populate("batch", "name")
+            .sort({ date: -1 });
+
+        const totalDays = attendance.length;
+
+        const presentDays = attendance.filter(
+            item => item.status === "PRESENT"
+        ).length;
+
+        const absentDays = attendance.filter(
+            item => item.status === "ABSENT"
+        ).length;
+
+        const percentage = totalDays > 0
+            ? (presentDays / totalDays) * 100
+            : 0;
+
+        return res.status(200).json({
+            success: true,
+            attendance,
+            summary: {
+                totalDays,
+                presentDays,
+                absentDays,
+                percentage: percentage.toFixed(2)
+            }
+        });
+
+    } catch (error) {
+        console.error("Get My Attendance Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch attendance",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
   getAttendanceStudents,
   createDailyAttendance,
   saveAttendance,
-  getAttendanceReports
+  getAttendanceReports,
+  getMyAttendance
 };

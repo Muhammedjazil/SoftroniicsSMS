@@ -64,12 +64,27 @@ const UserService = () => {
     }
   };
 
+
+   // ======== Intern Attendance ======== //
+  const getMyAttendance = async () => {
+    try {
+      const response = await axiosPrivate.get(
+        "/attendancemanagement/my-attendance"
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+
   return {
     takeinternweeklyschedule,
     takeinternweeklycard,
     takeallnotification,
     marknotificationread,
     markallnotificationsread,
+    getMyAttendance
   };
 };
 

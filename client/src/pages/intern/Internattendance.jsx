@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     MdChevronLeft,
     MdChevronRight,
@@ -6,7 +6,7 @@ import {
     MdBarChart
 } from "react-icons/md";
 import { LuUser } from "react-icons/lu";
-
+import UserService from "../../../src/services/user-api-services/UserService";
 import "./Internattendance.css";
 
 // =============================================
@@ -18,7 +18,9 @@ const Internattendance = () => {
     // =============================================
     // CURRENT DATE
     // =============================================
+    const {getMyAttendance}=UserService()
     const internattendanceToday = new Date();
+
 
     const [internattendanceCurrentMonth, setInternattendanceCurrentMonth] =
         useState(internattendanceToday.getMonth());
@@ -32,8 +34,8 @@ const Internattendance = () => {
     const [internattendanceSelectedMentor, setInternattendanceSelectedMentor] =
         useState("All Mentors");
 
-    const [internattendanceData] =
-        useState(internattendanceInitialData);
+   const [internattendanceData, setInternattendanceData] = useState([]);
+const [internattendanceLoading, setInternattendanceLoading] = useState(true);
 
     // =============================================
     // MONTH NAMES
@@ -52,6 +54,32 @@ const Internattendance = () => {
         "November",
         "December"
     ];
+
+    useEffect(() => {
+    const fetchMyAttendance = async () => {
+        try {
+            setInternattendanceLoading(true);
+
+            const response = await getMyAttendance();
+
+           if (response.success) {
+    const formattedData = response.attendance.map(item => ({
+        date: new Date(item.date).toLocaleDateString("en-CA"),
+        status: item.status === "PRESENT" ? "Present" : "Absent",
+        mentor: ""
+    }));
+
+    setInternattendanceData(formattedData);
+}
+        } catch (error) {
+            console.error("Failed to fetch attendance:", error);
+        } finally {
+            setInternattendanceLoading(false);
+        }
+    };
+
+    fetchMyAttendance();
+}, []);
 
     // =============================================
     // FORMAT DATE
