@@ -3,16 +3,19 @@ import {
   FiUser,
   FiChevronRight,
   FiChevronLeft,
+  FiChevronDown,
   FiSearch,
   FiArrowLeft,
   FiX,
   FiClock,
-  FiDownload,
-} from "react-icons/fi";
+  FiDownload
 
+} from "react-icons/fi";
 import "./staffmanagement.css";
 import AdminService from "../../../services/admin-api-services/AdminService";
 import usePermission from "../../../hooks/usePermission";
+import Loader from "../../../components/common/Loader";
+import { useToast } from "../../../components/common/Toast";
 
 const initialForm = {
   fullname: "",
@@ -52,6 +55,9 @@ const initialForm = {
 // =====================================
 
 export const Staffmanagement = () => {
+  const { showToast, ToastContainer } = useToast();
+  const [loading, setLoading] = useState(false);
+
   const {
     takeroletitle,
     takebranch,
@@ -84,6 +90,7 @@ export const Staffmanagement = () => {
 
   const [branchOptions, setBranchOptions] = useState([]);
   const [timingOptions, setTimingOptions] = useState([]);
+  const [allTimings, setAllTimings] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
   // Pagination
@@ -107,8 +114,13 @@ export const Staffmanagement = () => {
 
   const getTimingLabel = (timingVal) => {
     if (!timingVal) return "-";
-    if (typeof timingVal === "object") return timingVal.timeSlot || "-";
-    const found = timingOptions.find((t) => t._id === timingVal);
+    if (typeof timingVal === "object") {
+      if (timingVal.timeSlot) return timingVal.timeSlot;
+      timingVal = timingVal._id;
+    }
+    const found =
+      allTimings.find((t) => String(t._id) === String(timingVal)) ||
+      timingOptions.find((t) => String(t._id) === String(timingVal));
     return found?.timeSlot || timingVal;
   };
 
@@ -151,17 +163,28 @@ export const Staffmanagement = () => {
     }
   };
 
+  const fetchalltiming = async () => {
+    try {
+      const response = await taketiming();
+      setAllTimings(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error("Error fetching all timings:", error);
+      setAllTimings([]);
+    }
+  };
+
   const fetchallstaff = async () => {
     try {
+      setLoading(true);
       const response = await getallstaff();
 
       const staffList = Array.isArray(response)
         ? response
         : Array.isArray(response?.data)
-        ? response.data
-        : Array.isArray(response?.data?.data)
-        ? response.data.data
-        : [];
+          ? response.data
+          : Array.isArray(response?.data?.data)
+            ? response.data.data
+            : [];
 
       const formattedStaff = staffList.map((staff) => ({
         ...staff,
@@ -180,8 +203,8 @@ export const Staffmanagement = () => {
         allowAdditionalBranches: staff.isMultipleBranch || false,
         additionalBranches: Array.isArray(staff.multipleBranches)
           ? staff.multipleBranches.map((item) =>
-              typeof item === "object" ? item._id : item
-            )
+            typeof item === "object" ? item._id : item
+          )
           : [],
         experience: staff.yearsOfExperience || "",
         joindate: staff.dateOfJoining ? staff.dateOfJoining.slice(0, 10) : "",
@@ -193,8 +216,8 @@ export const Staffmanagement = () => {
         mentorRole: staff.isMentor || false,
         mentorTimings: Array.isArray(staff.time)
           ? staff.time.map((item) =>
-              typeof item === "object" ? item._id : item
-            )
+            typeof item === "object" && item !== null ? item : item
+          )
           : [],
       }));
 
@@ -202,6 +225,8 @@ export const Staffmanagement = () => {
     } catch (error) {
       console.error("Error fetching all staff:", error);
       setAlldata([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -209,6 +234,7 @@ export const Staffmanagement = () => {
     fetchrole();
     fetchbranch();
     fetchallstaff();
+    fetchalltiming();
   }, []);
 
   // =====================================
@@ -606,7 +632,7 @@ export const Staffmanagement = () => {
       console.error("Create/Update Staff Error:", error.response?.data || error);
       alert(
         error.response?.data?.message ||
-          "Failed to save staff. Please try again."
+        "Failed to save staff. Please try again."
       );
     } finally {
       setSubmitting(false);
@@ -620,6 +646,11 @@ export const Staffmanagement = () => {
   const handleview = (value) => {
     setView(value);
     setActiveTab("staffview");
+    if (value?.branch) {
+      const branchId =
+        typeof value.branch === "object" ? value.branch?._id : value.branch;
+      if (branchId) fetchtiming(branchId);
+    }
   };
 
   const openEditForm = (staffRecord) => {
@@ -644,7 +675,9 @@ export const Staffmanagement = () => {
       resume: null,
       additionalBranches: staffRecord.additionalBranches || [],
       allowAdditionalBranches: staffRecord.allowAdditionalBranches || false,
-      mentorTimings: staffRecord.mentorTimings || [],
+      mentorTimings: (staffRecord.mentorTimings || []).map((item) =>
+        typeof item === "object" && item !== null ? item._id : item
+      ),
       password: "",
       conformpassword: "",
     });
@@ -681,159 +714,193 @@ export const Staffmanagement = () => {
   // =====================================
 
   return (
-    <div className="staffmanagement">
-      {/* HEADER */}
-    
+    <div className="syl-mgmt-container staffmanagement">
+      <ToastContainer />
 
-      {/* MAIN CARD */}
-      <div className="stafffull">
-        {/* TOP TABS */}
-        <div className="staff-hero0">
-          <div className="staff-hero1">
+      {/* Outer Toolbar (Tabs on Top, Outside Main Panel) */}
+      <div className="syl-mgmt-toolbar">
+        <div className="syl-mgmt-tab-group">
+          <button
+            type="button"
+            className={`syl-mgmt-tab-btn ${activetap === "stafflist" ? "syl-mgmt-tab-btn--active" : ""}`}
+            onClick={handlestafflist}
+          >
+            Staff List
+          </button>
+
+          {(canAddStaff || editId !== null) && (
             <button
               type="button"
-              className={activetap === "stafflist" ? "active" : ""}
-              onClick={handlestafflist}
+              className={`syl-mgmt-tab-btn ${activetap === "newstaff" ? "syl-mgmt-tab-btn--active" : ""}`}
+              onClick={handlenewstaff}
             >
-              Staff List
+              {editId !== null ? "Edit Staff" : "New Staff"}
             </button>
-
-            {(canAddStaff || editId !== null) && (
-              <button
-                type="button"
-                className={activetap === "newstaff" ? "active" : ""}
-                onClick={handlenewstaff}
-              >
-                {editId !== null ? "Edit Staff" : "New Staff"}
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
+        {activetap === "stafflist" && (
+          <button
+            type="button"
+            className="syl-mgmt-export-btn"
+            onClick={handleExport}
+          >
+            <FiDownload className="syl-mgmt-export-icon" />
+            <span>Export</span>
+          </button>
+        )}
+      </div>
+
+      {/* Main White Card Panel */}
+      <main className="syl-mgmt-panel">
         {/* =====================================
             STAFF LIST
         ===================================== */}
-
         {activetap === "stafflist" && (
           <>
-            <div className="staffherosection">
-              <div className="staffsearch">
-                <FiSearch />
+            {/* Filter Bar */}
+            <div className="syl-mgmt-filter-bar">
+              <div className="syl-mgmt-search-wrapper">
+                <FiSearch className="syl-mgmt-search-icon" />
                 <input
                   type="text"
-                  placeholder="Search Staff"
+                  className="syl-mgmt-search-input"
+                  placeholder="Search staff..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
 
-              <div className="staffalldepartment">
-                <select
-                  value={departmentFilter}
-                  onChange={(e) => setDepartmentFilter(e.target.value)}
-                >
-                  <option value="all">All Departments</option>
-                  <option value="uiux">UI/UX</option>
-                  <option value="mern">MERN</option>
-                  <option value="python">Python</option>
-                  <option value="datascience">Data Science</option>
-                </select>
-              </div>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <div className="syl-mgmt-filter-select-wrapper" style={{ width: "160px" }}>
+                  <select
+                    className="syl-mgmt-filter-select"
+                    value={departmentFilter}
+                    onChange={(e) => setDepartmentFilter(e.target.value)}
+                  >
+                    <option value="all">All Departments</option>
+                    {[...new Set(allData.map((s) => s.department).filter(Boolean))].map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
+                  <FiChevronDown className="syl-mgmt-select-arrow" />
+                </div>
 
-              <div className="staffbranch">
-                <select
-                  value={branchFilter}
-                  onChange={(e) => setBranchFilter(e.target.value)}
-                >
-                  <option value="all">All Branches</option>
-                  {branchOptions.map((branch) => (
-                    <option key={branch._id} value={branch._id}>
-                      {branch.branchName}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                <div className="syl-mgmt-filter-select-wrapper" style={{ width: "150px" }}>
+                  <select
+                    className="syl-mgmt-filter-select"
+                    value={branchFilter}
+                    onChange={(e) => setBranchFilter(e.target.value)}
+                  >
+                    <option value="all">All Branches</option>
+                    {branchOptions.map((b) => (
+                      <option key={b._id} value={b._id}>
+                        {b.branchName || b.name}
+                      </option>
+                    ))}
+                  </select>
+                  <FiChevronDown className="syl-mgmt-select-arrow" />
+                </div>
 
-              <div className="staffactive">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="pause">Pause</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-
-              <div className="staffexport">
-                <button
-                  type="button"
-                  className="staffexport-btn"
-                  onClick={handleExport}
-                >
-                  <FiDownload />
-                  Export
-                </button>
+                <div className="syl-mgmt-filter-select-wrapper" style={{ width: "140px" }}>
+                  <select
+                    className="syl-mgmt-filter-select"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                  <FiChevronDown className="syl-mgmt-select-arrow" />
+                </div>
               </div>
             </div>
 
-            {/* STAFF TABLE */}
-            <div className="stafftable">
-              <table>
-                <thead>
-                  <tr>
-                    <th>NAME</th>
-                    <th>EMAIL</th>
-                    <th>ROLE</th>
-                    <th>BRANCH</th>
-                    <th>BATCHES</th>
-                    <th>ACTIONS</th>
-                  </tr>
-                </thead>
+            {/* Table */}
+            {loading ? (
+              <Loader message="Loading staff..." minHeight="320px" />
+            ) : filteredStaff.length === 0 ? (
+              <div className="syl-mgmt-content-area">
+                <p className="syl-mgmt-empty-message">No staff members found.</p>
+              </div>
+            ) : (
+              <div className="syl-mgmt-table-wrapper">
+                <div
+                  className="syl-mgmt-table-header-row"
+                  style={{ gridTemplateColumns: "50px 2fr 1.3fr 1.2fr 1.4fr 1fr 1.3fr" }}
+                >
+                  <div className="syl-mgmt-th">#</div>
+                  <div className="syl-mgmt-th">STAFF NAME</div>
+                  <div className="syl-mgmt-th syl-mgmt-th-center">DEPARTMENT</div>
+                  <div className="syl-mgmt-th">BRANCH</div>
+                  <div className="syl-mgmt-th syl-mgmt-th-center">ROLE</div>
+                  <div className="syl-mgmt-th syl-mgmt-th-center">STATUS</div>
+                  <div className="syl-mgmt-th syl-mgmt-th-center">ACTIONS</div>
+                </div>
 
-                <tbody className="stafftabledetails">
-                  {currentStaff.map((value) => (
-                    <tr key={value.id}>
-                      <td>
-                        <div className="staffnamecell">
-                          <div className="staffavatar">
-                            {value.fullname?.charAt(0).toUpperCase()}
-                          </div>
+                <div className="syl-mgmt-table-body">
+                  {currentStaff.map((value, index) => {
+                    const initial = (value.fullname || "S").charAt(0).toUpperCase();
 
-                          <div className="staffnamedetails">
-                            <h5>{value.fullname}</h5>
-                            <p>{value.phone}</p>
+                    return (
+                      <div
+                        key={value.id}
+                        className="syl-mgmt-table-row"
+                        style={{ gridTemplateColumns: "50px 2fr 1.3fr 1.2fr 1.4fr 1fr 1.3fr" }}
+                      >
+                        <div className="syl-mgmt-td">{startIndex + index + 1}</div>
+
+                        <div className="syl-mgmt-td">
+                          <div className="syl-mgmt-module-cell">
+                            <span className="syl-mgmt-module-avatar">{initial}</span>
+                            <div>
+                              <div className="syl-mgmt-module-name-text">{value.fullname}</div>
+                              <span style={{ fontSize: "12px", color: "#6b7280" }}>
+                                {value.phone || value.email || ""}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </td>
 
-                      <td>
-                        <div className="staffemail">
-                          <p>{value.email}</p>
-                          <span>{value.officialemail}</span>
+                        <div className="syl-mgmt-td syl-mgmt-td-center">
+                          <span className="syl-mgmt-course-pill">
+                            {value.department || "General"}
+                          </span>
                         </div>
-                      </td>
 
-                      <td>{value.typeemply || getRoleName(value.role)}</td>
+                        <div className="syl-mgmt-td" style={{ color: "#374151", fontWeight: 500, textTransform: "capitalize" }}>
+                          {getBranchName(value.branch)}
+                        </div>
 
-                      <td className="staffbranchname">
-                        {getBranchName(value.branch)}
-                      </td>
+                        <div className="syl-mgmt-td syl-mgmt-td-center">
+                          <span
+                            className="syl-mgmt-course-pill"
+                            style={{ backgroundColor: "#f3f4f6", color: "#374151" }}
+                          >
+                            {getRoleName(value.role)}
+                          </span>
+                        </div>
 
-                      <td>
-                        {value.mentorRole && (
-                          <button type="button" className="staffbatches">
-                            View Batches
-                          </button>
-                        )}
-                      </td>
+                        <div className="syl-mgmt-td syl-mgmt-td-center">
+                          <span
+                            className="syl-mgmt-topic-badge"
+                            style={
+                              value.status === "Active" || value.isActive
+                                ? { backgroundColor: "#ecfdf5", color: "#10b981" }
+                                : { backgroundColor: "#fef2f2", color: "#dc2626" }
+                            }
+                          >
+                            {value.status || (value.isActive ? "Active" : "Inactive")}
+                          </span>
+                        </div>
 
-                      <td>
-                        <div className="staffactions">
+                        <div className="syl-mgmt-td syl-mgmt-col-actions">
                           <button
                             type="button"
-                            className="staffviewbtn"
+                            className="syl-mgmt-text-action syl-mgmt-text-action--view"
                             onClick={() => handleview(value)}
                           >
                             View
@@ -842,7 +909,7 @@ export const Staffmanagement = () => {
                           {canEditStaff && (
                             <button
                               type="button"
-                              className="staffedit"
+                              className="syl-mgmt-text-action syl-mgmt-text-action--edit"
                               onClick={() => openEditForm(value)}
                             >
                               Edit
@@ -852,53 +919,48 @@ export const Staffmanagement = () => {
                           {canDeleteStaff && (
                             <button
                               type="button"
-                              className="staffdelete"
+                              className="syl-mgmt-text-action syl-mgmt-text-action--delete"
                               onClick={() => handleDelete(value.id)}
                             >
                               Delete
                             </button>
                           )}
                         </div>
-                      </td>
-                    </tr>
-                  ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-                  {filteredStaff.length === 0 && (
-                    <tr>
-                      <td colSpan="6" className="staffnodata">
-                        No staff found
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+            {/* Pagination */}
+            <div className="syl-mgmt-pagination-bar">
+              <span className="syl-mgmt-pagination-text">
+                {filteredStaff.length === 0
+                  ? "0 of 0"
+                  : `${currentPage} of ${Math.max(totalPages, 1)}`}
+              </span>
 
-              <div className="staffpagination">
-                <span>
-                  Showing{" "}
-                  {filteredStaff.length === 0 ? 0 : startIndex + 1}
-                  {" - "}
-                  {Math.min(endIndex, filteredStaff.length)}
-                  {" of "}
-                  {filteredStaff.length} Staff
-                </span>
-
+              <div className="syl-mgmt-pagination-controls">
                 <button
                   type="button"
+                  className="syl-mgmt-page-btn"
                   onClick={() => setCurrentPage((prev) => prev - 1)}
                   disabled={currentPage === 1}
+                  style={currentPage === 1 ? {} : { cursor: "pointer", color: "#374151", backgroundColor: "#fff" }}
                 >
                   <FiChevronLeft />
                 </button>
-
-                <span>
-                  Page {currentPage} of {Math.max(totalPages, 1)}
-                </span>
-
                 <button
                   type="button"
+                  className="syl-mgmt-page-btn"
                   onClick={() => setCurrentPage((prev) => prev + 1)}
                   disabled={totalPages === 0 || currentPage >= totalPages}
+                  style={
+                    totalPages === 0 || currentPage >= totalPages
+                      ? {}
+                      : { cursor: "pointer", color: "#374151", backgroundColor: "#fff" }
+                  }
                 >
                   <FiChevronRight />
                 </button>
@@ -1408,8 +1470,8 @@ export const Staffmanagement = () => {
                   {submitting
                     ? "Please Wait..."
                     : editId !== null
-                    ? "Update"
-                    : "Create Staff"}
+                      ? "Update"
+                      : "Create Staff"}
                 </button>
               </div>
             </form>
@@ -1631,7 +1693,7 @@ export const Staffmanagement = () => {
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };

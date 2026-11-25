@@ -80,7 +80,17 @@ const getInternWeeklySchedule = async (req, res) => {
     }
 
     if (!intern) {
-      return res.status(404).json({ message: "Intern profile not found." });
+      return res.status(200).json({
+        intern: {
+          id: "",
+          name: "INTERN",
+          role: "Intern",
+          badgeRole: "INTERN",
+          email: "",
+        },
+        myBatches: [],
+        weeklySlots: [],
+      });
     }
 
     // 2. Find all active Batches belonging to this Intern
@@ -182,22 +192,26 @@ const getInternWeeklySchedule = async (req, res) => {
         const slotBranch =
           sub.branch?.branchName || sub.branch?.name || internBranchName;
 
-        const matchedBatches = (sub.batch || []).filter((b) =>
-          batchIds.some((id) => id.toString() === b._id.toString())
-        );
+        const matchedBatches = (sub.batch || []).filter((b) => {
+          if (!b) return false;
+          const bIdStr = b._id ? b._id.toString() : b.toString();
+          return batchIds.some((id) => id.toString() === bIdStr);
+        });
 
         const daysList = extractUpperDays(sub.day);
         const displayDays = daysList.length > 0 ? daysList : ["SCHEDULED"];
 
         displayDays.forEach((dayUpper) => {
           matchedBatches.forEach((b) => {
+            const bIdStr = b._id ? b._id.toString() : b.toString();
+            const bName = b.batchName || (typeof b === "string" ? b : "Batch");
             weeklySlots.push({
-              id: `${doc._id}_${b._id}_${dayUpper}`,
+              id: `${doc._id}_${bIdStr}_${dayUpper}`,
               day: dayUpper,
               dayOrder: dayOrder[dayUpper] || 99,
               time: timeSlot,
               subject: subjectName,
-              batch: b.batchName,
+              batch: bName,
               branch: slotBranch,
               mentor: mentorName,
               note: sub.note || "",
@@ -264,7 +278,17 @@ const getInternWeeklyCard = async (req, res) => {
     }
 
     if (!intern) {
-      return res.status(404).json({ message: "Intern profile not found." });
+      return res.status(200).json({
+        intern: {
+          id: "",
+          name: "INTERN",
+          role: "Intern",
+          badgeRole: "INTERN",
+          email: "",
+        },
+        myBatches: [],
+        weeklySlots: [],
+      });
     }
 
     // Resolve Batch Name
