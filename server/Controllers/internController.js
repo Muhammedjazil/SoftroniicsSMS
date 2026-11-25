@@ -2,6 +2,33 @@
 const Intern = require("../Models/internModel");
 const bcrypt = require("bcrypt");
 
+const generateUniqueInternId = async () => {
+  const year = new Date().getFullYear();
+  const prefix = `INT-${year}-`;
+
+  const latestIntern = await Intern.findOne({
+    admissionNumber: { $regex: `^${prefix}\\d+$` }
+  })
+    .sort({ admissionNumber: -1 })
+    .select("admissionNumber")
+    .lean();
+
+  let nextNumber = 1;
+  if (latestIntern?.admissionNumber) {
+    const numericPart = parseInt(latestIntern.admissionNumber.replace(prefix, ""), 10);
+    if (!Number.isNaN(numericPart)) {
+      nextNumber = numericPart + 1;
+    }
+  }
+
+  while (true) {
+    const candidate = `${prefix}${String(nextNumber).padStart(4, "0")}`;
+    const exists = await Intern.exists({ admissionNumber: candidate });
+    if (!exists) return candidate;
+    nextNumber += 1;
+  }
+};
+
 const createIntern = async (req, res) => {
   try {
     const {
@@ -81,45 +108,63 @@ const createIntern = async (req, res) => {
       ? `/uploads/${req.files.resume[0].filename}`
       : "";
 
-    const intern = new Intern({
-      fullName: fullName.trim(),
-      dateOfBirth: dob,
-      gender,
-      email: email.toLowerCase(),
-      internPhoneNumber: phone,
-      internWhatsAppNumber: whatsapp,
-      guardianName,
-      fatherName,
-      motherName,
-      guardianParentPhone: parentPhone,
-      internPermanentAddress: address,
-      district,
-      state,
-      photo,
+    let intern;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const admissionNumber = await generateUniqueInternId();
 
-      course,
-      branch,
-      courseStartedDate: startDate,
-      completionDate: completionDate || null,
-      batch,
-      courseStatus: courseStatus || "Ongoing",
-      careerAdvisor: careerAdvisor || undefined,
-      remarks,
+      intern = new Intern({
+        admissionNumber,
+        fullName: fullName.trim(),
+        dateOfBirth: dob,
+        gender,
+        email: email.toLowerCase(),
+        internPhoneNumber: phone,
+        internWhatsAppNumber: whatsapp,
+        guardianName,
+        fatherName,
+        motherName,
+        guardianParentPhone: parentPhone,
+        internPermanentAddress: address,
+        district,
+        state,
+        photo,
 
-      internSyllabusStatus: syllabusStatus || "Not Started",
+        course,
+        branch,
+        courseStartedDate: startDate,
+        completionDate: completionDate || null,
+        batch,
+        courseStatus: courseStatus || "Ongoing",
+        careerAdvisor: careerAdvisor || undefined,
+        remarks,
 
-      placementStatus: placementStatus || "Not Placed",
-      linkedin,
-      portfolio,
-      companyName,
-      jobRole,
-      resume,
+        internSyllabusStatus: syllabusStatus || "Not Started",
 
-      officialEmail: studentEmail.toLowerCase(),
-      password: hashedPassword
-    });
+        placementStatus: placementStatus || "Not Placed",
+        linkedin,
+        portfolio,
+        companyName,
+        jobRole,
+        resume,
 
-    await intern.save();
+        officialEmail: studentEmail.toLowerCase(),
+        password: hashedPassword
+      });
+
+      try {
+        await intern.save();
+        break;
+      } catch (saveError) {
+        if (
+          saveError?.code === 11000 &&
+          saveError?.keyPattern?.admissionNumber &&
+          attempt < 2
+        ) {
+          continue;
+        }
+        throw saveError;
+      }
+    }
 
     const savedIntern = await Intern.findById(intern._id)
       .populate("course", "courseName")

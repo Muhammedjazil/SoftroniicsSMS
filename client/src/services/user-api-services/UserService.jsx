@@ -64,8 +64,7 @@ const UserService = () => {
     }
   };
 
-
-   // ======== Intern Attendance ======== //
+  // ======== Intern Attendance ======== //
   const getMyAttendance = async () => {
     try {
       const response = await axiosPrivate.get(
@@ -78,47 +77,59 @@ const UserService = () => {
   };
 
   // ======== Intern Assigned Tasks ========
-const takealltask = async () => {
-  try {
-    const response = await axiosPrivate.get(
-      "/taskmanagement/my-tasks"
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-};
+  const takealltask = async () => {
+    try {
+      const response = await axiosPrivate.get("/taskmanagement/my-tasks");
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
 
-// ======== Intern My Submissions ========
-const takemysubmissions = async () => {
-  try {
-    const response = await axiosPrivate.get(
-      "/taskmanagement/my-submissions"
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-};
+  // ======== Intern My Submissions ========
+  const takemysubmissions = async () => {
+    try {
+      const response = await axiosPrivate.get(
+        "/taskmanagement/my-submissions"
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
 
-// ======================================
-// INTERN CREATE TASK SUBMISSION
-// ======================================
+  // ======================================
+  // INTERN CREATE TASK SUBMISSION
+  // ======================================
+  const createTaskSubmission = async (formData) => {
+    try {
+      const response = await axiosPrivate.post(
+        "/taskmanagement/submissions",
+        formData
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
 
-const createTaskSubmission = async (formData) => {
-  try {
-    const response = await axiosPrivate.post(
-      "/taskmanagement/submissions",
-      formData
-    );
+  // ======== Intern Monthly Card ======== //
+  const takeMyMonthlyCard = async ({ internId, email } = {}) => {
+    try {
+      const params = {};
 
-    return response.data;
+      if (internId) params.internId = internId;
+      if (email) params.email = email;
 
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-};
+      const response = await axiosPrivate.get("/internmonthlycard", {
+        params,
+      });
 
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
 
   return {
     takeinternweeklyschedule,
@@ -129,8 +140,8 @@ const createTaskSubmission = async (formData) => {
     getMyAttendance,
     takealltask,
     takemysubmissions,
-    createTaskSubmission
-
+    createTaskSubmission,
+    takeMyMonthlyCard,
   };
 };
 
