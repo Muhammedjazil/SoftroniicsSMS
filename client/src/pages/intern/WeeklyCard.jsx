@@ -24,6 +24,7 @@ const WeeklyCard = () => {
       const u = parsed?.user || parsed;
       return {
         internId: u?._id || u?.id || '',
+        admissionNumber: u?.admissionNumber || '',
         email: u?.email || u?.officialEmail || '',
       };
     } catch {
@@ -48,7 +49,7 @@ const WeeklyCard = () => {
         initial: 'I',
         mode: 'FULL TIME',
         batch: 'BATCH',
-        studentId: userQuery.internId ? `STU-${userQuery.internId.slice(-4).toUpperCase()}` : 'STU-001',
+        studentId: userQuery.admissionNumber || (userQuery.internId ? `STU-${userQuery.internId.slice(-4).toUpperCase()}` : 'STU-001'),
         course: '',
         avgTestScore: 0,
         avgProjectScore: 0,

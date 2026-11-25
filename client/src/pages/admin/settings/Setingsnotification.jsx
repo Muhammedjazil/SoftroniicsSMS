@@ -1,12 +1,10 @@
-
 import { useEffect, useMemo, useState } from "react";
 import {
   FiDownload,
   FiArrowLeft,
   FiChevronLeft,
   FiChevronRight,
-  FiX,
-  FiFileText
+  FiX
 } from "react-icons/fi";
 import { LuSearch } from "react-icons/lu";
 
@@ -755,13 +753,13 @@ export const Notification = () => {
                   <table className="notificationtable">
                     <thead>
                       <tr>
-                        <th style={{ width: "50px" }}>#</th>
+                        <th style={{ width: "60px" }}>#</th>
                         <th>Title</th>
-                        <th className="noti-th-center" style={{ textAlign: "center" }}>Type</th>
+                        <th>Type</th>
                         <th>Branch</th>
                         <th>Audience</th>
                         <th>Selected Audience</th>
-                        <th style={{ width: "160px", textAlign: "center" }}>Actions</th>
+                        <th style={{ width: "160px" }}>Actions</th>
                       </tr>
                     </thead>
 
@@ -786,7 +784,7 @@ export const Notification = () => {
                                   <span className="noti-title-text">{item.title}</span>
                                 </div>
                               </td>
-                              <td className="noti-td-center" style={{ textAlign: "center" }}>
+                              <td>
                                 <span className="noti-type-badge">{item.type}</span>
                               </td>
                               <td>{getBranchText(item) || "—"}</td>
@@ -855,15 +853,10 @@ export const Notification = () => {
         )}
 
         {/* NEW / EDIT / VIEW FORM */}
-
         {(isactive === "Newnotification" || isactive === "show") && (
-
           <div className="Newnotification">
-
             {/* FORM HEADER */}
-
             <div className="Newnotificationsect1">
-
               <div className="Newnotificationsect2">
                 <h2>
                   {isView
@@ -875,18 +868,16 @@ export const Notification = () => {
               </div>
 
               <button
+                type="button"
                 className="notificationback"
                 onClick={handleBack}
               >
                 <FiArrowLeft /> Back
               </button>
-
             </div>
 
             {/* TITLE */}
-
             <div className="notificationfield">
-
               <label>Notification Title</label>
 
               <input
@@ -897,13 +888,10 @@ export const Notification = () => {
                 placeholder="Enter Notification Title"
                 readOnly={isView}
               />
-
             </div>
 
             {/* CONTENT */}
-
             <div className="notificationfield">
-
               <label>Notification Content</label>
 
               <textarea
@@ -914,17 +902,12 @@ export const Notification = () => {
                 placeholder="Enter The Details Of The Notification"
                 readOnly={isView}
               />
-
             </div>
 
             {/* TYPE / BRANCH / AUDIENCE */}
-
             <div className="newnotificationforminput">
-
               {/* TYPE */}
-
               <div className="newnotifi1">
-
                 <label>Type of Notification</label>
 
                 <select
@@ -940,15 +923,11 @@ export const Notification = () => {
                       {type}
                     </option>
                   ))}
-
                 </select>
-
               </div>
 
               {/* BRANCH */}
-
               <div className="newnotifi1">
-
                 <label>Branch</label>
 
                 <select
@@ -967,16 +946,13 @@ export const Notification = () => {
                       {branch.branchName}
                     </option>
                   ))}
-
                 </select>
 
                 {formData.branch.length > 0 && (
                   <div className="addedAudience">
-
                     <h3>Selected Branches</h3>
 
                     <div className="audiencechips">
-
                       {formData.branch.map((id) => {
                         const branch = dropdowns.branches.find(
                           (item) => item._id === id
@@ -984,7 +960,6 @@ export const Notification = () => {
 
                         return (
                           <div className="audiencechip" key={id}>
-
                             <span>
                               {branch?.branchName || id}
                             </span>
@@ -997,22 +972,16 @@ export const Notification = () => {
                                 <FiX />
                               </button>
                             )}
-
                           </div>
                         );
                       })}
-
                     </div>
-
                   </div>
                 )}
-
               </div>
 
               {/* AUDIENCE */}
-
               <div className="newnotifi1">
-
                 <label>Select Audience</label>
 
                 <select
@@ -1021,7 +990,6 @@ export const Notification = () => {
                   onChange={handleChange}
                   disabled={isView}
                 >
-
                   <option value="">Choose Audience</option>
 
                   {audienceTypes.map((audience) => (
@@ -1029,20 +997,14 @@ export const Notification = () => {
                       {audience}
                     </option>
                   ))}
-
                 </select>
-
               </div>
-
             </div>
 
             {/* AUDIENCE SELECTION */}
-
             {formData.audience !== "" &&
               formData.audience !== "All interns" && (
-
                 <div className="audienceinput">
-
                   <label>
                     {formData.audience === "By batches"
                       ? "Choose Batches"
@@ -1059,7 +1021,6 @@ export const Notification = () => {
                     onChange={handleAddAudience}
                     disabled={isView}
                   >
-
                     <option value="">
                       Select {formData.audience}
                     </option>
@@ -1077,21 +1038,15 @@ export const Notification = () => {
                         </option>
                       );
                     })}
-
                   </select>
 
                   {/* SELECTED AUDIENCE CHIPS */}
-
                   {formData.selectedAudience.length > 0 && (
-
                     <div className="addedAudience">
-
                       <h3>Selected Audience</h3>
 
                       <div className="audiencechips">
-
                         {formData.selectedAudience.map((id) => {
-
                           const option = getAudienceOptions().find(
                             (item) => getAudienceId(item) === id
                           );
@@ -1102,7 +1057,6 @@ export const Notification = () => {
 
                           return (
                             <div className="audiencechip" key={id}>
-
                               <span>{label}</span>
 
                               {!isView && (
@@ -1113,24 +1067,17 @@ export const Notification = () => {
                                   <FiX />
                                 </button>
                               )}
-
                             </div>
                           );
                         })}
-
                       </div>
-
                     </div>
-
                   )}
-
                 </div>
               )}
 
             {/* PUSH NOTIFICATION */}
-
             <div className="pushnotification">
-
               <input
                 type="checkbox"
                 id="pushNotification"
@@ -1143,14 +1090,12 @@ export const Notification = () => {
               <label htmlFor="pushNotification">
                 Push Notification
               </label>
-
             </div>
 
             {/* FORM BUTTONS */}
-
             <div className="newnotificationbutton">
-
               <button
+                type="button"
                 className="notificationcancel"
                 onClick={handleBack}
                 disabled={loading}
@@ -1159,17 +1104,16 @@ export const Notification = () => {
               </button>
 
               {isView ? (
-
                 <button
+                  type="button"
                   className="notificationpublish"
                   onClick={handleViewEdit}
                 >
                   Edit
                 </button>
-
               ) : (
-
                 <button
+                  type="button"
                   className="notificationpublish"
                   onClick={handlePublish}
                   disabled={loading}
@@ -1180,17 +1124,11 @@ export const Notification = () => {
                       ? "Update"
                       : "Publish"}
                 </button>
-
               )}
-
             </div>
-
           </div>
-
         )}
-
       </div>
-
     </div>
   );
 };
