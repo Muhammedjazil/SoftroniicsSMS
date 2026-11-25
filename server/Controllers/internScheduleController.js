@@ -4,10 +4,12 @@ const Intern = require("../Models/internModel");
 const WeeklySchedule = require("../Models/weeklyScheduleModel");
 const MentorCard = require("../Models/mentorCardModel");
 const InternsAttendance = require("../Models/internsAttendanceModel");
+const Attendance = require("../Models/attendanceModel");
 require("../Models/branchModel");
 require("../Models/staffModel");
 require("../Models/courseModel");
 require("../Models/timingModel");
+require("../Models/dayModel");
 require("../Models/dayCombinationModel");
 require("../Models/moduleModel");
 
@@ -286,14 +288,17 @@ const getInternWeeklyCard = async (req, res) => {
       .sort({ week: 1, createdAt: 1 });
 
     // Fetch Attendance records for overall attendance calculation
-    const attendanceRecords = await InternsAttendance.find({
-      intern: intern._id,
-    });
+    const [attendanceRecords, generalRecords] = await Promise.all([
+      InternsAttendance.find({ intern: intern._id }),
+      Attendance.find({ intern: intern._id }),
+    ]);
 
     let overallAttendancePct = 0;
-    if (attendanceRecords.length > 0) {
-      const presentCount = attendanceRecords.filter((r) => r.status === true).length;
-      overallAttendancePct = Math.round((presentCount / attendanceRecords.length) * 100);
+    const totalCount = attendanceRecords.length + generalRecords.length;
+    if (totalCount > 0) {
+      const presentFromInterns = attendanceRecords.filter((r) => r.status === true).length;
+      const presentFromGeneral = generalRecords.filter((r) => r.status === "PRESENT").length;
+      overallAttendancePct = Math.round(((presentFromInterns + presentFromGeneral) / totalCount) * 100);
     }
 
     // Helper to format date DD/MM/YYYY

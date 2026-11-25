@@ -1,10 +1,14 @@
+const mongoose = require("mongoose");
 const Attendance = require("../Models/attendanceModel");
 const Intern = require("../Models/internModel");
+require("../Models/branchModel");
+require("../Models/batchModel");
+require("../Models/courseModel");
 
 // GET STUDENTS FOR ATTENDANCE
 const getAttendanceStudents = async (req, res) => {
   try {
-    const { branch, batch } = req.query;
+    const { branch, batch, date } = req.query;
 
     if (!branch) {
       return res.status(400).json({
@@ -28,7 +32,40 @@ const getAttendanceStudents = async (req, res) => {
       .populate("batch", "batchName")
       .select("fullName email admissionNumber course branch batch");
 
-    res.status(200).json(students);
+    // If date is provided, check existing Attendance records for that date
+    const recordsMap = new Map();
+    if (date) {
+      const selectedDate = new Date(`${date}T00:00:00.000Z`);
+      const attendanceRecords = await Attendance.find({
+        branch,
+        date: selectedDate
+      });
+
+      attendanceRecords.forEach(record => {
+        recordsMap.set(record.intern.toString(), record.status);
+      });
+    }
+
+    const result = students.map(student => {
+      const hasRecord = recordsMap.has(student._id.toString());
+      const recordStatus = recordsMap.get(student._id.toString());
+
+      return {
+        _id: student._id,
+        id: student._id,
+        fullName: student.fullName,
+        email: student.email,
+        admissionNumber: student.admissionNumber,
+        course: student.course,
+        branch: student.branch,
+        batch: student.batch,
+        attendance: hasRecord ? recordStatus.toLowerCase() : "unmarked",
+        attendanceCreated: hasRecord,
+        status: hasRecord ? "Created" : "Not Created"
+      };
+    });
+
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({
       message: "Error fetching attendance students",
@@ -60,7 +97,9 @@ const createDailyAttendance = async (req, res) => {
 
     const students = await Intern.find(filter)
       .populate("course", "courseName")
-      .populate("batch", "batchName");
+      .populate("branch", "branchName")
+      .populate("batch", "batchName")
+      .select("fullName email admissionNumber course branch batch");
 
     const selectedDate = new Date(`${date}T00:00:00.000Z`);
 
@@ -76,17 +115,24 @@ const createDailyAttendance = async (req, res) => {
       ])
     );
 
-    const result = students.map(student => ({
-      _id: student._id,
-      fullName: student.fullName,
-      email: student.email,
-      course: student.course?.courseName || "",
-      batch: student.batch?.batchName || "",
-      attendance: recordsMap.get(student._id.toString()) || "UNMARKED",
-      status: recordsMap.has(student._id.toString())
-        ? "Created"
-        : "Not Created"
-    }));
+    const result = students.map(student => {
+      const hasRecord = recordsMap.has(student._id.toString());
+      const recordStatus = recordsMap.get(student._id.toString());
+
+      return {
+        _id: student._id,
+        id: student._id,
+        fullName: student.fullName,
+        email: student.email,
+        admissionNumber: student.admissionNumber,
+        course: student.course,
+        branch: student.branch,
+        batch: student.batch,
+        attendance: hasRecord ? recordStatus.toLowerCase() : "unmarked",
+        attendanceCreated: true,
+        status: "Created"
+      };
+    });
 
     res.status(200).json(result);
   } catch (error) {
@@ -100,7 +146,7 @@ const createDailyAttendance = async (req, res) => {
 // SAVE ATTENDANCE
 const saveAttendance = async (req, res) => {
   try {
-    const { date, branch, students } = req.body;
+    const { date, branch, students, batch } = req.body;
 
     if (!date || !branch || !Array.isArray(students) || !students.length) {
       return res.status(400).json({
@@ -111,24 +157,54 @@ const saveAttendance = async (req, res) => {
     const selectedDate = new Date(`${date}T00:00:00.000Z`);
 
     const operations = students.map(student => {
-      if (!["present", "absent", "PRESENT", "ABSENT"].includes(student.attendance)) {
-        throw new Error("Each student must have a present or absent status");
+      const internId =
+        student.internId ||
+        student.studentId ||
+        student.id ||
+        student._id;
+
+      if (!internId) {
+        throw new Error("Missing intern id for attendance record");
+      }
+
+      let rawStatus = (
+        student.status ||
+        student.attendance ||
+        ""
+      ).toUpperCase();
+
+      if (!["PRESENT", "ABSENT"].includes(rawStatus)) {
+        if (rawStatus === "PRESENT" || rawStatus === "1" || rawStatus === "TRUE") {
+          rawStatus = "PRESENT";
+        } else if (rawStatus === "ABSENT" || rawStatus === "0" || rawStatus === "FALSE") {
+          rawStatus = "ABSENT";
+        } else {
+          throw new Error("Each student must have a present or absent status");
+        }
+      }
+
+      const updateSet = {
+        intern: internId,
+        branch,
+        date: selectedDate,
+        status: rawStatus
+      };
+
+      const resolvedBatch =
+        student.batch || (batch && batch !== "All Batches" ? batch : null);
+
+      if (resolvedBatch && mongoose.Types.ObjectId.isValid(resolvedBatch)) {
+        updateSet.batch = resolvedBatch;
       }
 
       return {
         updateOne: {
           filter: {
-            intern: student.studentId,
+            intern: internId,
             date: selectedDate
           },
           update: {
-            $set: {
-              intern: student.studentId,
-              branch,
-              batch: student.batch,
-              date: selectedDate,
-              status: student.attendance.toUpperCase()
-            }
+            $set: updateSet
           },
           upsert: true
         }
@@ -141,6 +217,7 @@ const saveAttendance = async (req, res) => {
       message: "Attendance saved successfully"
     });
   } catch (error) {
+    console.error("Error saving attendance:", error);
     res.status(500).json({
       message: "Error saving attendance",
       error: error.message
@@ -155,18 +232,42 @@ const getAttendanceReports = async (req, res) => {
 
     const filter = {};
 
-    if (branch) {
+    if (branch && branch !== "All Branches") {
       filter.branch = branch;
     }
 
     if (month && year) {
-      const startDate = new Date(Date.UTC(Number(year), Number(month) - 1, 1));
-      const endDate = new Date(Date.UTC(Number(year), Number(month), 1));
+      let monthNum = Number(month);
+      if (isNaN(monthNum)) {
+        const monthNames = [
+          "january",
+          "february",
+          "march",
+          "april",
+          "may",
+          "june",
+          "july",
+          "august",
+          "september",
+          "october",
+          "november",
+          "december"
+        ];
+        const idx = monthNames.indexOf(String(month).trim().toLowerCase());
+        if (idx !== -1) {
+          monthNum = idx + 1;
+        }
+      }
 
-      filter.date = {
-        $gte: startDate,
-        $lt: endDate
-      };
+      if (!isNaN(monthNum) && monthNum >= 1 && monthNum <= 12) {
+        const startDate = new Date(Date.UTC(Number(year), monthNum - 1, 1));
+        const endDate = new Date(Date.UTC(Number(year), monthNum, 1));
+
+        filter.date = {
+          $gte: startDate,
+          $lt: endDate
+        };
+      }
     }
 
     const reports = await Attendance.find(filter)
