@@ -77,6 +77,26 @@ const UserService = () => {
     }
   };
 
+  // ======== Intern Monthly Card ======== //
+
+    
+const takeMyMonthlyCard = async ({ internId, email } = {}) => {
+    try {
+        const params = {};
+
+        if (internId) params.internId = internId;
+        if (email) params.email = email;
+
+        const response = await axiosPrivate.get("/internmonthlycard", {
+            params,
+        });
+
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error;
+    }
+};
+
 
   return {
     takeinternweeklyschedule,
@@ -84,7 +104,8 @@ const UserService = () => {
     takeallnotification,
     marknotificationread,
     markallnotificationsread,
-    getMyAttendance
+    getMyAttendance,
+    takeMyMonthlyCard,
   };
 };
 
