@@ -77,6 +77,30 @@ const UserService = () => {
     }
   };
 
+  // ======== Intern Assigned Tasks ========
+const takealltask = async () => {
+  try {
+    const response = await axiosPrivate.get(
+      "/taskmanagement/my-tasks"
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// ======== Intern My Submissions ========
+const takemysubmissions = async () => {
+  try {
+    const response = await axiosPrivate.get(
+      "/taskmanagement/my-submissions"
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 
   return {
     takeinternweeklyschedule,
@@ -84,7 +108,10 @@ const UserService = () => {
     takeallnotification,
     marknotificationread,
     markallnotificationsread,
-    getMyAttendance
+    getMyAttendance,
+    takealltask,
+    takemysubmissions
+
   };
 };
 
