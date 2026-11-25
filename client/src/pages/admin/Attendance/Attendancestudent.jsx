@@ -201,6 +201,7 @@ const Attendancestudent = () => {
 
       const formattedStudents = students.map((student) => ({
         id: student._id || student.id,
+        admissionNumber: student.admissionNumber || "",
         name: student.fullName || student.name || "Unknown",
         email: student.email || "",
         course: getName(student.course, ""),
@@ -738,7 +739,12 @@ const Attendancestudent = () => {
                       attendanceStudentStudents.map((student) => (
                         <tr key={student.id}>
                           <td className="attendance-student-name">
-                            {student.name}
+                            <div>{student.name}</div>
+                            {student.admissionNumber && (
+                              <div style={{ fontSize: "12px", color: "#6b7280", fontWeight: 400 }}>
+                                {student.admissionNumber}
+                              </div>
+                            )}
                           </td>
 
                           <td className="attendance-student-email">

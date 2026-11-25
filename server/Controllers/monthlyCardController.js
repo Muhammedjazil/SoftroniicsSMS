@@ -450,7 +450,7 @@ const createOrUpdateMonthlyCard = async (req, res) => {
         setDefaultsOnInsert: true,
       }
     )
-      .populate("internId", "fullName email")
+      .populate("internId", "fullName email admissionNumber")
       .populate("mentorId", "fullName email");
 
     return res.status(200).json({

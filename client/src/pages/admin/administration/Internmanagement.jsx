@@ -25,6 +25,7 @@ import { useToast } from "../../../components/common/Toast";
 // =====================================
 
 const initialForm = {
+  admissionNumber: "",
   fullName: "",
   dob: "",
   gender: "",
@@ -504,6 +505,7 @@ export const Internmanagement = () => {
 
       const formattedStudents = internList.map((intern) => ({
         id: intern._id,
+        admissionNumber: intern.admissionNumber || "",
 
         // Basic Details
         fullName: intern.fullName || "",
@@ -622,6 +624,7 @@ export const Internmanagement = () => {
     const searchValue = search.toLowerCase().trim();
 
     const matchesSearch =
+      student.admissionNumber?.toLowerCase().includes(searchValue) ||
       student.fullName?.toLowerCase().includes(searchValue) ||
       student.phone?.toLowerCase().includes(searchValue) ||
       student.email?.toLowerCase().includes(searchValue) ||
@@ -670,6 +673,7 @@ export const Internmanagement = () => {
     }
 
     const headers = [
+      "Intern ID",
       "Name",
       "Email",
       "Phone",
@@ -680,6 +684,7 @@ export const Internmanagement = () => {
     ];
 
     const rows = filteredStudents.map((student) => [
+      student.admissionNumber,
       student.fullName,
       student.email,
       student.phone,
@@ -840,9 +845,10 @@ export const Internmanagement = () => {
               <div className="syl-mgmt-table-wrapper">
                 <div
                   className="syl-mgmt-table-header-row"
-                  style={{ gridTemplateColumns: "50px 2.2fr 1.6fr 1.2fr 1.1fr 1fr 1.4fr" }}
+                  style={{ gridTemplateColumns: "50px 1.25fr 2fr 1.5fr 1.1fr 1fr 1fr 1.3fr" }}
                 >
                   <div className="syl-mgmt-th">#</div>
+                  <div className="syl-mgmt-th">INTERN ID</div>
                   <div className="syl-mgmt-th">STUDENT NAME</div>
                   <div className="syl-mgmt-th syl-mgmt-th-center">COURSE</div>
                   <div className="syl-mgmt-th">BRANCH</div>
@@ -859,9 +865,13 @@ export const Internmanagement = () => {
                       <div
                         key={student.id}
                         className="syl-mgmt-table-row"
-                        style={{ gridTemplateColumns: "50px 2.2fr 1.6fr 1.2fr 1.1fr 1fr 1.4fr" }}
+                        style={{ gridTemplateColumns: "50px 1.25fr 2fr 1.5fr 1.1fr 1fr 1fr 1.3fr" }}
                       >
                         <div className="syl-mgmt-td">{startIndex + index + 1}</div>
+
+                        <div className="syl-mgmt-td" style={{ fontWeight: 600, color: "#374151", fontSize: "13px" }}>
+                          {student.admissionNumber || "-"}
+                        </div>
 
                         <div className="syl-mgmt-td">
                           <div className="syl-mgmt-module-cell">
@@ -1003,6 +1013,22 @@ export const Internmanagement = () => {
             <h4>Basic Details</h4>
 
             <div className="intern-form-grid">
+
+              {editingId && (
+                <div className="intern-field">
+                  <label>
+                    Intern ID{" "}
+                    <span className="intern-optional">(Immutable)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.admissionNumber || "Not assigned"}
+                    readOnly
+                    disabled
+                    style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed", color: "#4b5563" }}
+                  />
+                </div>
+              )}
 
               <InputField
                 {...fieldProps}
@@ -1492,6 +1518,7 @@ export const Internmanagement = () => {
             <div className="intern-modal-details">
 
               {[
+                ["Intern ID", selectedStudent.admissionNumber],
                 ["Phone Number", selectedStudent.phone],
                 ["Email Address", selectedStudent.email],
                 ["Gender", selectedStudent.gender],
