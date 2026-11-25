@@ -1,4 +1,3 @@
-
 /* =====================================================
    TASK EVALUATION - GLOBAL
 ===================================================== */
@@ -121,33 +120,55 @@
     gap: 15px;
 }
 
+.tasks-evaluation-tabs-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
 
-/* Submissions tab */
 
+/* Tabs */
+
+.tasks-evaluation-tab,
 .tasks-evaluation-tab-active {
-    min-width: 173px;
+    min-width: 165px;
     height: 43px;
     padding: 0 20px;
 
-    border: 1px solid #ff790e;
     border-radius: 8px;
-
-    background: #ff790e;
-    color: #ffffff;
 
     font-family: inherit;
     font-size: 14px;
     font-weight: 600;
 
     cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tasks-evaluation-tab {
+    border: 1px solid #e0e4e8;
+    background: #ffffff;
+    color: #53606c;
+}
+
+.tasks-evaluation-tab:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    color: #27343f;
+}
+
+.tasks-evaluation-tab-active {
+    border: 1px solid #ff790e;
+    background: #ff790e;
+    color: #ffffff;
 
     box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
-    transition: all 0.15s ease;
 }
 
 .tasks-evaluation-tab-active:hover {
     transform: translateY(-1px);
-    filter: brightness(0.94);
+    filter: brightness(0.96);
 }
 
 
@@ -552,14 +573,20 @@
     color: #bd812b;
 }
 
-.tasks-evaluation-status-evaluated {
+.tasks-evaluation-status-evaluated,
+.tasks-evaluation-status-graded {
     background: #e5efff;
-    color: #4169a5;
+    color:green;
+}
+
+.tasks-evaluation-status-rejected {
+    background: #fee2e2;
+    color: #b91c1c;
 }
 
 
 /* =====================================================
-   10. VIEW BUTTON
+   10. VIEW & ACTION BUTTONS
 ===================================================== */
 
 .tasks-evaluation-view-btn {
@@ -567,7 +594,7 @@
     height: 27px;
     padding: 0;
 
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 
@@ -583,6 +610,25 @@
 
 .tasks-evaluation-view-btn:hover {
     transform: scale(1.15);
+}
+
+.tasks-evaluation-edit-grade-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #e0e4e8;
+    background: #ffffff;
+    color: #303b45;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+.tasks-evaluation-edit-grade-btn:hover:not(:disabled) {
+    border-color: #ff790e;
+    color: #ff790e;
+    background: #fffaf5;
 }
 
 
@@ -627,6 +673,164 @@
 
 
 /* =====================================================
+   11B. GRADE SUBMISSION FORM (MATCHING SCREENSHOT)
+===================================================== */
+
+.gradesubmission {
+    width: 100%;
+}
+
+.gradesubmission-card {
+    width: 100%;
+    padding: 28px 32px;
+
+    background: #ffffff;
+    border: 1px solid #eef0f2;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.gradesubmission-card h2 {
+    margin: 0 0 24px;
+
+    color: #27343f;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.gradesubmission-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px 22px;
+}
+
+.gradesubmissionforminput {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.gradesubmission-full-width {
+    margin-top: 18px;
+    margin-bottom: 18px;
+}
+
+.gradesubmissionforminput label {
+    color: #303b45;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.gradesubmissionforminput label span {
+    color: #8c969e;
+    font-weight: 400;
+}
+
+.gradesubmissionforminput input,
+.gradesubmissionforminput select,
+.gradesubmissionforminput textarea {
+    width: 100%;
+    padding: 10px 14px;
+
+    border: 1px solid #e2e6ea;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: #303b45;
+    font-family: inherit;
+    font-size: 13px;
+
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gradesubmissionforminput input,
+.gradesubmissionforminput select {
+    height: 40px;
+}
+
+.gradesubmissionforminput textarea {
+    min-height: 105px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.gradesubmissionforminput input::placeholder,
+.gradesubmissionforminput textarea::placeholder {
+    color: #a0a9b1;
+}
+
+.gradesubmissionforminput input[readonly],
+.gradesubmissionforminput textarea[readonly] {
+    background: #f9fafb;
+    color: #64707d;
+}
+
+.gradesubmissionforminput input:focus:not([readonly]),
+.gradesubmissionforminput select:focus,
+.gradesubmissionforminput textarea:focus:not([readonly]) {
+    border-color: #ff790e;
+    box-shadow: 0 0 0 2px rgba(255, 121, 14, 0.12);
+}
+
+.gradesubmission-actions {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.gradesubmission-cancel-btn {
+    min-width: 96px;
+    height: 38px;
+    padding: 0 18px;
+
+    border: 1px solid #e0e4e8;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #53606c;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.gradesubmission-cancel-btn:hover {
+    background: #f8f9fa;
+}
+
+.gradesubmission-submit-btn {
+    min-width: 104px;
+    height: 38px;
+    padding: 0 22px;
+
+    border: 1px solid #ff790e;
+    border-radius: 7px;
+    background: #ff790e;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+
+.gradesubmission-submit-btn:hover:not(:disabled) {
+    filter: brightness(0.95);
+}
+
+.gradesubmission-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =====================================================
    12. TABLET RESPONSIVE
 ===================================================== */
 
@@ -642,8 +846,13 @@
         padding: 12px 15px;
     }
 
-    .tasks-evaluation-content-container {
+    .tasks-evaluation-content-container,
+    .gradesubmission-card {
         padding: 18px;
+    }
+
+    .gradesubmission-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
 }
@@ -704,10 +913,11 @@
         padding-bottom: 12px;
     }
 
+    .tasks-evaluation-tab,
     .tasks-evaluation-tab-active {
-        min-width: 135px;
+        min-width: 125px;
         height: 38px;
-        padding: 0 10px;
+        padding: 0 12px;
         font-size: 11px;
     }
 
@@ -726,7 +936,8 @@
 
     /* Main content */
 
-    .tasks-evaluation-content-container {
+    .tasks-evaluation-content-container,
+    .gradesubmission-card {
         min-height: 370px;
         padding: 13px 10px;
         gap: 15px;
@@ -734,13 +945,18 @@
     }
 
 
-    /* Filters */
+    /* Filters & Form Grid */
 
-    .tasks-evaluation-filter-container {
+    .tasks-evaluation-filter-container,
+    .gradesubmission-grid {
         grid-template-columns: 1fr;
         gap: 13px;
 
         padding: 14px 12px;
+    }
+
+    .gradesubmission-grid {
+        padding: 0;
     }
 
     .tasks-evaluation-filter-group label {
@@ -837,8 +1053,9 @@
         height: 27px;
     }
 
+    .tasks-evaluation-tab,
     .tasks-evaluation-tab-active {
-        min-width: 120px;
+        min-width: 110px;
         font-size: 10px;
     }
 
@@ -847,7 +1064,8 @@
         font-size: 9px;
     }
 
-    .tasks-evaluation-content-container {
+    .tasks-evaluation-content-container,
+    .gradesubmission-card {
         padding: 10px 8px;
     }
 
@@ -888,4 +1106,141 @@
 .tasks-evaluation-page button:focus-visible {
     outline: 2px solid #f47713;
     outline-offset: 2px;
+}
+/* =====================================================
+10. VIEW & ACTION BUTTONS
+===================================================== */
+
+.tasks-evaluation-attachments {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.tasks-evaluation-view-btn {
+    width: auto;
+    height: auto;
+    max-width: 170px;
+    padding: 4px 8px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    border: 1px solid #d1fae5;
+    border-radius: 5px;
+    background: #ecfdf5;
+
+    color: #15803d;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.2;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.tasks-evaluation-view-btn svg {
+    flex-shrink: 0;
+    font-size: 13px;
+}
+
+.tasks-evaluation-view-btn:hover {
+    background: #d1fae5;
+    transform: translateY(-1px);
+}
+/* Filter bar with Total Submissions pill on the right */
+.tasks-evaluation-filter-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.tasks-evaluation-filter-group {
+    flex: 1 1 260px;
+    max-width: 385px;
+}
+
+.tasks-evaluation-total-badge {
+    margin-left: auto;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #fff3e6;
+    color: #e66b00;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Intern avatar + name/email */
+.tasks-evaluation-intern-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tasks-evaluation-intern-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff3e6;
+    color: #e66b00;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tasks-evaluation-intern-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Compact Download link/button in Attachment column */
+.tasks-evaluation-attachments {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.tasks-evaluation-download-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 4px;
+    border: none;
+    background: transparent;
+    color: #f05a28;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.tasks-evaluation-download-link svg {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.tasks-evaluation-download-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+@media screen and (max-width: 600px) {
+    .tasks-evaluation-total-badge {
+        margin-left: 0;
+    }
 }
