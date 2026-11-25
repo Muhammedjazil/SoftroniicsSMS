@@ -50,11 +50,13 @@ const Adminlayout = ({ children }) => {
       <AdminNavbar />
 
       <div className="adminmaincontent">
-        <PageHeader
-          title={headerInfo.title}
-          parent={headerInfo.parent}
-          current={headerInfo.current}
-        />
+        {pathname !== "/dashboard" && (
+          <PageHeader
+            title={headerInfo.title}
+            parent={headerInfo.parent}
+            current={headerInfo.current}
+          />
+        )}
 
         {children}
       </div>
