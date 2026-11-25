@@ -56,7 +56,7 @@ const RAW_MENU_ITEMS = [
         icon: <FiBook />,
         children: [
             {
-                title: "Categories",
+                title: "Category ",
                 path: "/categories",
                 module: "categoryManagement",
                 action: "viewCategory"

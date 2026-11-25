@@ -35,10 +35,7 @@ import TopicsManagement from "./pages/admin/syllabus/TopicsManagement";
 import Dashboard from "./pages/admin/Dashboard/Dashboard";
 import Categories from "./pages/admin/CourseManagement/Categories";
 import Course from "./pages/admin/CourseManagement/Course";
-import CategoryView from "./pages/admin/CourseManagement/CategoryView";
-import ViewCourse from "./pages/admin/CourseManagement/ViewCourse";
-import EditCourse from "./pages/admin/CourseManagement/EditCourse";
-import CategoryEdit from "./pages/admin/CourseManagement/CategoryEdit";
+
 
 // INTERN PAGES
 import { Internnotification } from "./pages/intern/Internnotification";
@@ -147,34 +144,9 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/course/:id"
-          element={
-            <ProtectedRoute
-              allowedTypes={["admin", "staff"]}
-              module="courseManagement"
-              action="viewCourse"
-            >
-              <Adminlayout>
-                <ViewCourse />
-              </Adminlayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/course/:id/edit"
-          element={
-            <ProtectedRoute
-              allowedTypes={["admin", "staff"]}
-              module="courseManagement"
-              action="editCourse"
-            >
-              <Adminlayout>
-                <EditCourse />
-              </Adminlayout>
-            </ProtectedRoute>
-          }
-        />
+       
+        
+        {/* CATEGORY MANAGEMENT */}
         <Route
           path="/categories"
           element={
@@ -189,34 +161,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/categories/view/:id"
-          element={
-            <ProtectedRoute
-              allowedTypes={["admin", "staff"]}
-              module="categoryManagement"
-              action="viewCategory"
-            >
-              <Adminlayout>
-                <CategoryView />
-              </Adminlayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/categories/edit/:id"
-          element={
-            <ProtectedRoute
-              allowedTypes={["admin", "staff"]}
-              module="categoryManagement"
-              action="editCategory"
-            >
-              <Adminlayout>
-                <CategoryEdit />
-              </Adminlayout>
-            </ProtectedRoute>
-          }
-        />
+       
+        
 
         {/* ADMINISTRATION */}
         <Route

@@ -53,7 +53,7 @@ const AdminService = () => {
   const updatebranch = async (id, branchData) => {
     const response = await axiosPrivate.put(
       `/branchmanagement/${id}`,
-      branchData
+      branchData,
     );
     return response.data;
   };
@@ -79,7 +79,7 @@ const AdminService = () => {
   const updatetiming = async (id, timingData) => {
     const response = await axiosPrivate.put(
       `/timemanagement/${id}`,
-      timingData
+      timingData,
     );
     return response.data;
   };
@@ -108,7 +108,7 @@ const AdminService = () => {
   const updatebatch = async (id, batchData) => {
     const response = await axiosPrivate.put(
       `/batchmanagement/${id}`,
-      batchData
+      batchData,
     );
     return response.data;
   };
@@ -127,7 +127,7 @@ const AdminService = () => {
 
   const takeinternsbybranch = async (branchId) => {
     const response = await axiosPrivate.get(
-      `/batchmanagement/interns/${branchId}`
+      `/batchmanagement/interns/${branchId}`,
     );
     return response.data;
   };
@@ -163,7 +163,7 @@ const AdminService = () => {
   const saveweeklyschedulecell = async (cellPayload) => {
     const response = await axiosPrivate.post(
       "/weeklyschedule/cell",
-      cellPayload
+      cellPayload,
     );
     return response.data;
   };
@@ -195,7 +195,7 @@ const AdminService = () => {
   const updatemodule = async (id, moduleData) => {
     const response = await axiosPrivate.put(
       `/modulemanagement/${id}`,
-      moduleData
+      moduleData,
     );
     return response.data;
   };
@@ -219,7 +219,7 @@ const AdminService = () => {
   const updatetopic = async (id, topicData) => {
     const response = await axiosPrivate.put(
       `/topicmanagement/${id}`,
-      topicData
+      topicData,
     );
     return response.data;
   };
@@ -233,7 +233,7 @@ const AdminService = () => {
   const createcategory = async (categoryData) => {
     const response = await axiosPrivate.post(
       "/categorymanagement",
-      categoryData
+      categoryData,
     );
     return response.data;
   };
@@ -251,7 +251,7 @@ const AdminService = () => {
   const updatecategory = async (id, categoryData) => {
     const response = await axiosPrivate.put(
       `/categorymanagement/${id}`,
-      categoryData
+      categoryData,
     );
     return response.data;
   };
@@ -280,7 +280,7 @@ const AdminService = () => {
   const updatecourse = async (id, courseData) => {
     const response = await axiosPrivate.put(
       `/coursemanagement/${id}`,
-      courseData
+      courseData,
     );
     return response.data;
   };
@@ -311,34 +311,26 @@ const AdminService = () => {
     return response.data;
   };
 
-  
-const createintern = async (internData) => {
-  const response = await axiosPrivate.post(
-    "/internmanagement",
-    internData
-  );
+  const createintern = async (internData) => {
+    const response = await axiosPrivate.post("/internmanagement", internData);
 
-  return response.data;
-};
-const getallinterns = async () => {
-  const response = await axiosPrivate.get("/internmanagement");
-  return response.data;
-};
+    return response.data;
+  };
+  const getallinterns = async () => {
+    const response = await axiosPrivate.get("/internmanagement");
+    return response.data;
+  };
 
+  const updateintern = async (id, data) => {
+    const response = await axiosPrivate.put(`/internmanagement/${id}`, data);
+    return response.data;
+  };
 
-const updateintern = async (id, data) => {
-  const response = await axiosPrivate.put(
-    `/internmanagement/${id}`,
-    data
-  );
-  return response.data;
-};
+  const handledeleteintern = async (id) => {
+    let response = await axiosPrivate.delete(`/internmanagement/${id}`);
+    return response.data;
+  };
 
-const handledeleteintern=async(id)=>{
-  let response=await axiosPrivate.delete(`/internmanagement/${id}`)
-  return response.data;
-}
-   
   // Get all tasks
   const taketasks = async () => {
     const response = await axiosPrivate.get("/taskmanagement");
@@ -359,30 +351,21 @@ const handledeleteintern=async(id)=>{
 
   // Create task
   const createtask = async (formData) => {
-    const response = await axiosPrivate.post(
-      "/taskmanagement",
-      formData
-    );
+    const response = await axiosPrivate.post("/taskmanagement", formData);
     return response.data;
   };
 
   // Update task
   const updatetask = async (id, formData) => {
-    const response = await axiosPrivate.put(
-      `/taskmanagement/${id}`,
-      formData
-    );
+    const response = await axiosPrivate.put(`/taskmanagement/${id}`, formData);
     return response.data;
   };
 
   // Permanently delete task
   const removetask = async (id) => {
-    const response = await axiosPrivate.delete(
-      `/taskmanagement/${id}`
-    );
+    const response = await axiosPrivate.delete(`/taskmanagement/${id}`);
     return response.data;
   };
-
 
   // =====================================================
   // MATERIAL MANAGEMENT
@@ -402,18 +385,13 @@ const handledeleteintern=async(id)=>{
 
   // Get material dropdown data
   const getmaterialdropdowns = async () => {
-    const response = await axiosPrivate.get(
-      "/materialmanagement/dropdowns"
-    );
+    const response = await axiosPrivate.get("/materialmanagement/dropdowns");
     return response.data;
   };
 
   // Create material
   const creatematerial = async (formData) => {
-    const response = await axiosPrivate.post(
-      "/materialmanagement",
-      formData
-    );
+    const response = await axiosPrivate.post("/materialmanagement", formData);
     return response.data;
   };
 
@@ -421,19 +399,16 @@ const handledeleteintern=async(id)=>{
   const updatematerial = async (id, formData) => {
     const response = await axiosPrivate.put(
       `/materialmanagement/${id}`,
-      formData
+      formData,
     );
     return response.data;
   };
 
   // Permanently delete material
   const removematerial = async (id) => {
-    const response = await axiosPrivate.delete(
-      `/materialmanagement/${id}`
-    );
+    const response = await axiosPrivate.delete(`/materialmanagement/${id}`);
     return response.data;
   };
-
 
   // =====================================================
   // TASK EVALUATION
@@ -442,7 +417,7 @@ const handledeleteintern=async(id)=>{
   // Get module names for Task Evaluation
   const takeevaluationmodules = async () => {
     const response = await axiosPrivate.get(
-      "/taskmanagement/evaluation/modules"
+      "/taskmanagement/evaluation/modules",
     );
     return response.data;
   };
@@ -452,8 +427,8 @@ const handledeleteintern=async(id)=>{
     const response = await axiosPrivate.get(
       "/taskmanagement/evaluation/tasks",
       {
-        params: { module }
-      }
+        params: { module },
+      },
     );
     return response.data;
   };
@@ -461,7 +436,7 @@ const handledeleteintern=async(id)=>{
   // Get submissions for a task
   const takesubmissions = async (taskId) => {
     const response = await axiosPrivate.get(
-      `/taskmanagement/${taskId}/submissions`
+      `/taskmanagement/${taskId}/submissions`,
     );
     return response.data;
   };
@@ -470,11 +445,10 @@ const handledeleteintern=async(id)=>{
   const gradesubmission = async (submissionId, data) => {
     const response = await axiosPrivate.put(
       `/taskmanagement/submissions/${submissionId}/grade`,
-      data
+      data,
     );
     return response.data;
   };
-
 
   // =====================================
   // NOTIFICATION MANAGEMENT
@@ -488,26 +462,21 @@ const handledeleteintern=async(id)=>{
 
   // Get notification by ID
   const takenotificationbyid = async (id) => {
-    const response = await axiosPrivate.get(
-      `/notificationmanagement/${id}`
-    );
+    const response = await axiosPrivate.get(`/notificationmanagement/${id}`);
     return response.data;
   };
 
   // Get notification dropdown data
   const getnotificationdropdowns = async () => {
     const response = await axiosPrivate.get(
-      "/notificationmanagement/dropdowns"
+      "/notificationmanagement/dropdowns",
     );
     return response.data;
   };
 
   // Create notification
   const createnotification = async (data) => {
-    const response = await axiosPrivate.post(
-      "/notificationmanagement",
-      data
-    );
+    const response = await axiosPrivate.post("/notificationmanagement", data);
     return response.data;
   };
 
@@ -515,20 +484,73 @@ const handledeleteintern=async(id)=>{
   const updatenotification = async (id, data) => {
     const response = await axiosPrivate.put(
       `/notificationmanagement/${id}`,
-      data
+      data,
     );
     return response.data;
   };
 
   // Permanently delete notification
   const removenotification = async (id) => {
-    const response = await axiosPrivate.delete(
-      `/notificationmanagement/${id}`
+    const response = await axiosPrivate.delete(`/notificationmanagement/${id}`);
+    return response.data;
+  };
+
+  // =====================================
+  // ATTENDANCE MANAGEMENT
+  // =====================================
+
+  const getAttendanceStudents = async (params = {}) => {
+    const response = await axiosPrivate.get("/attendancemanagement/students", {
+      params,
+    });
+    return response.data;
+  };
+
+  const createDailyAttendance = async (params = {}) => {
+    const response = await axiosPrivate.get("/attendancemanagement/create", {
+      params,
+    });
+    return response.data;
+  };
+
+  const saveAttendance = async (data) => {
+    const response = await axiosPrivate.post(
+      "/attendancemanagement/save",
+      data,
     );
     return response.data;
   };
 
+  const getAttendanceReports = async (params = {}) => {
+    const response = await axiosPrivate.get("/attendancemanagement/reports", {
+      params,
+    });
+    return response.data;
+  };
 
+  // =====================================
+  // LEAVE REQUEST MANAGEMENT
+  // =====================================
+
+  const getLeaveRequests = async () => {
+    const response = await axiosPrivate.get("/leaverequestmanagement");
+    return response.data;
+  };
+
+  const getLeaveRequestById = async (id) => {
+    const response = await axiosPrivate.get(`/leaverequestmanagement/${id}`);
+    return response.data;
+  };
+
+  const createLeaveRequest = async (data) => {
+    const response = await axiosPrivate.post("/leaverequestmanagement", data);
+    return response.data;
+  };
+
+  const deleteLeaveRequest = async (id) => {
+    const response = await axiosPrivate.delete(`/leaverequestmanagement/${id}`);
+    return response.data;
+  };
 
   return {
     newrolecreate,
@@ -607,6 +629,15 @@ const handledeleteintern=async(id)=>{
     createnotification,
     updatenotification,
     removenotification,
+    getAttendanceStudents,
+    createDailyAttendance,
+    saveAttendance,
+    getAttendanceReports,
+
+    getLeaveRequests,
+    getLeaveRequestById,
+    createLeaveRequest,
+    deleteLeaveRequest,
   };
 };
 
