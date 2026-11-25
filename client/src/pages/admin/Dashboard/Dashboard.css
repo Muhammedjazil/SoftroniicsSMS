@@ -8,14 +8,15 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  height: 100vh;
+  min-height: 100vh;
   box-sizing: border-box;
-  padding: 24px 32px 36px 32px;
+  padding: 20px 32px 24px 32px;
   background-color: #fbfcfd;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #1e293b;
-  min-height: 100vh;
+  overflow-y: auto;
 }
-
 /* =========================================
    TOP HEADER ROW (Welcome & Search/Bell)
 ========================================= */
@@ -250,14 +251,14 @@
 /* =========================================
    TWO-COLUMN MAIN WORKSPACE
 ========================================= */
-
 .dsh-main-grid {
   display: grid;
   grid-template-columns: 1fr 310px;
   gap: 22px;
-  align-items: flex-start;
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
 }
-
 /* =========================================
    LEFT SECTION: LATEST COURSES
 ========================================= */
@@ -265,6 +266,8 @@
 .dsh-courses-section {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 
 .dsh-section-header {
@@ -335,12 +338,12 @@
   color: #c2410c;
   text-decoration: underline;
 }
-
-/* Courses 2-Column Grid */
 .dsh-courses-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 1fr;
   gap: 16px;
+  flex: 1;
 }
 
 .dsh-no-courses {
@@ -527,7 +530,9 @@
 .dsh-sidebar-col {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 18px;
+  height: 100%;
 }
 
 /* Weekly Activity Widget Card */
@@ -537,6 +542,10 @@
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .dsh-widget-header {
@@ -582,7 +591,9 @@
 .dsh-activity-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  justify-content: space-around;
+  flex: 1;
+  gap: 12px;
 }
 
 .dsh-activity-row {

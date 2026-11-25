@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  FiUser,
   FiChevronRight,
   FiChevronLeft,
   FiChevronDown,
@@ -8,8 +7,7 @@ import {
   FiArrowLeft,
   FiX,
   FiClock,
-  FiDownload
-
+  FiDownload,
 } from "react-icons/fi";
 import "./staffmanagement.css";
 import AdminService from "../../../services/admin-api-services/AdminService";
@@ -29,7 +27,7 @@ const initialForm = {
   state: "",
   photo: null,
 
-  department: "",
+  department: "Office Staff",
   branch: "",
   allowAdditionalBranches: false,
   additionalBranches: [],
@@ -181,45 +179,52 @@ export const Staffmanagement = () => {
       const staffList = Array.isArray(response)
         ? response
         : Array.isArray(response?.data)
-          ? response.data
-          : Array.isArray(response?.data?.data)
-            ? response.data.data
-            : [];
+        ? response.data
+        : Array.isArray(response?.data?.data)
+        ? response.data.data
+        : [];
 
-      const formattedStaff = staffList.map((staff) => ({
-        ...staff,
-        id: staff._id,
-        fullname: staff.fullName || "",
-        dateofbirth: staff.dateOfBirth ? staff.dateOfBirth.slice(0, 10) : "",
-        phone: staff.staffPhoneNumber || "",
-        whatsapp: staff.staffWhatsAppNumber || "",
-        address: staff.staffPermanentAddress || "",
-        officialemail: staff.officialEmail || "",
-        role:
-          typeof staff.role === "object" ? staff.role?._id : staff.role || "",
-        typeemply:
-          typeof staff.role === "object" ? staff.role?.role || "" : "",
-        branch: staff.branch,
-        allowAdditionalBranches: staff.isMultipleBranch || false,
-        additionalBranches: Array.isArray(staff.multipleBranches)
-          ? staff.multipleBranches.map((item) =>
-            typeof item === "object" ? item._id : item
-          )
-          : [],
-        experience: staff.yearsOfExperience || "",
-        joindate: staff.dateOfJoining ? staff.dateOfJoining.slice(0, 10) : "",
-        status: staff.employmentStatus || "",
-        resingnation: staff.resignationDate
-          ? staff.resignationDate.slice(0, 10)
-          : "",
-        remark: staff.remarks || "",
-        mentorRole: staff.isMentor || false,
-        mentorTimings: Array.isArray(staff.time)
-          ? staff.time.map((item) =>
-            typeof item === "object" && item !== null ? item : item
-          )
-          : [],
-      }));
+      const formattedStaff = staffList.map((staff) => {
+        const roleLabel =
+          typeof staff.role === "object" ? staff.role?.role || "" : "";
+        const isMentor = roleLabel.trim().toLowerCase() === "mentor";
+
+        return {
+          ...staff,
+          id: staff._id,
+          fullname: staff.fullName || "",
+          dateofbirth: staff.dateOfBirth ? staff.dateOfBirth.slice(0, 10) : "",
+          phone: staff.staffPhoneNumber || "",
+          whatsapp: staff.staffWhatsAppNumber || "",
+          address: staff.staffPermanentAddress || "",
+          officialemail: staff.officialEmail || "",
+          role:
+            typeof staff.role === "object" ? staff.role?._id : staff.role || "",
+          typeemply: roleLabel,
+          department:
+            staff.department || (isMentor ? "" : "Office Staff"),
+          branch: staff.branch,
+          allowAdditionalBranches: staff.isMultipleBranch || false,
+          additionalBranches: Array.isArray(staff.multipleBranches)
+            ? staff.multipleBranches.map((item) =>
+                typeof item === "object" ? item._id : item
+              )
+            : [],
+          experience: staff.yearsOfExperience || "",
+          joindate: staff.dateOfJoining ? staff.dateOfJoining.slice(0, 10) : "",
+          status: staff.employmentStatus || "",
+          resingnation: staff.resignationDate
+            ? staff.resignationDate.slice(0, 10)
+            : "",
+          remark: staff.remarks || "",
+          mentorRole: staff.isMentor || false,
+          mentorTimings: Array.isArray(staff.time)
+            ? staff.time.map((item) =>
+                typeof item === "object" && item !== null ? item : item
+              )
+            : [],
+        };
+      });
 
       setAlldata(formattedStaff);
     } catch (error) {
@@ -247,6 +252,7 @@ export const Staffmanagement = () => {
       value.email,
       value.officialemail,
       value.typeemply,
+      value.department,
       getBranchName(value.branch),
       value.phone,
     ]
@@ -287,12 +293,21 @@ export const Staffmanagement = () => {
   }, [currentPage, totalPages]);
 
   // =====================================
-  // GET ROLE NAME
+  // GET ROLE NAME & MENTOR CHECK
   // =====================================
 
   const getRoleName = (roleId) => {
     const foundRole = roles.find((role) => role._id === roleId);
     return foundRole?.role || roleId || "-";
+  };
+
+  const isMentorRoleSelected = () => {
+    if (!formData.role) return false;
+    const foundRole = roles.find(
+      (r) => String(r._id) === String(formData.role)
+    );
+    const roleLabel = foundRole?.role || formData.typeemply || "";
+    return roleLabel.trim().toLowerCase() === "mentor";
   };
 
   // =====================================
@@ -322,7 +337,7 @@ export const Staffmanagement = () => {
       staff.officialemail,
       staff.phone,
       staff.typeemply || getRoleName(staff.role),
-      staff.department,
+      staff.department || "Office Staff",
       getBranchName(staff.branch),
       staff.status,
     ]);
@@ -376,6 +391,25 @@ export const Staffmanagement = () => {
 
   const handlecreate = (e) => {
     const { name, value, type, checked, files } = e.target;
+
+    if (name === "role") {
+      const selectedRoleObj = roles.find(
+        (r) => String(r._id) === String(value)
+      );
+      const isMentor =
+        selectedRoleObj?.role?.trim().toLowerCase() === "mentor";
+
+      setFormData((prev) => ({
+        ...prev,
+        role: value,
+        department: isMentor
+          ? prev.department === "Office Staff"
+            ? ""
+            : prev.department
+          : "Office Staff",
+      }));
+      return;
+    }
 
     if (name === "branch") {
       setFormData((prev) => ({
@@ -562,6 +596,14 @@ export const Staffmanagement = () => {
       return;
     }
 
+    if (
+      isMentorRoleSelected() &&
+      (!formData.department || formData.department === "Office Staff")
+    ) {
+      alert("Please select a department for Mentor role");
+      return;
+    }
+
     if (formData.mentorRole && formData.mentorTimings.length === 0) {
       alert("Please select at least one mentor timing");
       return;
@@ -583,7 +625,10 @@ export const Staffmanagement = () => {
       data.append("state", formData.state);
 
       // Professional Details
-      data.append("department", formData.department);
+      data.append(
+        "department",
+        isMentorRoleSelected() ? formData.department : "Office Staff"
+      );
       data.append("branch", formData.branch);
       data.append("allowAdditionalBranches", formData.allowAdditionalBranches);
       data.append(
@@ -632,7 +677,7 @@ export const Staffmanagement = () => {
       console.error("Create/Update Staff Error:", error.response?.data || error);
       alert(
         error.response?.data?.message ||
-        "Failed to save staff. Please try again."
+          "Failed to save staff. Please try again."
       );
     } finally {
       setSubmitting(false);
@@ -661,16 +706,27 @@ export const Staffmanagement = () => {
         ? staffRecord.branch?._id
         : staffRecord.branch;
 
+    const roleId =
+      typeof staffRecord.role === "object"
+        ? staffRecord.role?._id
+        : staffRecord.role || "";
+
+    const matchedRole = roles.find((r) => String(r._id) === String(roleId));
+    const roleLabel = matchedRole?.role || staffRecord.typeemply || "";
+    const isMentor = roleLabel.trim().toLowerCase() === "mentor";
+
     setView(staffRecord);
 
     setFormData({
       ...initialForm,
       ...staffRecord,
       branch: branchId || "",
-      role:
-        typeof staffRecord.role === "object"
-          ? staffRecord.role?._id
-          : staffRecord.role || "",
+      role: roleId,
+      department: isMentor
+        ? staffRecord.department === "Office Staff"
+          ? ""
+          : staffRecord.department || ""
+        : "Office Staff",
       photo: null,
       resume: null,
       additionalBranches: staffRecord.additionalBranches || [],
@@ -722,7 +778,9 @@ export const Staffmanagement = () => {
         <div className="syl-mgmt-tab-group">
           <button
             type="button"
-            className={`syl-mgmt-tab-btn ${activetap === "stafflist" ? "syl-mgmt-tab-btn--active" : ""}`}
+            className={`syl-mgmt-tab-btn ${
+              activetap === "stafflist" ? "syl-mgmt-tab-btn--active" : ""
+            }`}
             onClick={handlestafflist}
           >
             Staff List
@@ -731,7 +789,9 @@ export const Staffmanagement = () => {
           {(canAddStaff || editId !== null) && (
             <button
               type="button"
-              className={`syl-mgmt-tab-btn ${activetap === "newstaff" ? "syl-mgmt-tab-btn--active" : ""}`}
+              className={`syl-mgmt-tab-btn ${
+                activetap === "newstaff" ? "syl-mgmt-tab-btn--active" : ""
+              }`}
               onClick={handlenewstaff}
             >
               {editId !== null ? "Edit Staff" : "New Staff"}
@@ -772,14 +832,21 @@ export const Staffmanagement = () => {
               </div>
 
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <div className="syl-mgmt-filter-select-wrapper" style={{ width: "160px" }}>
+                <div
+                  className="syl-mgmt-filter-select-wrapper"
+                  style={{ width: "160px" }}
+                >
                   <select
                     className="syl-mgmt-filter-select"
                     value={departmentFilter}
                     onChange={(e) => setDepartmentFilter(e.target.value)}
                   >
                     <option value="all">All Departments</option>
-                    {[...new Set(allData.map((s) => s.department).filter(Boolean))].map((dept) => (
+                    {[
+                      ...new Set(
+                        allData.map((s) => s.department).filter(Boolean)
+                      ),
+                    ].map((dept) => (
                       <option key={dept} value={dept}>
                         {dept}
                       </option>
@@ -788,7 +855,10 @@ export const Staffmanagement = () => {
                   <FiChevronDown className="syl-mgmt-select-arrow" />
                 </div>
 
-                <div className="syl-mgmt-filter-select-wrapper" style={{ width: "150px" }}>
+                <div
+                  className="syl-mgmt-filter-select-wrapper"
+                  style={{ width: "150px" }}
+                >
                   <select
                     className="syl-mgmt-filter-select"
                     value={branchFilter}
@@ -804,7 +874,10 @@ export const Staffmanagement = () => {
                   <FiChevronDown className="syl-mgmt-select-arrow" />
                 </div>
 
-                <div className="syl-mgmt-filter-select-wrapper" style={{ width: "140px" }}>
+                <div
+                  className="syl-mgmt-filter-select-wrapper"
+                  style={{ width: "140px" }}
+                >
                   <select
                     className="syl-mgmt-filter-select"
                     value={statusFilter}
@@ -824,17 +897,24 @@ export const Staffmanagement = () => {
               <Loader message="Loading staff..." minHeight="320px" />
             ) : filteredStaff.length === 0 ? (
               <div className="syl-mgmt-content-area">
-                <p className="syl-mgmt-empty-message">No staff members found.</p>
+                <p className="syl-mgmt-empty-message">
+                  No staff members found.
+                </p>
               </div>
             ) : (
               <div className="syl-mgmt-table-wrapper">
                 <div
                   className="syl-mgmt-table-header-row"
-                  style={{ gridTemplateColumns: "50px 2fr 1.3fr 1.2fr 1.4fr 1fr 1.3fr" }}
+                  style={{
+                    gridTemplateColumns:
+                      "50px 2fr 1.3fr 1.2fr 1.4fr 1fr 1.3fr",
+                  }}
                 >
                   <div className="syl-mgmt-th">#</div>
                   <div className="syl-mgmt-th">STAFF NAME</div>
-                  <div className="syl-mgmt-th syl-mgmt-th-center">DEPARTMENT</div>
+                  <div className="syl-mgmt-th syl-mgmt-th-center">
+                    DEPARTMENT
+                  </div>
                   <div className="syl-mgmt-th">BRANCH</div>
                   <div className="syl-mgmt-th syl-mgmt-th-center">ROLE</div>
                   <div className="syl-mgmt-th syl-mgmt-th-center">STATUS</div>
@@ -843,22 +923,35 @@ export const Staffmanagement = () => {
 
                 <div className="syl-mgmt-table-body">
                   {currentStaff.map((value, index) => {
-                    const initial = (value.fullname || "S").charAt(0).toUpperCase();
+                    const initial = (value.fullname || "S")
+                      .charAt(0)
+                      .toUpperCase();
 
                     return (
                       <div
                         key={value.id}
                         className="syl-mgmt-table-row"
-                        style={{ gridTemplateColumns: "50px 2fr 1.3fr 1.2fr 1.4fr 1fr 1.3fr" }}
+                        style={{
+                          gridTemplateColumns:
+                            "50px 2fr 1.3fr 1.2fr 1.4fr 1fr 1.3fr",
+                        }}
                       >
-                        <div className="syl-mgmt-td">{startIndex + index + 1}</div>
+                        <div className="syl-mgmt-td">
+                          {startIndex + index + 1}
+                        </div>
 
                         <div className="syl-mgmt-td">
                           <div className="syl-mgmt-module-cell">
-                            <span className="syl-mgmt-module-avatar">{initial}</span>
+                            <span className="syl-mgmt-module-avatar">
+                              {initial}
+                            </span>
                             <div>
-                              <div className="syl-mgmt-module-name-text">{value.fullname}</div>
-                              <span style={{ fontSize: "12px", color: "#6b7280" }}>
+                              <div className="syl-mgmt-module-name-text">
+                                {value.fullname}
+                              </div>
+                              <span
+                                style={{ fontSize: "12px", color: "#6b7280" }}
+                              >
                                 {value.phone || value.email || ""}
                               </span>
                             </div>
@@ -867,18 +960,28 @@ export const Staffmanagement = () => {
 
                         <div className="syl-mgmt-td syl-mgmt-td-center">
                           <span className="syl-mgmt-course-pill">
-                            {value.department || "General"}
+                            {value.department || "Office Staff"}
                           </span>
                         </div>
 
-                        <div className="syl-mgmt-td" style={{ color: "#374151", fontWeight: 500, textTransform: "capitalize" }}>
+                        <div
+                          className="syl-mgmt-td"
+                          style={{
+                            color: "#374151",
+                            fontWeight: 500,
+                            textTransform: "capitalize",
+                          }}
+                        >
                           {getBranchName(value.branch)}
                         </div>
 
                         <div className="syl-mgmt-td syl-mgmt-td-center">
                           <span
                             className="syl-mgmt-course-pill"
-                            style={{ backgroundColor: "#f3f4f6", color: "#374151" }}
+                            style={{
+                              backgroundColor: "#f3f4f6",
+                              color: "#374151",
+                            }}
                           >
                             {getRoleName(value.role)}
                           </span>
@@ -889,11 +992,18 @@ export const Staffmanagement = () => {
                             className="syl-mgmt-topic-badge"
                             style={
                               value.status === "Active" || value.isActive
-                                ? { backgroundColor: "#ecfdf5", color: "#10b981" }
-                                : { backgroundColor: "#fef2f2", color: "#dc2626" }
+                                ? {
+                                    backgroundColor: "#ecfdf5",
+                                    color: "#10b981",
+                                  }
+                                : {
+                                    backgroundColor: "#fef2f2",
+                                    color: "#dc2626",
+                                  }
                             }
                           >
-                            {value.status || (value.isActive ? "Active" : "Inactive")}
+                            {value.status ||
+                              (value.isActive ? "Active" : "Inactive")}
                           </span>
                         </div>
 
@@ -947,7 +1057,15 @@ export const Staffmanagement = () => {
                   className="syl-mgmt-page-btn"
                   onClick={() => setCurrentPage((prev) => prev - 1)}
                   disabled={currentPage === 1}
-                  style={currentPage === 1 ? {} : { cursor: "pointer", color: "#374151", backgroundColor: "#fff" }}
+                  style={
+                    currentPage === 1
+                      ? {}
+                      : {
+                          cursor: "pointer",
+                          color: "#374151",
+                          backgroundColor: "#fff",
+                        }
+                  }
                 >
                   <FiChevronLeft />
                 </button>
@@ -959,7 +1077,11 @@ export const Staffmanagement = () => {
                   style={
                     totalPages === 0 || currentPage >= totalPages
                       ? {}
-                      : { cursor: "pointer", color: "#374151", backgroundColor: "#fff" }
+                      : {
+                          cursor: "pointer",
+                          color: "#374151",
+                          backgroundColor: "#fff",
+                        }
                   }
                 >
                   <FiChevronRight />
@@ -976,9 +1098,7 @@ export const Staffmanagement = () => {
         {activetap === "newstaff" && (
           <div className="newstaff">
             <div className="staff-create-heading">
-              <h3>
-                {editId !== null ? "Edit Staff" : "Create New Staff"}
-              </h3>
+              <h3>{editId !== null ? "Edit Staff" : "Create New Staff"}</h3>
               <p>Fill in staff details and assign a role & credentials</p>
             </div>
 
@@ -1124,25 +1244,6 @@ export const Staffmanagement = () => {
                 <h3>Professional Details</h3>
 
                 <div className="staffprofessionalgrid">
-                  {/* DEPARTMENT */}
-                  <div className="staffprofessionalfield">
-                    <label>
-                      Department <span>*</span>
-                    </label>
-                    <select
-                      name="department"
-                      value={formData.department}
-                      onChange={handlecreate}
-                      required
-                    >
-                      <option value="">Choose Department</option>
-                      <option value="uiux">UI/UX</option>
-                      <option value="mern">MERN</option>
-                      <option value="python">Python</option>
-                      <option value="datascience">Data Science</option>
-                    </select>
-                  </div>
-
                   {/* ROLE */}
                   <div className="staffprofessionalfield">
                     <label>
@@ -1162,6 +1263,27 @@ export const Staffmanagement = () => {
                       ))}
                     </select>
                   </div>
+
+                  {/* DEPARTMENT (ONLY WHEN ROLE IS MENTOR; OTHERWISE AUTOMATICALLY "Office Staff") */}
+                  {isMentorRoleSelected() && (
+                    <div className="staffprofessionalfield">
+                      <label>
+                        Department <span>*</span>
+                      </label>
+                      <select
+                        name="department"
+                        value={formData.department}
+                        onChange={handlecreate}
+                        required
+                      >
+                        <option value="">Choose Department</option>
+                        <option value="uiux">UI/UX</option>
+                        <option value="mern">MERN</option>
+                        <option value="python">Python</option>
+                        <option value="datascience">Data Science</option>
+                      </select>
+                    </div>
+                  )}
 
                   {/* BRANCH */}
                   <div className="staffprofessionalfield">
@@ -1470,8 +1592,8 @@ export const Staffmanagement = () => {
                   {submitting
                     ? "Please Wait..."
                     : editId !== null
-                      ? "Update"
-                      : "Create Staff"}
+                    ? "Update"
+                    : "Create Staff"}
                 </button>
               </div>
             </form>
@@ -1580,7 +1702,7 @@ export const Staffmanagement = () => {
 
                 <div className="staffviewfield">
                   <h4>Department</h4>
-                  <p>{view.department || "-"}</p>
+                  <p>{view.department || "Office Staff"}</p>
                 </div>
 
                 <div className="staffviewfield">
