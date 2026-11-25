@@ -1,39 +1,112 @@
-
 import React, { useEffect, useState } from "react";
 import {
   LuClipboardList,
   LuEye,
-  LuSend,
   LuFileText,
+  LuInfo,
+  LuX,
 } from "react-icons/lu";
 
 import "./interntask.css";
 import UserService from "../../services/user-api-services/UserService";
 
 export const Intrentask = () => {
-  const { takealltask, takemysubmissions } = UserService();
+  const { takealltask, takemysubmissions, createTaskSubmission } =
+    UserService();
+
+  // ==========================================
+  // STATES
+  // ==========================================
 
   const [activeTab, setActiveTab] = useState("assigned");
+
   const [alltask, setAlltask] = useState([]);
   const [allsubmissions, setAllsubmissions] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [selectedTask, setSelectedTask] = useState(null);
   const [modalType, setModalType] = useState("");
 
-  // Format date
+  const [submissionData, setSubmissionData] = useState({
+    submissionText: "",
+    githubRepository: "",
+    liveDemoUrl: "",
+    attachment: null,
+  });
+
+  const [submitting, setSubmitting] = useState(false);
+
+  // ==========================================
+  // FORMAT DATE
+  // ==========================================
+
   const formatDate = (date) => {
     if (!date) return "-";
 
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    });
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) return "-";
+
+    return parsedDate.toLocaleDateString("en-GB");
   };
 
-  // Fetch assigned tasks and submissions
+  // Matches MM/DD/YYYY shown in the modal screenshot
+  const formatModalDate = (date) => {
+    if (!date) return "-";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) return "-";
+
+    return parsedDate.toLocaleDateString("en-US");
+  };
+
+  // ==========================================
+  // GET MODULE NAME
+  // ==========================================
+
+  const getModuleName = (module) => {
+    if (!module) return "-";
+
+    if (typeof module === "object") {
+      return module.moduleName || module.name || "-";
+    }
+
+    return module;
+  };
+
+  // ==========================================
+  // GET MENTOR NAME
+  // ==========================================
+
+  const getMentorName = (mentor) => {
+    if (!mentor) return "-";
+
+    if (typeof mentor === "string") return mentor;
+
+    return mentor.fullName || mentor.name || "-";
+  };
+
+  // ==========================================
+  // GET TASK TITLE
+  // ==========================================
+
+  const getTaskTitle = (submission) => {
+    if (!submission?.task) return "Task unavailable";
+
+    if (typeof submission.task === "object") {
+      return submission.task.title || "Task unavailable";
+    }
+
+    return "Task unavailable";
+  };
+
+  // ==========================================
+  // FETCH TASKS AND SUBMISSIONS
+  // ==========================================
+
   const fetchTaskData = async () => {
     try {
       setLoading(true);
@@ -55,7 +128,12 @@ export const Intrentask = () => {
       );
     } catch (error) {
       console.error("Fetch Task Error:", error);
-      setError(error.message || "Failed to load task details");
+
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to load task details"
+      );
     } finally {
       setLoading(false);
     }
@@ -65,83 +143,427 @@ export const Intrentask = () => {
     fetchTaskData();
   }, []);
 
-  // Open task details
+  // ==========================================
+  // VIEW TASK
+  // ==========================================
+
   const handleViewTask = (task) => {
     setSelectedTask(task);
     setModalType("view");
   };
 
-  // Open submit task information
+  // ==========================================
+  // SUBMIT TASK - FULL PAGE
+  // ==========================================
+
   const handleSubmitTask = (task) => {
+    if (!task) return;
+
     setSelectedTask(task);
-    setModalType("submit");
+
+    setSubmissionData({
+      submissionText: "",
+      githubRepository: "",
+      liveDemoUrl: "",
+      attachment: null,
+    });
+
+    setModalType("");
+    setActiveTab("submit");
   };
 
-  // Open submission details
+  // ==========================================
+  // VIEW SUBMISSION
+  // ==========================================
+
   const handleViewSubmission = (submission) => {
     setSelectedTask(submission);
     setModalType("submission");
   };
 
+  // ==========================================
+  // CLOSE MODAL / CANCEL SUBMISSION
+  // ==========================================
+
   const closeModal = () => {
+    if (submitting) return;
+
     setSelectedTask(null);
     setModalType("");
+
+    if (activeTab === "submit") {
+      setActiveTab("assigned");
+    }
   };
 
-  const getMentorName = (mentor) => {
-    if (!mentor) return "-";
+  // ==========================================
+  // CHANGE SUBMISSION INPUTS
+  // ==========================================
 
-    return mentor.fullName || mentor.name || "-";
+  const handleSubmissionChange = (e) => {
+    const { name, value, files } = e.target;
+
+    if (name === "attachment") {
+      const file = files?.[0];
+
+      if (!file) return;
+
+      const allowedExtensions = /\.(zip|png|pdf)$/i;
+
+      if (!allowedExtensions.test(file.name)) {
+        alert("Only ZIP, PNG and PDF files are allowed.");
+        e.target.value = "";
+        return;
+      }
+
+      setSubmissionData((prev) => ({
+        ...prev,
+        attachment: file,
+      }));
+
+      return;
+    }
+
+    setSubmissionData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const getTaskTitle = (submission) => {
-    return submission.task?.title || "Task unavailable";
+  // ==========================================
+  // SAVE TASK SUBMISSION
+  // ==========================================
+
+  const handleSaveSubmission = async (e) => {
+    e.preventDefault();
+
+    if (!selectedTask?._id) {
+      alert("Task information is missing.");
+      return;
+    }
+
+    if (!submissionData.submissionText.trim()) {
+      alert("Please enter submission description.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const formData = new FormData();
+
+      formData.append("task", selectedTask._id);
+      formData.append("submissionText", submissionData.submissionText.trim());
+      formData.append(
+        "githubRepository",
+        submissionData.githubRepository.trim()
+      );
+      formData.append("liveDemoUrl", submissionData.liveDemoUrl.trim());
+
+      if (submissionData.attachment) {
+        formData.append("attachments", submissionData.attachment);
+      }
+
+      const response = await createTaskSubmission(formData);
+
+      alert(response.message || "Task submitted successfully!");
+
+      setSubmissionData({
+        submissionText: "",
+        githubRepository: "",
+        liveDemoUrl: "",
+        attachment: null,
+      });
+
+      setSelectedTask(null);
+      setModalType("");
+
+      await fetchTaskData();
+
+      setActiveTab("submissions");
+    } catch (error) {
+      console.error("Submission Error:", error);
+
+      alert(
+        error.message ||
+          error.response?.data?.message ||
+          "Task submission failed."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  // ==========================================
+  // STATUS CLASS
+  // ==========================================
+
+  const getStatusClass = (status) => {
+    if (status === "Graded") {
+      return "int-status-graded";
+    }
+
+    if (status === "Rejected") {
+      return "int-status-rejected";
+    }
+
+    return "int-status-submitted";
+  };
+
+  // ==========================================
+  // MAIN JSX
+  // ==========================================
 
   return (
     <div className="wk-card-container">
       <div className="wk-card-body">
+        {/* ==================================
+            TABS
+        ================================== */}
 
-        {/* Tabs */}
-        <div className="int-task-tabs-row">
-          <button
-            type="button"
-            className={`int-task-tab-btn ${
-              activeTab === "assigned" ? "int-task-tab-btn--active" : ""
-            }`}
-            onClick={() => setActiveTab("assigned")}
-          >
-            Assigned Tasks
-          </button>
+        {activeTab !== "submit" && (
+          <div className="int-task-tabs-row">
+            <button
+              type="button"
+              className={`int-task-tab-btn ${
+                activeTab === "assigned" ? "int-task-tab-btn--active" : ""
+              }`}
+              onClick={() => setActiveTab("assigned")}
+            >
+              Assigned Tasks
+            </button>
 
-          <button
-            type="button"
-            className={`int-task-tab-btn ${
-              activeTab === "submissions" ? "int-task-tab-btn--active" : ""
-            }`}
-            onClick={() => setActiveTab("submissions")}
-          >
-            My Submissions
-          </button>
-        </div>
+            <button
+              type="button"
+              className={`int-task-tab-btn ${
+                activeTab === "submissions" ? "int-task-tab-btn--active" : ""
+              }`}
+              onClick={() => setActiveTab("submissions")}
+            >
+              My Submissions
+            </button>
+          </div>
+        )}
 
-        {/* Content */}
+        {/* ==================================
+            MAIN CONTENT
+        ================================== */}
+
         <div className="int-task-card">
-
           {loading ? (
-            <div className="int-task-message">
-              Loading task details...
-            </div>
+            <div className="int-task-message">Loading task details...</div>
           ) : error ? (
             <div className="int-task-error">
-              {error}
+              <p>{error}</p>
               <button type="button" onClick={fetchTaskData}>
                 Try Again
               </button>
             </div>
-          ) : activeTab === "assigned" ? (
+          ) : activeTab === "submit" ? (
+            /* ==================================
+               FULL PAGE SUBMISSION FORM
+            ================================== */
 
-            /* ASSIGNED TASKS TABLE */
+            selectedTask && (
+              <div className="int-submit-page">
+                <div className="int-submit-page-header">
+                  <div>
+                    <h2>Task Submission</h2>
+                    <p>Task &gt; Task Submission</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="int-submit-back-btn"
+                    onClick={closeModal}
+                    disabled={submitting}
+                  >
+                    <LuX />
+                    Cancel
+                  </button>
+                </div>
+
+                {/* Mentor Instructions */}
+
+                <div className="int-mentor-instructions">
+                  <div className="int-mentor-instructions-header">
+                    <div className="int-mentor-icon">
+                      <LuFileText />
+                    </div>
+
+                    <div className="int-mentor-title-info">
+                      <h3>{selectedTask.title}</h3>
+                      <p>
+                        Mentor: {getMentorName(selectedTask.assignedMentor)} •
+                        Due: {formatDate(selectedTask.dueDate)} • Total Marks:{" "}
+                        {selectedTask.totalMarks || 0} pts
+                      </p>
+                    </div>
+
+                    <span className="int-mentor-label">
+                      MENTOR'S INSTRUCTIONS
+                    </span>
+                  </div>
+
+                  <div className="int-instruction-description">
+                    <strong>ⓘ DESCRIPTION ADDED BY MENTOR</strong>
+                    <p>
+                      {selectedTask.description || "No instructions provided."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Submission Form */}
+
+                <form
+                  onSubmit={handleSaveSubmission}
+                  className="int-submit-form"
+                >
+                  <div className="int-submit-grid">
+                    <div className="int-submit-field">
+                      <label>Task Title</label>
+                      <input value={selectedTask.title || ""} readOnly />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Module</label>
+                      <input
+                        value={getModuleName(selectedTask.module)}
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Status</label>
+                      <input value="Submitted" readOnly />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Submitted By</label>
+                      <input value="Me" readOnly />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Submitted Date</label>
+                      <input value={formatDate(new Date())} readOnly />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Due Date</label>
+                      <input
+                        value={formatDate(selectedTask.dueDate)}
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="int-submit-field int-submit-full">
+                      <label>Submission Description</label>
+                      <textarea
+                        name="submissionText"
+                        value={submissionData.submissionText}
+                        onChange={handleSubmissionChange}
+                        placeholder="Enter your submission description"
+                        rows="5"
+                        required
+                      />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>GitHub Repository</label>
+                      <input
+                        type="url"
+                        name="githubRepository"
+                        value={submissionData.githubRepository}
+                        onChange={handleSubmissionChange}
+                        placeholder="Enter GitHub repository link"
+                      />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Live Demo URL (Optional)</label>
+                      <input
+                        type="url"
+                        name="liveDemoUrl"
+                        value={submissionData.liveDemoUrl}
+                        onChange={handleSubmissionChange}
+                        placeholder="Enter live demo URL"
+                      />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Total Marks</label>
+                      <input value={selectedTask.totalMarks || 0} readOnly />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>
+                        Attachments (Optional - ZIP/PNG/PDF only)
+                      </label>
+                      <input
+                        type="file"
+                        name="attachment"
+                        accept=".zip,.png,.pdf"
+                        onChange={handleSubmissionChange}
+                      />
+                      {submissionData.attachment && (
+                        <small className="int-file-name">
+                          {submissionData.attachment.name}
+                        </small>
+                      )}
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Achieved Marks</label>
+                      <input value="N/A" readOnly />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Feedback</label>
+                      <input value="No feedback yet" readOnly />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Submission Status</label>
+                      <input value="Submitted" readOnly />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Reviewed By</label>
+                      <input value="Not reviewed yet" readOnly />
+                    </div>
+
+                    <div className="int-submit-field">
+                      <label>Reviewed Date</label>
+                      <input value="dd-mm-yyyy" readOnly />
+                    </div>
+                  </div>
+
+                  <div className="int-submit-footer">
+                    <button
+                      type="button"
+                      className="int-submit-cancel"
+                      onClick={closeModal}
+                      disabled={submitting}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="int-submit-save"
+                      disabled={submitting}
+                    >
+                      {submitting ? "Submitting..." : "Submit"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )
+          ) : activeTab === "assigned" ? (
+            /* ==================================
+               ASSIGNED TASKS
+            ================================== */
+
             alltask.length > 0 ? (
               <div className="int-task-table-wrapper">
                 <table className="int-task-table">
@@ -177,15 +599,11 @@ export const Intrentask = () => {
 
                         <td>
                           <span className="int-task-module-badge">
-                            {typeof task.module === "object"
-                              ? task.module?.moduleName
-                              : task.module || "-"}
+                            {getModuleName(task.module)}
                           </span>
                         </td>
 
-                        <td>
-                          {getMentorName(task.assignedMentor)}
-                        </td>
+                        <td>{getMentorName(task.assignedMentor)}</td>
 
                         <td>{formatDate(task.dueDate)}</td>
 
@@ -220,19 +638,18 @@ export const Intrentask = () => {
                   <LuClipboardList />
                 </div>
 
-                <h3 className="int-task-empty-title">
-                  No tasks assigned
-                </h3>
+                <h3 className="int-task-empty-title">No tasks assigned</h3>
 
                 <p className="int-task-empty-desc">
                   You currently have no tasks assigned to you.
                 </p>
               </div>
             )
-
           ) : (
+            /* ==================================
+               MY SUBMISSIONS
+            ================================== */
 
-            /* MY SUBMISSIONS TABLE */
             allsubmissions.length > 0 ? (
               <div className="int-task-table-wrapper">
                 <table className="int-task-table int-submission-table">
@@ -250,13 +667,8 @@ export const Intrentask = () => {
                     {allsubmissions.map((submission) => (
                       <tr key={submission._id}>
                         <td className="int-task-title-cell">
-                          <strong>
-                            {getTaskTitle(submission)}
-                          </strong>
-
-                          <span>
-                            {submission.task?.module || "-"}
-                          </span>
+                          <strong>{getTaskTitle(submission)}</strong>
+                          <span>{getModuleName(submission.task?.module)}</span>
                         </td>
 
                         <td>{formatDate(submission.createdAt)}</td>
@@ -271,13 +683,9 @@ export const Intrentask = () => {
 
                         <td>
                           <span
-                            className={`int-submission-status ${
-                              submission.status === "Graded"
-                                ? "int-status-graded"
-                                : submission.status === "Rejected"
-                                ? "int-status-rejected"
-                                : "int-status-submitted"
-                            }`}
+                            className={`int-submission-status ${getStatusClass(
+                              submission.status
+                            )}`}
                           >
                             {submission.status || "Submitted"}
                           </span>
@@ -287,10 +695,9 @@ export const Intrentask = () => {
                           <button
                             type="button"
                             className="int-task-action-btn int-view-submission-btn"
-                            onClick={() =>
-                              handleViewSubmission(submission)
-                            }
+                            onClick={() => handleViewSubmission(submission)}
                           >
+                            <LuEye />
                             View Submission
                           </button>
                         </td>
@@ -305,13 +712,11 @@ export const Intrentask = () => {
                   <LuFileText />
                 </div>
 
-                <h3 className="int-task-empty-title">
-                  No submissions yet
-                </h3>
+                <h3 className="int-task-empty-title">No submissions yet</h3>
 
                 <p className="int-task-empty-desc">
-                  You haven't submitted any tasks yet. Go to Assigned
-                  Tasks and click Submit Task to start.
+                  You haven't submitted any tasks yet. Go to Assigned Tasks and
+                  click Submit Task to start.
                 </p>
               </div>
             )
@@ -319,98 +724,178 @@ export const Intrentask = () => {
         </div>
       </div>
 
-      {/* Task / Submission Details Modal */}
-      {selectedTask && (
+      {/* ==================================
+          VIEW TASK / VIEW SUBMISSION MODAL
+      ================================== */}
+
+      {selectedTask && modalType !== "" && (
         <div className="int-task-modal-overlay" onClick={closeModal}>
           <div
-            className="int-task-modal"
-            onClick={(event) => event.stopPropagation()}
+            className={`int-task-modal ${
+              modalType === "view" ? "int-task-modal--view" : ""
+            }`}
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="int-task-modal-header">
-              <h3>
-                {modalType === "submission"
-                  ? "Submission Details"
-                  : modalType === "submit"
-                  ? "Submit Task"
-                  : "Task Details"}
-              </h3>
+            {modalType === "view" ? (
+              /* ==================================
+                 VIEW TASK MODAL (MATCHES IMAGE)
+              ================================== */
+              <>
+                <div className="int-view-modal-header">
+                  <div className="int-view-modal-icon-box">
+                    <LuFileText />
+                  </div>
 
-              <button type="button" onClick={closeModal}>
-                &times;
-              </button>
-            </div>
+                  <div className="int-view-modal-title-group">
+                    <h3>{selectedTask.title}</h3>
+                    {selectedTask.taskType && (
+                      <span className="int-view-type-pill">
+                        {selectedTask.taskType}
+                      </span>
+                    )}
+                  </div>
 
-            <div className="int-task-modal-body">
-              {modalType === "submission" ? (
-                <>
+                  <button
+                    type="button"
+                    className="int-view-modal-close"
+                    onClick={closeModal}
+                    aria-label="Close modal"
+                  >
+                    <LuX />
+                  </button>
+                </div>
+
+                <div className="int-view-modal-body">
+                  <div className="int-view-meta-card">
+                    <div className="int-view-meta-item">
+                      <span className="int-view-meta-label">MODULE</span>
+                      <strong className="int-view-meta-value">
+                        {getModuleName(selectedTask.module)}
+                      </strong>
+                    </div>
+
+                    <div className="int-view-meta-item">
+                      <span className="int-view-meta-label">
+                        ASSIGNED MENTOR
+                      </span>
+                      <strong className="int-view-meta-value">
+                        {getMentorName(selectedTask.assignedMentor)}
+                      </strong>
+                    </div>
+
+                    <div className="int-view-meta-item">
+                      <span className="int-view-meta-label">DUE DATE</span>
+                      <strong className="int-view-meta-value int-view-due-date">
+                        {formatModalDate(selectedTask.dueDate)}
+                      </strong>
+                    </div>
+
+                    <div className="int-view-meta-item">
+                      <span className="int-view-meta-label">TOTAL MARKS</span>
+                      <strong className="int-view-meta-value">
+                        {selectedTask.totalMarks ?? 0} pts
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="int-view-desc-section">
+                    <div className="int-view-desc-heading">
+                      <LuInfo />
+                      <span>TASK DESCRIPTION (FROM MENTOR)</span>
+                    </div>
+
+                    <div className="int-view-desc-box">
+                      {selectedTask.description
+                        ? selectedTask.description
+                            .split("\n")
+                            .map((line, idx) => <p key={idx}>{line}</p>)
+                        : "No description provided."}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="int-view-modal-footer">
+                  <button
+                    type="button"
+                    className="int-view-btn-close"
+                    onClick={closeModal}
+                  >
+                    Close
+                  </button>
+
+                  <button
+                    type="button"
+                    className="int-view-btn-submit"
+                    onClick={() => handleSubmitTask(selectedTask)}
+                  >
+                    Submit Task
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* ==================================
+                 SUBMISSION DETAILS MODAL
+              ================================== */
+              <>
+                <div className="int-task-modal-header">
+                  <h3>Submission Details</h3>
+                  <button type="button" onClick={closeModal}>
+                    &times;
+                  </button>
+                </div>
+
+                <div className="int-task-modal-body">
                   <p>
                     <strong>Task:</strong> {getTaskTitle(selectedTask)}
                   </p>
+
                   <p>
                     <strong>Submitted Date:</strong>{" "}
                     {formatDate(selectedTask.createdAt)}
                   </p>
+
                   <p>
-                    <strong>Status:</strong> {selectedTask.status}
+                    <strong>Status:</strong> {selectedTask.status || "Submitted"}
                   </p>
+
                   <p>
                     <strong>Submission Text:</strong>{" "}
                     {selectedTask.submissionText || "No text provided"}
                   </p>
+
                   <p>
                     <strong>GitHub:</strong>{" "}
                     {selectedTask.githubRepository || "-"}
                   </p>
+
                   <p>
                     <strong>Live Demo:</strong>{" "}
                     {selectedTask.liveDemoUrl || "-"}
                   </p>
+
                   <p>
                     <strong>Feedback:</strong>{" "}
                     {selectedTask.feedback || "No feedback yet"}
                   </p>
-                </>
-              ) : (
-                <>
-                  <p>
-                    <strong>Title:</strong> {selectedTask.title}
-                  </p>
-                  <p>
-                    <strong>Description:</strong>{" "}
-                    {selectedTask.description || "-"}
-                  </p>
-                  <p>
-                    <strong>Task Type:</strong> {selectedTask.taskType || "-"}
-                  </p>
-                  <p>
-                    <strong>Module:</strong>{" "}
-                    {typeof selectedTask.module === "object"
-                      ? selectedTask.module?.moduleName
-                      : selectedTask.module || "-"}
-                  </p>
-                  <p>
-                    <strong>Due Date:</strong>{" "}
-                    {formatDate(selectedTask.dueDate)}
-                  </p>
 
-                  {modalType === "submit" && (
-                    <p className="int-task-submit-note">
-                      Submission form and submit API need to be connected
-                      before you can send your work.
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
+                  <p>
+                    <strong>Achieved Marks:</strong>{" "}
+                    {selectedTask.achievedMarks ?? "Not graded"}
+                  </p>
+                </div>
 
-            <div className="int-task-modal-footer">
-              <button type="button" onClick={closeModal}>
-                Close
-              </button>
-            </div>
+                <div className="int-task-modal-footer">
+                  <button type="button" onClick={closeModal}>
+                    Close
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
     </div>
   );
 };
+
+export default Intrentask;

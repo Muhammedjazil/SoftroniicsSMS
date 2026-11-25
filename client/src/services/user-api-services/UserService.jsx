@@ -101,6 +101,24 @@ const takemysubmissions = async () => {
   }
 };
 
+// ======================================
+// INTERN CREATE TASK SUBMISSION
+// ======================================
+
+const createTaskSubmission = async (formData) => {
+  try {
+    const response = await axiosPrivate.post(
+      "/taskmanagement/submissions",
+      formData
+    );
+
+    return response.data;
+
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 
   return {
     takeinternweeklyschedule,
@@ -110,7 +128,8 @@ const takemysubmissions = async () => {
     markallnotificationsread,
     getMyAttendance,
     takealltask,
-    takemysubmissions
+    takemysubmissions,
+    createTaskSubmission
 
   };
 };

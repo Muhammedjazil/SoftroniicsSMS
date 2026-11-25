@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const Task = require("../Models/taskModel");
 const TaskSubmission = require("../Models/taskSubmissionModel");
 
+const Intern = require("../Models/internModel");
+
 // GET MODULE NAMES FROM EXISTING TASKS
 exports.getEvaluationModules = async (req, res) => {
   try {
@@ -190,6 +192,158 @@ exports.gradeSubmission = async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to evaluate submission",
+      error: error.message
+    });
+  }
+};
+
+
+// ======================================
+// INTERN SUBMIT TASK
+// ======================================
+
+exports.createTaskSubmission = async (req, res) => {
+  try {
+    // 1. Check authentication
+    if (req.userType !== "intern") {
+      return res.status(403).json({
+        message: "Only interns can submit tasks"
+      });
+    }
+
+    const internId = req.userId;
+
+    // 2. Get form data
+    const {
+      task,
+      submissionText,
+      githubRepository,
+      liveDemoUrl
+    } = req.body;
+
+    if (!task || !mongoose.Types.ObjectId.isValid(task)) {
+      return res.status(400).json({
+        message: "Valid task ID is required"
+      });
+    }
+
+    if (!submissionText || !submissionText.trim()) {
+      return res.status(400).json({
+        message: "Submission description is required"
+      });
+    }
+
+    // 3. Find logged-in intern
+    const intern = await Intern.findOne({
+      _id: internId,
+      isActive: true,
+      isDeleted: false
+    })
+      .populate({
+        path: "course",
+        select: "courseName category"
+      });
+
+    if (!intern) {
+      return res.status(404).json({
+        message: "Intern not found"
+      });
+    }
+
+    // 4. Check whether the task is assigned to this intern
+    const audienceConditions = [
+      { audience: "All interns" },
+
+      ...(intern.batch
+        ? [{
+            audience: "By batches",
+            batches: intern.batch
+          }]
+        : []),
+
+      ...(intern.course
+        ? [{
+            audience: "By Courses",
+            courses: intern.course._id
+          }]
+        : []),
+
+      ...(intern.course?.category
+        ? [{
+            audience: "By Category",
+            categories: intern.course.category
+          }]
+        : []),
+
+      {
+        audience: "Individual interns",
+        individualInterns: intern._id
+      }
+    ];
+
+    const assignedTask = await Task.findOne({
+      _id: task,
+      isActive: true,
+      isDeleted: false,
+      branch: intern.branch,
+      $or: audienceConditions
+    });
+
+    if (!assignedTask) {
+      return res.status(404).json({
+        message: "Task not found or not assigned to you"
+      });
+    }
+
+    // 5. Prevent duplicate submissions
+    const existingSubmission = await TaskSubmission.findOne({
+      task: task,
+      intern: intern._id,
+      isDeleted: false
+    });
+
+    if (existingSubmission) {
+      return res.status(400).json({
+        message: "You have already submitted this task"
+      });
+    }
+
+    // 6. Get uploaded attachment
+    const attachments = req.file
+      ? [`/uploads/tasks/${req.file.filename}`]
+      : [];
+
+    // 7. Save submission in MongoDB
+    const newSubmission = await TaskSubmission.create({
+      task: assignedTask._id,
+      intern: intern._id,
+      submissionText: submissionText.trim(),
+      githubRepository: githubRepository || "",
+      liveDemoUrl: liveDemoUrl || "",
+      attachments,
+      status: "Submitted"
+    });
+
+    // 8. Return saved submission
+    const savedSubmission = await TaskSubmission.findById(
+      newSubmission._id
+    )
+      .populate("task", "title taskType module totalMarks dueDate")
+      .populate("intern", "fullName email")
+      .lean();
+
+    return res.status(201).json({
+      success: true,
+      message: "Task submitted successfully!",
+      submission: savedSubmission
+    });
+
+  } catch (error) {
+    console.error("Create Task Submission Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to submit task",
       error: error.message
     });
   }
