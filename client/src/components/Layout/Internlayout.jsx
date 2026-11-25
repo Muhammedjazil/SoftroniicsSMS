@@ -16,6 +16,11 @@ const internRouteMeta = {
         parentPath: "Weekly Schedule",
         currentPath: "Batch Timetable"
     },
+    "/student/weekly_schedule": {
+        title: "My Weekly Schedule",
+        parentPath: "My Weekly Schedule",
+        currentPath: "Weekly Schedule"
+    },
     "/internweeklycard": {
         title: "Weekly Evaluation Card",
         parentPath: "Weekly Card",
