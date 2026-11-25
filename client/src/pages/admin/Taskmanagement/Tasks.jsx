@@ -2,6 +2,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import {
+    FiSearch,
+    FiDownload,
+    FiChevronLeft,
+    FiChevronRight,
+    FiChevronDown,
+} from "react-icons/fi";
+import {
     MdPersonOutline,
     MdFileDownload,
     MdUploadFile,
@@ -1520,6 +1527,36 @@ const Tasks = () => {
         tasksBranchFilter
     ]);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [tasksSearch, tasksTypeFilter, tasksStatusFilter, tasksAudienceFilter, tasksBranchFilter]);
+
+    const totalPages = Math.ceil(tasksFilteredList.length / itemsPerPage);
+    const currentTasks = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return tasksFilteredList.slice(start, start + itemsPerPage);
+    }, [tasksFilteredList, currentPage, itemsPerPage]);
+
+    const getStatusBadgeStyle = (status) => {
+        const s = (status || "").toLowerCase();
+        if (s === "completed") {
+            return { backgroundColor: "#ecfdf5", color: "#10b981" };
+        }
+        if (s === "in progress") {
+            return { backgroundColor: "#eff6ff", color: "#2563eb" };
+        }
+        if (s === "pending") {
+            return { backgroundColor: "#fff7ed", color: "#ea580c" };
+        }
+        if (s === "cancelled") {
+            return { backgroundColor: "#fef2f2", color: "#dc2626" };
+        }
+        return { backgroundColor: "#f3f4f6", color: "#4b5563" };
+    };
+
     // =====================================================
     // EXPORT CSV
     // =====================================================
@@ -1644,320 +1681,277 @@ const Tasks = () => {
 
     return (
 
-        <div className="tasks-page">
-
-            {/* HEADER */}
-
-            {/* TOP NAVIGATION */}
-
-            <div className="tasks-top-navigation">
-
-                <div className="tasks-tabs">
-
-                    <button
-                        type="button"
-                        className={
-                            tasksMode === "list"
-                                ? "tasks-tab-active"
-                                : ""
-                        }
-                        onClick={() => {
-                            setTasksMode("list");
-                            setTasksSelectedId(null);
-                        }}
-                    >
-                        Tasks List
-                    </button>
-
-                    <button
-                        type="button"
-                        className={
-                            tasksMode === "create"
-                                ? "tasks-tab-active"
-                                : ""
-                        }
-                        onClick={tasksHandleNew}
-                    >
-                        New Task
-                    </button>
-
-                </div>
-
-                <button
-                    type="button"
-                    className="tasks-export-btn"
-                    onClick={tasksHandleExport}
-                >
-                    <MdFileDownload />
-                    Export
-                </button>
-
-            </div>
-
-            {/* TASK LIST */}
-
-            {tasksMode === "list" && (
-
-                <div className="tasks-list-container">
-
-                    {/* FILTER PANEL */}
-
-                    <div className="tasks-filter-panel">
-
-                        <div className="tasks-search-box">
-
-                            <MdSearch />
-
-                            <input
-                                type="text"
-                                placeholder="Search Tasks"
-                                value={tasksSearch}
-                                onChange={e =>
-                                    setTasksSearch(e.target.value)
-                                }
-                            />
-
-                            {tasksSearch && (
-
-                                <button
-                                    type="button"
-                                    onClick={() => setTasksSearch("")}
-                                >
-                                    <MdClose />
-                                </button>
-
-                            )}
-
-                        </div>
-
-                        <select
-                            value={tasksTypeFilter}
-                            onChange={e =>
-                                setTasksTypeFilter(e.target.value)
-                            }
+        <div className="tasks-page syl-mgmt-container">
+            {/* TOP NAVIGATION / TOOLBAR */}
+            {(tasksMode === "list" || tasksMode === "create") && (
+                <div className="syl-mgmt-toolbar">
+                    <div className="syl-mgmt-tab-group">
+                        <button
+                            type="button"
+                            className={`syl-mgmt-tab-btn ${
+                                tasksMode === "list" ? "syl-mgmt-tab-btn--active" : ""
+                            }`}
+                            onClick={() => {
+                                setTasksMode("list");
+                                setTasksSelectedId(null);
+                            }}
                         >
-
-                            <option value="all">All Types</option>
-
-                            {taskTypes.map(type => (
-                                <option key={type} value={type}>
-                                    {type}
-                                </option>
-                            ))}
-
-                        </select>
-
-                        <select
-                            value={tasksStatusFilter}
-                            onChange={e =>
-                                setTasksStatusFilter(e.target.value)
-                            }
-                        >
-
-                            <option value="all">All Status</option>
-
-                            {taskStatuses.map(status => (
-                                <option key={status} value={status}>
-                                    {status}
-                                </option>
-                            ))}
-
-                        </select>
-
-                        <select
-                            value={tasksAudienceFilter}
-                            onChange={e =>
-                                setTasksAudienceFilter(e.target.value)
-                            }
-                        >
-
-                            <option value="all">All Audience</option>
-
-                            {audienceOptions.map(item => (
-                                <option key={item} value={item}>
-                                    {item}
-                                </option>
-                            ))}
-
-                        </select>
-
-                        <select
-                            value={tasksBranchFilter}
-                            onChange={e =>
-                                setTasksBranchFilter(e.target.value)
-                            }
-                        >
-
-                            <option value="all">All Branches</option>
-
-                            {dropdowns.branches.map(item => (
-                                <option
-                                    key={getId(item)}
-                                    value={getId(item)}
-                                >
-                                    {item.branchName}
-                                </option>
-                            ))}
-
-                        </select>
+                            Tasks List
+                        </button>
 
                         <button
                             type="button"
-                            className="tasks-reset-filter"
-                            onClick={tasksResetFilters}
+                            className={`syl-mgmt-tab-btn ${
+                                tasksMode === "create" ? "syl-mgmt-tab-btn--active" : ""
+                            }`}
+                            onClick={tasksHandleNew}
                         >
-                            Reset
+                            New Task
                         </button>
+                    </div>
 
+                    {tasksMode === "list" && (
+                        <button
+                            type="button"
+                            className="syl-mgmt-export-btn"
+                            onClick={tasksHandleExport}
+                        >
+                            <FiDownload className="syl-mgmt-export-icon" />
+                            <span>Export</span>
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* TASK LIST */}
+            {tasksMode === "list" && (
+                <main className="syl-mgmt-panel">
+                    {/* FILTER PANEL */}
+                    <div className="syl-mgmt-filter-bar">
+                        <div className="syl-mgmt-search-wrapper">
+                            <FiSearch className="syl-mgmt-search-icon" />
+                            <input
+                                type="text"
+                                className="syl-mgmt-search-input"
+                                placeholder="Search Tasks..."
+                                value={tasksSearch}
+                                onChange={(e) => setTasksSearch(e.target.value)}
+                            />
+                        </div>
+
+                        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                            <div className="syl-mgmt-filter-select-wrapper" style={{ width: "140px" }}>
+                                <select
+                                    className="syl-mgmt-filter-select"
+                                    value={tasksTypeFilter}
+                                    onChange={(e) => setTasksTypeFilter(e.target.value)}
+                                >
+                                    <option value="all">All Types</option>
+                                    {taskTypes.map((type) => (
+                                        <option key={type} value={type}>
+                                            {type}
+                                        </option>
+                                    ))}
+                                </select>
+                                <FiChevronDown className="syl-mgmt-select-arrow" />
+                            </div>
+
+                            <div className="syl-mgmt-filter-select-wrapper" style={{ width: "140px" }}>
+                                <select
+                                    className="syl-mgmt-filter-select"
+                                    value={tasksStatusFilter}
+                                    onChange={(e) => setTasksStatusFilter(e.target.value)}
+                                >
+                                    <option value="all">All Status</option>
+                                    {taskStatuses.map((status) => (
+                                        <option key={status} value={status}>
+                                            {status}
+                                        </option>
+                                    ))}
+                                </select>
+                                <FiChevronDown className="syl-mgmt-select-arrow" />
+                            </div>
+
+                            <div className="syl-mgmt-filter-select-wrapper" style={{ width: "140px" }}>
+                                <select
+                                    className="syl-mgmt-filter-select"
+                                    value={tasksAudienceFilter}
+                                    onChange={(e) => setTasksAudienceFilter(e.target.value)}
+                                >
+                                    <option value="all">All Audience</option>
+                                    {audienceOptions.map((item) => (
+                                        <option key={item} value={item}>
+                                            {item}
+                                        </option>
+                                    ))}
+                                </select>
+                                <FiChevronDown className="syl-mgmt-select-arrow" />
+                            </div>
+
+                            <div className="syl-mgmt-filter-select-wrapper" style={{ width: "140px" }}>
+                                <select
+                                    className="syl-mgmt-filter-select"
+                                    value={tasksBranchFilter}
+                                    onChange={(e) => setTasksBranchFilter(e.target.value)}
+                                >
+                                    <option value="all">All Branches</option>
+                                    {dropdowns.branches.map((item) => (
+                                        <option key={getId(item)} value={getId(item)}>
+                                            {item.branchName}
+                                        </option>
+                                    ))}
+                                </select>
+                                <FiChevronDown className="syl-mgmt-select-arrow" />
+                            </div>
+
+                            <button
+                                type="button"
+                                className="syl-mgmt-export-btn"
+                                style={{ height: "42px", padding: "0 16px" }}
+                                onClick={tasksResetFilters}
+                            >
+                                Reset
+                            </button>
+                        </div>
                     </div>
 
                     {/* TABLE */}
-
                     {tasksFilteredList.length > 0 ? (
-
-                        <div className="tasks-table-wrapper">
-
-                            <table className="tasks-table">
-
+                        <div className="syl-mgmt-table-wrapper">
+                            <table className="notificationtable">
                                 <thead>
-
                                     <tr>
-                                        <th>#</th>
+                                        <th style={{ width: "50px" }}>#</th>
                                         <th>Title</th>
-                                        <th>Task Type</th>
+                                        <th className="noti-th-center" style={{ textAlign: "center" }}>Task Type</th>
                                         <th>Mentor</th>
-                                        <th>Start Date</th>
-                                        <th>Due Date</th>
-                                        <th>Status</th>
-                                        <th>Audience</th>
+                                        <th className="noti-th-center" style={{ textAlign: "center" }}>Start Date</th>
+                                        <th className="noti-th-center" style={{ textAlign: "center" }}>Due Date</th>
+                                        <th className="noti-th-center" style={{ textAlign: "center" }}>Status</th>
+                                        <th className="noti-th-center" style={{ textAlign: "center" }}>Audience</th>
                                         <th>Branches</th>
-                                        <th>Actions</th>
+                                        <th style={{ width: "160px", textAlign: "center" }}>Actions</th>
                                     </tr>
-
                                 </thead>
 
                                 <tbody>
+                                    {currentTasks.map((task, index) => {
+                                        const actualIndex = (currentPage - 1) * itemsPerPage + index;
+                                        const initial = (task.title || "T").charAt(0).toUpperCase();
 
-                                    {tasksFilteredList.map((task, index) => (
-
-                                        <tr key={task._id}>
-
-                                            <td>{index + 1}</td>
-
-                                            <td className="tasks-title-cell">
-                                                {task.title}
-                                            </td>
-
-                                            <td>{task.taskType}</td>
-
-                                            <td>
-                                                {getName(
-                                                    task.assignedMentor,
-                                                    ["fullName", "name", "email"]
-                                                )}
-                                            </td>
-
-                                            <td>
-                                                {getDateValue(task.startDate) || "-"}
-                                            </td>
-
-                                            <td>
-                                                {getDateValue(task.dueDate) || "-"}
-                                            </td>
-
-                                            <td>
-
-                                                <span
-                                                    className={`tasks-status tasks-status-${(
-                                                        task.status || ""
-                                                    ).toLowerCase().replace(/\s+/g, "-")}`}
-                                                >
-                                                    {task.status}
-                                                </span>
-
-                                            </td>
-
-                                            <td>{task.audience || "-"}</td>
-
-                                            <td>
-                                                {(task.branch || [])
-                                                    .map(item => item.branchName)
-                                                    .join(", ") || "-"}
-                                            </td>
-
-                                            <td>
-
-                                                <div className="tasks-action-buttons">
-
-                                                    <button
-                                                        type="button"
-                                                        title="View"
-                                                        onClick={() =>
-                                                            tasksHandleView(task)
-                                                        }
+                                        return (
+                                            <tr key={task._id}>
+                                                <td>{actualIndex + 1}</td>
+                                                <td>
+                                                    <div className="noti-title-cell">
+                                                        <div className="noti-avatar">{initial}</div>
+                                                        <span className="noti-title-text">{task.title}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="noti-td-center" style={{ textAlign: "center" }}>
+                                                    <span className="noti-type-badge">{task.taskType}</span>
+                                                </td>
+                                                <td>
+                                                    {getName(task.assignedMentor, ["fullName", "name", "email"]) || "—"}
+                                                </td>
+                                                <td className="noti-td-center" style={{ textAlign: "center" }}>
+                                                    <span className="syl-mgmt-date-text">{getDateValue(task.startDate) || "—"}</span>
+                                                </td>
+                                                <td className="noti-td-center" style={{ textAlign: "center" }}>
+                                                    <span className="syl-mgmt-date-text">{getDateValue(task.dueDate) || "—"}</span>
+                                                </td>
+                                                <td className="noti-td-center" style={{ textAlign: "center" }}>
+                                                    <span
+                                                        className="noti-type-badge"
+                                                        style={getStatusBadgeStyle(task.status)}
                                                     >
-                                                        <MdVisibility />
-                                                    </button>
-
-                                                    <button
-                                                        type="button"
-                                                        title="Edit"
-                                                        onClick={() =>
-                                                            tasksHandleEdit(task)
-                                                        }
+                                                        {task.status}
+                                                    </span>
+                                                </td>
+                                                <td className="noti-td-center" style={{ textAlign: "center" }}>
+                                                    <span
+                                                        className="syl-mgmt-course-pill"
+                                                        style={{ backgroundColor: "#f3f4f6", color: "#4b5563" }}
                                                     >
-                                                        <MdEdit />
-                                                    </button>
-
-                                                    <button
-                                                        type="button"
-                                                        title="Delete"
-                                                        className="tasks-delete-icon"
-                                                        onClick={() =>
-                                                            tasksHandleDelete(task._id)
-                                                        }
-                                                    >
-                                                        <MdDelete />
-                                                    </button>
-
-                                                </div>
-
-                                            </td>
-
-                                        </tr>
-
-                                    ))}
-
+                                                        {task.audience || "—"}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {(task.branch || []).map((b) => b.branchName).join(", ") || "—"}
+                                                </td>
+                                                <td style={{ textAlign: "center" }}>
+                                                    <div className="syl-mgmt-col-actions">
+                                                        <button
+                                                            type="button"
+                                                            className="syl-mgmt-text-action syl-mgmt-text-action--view"
+                                                            onClick={() => tasksHandleView(task)}
+                                                        >
+                                                            View
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="syl-mgmt-text-action syl-mgmt-text-action--edit"
+                                                            onClick={() => tasksHandleEdit(task)}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="syl-mgmt-text-action syl-mgmt-text-action--delete"
+                                                            onClick={() => tasksHandleDelete(task._id)}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
-
                             </table>
-
                         </div>
-
                     ) : (
-
-                        <div className="tasks-empty-state">
-
-                            <p>
+                        <div className="syl-mgmt-content-area">
+                            <p className="syl-mgmt-empty-message">
                                 No tasks available. Please add tasks to view them here.
                             </p>
-
                         </div>
-
                     )}
 
-                    {/* RESULT COUNT */}
+                    {/* Pagination */}
+                    {tasksFilteredList.length > 0 && (
+                        <div className="syl-mgmt-pagination-bar">
+                            <span className="syl-mgmt-pagination-text">
+                                {`${currentPage} of ${Math.max(totalPages, 1)}`}
+                            </span>
 
-                    <div className="tasks-list-footer">
-
-                        <span>
-                            Showing {tasksFilteredList.length} of {tasksList.length} tasks
-                        </span>
-
-                    </div>
-
-                </div>
-
+                            <div className="syl-mgmt-pagination-controls">
+                                <button
+                                    type="button"
+                                    className="syl-mgmt-page-btn"
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    style={currentPage === 1 ? {} : { cursor: "pointer", color: "#374151", backgroundColor: "#fff" }}
+                                >
+                                    <FiChevronLeft />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="syl-mgmt-page-btn"
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={totalPages === 0 || currentPage >= totalPages}
+                                    style={
+                                        totalPages === 0 || currentPage >= totalPages
+                                            ? {}
+                                            : { cursor: "pointer", color: "#374151", backgroundColor: "#fff" }
+                                    }
+                                >
+                                    <FiChevronRight />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </main>
             )}
 
             {/* CREATE TASK */}

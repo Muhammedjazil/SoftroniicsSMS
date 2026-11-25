@@ -1,118 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('../syllabus/ModuleManagement.css');
 
 /* =========================================
    MAIN CONTAINER
 ========================================= */
 
 .Rolemanagement {
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
     min-height: 100vh;
+    box-sizing: border-box;
+    background-color: #f8f9fa;
     padding: 24px 32px 32px 32px;
-    background: #f8f9fa;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    box-sizing: border-box;
-}
-
-
-/* =========================================
-   HEADER
-========================================= */
-
-.Rolemanagement-role {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
-    margin-bottom: 24px;
-}
-
-.Rolemanagement-name h2 {
-    font-size: 22px;
-    font-weight: 700;
-    margin: 0 0 4px;
-    color: #1f2937;
-    letter-spacing: -0.02em;
-}
-
-.Rolemanagement-name p {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #6b7280;
-    margin: 0;
-}
-
-
-/* =========================================
-   PROFILE
-========================================= */
-
-.Rolemanagement-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    background: #ffffff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-    min-width: 155px;
-    height: 54px;
-    box-sizing: border-box;
-}
-
-.Rolemanagement-profile-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #e5e7eb;
-    font-size: 18px;
-    color: #6b7280;
-    flex-shrink: 0;
-}
-
-.Rolemanagement-profiledetails h5 {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 600;
     color: #111827;
-    line-height: 1.2;
-    text-transform: capitalize;
 }
-
-.Rolemanagement-profiledetails p {
-    margin: 2px 0 0 0;
-    font-size: 12px;
-    color: #6b7280;
-    line-height: 1.2;
-    text-transform: capitalize;
-}
-
 
 /* =========================================
-   MAIN CARD
+   TOOLBAR (TABS + EXPORT)
 ========================================= */
 
-.Rolemanagement-hero {
-    width: 100%;
-    min-height: 650px;
-    padding: 24px 28px;
-    box-sizing: border-box;
-    border: 1px solid #eef0f2;
-    border-radius: 14px;
-    background: #ffffff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
-
-
-/* =========================================
-   TOP TABS
-========================================= */
-
-.Rolemanagement-hero0 {
+.Rolemanagement-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -121,27 +31,33 @@
 }
 
 .Rolemanagement-hero1 {
-    display: flex;
-    align-items: center;
+    display: inline-flex;
     gap: 10px;
 }
 
 .Rolemanagement-hero1 button {
-    min-width: 100px;
     height: 40px;
     padding: 0 20px;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #374151;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-size: 14px;
     font-weight: 600;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #374151;
     cursor: pointer;
     transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.Rolemanagement-hero1 button:hover {
+    background-color: #f9fafb;
 }
 
 .Rolemanagement-hero1 button.active {
-    background: #ff790e;
+    background-color: #ff790e;
     border-color: #ff790e;
     color: #ffffff;
     box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
@@ -152,266 +68,309 @@
     filter: brightness(0.94);
 }
 
-.Rolemanagement-hero1 button:hover:not(.active) {
-    background: #f9fafb;
-    border-color: #d1d5db;
-    color: #111827;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+.Rolemanagement-export {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 18px;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    font-family: inherit;
 }
 
+.Rolemanagement-export:hover {
+    background-color: #f9fafb;
+}
 
 /* =========================================
-   SEARCH, FILTER AND EXPORT
+   MAIN WHITE CARD PANEL
+========================================= */
+
+.Rolemanagement-hero {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background-color: #ffffff;
+    border: 1px solid #eef0f2;
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    box-sizing: border-box;
+}
+
+/* =========================================
+   FILTER & SEARCH BAR
 ========================================= */
 
 .Rolemanagement-table-controls {
-    display: grid;
-    grid-template-columns: minmax(200px, 1fr) 194px 122px;
-    gap: 13px;
-    align-items: center;
-    width: 100%;
-    margin: 22px 0 19px;
-}
-
-
-/* SEARCH */
-
-.Rolemanagement-search {
     display: flex;
     align-items: center;
-    gap: 10px;
-    width: 100%;
-    height: 42px;
-    padding: 0 12px;
-    box-sizing: border-box;
-    border: 1px solid #e3e5e8;
-    border-radius: 6px;
-    background: #ffffff;
-    color: #999999;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.Rolemanagement-search {
+    position: relative;
+    flex: 1;
 }
 
 .Rolemanagement-search svg {
-    flex-shrink: 0;
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 17px;
+    color: #9ca3af;
+    pointer-events: none;
 }
 
 .Rolemanagement-search input {
     width: 100%;
-    height: 100%;
-    border: none;
+    height: 42px;
+    box-sizing: border-box;
+    padding: 0 14px 0 42px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #111827;
+    background-color: #ffffff;
     outline: none;
-    background: transparent;
-    color: #333333;
-    font-size: 13px;
+    font-family: inherit;
 }
 
 .Rolemanagement-search input::placeholder {
-    color: #999999;
+    color: #9ca3af;
 }
 
-
-/* STATUS FILTER */
+.Rolemanagement-search input:focus {
+    border-color: #f97316;
+}
 
 .Rolemanagement-filter {
-    width: 100%;
+    width: 180px;
     height: 42px;
-    padding: 0 12px;
-    border: 1px solid #e3e5e8;
-    border-radius: 6px;
+    box-sizing: border-box;
+    padding: 0 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    background-color: #ffffff;
     outline: none;
-    background: #ffffff;
-    color: #555555;
-    font-size: 13px;
     cursor: pointer;
+    font-family: inherit;
 }
 
 .Rolemanagement-filter:focus {
-    border-color: #ed8019;
+    border-color: #f97316;
 }
-
-
-/* EXPORT BUTTON */
-
-.Rolemanagement-export {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    height: 40px;
-    padding: 0 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #374151;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.Rolemanagement-export svg {
-    font-size: 16px;
-}
-
-.Rolemanagement-export:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
-    color: #111827;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
 
 /* =========================================
-   TABLE CONTAINER
+   ROLES TABLE
 ========================================= */
 
 .Rolemanagement-hero-table {
     width: 100%;
     overflow-x: auto;
-    box-sizing: border-box;
 }
-
-
-/* =========================================
-   TABLE
-========================================= */
 
 .Rolemanagement-hero-table table {
     width: 100%;
-    min-width: 650px;
-    border-collapse: collapse;
-    table-layout: auto;
-    background: #ffffff;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
-
-/* TABLE HEADER */
-
-.Rolemanagement-hero-table thead {
-    background: #f7f9f9;
+.Rolemanagement-hero-table thead tr {
+    background-color: #f9fafb;
 }
 
 .Rolemanagement-hero-table th {
-    height: 43px;
-    padding: 0 18px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    color: #626b73;
-    white-space: nowrap;
+    padding: 12px 16px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #6b7280;
     text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: left;
+    border: none;
 }
 
+.Rolemanagement-hero-table th:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
 
-/* TABLE BODY */
+.Rolemanagement-hero-table th:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    text-align: center;
+}
 
-.Rolemanagement-hero-table td {
-    height: 61px;
-    padding: 10px 18px;
-    text-align: left;
-    font-size: 12px;
-    color: #777777;
-    border-bottom: 1px solid #e7e8e9;
-    line-height: 1.5;
-    white-space: nowrap;
+.Rolemanagement-hero-table tbody tr {
+    background-color: #ffffff;
+    transition: background-color 0.15s ease;
 }
 
 .Rolemanagement-hero-table tbody tr:hover {
-    background: #fcfcfc;
+    background-color: #fafafa;
 }
 
-.Rolemanagement-hero-table tbody tr:last-child td {
-    border-bottom: 1px solid #e7e8e9;
+.Rolemanagement-hero-table td {
+    padding: 16px;
+    font-size: 13.5px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
 }
 
-
-/* ROLE NAME */
-
-.Rolemanagement-hero-table .role-name {
-    color: #252a30;
-    font-weight: 600;
-    text-transform: lowercase;
+.role-cell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
 }
 
+.role-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: #ffedd5;
+    color: #ea580c;
+    font-size: 13.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
 
-/* =========================================
-   STATUS
-========================================= */
+.role-name-text {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #111827;
+    text-transform: capitalize;
+}
 
 .Rolemanagement-status {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 3px 10px;
+    font-size: 12px;
     font-weight: 600;
+}
+
+.Rolemanagement-status button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+    font-family: inherit;
 }
 
 .active-status {
-    background: #dcf8e6;
-    color: #29965a;
+    background-color: #ecfdf5;
+    color: #10b981;
 }
 
 .inactive-status {
-    background: #ffe5e5;
-    color: #d94c4c;
+    background-color: #fef2f2;
+    color: #dc2626;
 }
 
+.Rolemanagement-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    white-space: nowrap;
+}
 
-/* =========================================
-   EMPTY TABLE
-========================================= */
+.Rolemanagement-actions button {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    font-family: inherit;
+}
+
+.Rolemanagement-actions button:hover {
+    text-decoration: underline;
+    opacity: 0.85;
+}
+
+.view-action {
+    color: #2563eb !important;
+}
+
+.edit-action {
+    color: #f97316 !important;
+}
+
+.delete-action {
+    color: #dc2626 !important;
+}
 
 .Rolemanagement-empty {
-    height: 100px !important;
-    text-align: center !important;
-    color: #999999 !important;
-    font-size: 13px !important;
+    text-align: center;
+    padding: 48px 16px !important;
+    color: #6b7280;
+    font-size: 14.5px;
+    font-weight: 500;
 }
 
-
-/* =========================================
-   PAGINATION
-========================================= */
-
+/* Pagination */
 .Rolemanagement-pagination {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
-    gap: 9px;
-    margin-top: 18px;
+    justify-content: flex-end;
+    gap: 14px;
+    margin-top: 24px;
+    padding-right: 4px;
 }
 
 .Rolemanagement-pagination span {
-    margin-right: 5px;
-    color: #777777;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4b5563;
 }
 
 .Rolemanagement-pagination button {
     display: flex;
-    justify-content: center;
     align-items: center;
-    width: 30px;
-    height: 30px;
-    border: 1px solid #e3e5e8;
-    border-radius: 5px;
-    background: #ffffff;
-    color: #777777;
-    font-size: 16px;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #374151;
     cursor: pointer;
+    font-size: 15px;
+    font-family: inherit;
 }
 
 .Rolemanagement-pagination button:disabled {
-    opacity: 0.5;
+    color: #9ca3af;
     cursor: not-allowed;
 }
 
-
 /* =========================================
-   NEW ROLE MAIN CONTAINER
+   NEW ROLE / EDIT ROLE MAIN CONTAINER
 ========================================= */
 
 .Rolemanagement-newtask {
@@ -421,6 +380,22 @@
     box-sizing: border-box;
 }
 
+.Rolemanagement-create-heading {
+    margin-bottom: 24px;
+}
+
+.Rolemanagement-create-heading h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 4px;
+}
+
+.Rolemanagement-create-heading p {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
 
 /* =========================================
    ROLE AND DESCRIPTION
@@ -466,6 +441,9 @@
     box-shadow: 0 0 3px rgba(233, 147, 25, 0.2);
 }
 
+.required-star {
+    color: #e32626;
+}
 
 /* =========================================
    ALL PRIVILEGES HEADING
@@ -478,7 +456,6 @@
     color: #222222;
 }
 
-
 /* =========================================
    PRIVILEGE GRID
 ========================================= */
@@ -489,7 +466,6 @@
     gap: 15px;
     width: 100%;
 }
-
 
 /* =========================================
    PRIVILEGE CARD
@@ -509,7 +485,6 @@
     box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
 }
 
-
 /* =========================================
    CARD HEADER
 ========================================= */
@@ -528,7 +503,6 @@
     color: #292929;
     margin: 0;
 }
-
 
 /* =========================================
    ORANGE SWITCH
@@ -570,17 +544,14 @@
     transition: 0.3s;
 }
 
-.Rolemanagement-newtask-switch input:checked
-+ .Rolemanagement-newtask-slider {
+.Rolemanagement-newtask-switch input:checked+.Rolemanagement-newtask-slider {
     background: #e99319;
 }
 
-.Rolemanagement-newtask-switch input:checked
-+ .Rolemanagement-newtask-slider::before {
+.Rolemanagement-newtask-switch input:checked+.Rolemanagement-newtask-slider::before {
     transform: translateX(16px);
     background: #ffffff;
 }
-
 
 /* =========================================
    CHECKBOX OPTIONS
@@ -629,7 +600,6 @@
     font-weight: bold;
 }
 
-
 /* =========================================
    BOTTOM BUTTONS
 ========================================= */
@@ -674,6 +644,22 @@
     border-color: #d9820d;
 }
 
+/* =========================================
+   VIEW ROLE DETAILS
+========================================= */
+
+.Rolemanagement-view-details {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 20px;
+    font-size: 13.5px;
+    color: #374151;
+}
+
+.Rolemanagement-view-details strong {
+    color: #111827;
+}
 
 /* =========================================
    FOCUS EFFECTS
@@ -684,328 +670,7 @@
     outline-offset: 2px;
 }
 
-.Rolemanagement-newtask-switch input:focus-visible
-+ .Rolemanagement-newtask-slider {
+.Rolemanagement-newtask-switch input:focus-visible+.Rolemanagement-newtask-slider {
     outline: 2px solid #e99319;
     outline-offset: 2px;
 }
-
-
-/* =========================================
-   TABLET RESPONSIVE
-========================================= */
-
-@media (max-width: 1000px) {
-
-    .Rolemanagement-newtask-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .Rolemanagement-hero-table {
-        overflow-x: auto;
-    }
-
-}
-
-
-/* =========================================
-   MOBILE RESPONSIVE
-========================================= */
-
-@media (max-width: 768px) {
-
-    .Rolemanagement {
-        padding: 15px;
-    }
-
-    .Rolemanagement-role {
-        gap: 15px;
-        align-items: flex-start;
-    }
-
-    .Rolemanagement-name h2 {
-        font-size: 19px;
-    }
-
-    .Rolemanagement-profile {
-        padding: 8px;
-        gap: 7px;
-    }
-
-    .Rolemanagement-profiledetails h5 {
-        font-size: 13px;
-    }
-
-    .Rolemanagement-profiledetails p {
-        font-size: 11px;
-    }
-
-    .Rolemanagement-hero {
-        padding: 15px;
-        min-height: 550px;
-    }
-
-    .Rolemanagement-hero1 button {
-        min-width: 90px;
-        height: 40px;
-        font-size: 13px;
-    }
-
-    .Rolemanagement-table-controls {
-        grid-template-columns: minmax(0, 1fr) 130px;
-        gap: 10px;
-    }
-
-    .Rolemanagement-search {
-        grid-column: 1 / -1;
-    }
-
-    .Rolemanagement-filter,
-    .Rolemanagement-export {
-        width: 100%;
-    }
-
-    .Rolemanagement-newtask-details {
-        gap: 12px;
-    }
-
-    .Rolemanagement-newtask-field {
-        width: 50%;
-    }
-
-}
-
-
-/* =========================================
-   SMALL MOBILE
-========================================= */
-
-@media (max-width: 500px) {
-
-    .Rolemanagement {
-        padding: 12px;
-    }
-
-    .Rolemanagement-role {
-        flex-direction: column;
-    }
-
-    .Rolemanagement-hero {
-        padding: 12px;
-    }
-
-    .Rolemanagement-hero0 {
-        align-items: flex-start;
-    }
-
-    .Rolemanagement-hero1 button {
-        min-width: 85px;
-        padding: 0 10px;
-        font-size: 12px;
-    }
-
-    .Rolemanagement-table-controls {
-        grid-template-columns: 1fr;
-    }
-
-    .Rolemanagement-search {
-        grid-column: auto;
-    }
-
-    .Rolemanagement-newtask-details {
-        flex-direction: column;
-    }
-
-    .Rolemanagement-newtask-field {
-        width: 100%;
-    }
-
-    .Rolemanagement-newtask-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .Rolemanagement-newtask-card {
-        min-height: 140px;
-    }
-
-    .Rolemanagement-newtask-buttons {
-        flex-wrap: wrap;
-    }
-
-    .Rolemanagement-newtask-buttons button {
-        flex: 1;
-    }
-
-}
-/* ACTIONS */
-
-/* =========================================
-   ROLE MANAGEMENT - TABLE ACTIONS
-========================================= */
-
-/* Center ACTIONS table heading */
-.Rolemanagement-hero-table thead th:last-child {
-    text-align: center !important;
-    vertical-align: middle;
-}
-
-/* Center actions table cell */
-.Rolemanagement-hero-table tbody td:last-child {
-    text-align: center !important;
-    vertical-align: middle;
-    min-width: 180px;
-}
-
-/* Arrange View, Edit, Delete horizontally */
-.Rolemanagement-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
-    width: 100%;
-    white-space: nowrap;
-}
-
-/* Common button styling */
-.Rolemanagement-actions button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 0;
-    margin: 0;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-/* View - Blue */
-.Rolemanagement-actions .view-action {
-    color: #1557e8;
-}
-
-/* Edit - Orange */
-.Rolemanagement-actions .edit-action {
-    color: #ff790e;
-}
-
-/* Delete - Red */
-.Rolemanagement-actions .delete-action {
-    color: #e32626;
-}
-
-/* Hover effects */
-.Rolemanagement-actions .view-action:hover {
-    color: #003dbb;
-    text-decoration: underline;
-}
-
-.Rolemanagement-actions .edit-action:hover {
-    color: #d65e00;
-    text-decoration: underline;
-}
-
-.Rolemanagement-actions .delete-action:hover {
-    color: #bd1717;
-    text-decoration: underline;
-}
-
-
-/* VIEW RESPONSIVE */
-
-@media (max-width: 550px) {
-    .Rolemanagement-view-details {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-}
-/* STATUS BUTTON */
-
-.Rolemanagement-status {
-    display: inline-block;
-    padding: 0;
-    border: none;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.Rolemanagement-status button {
-    padding: 6px 14px;
-    border: none;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-/* ACTIVE - GREEN */
-
-.Rolemanagement-status.active-status button {
-    background: #dcf8e6;
-    color: #29965a;
-}
-
-/* INACTIVE - RED */
-
-.Rolemanagement-status.inactive-status button {
-    background: #ffe5e5;
-    color: #d94c4c;
-}
-
-.Rolemanagement-status button:hover {
-    opacity: 0.8;
-}
-
-.Rolemanagement-pagination {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 12px;
-    margin-top: 18px;
-}
-
-.Rolemanagement-pagination span {
-    color: #777777;
-    font-size: 12px;
-}
-
-.Rolemanagement-pagination button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid #e3e5e8;
-    border-radius: 5px;
-    background: #ffffff;
-    color: #777777;
-    cursor: pointer;
-}
-
-.Rolemanagement-pagination button:hover:not(:disabled) {
-    background: #ff790e;
-    color: #ffffff;
-    border-color: #ff790e;
-}
-
-.Rolemanagement-pagination button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-/* DELETE BUTTON - RED */
-.Rolemanagement-actions .delete-action {
-    color: #e32626 !important;
-}
-
-.Rolemanagement-actions .delete-action:hover {
-    color: #bd1717 !important;
-    text-decoration: underline;
-}
-

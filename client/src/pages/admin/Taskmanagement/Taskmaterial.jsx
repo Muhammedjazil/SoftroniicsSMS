@@ -1,7 +1,14 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  MdSearch,
+  FiSearch,
+  FiDownload,
+  FiEye,
+  FiChevronLeft,
+  FiChevronRight,
+  FiChevronDown,
+} from "react-icons/fi";
+import {
   MdClose,
   MdVisibility,
   MdEdit,
@@ -408,7 +415,7 @@ const Taskmaterial = () => {
     event.target.value = "";
   };
 
-  const downloadAttachment = (attachment) => {
+  const handleViewAttachment = (attachment) => {
     if (!attachment) {
       alert("Attachment is not available.");
       return;
@@ -420,6 +427,45 @@ const Taskmaterial = () => {
 
     window.open(url, "_blank", "noopener,noreferrer");
   };
+
+  const handleDownloadAttachment = async (attachment) => {
+    if (!attachment) {
+      alert("Attachment is not available.");
+      return;
+    }
+
+    const url = attachment.startsWith("http")
+      ? attachment
+      : `${import.meta.env.VITE_API_URL || "http://localhost:7000"}${attachment}`;
+
+    const fileName = getFileName(attachment) || "attachment";
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Network response was not ok");
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.warn("Direct blob download failed, falling back to anchor trigger:", err);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const downloadAttachment = handleDownloadAttachment;
 
   // =====================================================
   // NORMALIZE MATERIAL FOR FORM
@@ -721,6 +767,19 @@ const Taskmaterial = () => {
     mentorFilter,
     branchFilter,
   ]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, audienceFilter, mentorFilter, branchFilter]);
+
+  const totalPages = Math.ceil(filteredMaterials.length / itemsPerPage);
+  const currentMaterials = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredMaterials.slice(start, start + itemsPerPage);
+  }, [filteredMaterials, currentPage, itemsPerPage]);
 
   // =====================================================
   // EXPORT CSV
@@ -1302,17 +1361,15 @@ const Taskmaterial = () => {
   // =====================================================
 
   return (
-    <div className="tasks-material-page">
+    <div className="tasks-material-page syl-mgmt-container">
       {(mode === "list" || mode === "create") && (
-        <div className="tasks-material-top-navigation">
-          <div className="tasks-material-tabs">
+        <div className="syl-mgmt-toolbar">
+          <div className="syl-mgmt-tab-group">
             <button
               type="button"
-              className={
-                mode === "list"
-                  ? "tasks-material-tab-active"
-                  : ""
-              }
+              className={`syl-mgmt-tab-btn ${
+                mode === "list" ? "syl-mgmt-tab-btn--active" : ""
+              }`}
               onClick={() => {
                 resetForm();
                 setMode("list");
@@ -1323,239 +1380,254 @@ const Taskmaterial = () => {
 
             <button
               type="button"
-              className={
-                mode === "create"
-                  ? "tasks-material-tab-active"
-                  : ""
-              }
+              className={`syl-mgmt-tab-btn ${
+                mode === "create" ? "syl-mgmt-tab-btn--active" : ""
+              }`}
               onClick={handleNew}
             >
               New Material
             </button>
           </div>
 
-          <button
-            type="button"
-            className="tasks-material-export-btn"
-            onClick={handleExport}
-          >
-            <MdFileDownload />
-            Export
-          </button>
+          {mode === "list" && (
+            <button
+              type="button"
+              className="syl-mgmt-export-btn"
+              onClick={handleExport}
+            >
+              <FiDownload className="syl-mgmt-export-icon" />
+              <span>Export</span>
+            </button>
+          )}
         </div>
       )}
 
       {/* MATERIAL LIST */}
-
       {mode === "list" && (
-        <div className="tasks-material-list-container">
-          <div className="tasks-material-filter-row">
-            <div className="tasks-material-search-box">
-              <MdSearch />
-
+        <main className="syl-mgmt-panel">
+          {/* Filter Bar */}
+          <div className="syl-mgmt-filter-bar">
+            <div className="syl-mgmt-search-wrapper">
+              <FiSearch className="syl-mgmt-search-icon" />
               <input
                 type="text"
-                placeholder="Search Materials"
+                className="syl-mgmt-search-input"
+                placeholder="Search Materials..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                >
-                  <MdClose />
-                </button>
-              )}
             </div>
 
-            <select
-              value={audienceFilter}
-              onChange={(e) =>
-                setAudienceFilter(e.target.value)
-              }
-            >
-              <option value="all">All Audience</option>
-
-              {AUDIENCE_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={mentorFilter}
-              onChange={(e) =>
-                setMentorFilter(e.target.value)
-              }
-            >
-              <option value="all">All Mentors</option>
-
-              {dropdowns.mentors.map((mentor) => (
-                <option
-                  key={getId(mentor)}
-                  value={getId(mentor)}
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <div className="syl-mgmt-filter-select-wrapper" style={{ width: "160px" }}>
+                <select
+                  className="syl-mgmt-filter-select"
+                  value={audienceFilter}
+                  onChange={(e) => setAudienceFilter(e.target.value)}
                 >
-                  {getName(mentor, ["fullName", "email"])}
-                </option>
-              ))}
-            </select>
+                  <option value="all">All Audience</option>
+                  {AUDIENCE_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+                <FiChevronDown className="syl-mgmt-select-arrow" />
+              </div>
 
-            <select
-              value={branchFilter}
-              onChange={(e) =>
-                setBranchFilter(e.target.value)
-              }
-            >
-              <option value="all">All Branches</option>
-
-              {dropdowns.branches.map((branch) => (
-                <option
-                  key={getId(branch)}
-                  value={getId(branch)}
+              <div className="syl-mgmt-filter-select-wrapper" style={{ width: "160px" }}>
+                <select
+                  className="syl-mgmt-filter-select"
+                  value={mentorFilter}
+                  onChange={(e) => setMentorFilter(e.target.value)}
                 >
-                  {branch.branchName}
-                </option>
-              ))}
-            </select>
+                  <option value="all">All Mentors</option>
+                  {dropdowns.mentors.map((mentor) => (
+                    <option key={getId(mentor)} value={getId(mentor)}>
+                      {getName(mentor, ["fullName", "email"])}
+                    </option>
+                  ))}
+                </select>
+                <FiChevronDown className="syl-mgmt-select-arrow" />
+              </div>
+
+              <div className="syl-mgmt-filter-select-wrapper" style={{ width: "160px" }}>
+                <select
+                  className="syl-mgmt-filter-select"
+                  value={branchFilter}
+                  onChange={(e) => setBranchFilter(e.target.value)}
+                >
+                  <option value="all">All Branches</option>
+                  {dropdowns.branches.map((branch) => (
+                    <option key={getId(branch)} value={getId(branch)}>
+                      {branch.branchName}
+                    </option>
+                  ))}
+                </select>
+                <FiChevronDown className="syl-mgmt-select-arrow" />
+              </div>
+            </div>
           </div>
 
           {pageLoading ? (
-            <div className="tasks-material-empty-state">
-              <p>Loading materials...</p>
+            <div className="syl-mgmt-content-area">
+              <p className="syl-mgmt-empty-message">Loading materials...</p>
             </div>
-          ) : filteredMaterials.length ? (
-            <div className="tasks-material-table-wrapper">
-              <table className="tasks-material-table">
+          ) : currentMaterials.length ? (
+            <div className="syl-mgmt-table-wrapper">
+              <table className="notificationtable">
                 <thead>
                   <tr>
+                    <th style={{ width: "50px" }}>#</th>
                     <th>Title</th>
                     <th>Mentor</th>
                     <th>Branch</th>
-                    <th>Audience</th>
-                    <th>Attachments</th>
-                    <th>Created Date</th>
-                    <th>Actions</th>
+                    <th className="noti-th-center" style={{ textAlign: "center" }}>Audience</th>
+                    <th className="noti-th-center" style={{ textAlign: "center" }}>Attachments</th>
+                    <th className="noti-th-center" style={{ textAlign: "center" }}>Created Date</th>
+                    <th style={{ width: "160px", textAlign: "center" }}>Actions</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {filteredMaterials.map((material) => (
-                    <tr key={getId(material)}>
-                      <td className="tasks-material-title-cell">
-                        {material.title}
-                      </td>
+                  {currentMaterials.map((material, idx) => {
+                    const actualIndex = (currentPage - 1) * itemsPerPage + idx;
+                    const initial = (material.title || "M").charAt(0).toUpperCase();
 
-                      <td>
-                        {getName(material.mentor, [
-                          "fullName",
-                          "email",
-                        ])}
-                      </td>
-
-                      <td>
-                        <div className="tasks-material-branch-tags">
-                          {(material.branch || []).map((branch) => (
-                            <span key={getId(branch)}>
-                              {getName(branch, ["branchName"])}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-
-                      <td>
-                        <span className="tasks-material-audience-badge">
-                          {material.audience}
-                        </span>
-                      </td>
-
-                      <td>
-                        <div className="tasks-material-attachment-actions">
-                          <button
-                            type="button"
-                            title="View attachment"
-                            onClick={() =>
-                              downloadAttachment(material.attachments)
-                            }
-                          >
-                            <MdVisibility />
-                          </button>
-
-                          {material.allowDownload && (
+                    return (
+                      <tr key={getId(material)}>
+                        <td>{actualIndex + 1}</td>
+                        <td>
+                          <div className="noti-title-cell">
+                            <div className="noti-avatar">{initial}</div>
+                            <span className="noti-title-text">{material.title}</span>
+                          </div>
+                        </td>
+                        <td>
+                          {getName(material.mentor, ["fullName", "email"]) || "—"}
+                        </td>
+                        <td>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                            {(material.branch || []).length > 0
+                              ? (material.branch || []).map((b) => (
+                                  <span
+                                    key={getId(b)}
+                                    className="syl-mgmt-course-pill"
+                                    style={{ backgroundColor: "#f3f4f6", color: "#374151", fontSize: "11px" }}
+                                  >
+                                    {getName(b, ["branchName"])}
+                                  </span>
+                                ))
+                              : "—"}
+                          </div>
+                        </td>
+                        <td className="noti-td-center" style={{ textAlign: "center" }}>
+                          <span className="noti-type-badge">{material.audience}</span>
+                        </td>
+                        <td className="noti-td-center" style={{ textAlign: "center" }}>
+                          {material.attachments ? (
+                            <div className="tasks-material-attach-actions">
+                              <button
+                                type="button"
+                                className="tasks-material-attach-btn tasks-material-attach-btn--view"
+                                onClick={() => handleViewAttachment(material.attachments)}
+                                title={`View ${getFileName(material.attachments)}`}
+                              >
+                                <FiEye />
+                              </button>
+                              <button
+                                type="button"
+                                className="tasks-material-attach-btn tasks-material-attach-btn--download"
+                                onClick={() => handleDownloadAttachment(material.attachments)}
+                                title={`Download ${getFileName(material.attachments)}`}
+                              >
+                                <FiDownload />
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="syl-mgmt-doc-badge">No File</span>
+                          )}
+                        </td>
+                        <td className="noti-td-center" style={{ textAlign: "center" }}>
+                          <span className="syl-mgmt-date-text">
+                            {material.createdAt
+                              ? new Date(material.createdAt).toLocaleDateString()
+                              : "—"}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          <div className="syl-mgmt-col-actions">
                             <button
                               type="button"
-                              title="Download attachment"
-                              onClick={() =>
-                                downloadAttachment(material.attachments)
-                              }
+                              className="syl-mgmt-text-action syl-mgmt-text-action--view"
+                              onClick={() => handleView(material)}
                             >
-                              <MdFileDownload />
+                              View
                             </button>
-                          )}
-                        </div>
-                      </td>
-
-                      <td>
-                        {material.createdAt
-                          ? new Date(
-                              material.createdAt
-                            ).toLocaleDateString()
-                          : "-"}
-                      </td>
-
-                      <td>
-                        <div className="tasks-material-action-buttons">
-                          <button
-                            type="button"
-                            title="View"
-                            onClick={() => handleView(material)}
-                          >
-                            <MdVisibility />
-                          </button>
-
-                          <button
-                            type="button"
-                            title="Edit"
-                            onClick={() => handleEdit(material)}
-                          >
-                            <MdEdit />
-                          </button>
-
-                          <button
-                            type="button"
-                            title="Delete"
-                            className="tasks-material-delete-icon"
-                            onClick={() =>
-                              handleDelete(getId(material))
-                            }
-                          >
-                            <MdDelete />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            <button
+                              type="button"
+                              className="syl-mgmt-text-action syl-mgmt-text-action--edit"
+                              onClick={() => handleEdit(material)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="syl-mgmt-text-action syl-mgmt-text-action--delete"
+                              onClick={() => handleDelete(getId(material))}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           ) : (
-            <div className="tasks-material-empty-state">
-              <p>
+            <div className="syl-mgmt-content-area">
+              <p className="syl-mgmt-empty-message">
                 No data available. Please add Material to view them here.
               </p>
             </div>
           )}
 
+          {/* Pagination */}
           {filteredMaterials.length > 0 && (
-            <div className="tasks-material-list-footer">
-              <span>
-                Showing {filteredMaterials.length} of {materials.length} materials
+            <div className="syl-mgmt-pagination-bar">
+              <span className="syl-mgmt-pagination-text">
+                {`${currentPage} of ${Math.max(totalPages, 1)}`}
               </span>
+
+              <div className="syl-mgmt-pagination-controls">
+                <button
+                  type="button"
+                  className="syl-mgmt-page-btn"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  style={currentPage === 1 ? {} : { cursor: "pointer", color: "#374151", backgroundColor: "#fff" }}
+                >
+                  <FiChevronLeft />
+                </button>
+                <button
+                  type="button"
+                  className="syl-mgmt-page-btn"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={totalPages === 0 || currentPage >= totalPages}
+                  style={
+                    totalPages === 0 || currentPage >= totalPages
+                      ? {}
+                      : { cursor: "pointer", color: "#374151", backgroundColor: "#fff" }
+                  }
+                >
+                  <FiChevronRight />
+                </button>
+              </div>
             </div>
           )}
-        </div>
+        </main>
       )}
 
       {/* CREATE */}

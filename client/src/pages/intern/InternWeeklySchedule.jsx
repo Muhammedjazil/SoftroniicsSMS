@@ -44,12 +44,24 @@ const InternWeeklySchedule = () => {
 
   const fetchInternSchedule = useCallback(async () => {
     setLoading(true);
+    let isSettled = false;
+    const timeoutId = setTimeout(() => {
+      if (!isSettled) {
+        setLoading(false);
+      }
+    }, 6000);
+
     try {
       const userQuery = getStoredUserQuery();
-      const data = await takeinternweeklyschedule({
-        ...userQuery,
-        startDate: selectedDate,
-      });
+      const data = await Promise.race([
+        takeinternweeklyschedule({
+          ...userQuery,
+          startDate: selectedDate,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timeout')), 6000)
+        ),
+      ]);
 
       if (data?.intern) {
         setInternProfile(data.intern);
@@ -60,6 +72,8 @@ const InternWeeklySchedule = () => {
       console.error('Failed to load intern weekly schedule:', error);
       setWeeklySlots([]);
     } finally {
+      isSettled = true;
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   }, [selectedDate]);
