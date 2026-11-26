@@ -1244,3 +1244,58 @@
         margin-left: 0;
     }
 }
+
+.tasks-evaluation-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tasks-evaluation-attachment-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tasks-evaluation-download-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.tasks-evaluation-download-link:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.tasks-evaluation-view-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.tasks-evaluation-view-link:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1e40af;
+}

@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   MdAssignment,
   MdFileDownload,
+  MdVisibility,
   MdSearch,
   MdClose,
 } from "react-icons/md";
@@ -77,6 +78,14 @@ const Taskevaluation = () => {
     return `${API_ORIGIN}${
       normalizedFile.startsWith("/") ? "" : "/"
     }${normalizedFile}`;
+  };
+
+  // VIEW ATTACHMENT WITHOUT DOWNLOADING
+  const handleViewAttachment = (file) => {
+    const fileUrl = getAttachmentUrl(file);
+    if (!fileUrl) return;
+
+    window.open(fileUrl, "_blank", "noopener,noreferrer");
   };
 
   // DOWNLOAD ATTACHMENT
@@ -596,18 +605,40 @@ const Taskevaluation = () => {
                             <td>
                               {submission.attachments?.length > 0 ? (
                                 <div className="tasks-evaluation-attachments">
-                                  {submission.attachments.map((file, fileIndex) => (
-                                    <button
-                                      type="button"
-                                      key={fileIndex}
-                                      className="tasks-evaluation-download-link"
-                                      title={file.split("/").pop()}
-                                      onClick={() => handleDownloadAttachment(file)}
-                                    >
-                                      <MdFileDownload />
-                                      <span>Download</span>
-                                    </button>
-                                  ))}
+                                  {submission.attachments.map((file, fileIndex) => {
+                                    const fileName =
+                                      file.replace(/\\/g, "/").split("/").pop() ||
+                                      "Attachment";
+
+                                    return (
+                                      <div
+                                        key={fileIndex}
+                                        className="tasks-evaluation-attachment-item"
+                                      >
+                                        <button
+                                          type="button"
+                                          className="tasks-evaluation-download-link"
+                                          title={`Download ${fileName}`}
+                                          onClick={() =>
+                                            handleDownloadAttachment(file)
+                                          }
+                                        >
+                                          <MdFileDownload />
+                                          <span>Download</span>
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          className="tasks-evaluation-view-link"
+                                          title={`View ${fileName}`}
+                                          aria-label={`View ${fileName}`}
+                                          onClick={() => handleViewAttachment(file)}
+                                        >
+                                          <MdVisibility />
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               ) : (
                                 <span>-</span>
