@@ -61,6 +61,7 @@ exports.getEvaluationTasks = async (req, res) => {
 };
 
 // GET SUBMISSIONS FOR A SELECTED TASK
+// GET SUBMISSIONS FOR A SELECTED TASK
 exports.getTaskSubmissions = async (req, res) => {
   try {
     const { taskId } = req.params;
@@ -74,7 +75,7 @@ exports.getTaskSubmissions = async (req, res) => {
     const task = await Task.findOne({
       _id: taskId,
       isDeleted: false
-    }).select("title module totalMarks");
+    }).select("title module totalMarks dueDate");
 
     if (!task) {
       return res.status(404).json({
@@ -90,7 +91,10 @@ exports.getTaskSubmissions = async (req, res) => {
         "intern",
         "fullName admissionNumber email officialEmail"
       )
-      .populate("gradedBy", "fullName name email")
+      .populate(
+        "gradedBy",
+        "fullName name email"
+      )
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -98,6 +102,7 @@ exports.getTaskSubmissions = async (req, res) => {
       task,
       submissions
     });
+
   } catch (error) {
     console.error("Task Submissions Error:", error);
 
