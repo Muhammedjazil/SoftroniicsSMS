@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Internnavbar } from "../Intern/Internnavbar";
 import InternHeader from "../Intern/InternHeader";
 import axios from "../../Axios";
@@ -15,6 +15,11 @@ const internRouteMeta = {
         title: "Weekly Schedule",
         parentPath: "Weekly Schedule",
         currentPath: "Batch Timetable"
+    },
+    "/student/weekly_schedule": {
+        title: "My Weekly Schedule",
+        parentPath: "My Weekly Schedule",
+        currentPath: "Weekly Schedule"
     },
     "/internweeklycard": {
         title: "Weekly Evaluation Card",
@@ -50,15 +55,21 @@ const internRouteMeta = {
 
 export const Internlayout = ({ children }) => {
     const { pathname } = useLocation();
+    const navigate = useNavigate();
     const [isSyncing, setIsSyncing] = useState(true);
 
     useEffect(() => {
         let isMounted = true;
 
         const syncInternProfile = async () => {
+            let redirected = false;
             try {
                 const token = localStorage.getItem("SMStoken");
-                if (!token) return;
+                if (!token) {
+                    redirected = true;
+                    navigate("/login", { replace: true });
+                    return;
+                }
 
                 const response = await axios.get("/auth/me", {
                     headers: {
@@ -72,8 +83,15 @@ export const Internlayout = ({ children }) => {
                 }
             } catch (error) {
                 console.error("Failed to sync intern profile:", error);
+                const status = error?.response?.status;
+                if (status === 401 || status === 403 || status === 404) {
+                    localStorage.removeItem("SMStoken");
+                    localStorage.removeItem("user");
+                    redirected = true;
+                    navigate("/login", { replace: true });
+                }
             } finally {
-                if (isMounted) {
+                if (isMounted && !redirected) {
                     setIsSyncing(false);
                 }
             }
@@ -84,7 +102,7 @@ export const Internlayout = ({ children }) => {
         return () => {
             isMounted = false;
         };
-    }, []);
+    }, [navigate]);
 
     const meta = internRouteMeta[pathname] || {
         title: "Intern Portal",

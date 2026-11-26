@@ -240,6 +240,7 @@ const loginUser = async (req, res) => {
         accessToken,
         user: {
           _id: internMember._id,
+          admissionNumber: internMember.admissionNumber || "",
           name: internMember.fullName,
           email: internMember.officialEmail,
           personalEmail: internMember.email,
@@ -295,6 +296,7 @@ const getCurrentUser = async (req, res) => {
       return res.status(200).json({
         user: {
           _id: internMember._id,
+          admissionNumber: internMember.admissionNumber || "",
           name: internMember.fullName,
           email: internMember.officialEmail,
           personalEmail: internMember.email,

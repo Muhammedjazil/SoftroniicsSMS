@@ -1,19 +1,16 @@
-
 import { useEffect, useMemo, useState } from "react";
-
 import {
   FiDownload,
-  FiEye,
-  FiEdit,
-  FiTrash2,
   FiArrowLeft,
   FiChevronLeft,
   FiChevronRight,
-  FiX,
-  FiFileText
+  FiX
 } from "react-icons/fi";
+import { LuSearch } from "react-icons/lu";
 
 import AdminService from "../../../services/admin-api-services/AdminService";
+import Loader from "../../../components/common/Loader";
+import { useToast } from "../../../components/common/Toast";
 import "./Settingsnotification.css";
 
 const initialForm = {
@@ -61,6 +58,8 @@ const getLabel = (item, fields = []) => {
 };
 
 export const Notification = () => {
+  const { showToast, ToastContainer } = useToast();
+
   const {
     takenotifications,
     takenotificationbyid,
@@ -75,14 +74,11 @@ export const Notification = () => {
   // =====================================
 
   const [isactive, setIsactive] = useState("Notification");
-
   const [notifications, setNotifications] = useState([]);
-
   const [formData, setFormData] = useState(initialForm);
-
   const [selectedId, setSelectedId] = useState(null);
-
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [dropdowns, setDropdowns] = useState({
     branches: [],
@@ -94,7 +90,7 @@ export const Notification = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
   const isView = isactive === "show";
 
   // =====================================
@@ -114,9 +110,10 @@ export const Notification = () => {
         error.response?.data || error
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to load notifications"
+        "Unable to load notifications",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -144,9 +141,10 @@ export const Notification = () => {
         error.response?.data || error
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to load notification dropdown data"
+        "Unable to load notification dropdown data",
+        "error"
       );
     }
   };
@@ -408,7 +406,7 @@ export const Notification = () => {
       formData.branch.length === 0 ||
       !formData.audience
     ) {
-      alert("Please fill all required fields");
+      showToast("Please fill all required fields", "warning");
       return;
     }
 
@@ -416,7 +414,7 @@ export const Notification = () => {
       formData.audience !== "All interns" &&
       formData.selectedAudience.length === 0
     ) {
-      alert("Please select at least one audience");
+      showToast("Please select at least one audience", "warning");
       return;
     }
 
@@ -427,10 +425,10 @@ export const Notification = () => {
 
       if (selectedId) {
         await updatenotification(selectedId, payload);
-        alert("Notification updated successfully!");
+        showToast("Notification updated successfully!", "success");
       } else {
         await createnotification(payload);
-        alert("Notification published successfully!");
+        showToast("Notification published successfully!", "success");
       }
 
       await loadNotifications();
@@ -443,9 +441,10 @@ export const Notification = () => {
         error.response?.data || error
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to save notification"
+        "Unable to save notification",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -500,9 +499,10 @@ export const Notification = () => {
         error.response?.data || error
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to open notification"
+        "Unable to open notification",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -529,9 +529,10 @@ export const Notification = () => {
         error.response?.data || error
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to edit notification"
+        "Unable to edit notification",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -571,16 +572,17 @@ export const Notification = () => {
         setIsactive("Notification");
       }
 
-      alert("Notification permanently deleted.");
+      showToast("Notification permanently deleted.", "success");
     } catch (error) {
       console.error(
         "Delete Notification Error:",
         error.response?.data || error
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to delete notification"
+        "Unable to delete notification",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -602,7 +604,7 @@ export const Notification = () => {
 
   const handleExport = () => {
     if (notifications.length === 0) {
-      alert("No notifications available to export");
+      showToast("No notifications available to export", "warning");
       return;
     }
 
@@ -658,14 +660,25 @@ export const Notification = () => {
   // PAGINATION
   // =====================================
 
+  const filteredNotifications = useMemo(() => {
+    return notifications.filter((item) => {
+      const q = searchQuery.toLowerCase().trim();
+      if (!q) return true;
+      const title = (item.title || "").toLowerCase();
+      const content = (item.content || "").toLowerCase();
+      const type = (item.type || "").toLowerCase();
+      return title.includes(q) || content.includes(q) || type.includes(q);
+    });
+  }, [notifications, searchQuery]);
+
   const totalPages = Math.max(
     1,
-    Math.ceil(notifications.length / itemsPerPage)
+    Math.ceil(filteredNotifications.length / itemsPerPage)
   );
 
   const startIndex = (currentPage - 1) * itemsPerPage;
 
-  const currentNotifications = notifications.slice(
+  const currentNotifications = filteredNotifications.slice(
     startIndex,
     startIndex + itemsPerPage
   );
@@ -676,201 +689,195 @@ export const Notification = () => {
 
   return (
     <div className="notification">
+      <ToastContainer />
 
-      <div className="notificationherosection">
+      {/* TOP TABS & EXPORT */}
+      <div className="notificationtopbar">
+        <div className="notfibutton">
+          <button
+            type="button"
+            className={isactive === "Notification" ? "active" : ""}
+            onClick={() => {
+              resetForm();
+              setIsactive("Notification");
+            }}
+          >
+            Notifications
+          </button>
 
-        {/* TOP TABS */}
-
-        <div className="notificationtopbar">
-
-          <div className="notfibutton">
-
-            <button
-              className={isactive === "Notification" ? "active" : ""}
-              onClick={() => {
-                resetForm();
-                setIsactive("Notification");
-              }}
-            >
-              Notifications
-            </button>
-
-            <button
-              className={isactive !== "Notification" ? "active" : ""}
-              onClick={handleNew}
-            >
-              New Notification
-            </button>
-
-          </div>
-
-          {isactive === "Notification" && (
-            <button
-              className="notificationexport"
-              onClick={handleExport}
-            >
-              Export <FiDownload />
-            </button>
-          )}
-
+          <button
+            type="button"
+            className={isactive !== "Notification" ? "active" : ""}
+            onClick={handleNew}
+          >
+            New Notification
+          </button>
         </div>
 
-        {/* NOTIFICATION TABLE */}
+        {isactive === "Notification" && (
+          <button
+            type="button"
+            className="notifiexportbtn"
+            onClick={handleExport}
+          >
+            <FiDownload /> Export
+          </button>
+        )}
+      </div>
 
+      <div className="notificationherosection">
+        {/* NOTIFICATION TABLE */}
         {isactive === "Notification" && (
           <>
-            <div className="notificationtable">
+            <div className="noti-filter-bar">
+              <div className="noti-search-wrapper">
+                <LuSearch className="noti-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search notifications by title, content, or type..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="noti-search-input"
+                />
+              </div>
+            </div>
 
-              <table>
+            {loading ? (
+              <Loader message="Loading notifications..." minHeight="320px" />
+            ) : (
+              <>
+                <div className="notificationtablewrapper">
+                  <table className="notificationtable">
+                    <thead>
+                      <tr>
+                        <th style={{ width: "60px" }}>#</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Branch</th>
+                        <th>Audience</th>
+                        <th>Selected Audience</th>
+                        <th style={{ width: "160px" }}>Actions</th>
+                      </tr>
+                    </thead>
 
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Type</th>
-                    <th>Branch</th>
-                    <th>Audience</th>
-                    <th>Selected Audience</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-
-                  {loading ? (
-                    <tr>
-                      <td colSpan="7" className="notificationempty">
-                        Loading notifications...
-                      </td>
-                    </tr>
-                  ) : currentNotifications.length === 0 ? (
-                    <tr>
-                      <td colSpan="7" className="notificationempty">
-                        <FiFileText />
-                        <p>No notifications available</p>
-                      </td>
-                    </tr>
-                  ) : (
-                    currentNotifications.map((item, index) => {
-                      const actualIndex = startIndex + index;
-
-                      return (
-                        <tr key={item._id}>
-
-                          <td>{actualIndex + 1}</td>
-
-                          <td>{item.title}</td>
-
-                          <td>{item.type}</td>
-
-                          <td>{getBranchText(item)}</td>
-
-                          <td>{item.audience}</td>
-
-                          <td className="selectedaudience">
-                            {getSelectedAudience(item) || "-"}
+                    <tbody>
+                      {currentNotifications.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" className="notificationemptytable">
+                            No notifications found
                           </td>
-
-                          <td className="notificationactions">
-
-                            <button
-                              className="viewaction"
-                              title="View"
-                              onClick={() => handleView(item._id)}
-                            >
-                              <FiEye />
-                            </button>
-
-                            <button
-                              className="editaction"
-                              title="Edit"
-                              onClick={() => handleEdit(item._id)}
-                            >
-                              <FiEdit />
-                            </button>
-
-                            <button
-                              className="deleteaction"
-                              title="Delete"
-                              onClick={() => handleDelete(item._id)}
-                            >
-                              <FiTrash2 />
-                            </button>
-
-                          </td>
-
                         </tr>
-                      );
-                    })
-                  )}
+                      ) : (
+                        currentNotifications.map((item, index) => {
+                          const actualIndex = startIndex + index;
+                          const initial = (item.title || "N").charAt(0).toUpperCase();
 
-                </tbody>
+                          return (
+                            <tr key={item._id}>
+                              <td>{actualIndex + 1}</td>
+                              <td>
+                                <div className="noti-title-cell">
+                                  <div className="noti-avatar">{initial}</div>
+                                  <span className="noti-title-text">{item.title}</span>
+                                </div>
+                              </td>
+                              <td>
+                                <span className="noti-type-badge">{item.type}</span>
+                              </td>
+                              <td>{getBranchText(item) || "—"}</td>
+                              <td>{item.audience}</td>
+                              <td>{getSelectedAudience(item) || "—"}</td>
+                              <td>
+                                <div className="notiactions">
+                                  <button
+                                    type="button"
+                                    className="noti-text-action noti-text-action--view"
+                                    onClick={() => handleView(item._id)}
+                                  >
+                                    View
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="noti-text-action noti-text-action--edit"
+                                    onClick={() => handleEdit(item._id)}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="noti-text-action noti-text-action--delete"
+                                    onClick={() => handleDelete(item._id)}
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
 
-              </table>
+                {/* PAGINATION */}
+                {filteredNotifications.length > 0 && (
+                  <div className="notificationpagination">
+                    <span>
+                      {currentPage} of {totalPages}
+                    </span>
 
-            </div>
+                    <button
+                      type="button"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((prev) => prev - 1)}
+                    >
+                      <FiChevronLeft />
+                    </button>
 
-            {/* PAGINATION */}
-
-            <div className="notificationpagination">
-
-              <span>
-                {notifications.length === 0 ? 0 : currentPage}
-                {" "}of{" "}
-                {totalPages}
-              </span>
-
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-              >
-                <FiChevronLeft />
-              </button>
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-              >
-                <FiChevronRight />
-              </button>
-
-            </div>
+                    <button
+                      type="button"
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage((prev) => prev + 1)}
+                    >
+                      <FiChevronRight />
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </>
         )}
 
         {/* NEW / EDIT / VIEW FORM */}
-
         {(isactive === "Newnotification" || isactive === "show") && (
-
           <div className="Newnotification">
-
             {/* FORM HEADER */}
-
             <div className="Newnotificationsect1">
-
               <div className="Newnotificationsect2">
                 <h2>
                   {isView
                     ? "Notification Details"
                     : selectedId
-                    ? "Edit Notification"
-                    : "New Notification"}
+                      ? "Edit Notification"
+                      : "New Notification"}
                 </h2>
               </div>
 
               <button
+                type="button"
                 className="notificationback"
                 onClick={handleBack}
               >
                 <FiArrowLeft /> Back
               </button>
-
             </div>
 
             {/* TITLE */}
-
             <div className="notificationfield">
-
               <label>Notification Title</label>
 
               <input
@@ -881,13 +888,10 @@ export const Notification = () => {
                 placeholder="Enter Notification Title"
                 readOnly={isView}
               />
-
             </div>
 
             {/* CONTENT */}
-
             <div className="notificationfield">
-
               <label>Notification Content</label>
 
               <textarea
@@ -898,17 +902,12 @@ export const Notification = () => {
                 placeholder="Enter The Details Of The Notification"
                 readOnly={isView}
               />
-
             </div>
 
             {/* TYPE / BRANCH / AUDIENCE */}
-
             <div className="newnotificationforminput">
-
               {/* TYPE */}
-
               <div className="newnotifi1">
-
                 <label>Type of Notification</label>
 
                 <select
@@ -924,15 +923,11 @@ export const Notification = () => {
                       {type}
                     </option>
                   ))}
-
                 </select>
-
               </div>
 
               {/* BRANCH */}
-
               <div className="newnotifi1">
-
                 <label>Branch</label>
 
                 <select
@@ -951,16 +946,13 @@ export const Notification = () => {
                       {branch.branchName}
                     </option>
                   ))}
-
                 </select>
 
                 {formData.branch.length > 0 && (
                   <div className="addedAudience">
-
                     <h3>Selected Branches</h3>
 
                     <div className="audiencechips">
-
                       {formData.branch.map((id) => {
                         const branch = dropdowns.branches.find(
                           (item) => item._id === id
@@ -968,7 +960,6 @@ export const Notification = () => {
 
                         return (
                           <div className="audiencechip" key={id}>
-
                             <span>
                               {branch?.branchName || id}
                             </span>
@@ -981,22 +972,16 @@ export const Notification = () => {
                                 <FiX />
                               </button>
                             )}
-
                           </div>
                         );
                       })}
-
                     </div>
-
                   </div>
                 )}
-
               </div>
 
               {/* AUDIENCE */}
-
               <div className="newnotifi1">
-
                 <label>Select Audience</label>
 
                 <select
@@ -1005,7 +990,6 @@ export const Notification = () => {
                   onChange={handleChange}
                   disabled={isView}
                 >
-
                   <option value="">Choose Audience</option>
 
                   {audienceTypes.map((audience) => (
@@ -1013,108 +997,87 @@ export const Notification = () => {
                       {audience}
                     </option>
                   ))}
-
                 </select>
-
               </div>
-
             </div>
 
             {/* AUDIENCE SELECTION */}
-
             {formData.audience !== "" &&
               formData.audience !== "All interns" && (
+                <div className="audienceinput">
+                  <label>
+                    {formData.audience === "By batches"
+                      ? "Choose Batches"
+                      : formData.audience === "By Courses"
+                        ? "Choose Courses"
+                        : formData.audience === "By Category"
+                          ? "Choose Categories"
+                          : "Select Interns"}
+                  </label>
 
-              <div className="audienceinput">
+                  <select
+                    className="audienceSelect"
+                    value=""
+                    onChange={handleAddAudience}
+                    disabled={isView}
+                  >
+                    <option value="">
+                      Select {formData.audience}
+                    </option>
 
-                <label>
-                  {formData.audience === "By batches"
-                    ? "Choose Batches"
-                    : formData.audience === "By Courses"
-                    ? "Choose Courses"
-                    : formData.audience === "By Category"
-                    ? "Choose Categories"
-                    : "Select Interns"}
-                </label>
+                    {getAudienceOptions().map((option) => {
+                      const id = getAudienceId(option);
 
-                <select
-                  className="audienceSelect"
-                  value=""
-                  onChange={handleAddAudience}
-                  disabled={isView}
-                >
+                      return (
+                        <option
+                          key={id}
+                          value={id}
+                          disabled={formData.selectedAudience.includes(id)}
+                        >
+                          {getAudienceLabel(option)}
+                        </option>
+                      );
+                    })}
+                  </select>
 
-                  <option value="">
-                    Select {formData.audience}
-                  </option>
+                  {/* SELECTED AUDIENCE CHIPS */}
+                  {formData.selectedAudience.length > 0 && (
+                    <div className="addedAudience">
+                      <h3>Selected Audience</h3>
 
-                  {getAudienceOptions().map((option) => {
-                    const id = getAudienceId(option);
+                      <div className="audiencechips">
+                        {formData.selectedAudience.map((id) => {
+                          const option = getAudienceOptions().find(
+                            (item) => getAudienceId(item) === id
+                          );
 
-                    return (
-                      <option
-                        key={id}
-                        value={id}
-                        disabled={formData.selectedAudience.includes(id)}
-                      >
-                        {getAudienceLabel(option)}
-                      </option>
-                    );
-                  })}
+                          const label = option
+                            ? getAudienceLabel(option)
+                            : id;
 
-                </select>
+                          return (
+                            <div className="audiencechip" key={id}>
+                              <span>{label}</span>
 
-                {/* SELECTED AUDIENCE CHIPS */}
-
-                {formData.selectedAudience.length > 0 && (
-
-                  <div className="addedAudience">
-
-                    <h3>Selected Audience</h3>
-
-                    <div className="audiencechips">
-
-                      {formData.selectedAudience.map((id) => {
-
-                        const option = getAudienceOptions().find(
-                          (item) => getAudienceId(item) === id
-                        );
-
-                        const label = option
-                          ? getAudienceLabel(option)
-                          : id;
-
-                        return (
-                          <div className="audiencechip" key={id}>
-
-                            <span>{label}</span>
-
-                            {!isView && (
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveAudience(id)}
-                              >
-                                <FiX />
-                              </button>
-                            )}
-
-                          </div>
-                        );
-                      })}
-
+                              {!isView && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveAudience(id)}
+                                >
+                                  <FiX />
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-
-                  </div>
-
-                )}
-
-              </div>
-            )}
+                  )}
+                </div>
+              )}
 
             {/* PUSH NOTIFICATION */}
-
             <div className="pushnotification">
-
               <input
                 type="checkbox"
                 id="pushNotification"
@@ -1127,14 +1090,12 @@ export const Notification = () => {
               <label htmlFor="pushNotification">
                 Push Notification
               </label>
-
             </div>
 
             {/* FORM BUTTONS */}
-
             <div className="newnotificationbutton">
-
               <button
+                type="button"
                 className="notificationcancel"
                 onClick={handleBack}
                 disabled={loading}
@@ -1143,17 +1104,16 @@ export const Notification = () => {
               </button>
 
               {isView ? (
-
                 <button
+                  type="button"
                   className="notificationpublish"
                   onClick={handleViewEdit}
                 >
                   Edit
                 </button>
-
               ) : (
-
                 <button
+                  type="button"
                   className="notificationpublish"
                   onClick={handlePublish}
                   disabled={loading}
@@ -1161,20 +1121,14 @@ export const Notification = () => {
                   {loading
                     ? "Saving..."
                     : selectedId
-                    ? "Update"
-                    : "Publish"}
+                      ? "Update"
+                      : "Publish"}
                 </button>
-
               )}
-
             </div>
-
           </div>
-
         )}
-
       </div>
-
     </div>
   );
 };

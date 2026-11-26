@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import AdminService from "../../../services/admin-api-services/AdminService";
 import usePermission from "../../../hooks/usePermission";
+import Loader from "../../../components/common/Loader";
+import { useToast } from "../../../components/common/Toast";
 import {
   FiUser,
   FiDownload,
   FiChevronRight,
   FiChevronLeft,
+  FiChevronDown,
   FiSearch,
+  FiArrowLeft,
 } from "react-icons/fi";
 
 import "./Rolemanagement.css";
@@ -248,6 +252,8 @@ const formatPermissions = (permissions = {}) => {
 // =====================================
 
 export const Rolemanagement = () => {
+  const { showToast, ToastContainer } = useToast();
+
   const {
     newrolecreate,
     takeroles,
@@ -299,7 +305,7 @@ export const Rolemanagement = () => {
       setRoles(Array.isArray(response) ? response : []);
     } catch (error) {
       console.log("Fetch roles error:", error.response?.data || error);
-      alert(error.response?.data?.message || "Unable to fetch roles");
+      showToast(error.response?.data?.message || "Unable to fetch roles", "error");
     } finally {
       setLoading(false);
     }
@@ -431,17 +437,17 @@ export const Rolemanagement = () => {
 
   const handleCreateRole = async () => {
     if (!roleName.trim() || !description.trim()) {
-      alert("Please enter role name and description");
+      showToast("Please enter role name and description", "warning");
       return;
     }
 
     if (editingRoleId !== null && !canEditRole) {
-      alert("You do not have permission to edit roles.");
+      showToast("You do not have permission to edit roles.", "error");
       return;
     }
 
     if (editingRoleId === null && !canAddRole) {
-      alert("You do not have permission to create roles.");
+      showToast("You do not have permission to create roles.", "error");
       return;
     }
 
@@ -456,17 +462,17 @@ export const Rolemanagement = () => {
 
       if (editingRoleId !== null) {
         await Updaterole(editingRoleId, roleData);
-        alert("Role updated successfully!");
+        showToast("Role updated successfully!", "success");
       } else {
         await newrolecreate(roleData);
-        alert("Role created successfully");
+        showToast("Role created successfully", "success");
       }
 
       await fetchRoles();
       handleCancel();
     } catch (error) {
       console.log("Create / Update role error:", error);
-      alert(error.response?.data?.message || "Failed to save role");
+      showToast(error.response?.data?.message || "Failed to save role", "error");
     } finally {
       setLoading(false);
     }
@@ -552,11 +558,11 @@ export const Rolemanagement = () => {
 
     try {
       await roleremove(id);
-      alert("Role removed successfully!");
+      showToast("Role removed successfully!", "success");
       await fetchRoles();
     } catch (error) {
       console.log("Delete role error:", error);
-      alert(error.response?.data?.message || "Role not deleted!");
+      showToast(error.response?.data?.message || "Role not deleted!", "error");
     }
   };
 
@@ -569,10 +575,11 @@ export const Rolemanagement = () => {
 
     try {
       await changestatus(id);
+      showToast("Role status updated", "success");
       await fetchRoles();
     } catch (error) {
       console.log("Status update error:", error);
-      alert(error.response?.data?.message || "Status not updated!");
+      showToast(error.response?.data?.message || "Status not updated!", "error");
     }
   };
 
@@ -581,202 +588,220 @@ export const Rolemanagement = () => {
   // =====================================
 
   return (
-    <div className="Rolemanagement">
-      {/* HEADER */}
-     
+    <div className="syl-mgmt-container Rolemanagement">
+      <ToastContainer />
 
-      {/* MAIN CARD */}
-      <div className="Rolemanagement-hero">
-        {/* TOP TABS */}
-        <div className="Rolemanagement-hero0">
-          <div className="Rolemanagement-hero1">
+      {/* Outer Toolbar */}
+      <div className="syl-mgmt-toolbar">
+        <div className="syl-mgmt-tab-group">
+          <button
+            type="button"
+            className={`syl-mgmt-tab-btn ${activeTab === "Roles" ? "syl-mgmt-tab-btn--active" : ""}`}
+            onClick={handleCancel}
+          >
+            Roles List
+          </button>
+
+          {(canAddRole || editingRoleId !== null) && (
             <button
-              className={activeTab === "Roles" ? "active" : ""}
-              onClick={handleCancel}
+              type="button"
+              className={`syl-mgmt-tab-btn ${activeTab === "New Role" ? "syl-mgmt-tab-btn--active" : ""}`}
+              onClick={handleNewRole}
             >
-              Roles
+              {editingRoleId !== null ? "Edit Role" : "New Role"}
             </button>
-
-            {(canAddRole || editingRoleId !== null) && (
-              <button
-                className={activeTab === "New Role" ? "active" : ""}
-                onClick={handleNewRole}
-              >
-                {editingRoleId !== null ? "Edit Role" : "New Role"}
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
+        {activeTab === "Roles" && (
+          <button
+            type="button"
+            className="syl-mgmt-export-btn"
+            onClick={handleExport}
+          >
+            <FiDownload className="syl-mgmt-export-icon" />
+            <span>Export</span>
+          </button>
+        )}
+      </div>
+
+      {/* Main White Card Panel */}
+      <main className="syl-mgmt-panel">
         {/* =====================================
               ROLES TABLE
         ===================================== */}
-
         {activeTab === "Roles" && (
           <>
-            {/* TABLE CONTROLS */}
-            <div className="Rolemanagement-table-controls">
-              <div className="Rolemanagement-search">
-                <FiSearch />
+            {/* Filter Bar */}
+            <div className="syl-mgmt-filter-bar">
+              <div className="syl-mgmt-search-wrapper">
+                <FiSearch className="syl-mgmt-search-icon" />
                 <input
                   type="text"
+                  className="syl-mgmt-search-input"
                   placeholder="Search Roles"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
 
-              <select
-                className="Rolemanagement-filter"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="All Roles">All Roles</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-
-              <button
-                className="Rolemanagement-export"
-                onClick={handleExport}
-              >
-                <FiDownload />
-                Export
-              </button>
+              <div className="syl-mgmt-filter-select-wrapper">
+                <select
+                  className="syl-mgmt-filter-select"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="All Roles">All Roles</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+                <FiChevronDown className="syl-mgmt-select-arrow" />
+              </div>
             </div>
 
-            {/* TABLE */}
-            <div className="Rolemanagement-hero-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>ROLE</th>
-                    <th>DESCRIPTION</th>
-                    <th>STATUS</th>
-                    <th>CREATED AT</th>
-                    <th>ACTIONS</th>
-                  </tr>
-                </thead>
+            {/* Table */}
+            {loading ? (
+              <Loader message="Loading roles..." minHeight="320px" />
+            ) : filteredRoles.length === 0 ? (
+              <div className="syl-mgmt-content-area">
+                <p className="syl-mgmt-empty-message">No Roles Found</p>
+              </div>
+            ) : (
+              <div className="syl-mgmt-table-wrapper">
+                <div
+                  className="syl-mgmt-table-header-row"
+                  style={{ gridTemplateColumns: "50px 2fr 2.5fr 1fr 1.2fr 1.3fr" }}
+                >
+                  <div className="syl-mgmt-th">#</div>
+                  <div className="syl-mgmt-th">ROLE NAME</div>
+                  <div className="syl-mgmt-th">DESCRIPTION</div>
+                  <div className="syl-mgmt-th syl-mgmt-th-center">STATUS</div>
+                  <div className="syl-mgmt-th syl-mgmt-th-center">CREATED</div>
+                  <div className="syl-mgmt-th syl-mgmt-th-center">ACTIONS</div>
+                </div>
 
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan="6" className="Rolemanagement-empty">
-                        Loading roles...
-                      </td>
-                    </tr>
-                  ) : filteredRoles.length > 0 ? (
-                    currentRoles.map((value, index) => (
-                      <tr key={value._id}>
-                        <td>{startIndex + index + 1}</td>
+                <div className="syl-mgmt-table-body">
+                  {currentRoles.map((value, index) => {
+                    const initial = (value.role || "R").charAt(0).toUpperCase();
 
-                        <td className="role-name">{value.role}</td>
+                    return (
+                      <div
+                        key={value._id}
+                        className="syl-mgmt-table-row"
+                        style={{ gridTemplateColumns: "50px 2fr 2.5fr 1fr 1.2fr 1.3fr" }}
+                      >
+                        <div className="syl-mgmt-td">{startIndex + index + 1}</div>
 
-                        <td>{value.description}</td>
+                        <div className="syl-mgmt-td">
+                          <div className="syl-mgmt-module-cell">
+                            <span className="syl-mgmt-module-avatar">{initial}</span>
+                            <span className="syl-mgmt-module-name-text">{value.role}</span>
+                          </div>
+                        </div>
 
-                        {/* STATUS */}
-                        <td>
-                          <span
-                            className={
-                              value.isActive
-                                ? "Rolemanagement-status active-status"
-                                : "Rolemanagement-status inactive-status"
-                            }
+                        <div className="syl-mgmt-td" style={{ color: "#4b5563" }}>
+                          {value.description || "—"}
+                        </div>
+
+                        <div className="syl-mgmt-td syl-mgmt-td-center">
+                          <button
+                            type="button"
+                            disabled={!canEditRole}
+                            style={{
+                              border: "none",
+                              padding: 0,
+                              background: "none",
+                              cursor: canEditRole ? "pointer" : "default",
+                            }}
+                            onClick={() => handlestatus(value._id)}
                           >
-                            <button
-                              type="button"
-                              disabled={!canEditRole}
-                              style={{
-                                cursor: canEditRole ? "pointer" : "default",
-                              }}
-                              onClick={() => handlestatus(value._id)}
+                            <span
+                              className="syl-mgmt-topic-badge"
+                              style={
+                                value.isActive
+                                  ? { backgroundColor: "#ecfdf5", color: "#10b981" }
+                                  : { backgroundColor: "#fef2f2", color: "#dc2626" }
+                              }
                             >
                               {value.isActive ? "Active" : "Inactive"}
-                            </button>
+                            </span>
+                          </button>
+                        </div>
+
+                        <div className="syl-mgmt-td syl-mgmt-td-center">
+                          <span className="syl-mgmt-date-text">
+                            {value.createdAt ? new Date(value.createdAt).toLocaleDateString() : "-"}
                           </span>
-                        </td>
+                        </div>
 
-                        {/* CREATED DATE */}
-                        <td>
-                          {value.createdAt
-                            ? new Date(value.createdAt).toLocaleDateString()
-                            : "-"}
-                        </td>
+                        <div className="syl-mgmt-td syl-mgmt-col-actions">
+                          <button
+                            type="button"
+                            className="syl-mgmt-text-action syl-mgmt-text-action--view"
+                            onClick={() => handleView(value)}
+                          >
+                            View
+                          </button>
 
-                        {/* ACTIONS */}
-                        <td>
-                          <div className="Rolemanagement-actions">
+                          {canEditRole && (
                             <button
                               type="button"
-                              className="view-action"
-                              onClick={() => handleView(value)}
+                              className="syl-mgmt-text-action syl-mgmt-text-action--edit"
+                              onClick={() => handleEdit(value)}
                             >
-                              View
+                              Edit
                             </button>
+                          )}
 
-                            {canEditRole && (
-                              <button
-                                type="button"
-                                className="edit-action"
-                                onClick={() => handleEdit(value)}
-                              >
-                                Edit
-                              </button>
-                            )}
+                          {canDeleteRole && (
+                            <button
+                              type="button"
+                              className="syl-mgmt-text-action syl-mgmt-text-action--delete"
+                              onClick={() => handledelete(value._id)}
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-                         {canDeleteRole && (
-  <button
-    type="button"
-    className="delete-action"
-    onClick={() => handledelete(value._id)}
-  >
-    Delete
-  </button>
-)}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="Rolemanagement-empty">
-                        No Roles Found
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* PAGINATION */}
-            <div className="Rolemanagement-pagination">
-              <span>
-                Showing{" "}
-                {filteredRoles.length === 0 ? 0 : startIndex + 1}
-                {" - "}
-                {Math.min(endIndex, filteredRoles.length)}
-                {" of "}
-                {filteredRoles.length} Roles
+            {/* Pagination */}
+            <div className="syl-mgmt-pagination-bar">
+              <span className="syl-mgmt-pagination-text">
+                {filteredRoles.length === 0
+                  ? "0 of 0"
+                  : `${currentPage} of ${Math.max(totalPages, 1)}`}
               </span>
 
-              <button
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-                disabled={currentPage === 1}
-              >
-                <FiChevronLeft />
-              </button>
-
-              <span>
-                Page {currentPage} of {Math.max(totalPages, 1)}
-              </span>
-
-              <button
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-                disabled={totalPages === 0 || currentPage >= totalPages}
-              >
-                <FiChevronRight />
-              </button>
+              <div className="syl-mgmt-pagination-controls">
+                <button
+                  type="button"
+                  className="syl-mgmt-page-btn"
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  disabled={currentPage === 1}
+                  style={currentPage === 1 ? {} : { cursor: "pointer", color: "#374151", backgroundColor: "#fff" }}
+                >
+                  <FiChevronLeft />
+                </button>
+                <button
+                  type="button"
+                  className="syl-mgmt-page-btn"
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  disabled={totalPages === 0 || currentPage >= totalPages}
+                  style={
+                    totalPages === 0 || currentPage >= totalPages
+                      ? {}
+                      : { cursor: "pointer", color: "#374151", backgroundColor: "#fff" }
+                  }
+                >
+                  <FiChevronRight />
+                </button>
+              </div>
             </div>
           </>
         )}
@@ -975,9 +1000,7 @@ export const Rolemanagement = () => {
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
-};
-
-export default Rolemanagement;
+};export default Rolemanagement;

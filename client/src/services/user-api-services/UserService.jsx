@@ -123,27 +123,84 @@ const applyinternleave = async (leaveData) => {
 
 // ================= GET MY LEAVE REQUESTS ================= //
 
-const takeinternleaverequests = async () => {
-  try {
-    const response = await axiosPrivate.get(
-      "/leaverequestmanagement/intern/my-requests"
-    );
+  // ======== Intern Attendance ======== //
+  const getMyAttendance = async () => {
+    try {
+      const response = await axiosPrivate.get(
+        "/attendancemanagement/my-attendance"
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
 
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-};
+  // ======== Intern Assigned Tasks ========
+  const takealltask = async () => {
+    try {
+      const response = await axiosPrivate.get("/taskmanagement/my-tasks");
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Intern My Submissions ========
+  const takemysubmissions = async () => {
+    try {
+      const response = await axiosPrivate.get(
+        "/taskmanagement/my-submissions"
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======================================
+  // INTERN CREATE TASK SUBMISSION
+  // ======================================
+  const createTaskSubmission = async (formData) => {
+    try {
+      const response = await axiosPrivate.post(
+        "/taskmanagement/submissions",
+        formData
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Intern Monthly Card ======== //
+  const takeMyMonthlyCard = async ({ internId, email } = {}) => {
+    try {
+      const params = {};
+
+      if (internId) params.internId = internId;
+      if (email) params.email = email;
+
+      const response = await axiosPrivate.get("/internmonthlycard", {
+        params,
+      });
+
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
   return {
     takeinternweeklyschedule,
     takeinternweeklycard,
     takeallnotification,
     marknotificationread,
     markallnotificationsread,
-    takematerials,
-    takematerialbyid,
-     applyinternleave,
-  takeinternleaverequests,
+    getMyAttendance,
+    takealltask,
+    takemysubmissions,
+    createTaskSubmission,
+    takeMyMonthlyCard,
   };
 };
 

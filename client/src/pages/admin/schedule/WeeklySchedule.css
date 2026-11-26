@@ -1,14 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
 .wk-sched-container {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   box-sizing: border-box;
   background-color: #f8f9fa;
-  padding: 24px 32px 32px 32px;
+  padding: 24px 32px 24px 32px;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -93,22 +94,27 @@
 /* Two-Column Workspace */
 .wk-sched-workspace {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 20px;
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* Left Sidebar: Batch's */
 .wk-sched-batch-sidebar {
   width: 240px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
   background-color: #ffffff;
   border: 1px solid #eef0f2;
   border-radius: 14px;
   padding: 20px 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .wk-sched-sidebar-title {
@@ -162,7 +168,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 540px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding-right: 2px;
 }
@@ -219,12 +226,16 @@
 .wk-sched-main-panel {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   background-color: #ffffff;
   border: 1px solid #eef0f2;
   border-radius: 14px;
   padding: 22px 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .wk-sched-panel-topbar {
@@ -360,19 +371,25 @@
 /* Scrollable Grid Table */
 .wk-sched-table-scroll {
   width: 100%;
-  overflow-x: auto;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
+  position: relative;
 }
-
 .wk-sched-table {
   width: 100%;
   min-width: 1180px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   background-color: #ffffff;
 }
 
 .wk-sched-thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background-color: #f97316;
   color: #ffffff;
   font-size: 11px;

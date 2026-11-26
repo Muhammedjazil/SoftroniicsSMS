@@ -1,28 +1,49 @@
-@import './WeeklyCard.css';
+/* ==========================================
+   MAIN CONTAINER
+========================================== */
 
-/* Tab Section */
+.wk-card-container {
+  width: 100%;
+  min-height: 100%;
+  padding: 20px 0;
+  background: #f7f9fc;
+  box-sizing: border-box;
+}
+
+.wk-card-body {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   TABS
+========================================== */
+
 .int-task-tabs-row {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 10px 5px 25px;
+  margin-bottom: 35px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .int-task-tab-btn {
-  height: 42px;
+  min-width: 100px;
+  height: 40px;
   padding: 0 20px;
-  border-radius: 10px;
-  background-color: #ffffff;
-  border: 1px solid #d9dee5;
-  color: #34445b;
-  font-family: inherit;
-  font-size: 13.5px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .int-task-tab-btn:hover:not(.int-task-tab-btn--active) {
-  background-color: #f9fafb;
+  background: #f9fafb;
   border-color: #d1d5db;
   color: #111827;
   transform: translateY(-1px);
@@ -30,7 +51,7 @@
 }
 
 .int-task-tab-btn--active {
-  background-color: #ff790e;
+  background: #ff790e;
   border-color: #ff790e;
   color: #ffffff;
   box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
@@ -41,51 +62,1129 @@
   filter: brightness(0.94);
 }
 
-/* Content Card */
+/* ==========================================
+   TASK CARD
+========================================== */
+
 .int-task-card {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-  padding: 60px 24px;
-  min-height: 380px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  min-height: 250px;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
   box-sizing: border-box;
 }
+
+/* ==========================================
+   TABLE WRAPPER
+========================================== */
+
+.int-task-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #d8e0eb;
+  border-radius: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #929292 #f1f3f5;
+}
+
+.int-task-table-wrapper::-webkit-scrollbar {
+  height: 9px;
+}
+
+.int-task-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f3f5;
+  border-radius: 10px;
+}
+
+.int-task-table-wrapper::-webkit-scrollbar-thumb {
+  background: #929292;
+  border-radius: 10px;
+}
+
+/* ==========================================
+   TASK TABLE
+========================================== */
+
+.int-task-table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.int-task-table thead {
+  background: #f7f9fc;
+}
+
+.int-task-table th {
+  padding: 16px 18px;
+  color: #52647d;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid #dce3ed;
+}
+
+.int-task-table td {
+  padding: 18px;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 400;
+  border-bottom: 1px solid #e7edf4;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.int-task-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.int-task-table tbody tr:hover {
+  background: #fbfcff;
+}
+
+/* ==========================================
+   TASK TITLE
+========================================== */
+
+.int-task-title-cell {
+  min-width: 230px;
+  max-width: 300px;
+  white-space: normal !important;
+}
+
+.int-task-title-cell strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #18283f;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.int-task-title-cell span {
+  display: -webkit-box;
+  max-width: 280px;
+  overflow: hidden;
+  color: #728198;
+  font-size: 12.5px;
+  line-height: 1.45;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* ==========================================
+   TASK TYPE BADGE
+========================================== */
+
+.int-task-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 13px;
+  background: #e0ecff;
+  color: #1760d5;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ==========================================
+   MODULE BADGE
+========================================== */
+
+.int-task-module-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 13px;
+  background: #f3e7ff;
+  color: #8617d9;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* ==========================================
+   ACTION BUTTONS
+========================================== */
+
+.int-task-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.int-task-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 36px;
+  min-width: 96px;
+  padding: 0 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #075ce5;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.int-task-action-btn svg {
+  font-size: 15px;
+}
+
+.int-task-action-btn:hover {
+  background: #eef5ff;
+  border-color: #075ce5;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.int-task-submit-btn {
+  color: #075ce5;
+}
+
+.int-task-submit-btn:hover {
+  background: #075ce5;
+  border-color: #075ce5;
+  color: #ffffff;
+}
+
+.int-view-submission-btn {
+  height: 36px;
+}
+
+/* ==========================================
+   SUBMISSION STATUS
+========================================== */
+
+.int-submission-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.int-status-submitted {
+  background: #e2edff;
+  color: #1760d5;
+}
+
+.int-status-graded {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.int-status-rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* ==========================================
+   EMPTY STATE
+========================================== */
 
 .int-task-empty-box {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 35px 20px;
   text-align: center;
-  max-width: 400px;
 }
 
 .int-task-empty-icon-circle {
-  width: 54px;
-  height: 54px;
-  border-radius: 14px;
-  background-color: #fff4ec;
-  color: #ff7417;
-  font-size: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  width: 75px;
+  height: 75px;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: #fff0e3;
+  color: #ff7900;
+}
+
+.int-task-empty-icon-circle svg {
+  font-size: 34px;
 }
 
 .int-task-empty-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 6px 0;
+  margin: 0 0 10px;
+  color: #192b43;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .int-task-empty-desc {
-  font-size: 13.5px;
-  color: #64748b;
+  max-width: 450px;
   margin: 0;
-  line-height: 1.5;
+  color: #748197;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ==========================================
+   LOADING AND ERROR
+========================================== */
+
+.int-task-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.int-task-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  gap: 15px;
+  color: #dc2626;
+  text-align: center;
+}
+
+.int-task-error button {
+  min-width: 100px;
+  height: 40px;
+  padding: 0 20px;
+  background: #ff790e;
+  border: 1px solid #ff790e;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.int-task-error button:hover {
+  background: #e96800;
+  border-color: #e96800;
+}
+
+/* ==========================================
+   FULL PAGE SUBMISSION
+========================================== */
+
+.int-submit-page {
+  width: 100%;
+  padding: 10px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   SUBMISSION PAGE HEADER
+========================================== */
+
+.int-submit-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.int-submit-page-header h2 {
+  margin: 0 0 6px;
+  color: #26364d;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.int-submit-page-header p {
+  margin: 0;
+  color: #8491a3;
+  font-size: 13px;
+}
+
+.int-submit-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 102px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.int-submit-back-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================
+   MENTOR INSTRUCTIONS
+========================================== */
+
+.int-mentor-instructions {
+  width: 100%;
+  margin-bottom: 28px;
+  padding: 22px;
+  border: 1px solid #e8e3dc;
+  border-radius: 12px;
+  background: #fffcf7;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+.int-mentor-instructions-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #f1e8da;
+}
+
+.int-mentor-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #fff0dc;
+  color: #f47717;
+}
+
+.int-mentor-icon svg {
+  font-size: 22px;
+}
+
+.int-mentor-title-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.int-mentor-title-info h3 {
+  margin: 0 0 7px;
+  color: #26364d;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.int-mentor-title-info p {
+  margin: 0;
+  color: #8491a3;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.int-mentor-label {
+  padding: 9px 15px;
+  border-radius: 20px;
+  background: #fff0dc;
+  color: #a95319;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ==========================================
+   INSTRUCTION DESCRIPTION
+========================================== */
+
+.int-instruction-description {
+  margin-top: 15px;
+  padding: 17px;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.int-instruction-description strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #e46d32;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.int-instruction-description p {
+  margin: 0;
+  color: #68778b;
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+/* ==========================================
+   SUBMISSION FORM
+========================================== */
+
+.int-submit-form {
+  width: 100%;
+}
+
+.int-submit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  width: 100%;
+}
+
+/* ==========================================
+   SUBMISSION FIELDS
+========================================== */
+
+.int-submit-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 9px;
+}
+
+.int-submit-field label {
+  color: #34445b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.int-submit-field input,
+.int-submit-field textarea {
+  width: 100%;
+  min-height: 47px;
+  padding: 12px 15px;
+  border: 1px solid #dce3eb;
+  border-radius: 7px;
+  outline: none;
+  background: #ffffff;
+  color: #46566d;
+  font-family: inherit;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.int-submit-field input:focus,
+.int-submit-field textarea:focus {
+  border-color: #ff7900;
+}
+
+.int-submit-field input[readonly] {
+  background: #f7f9fb;
+  color: #78869a;
+  cursor: default;
+}
+
+.int-submit-field textarea {
+  min-height: 125px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.int-submit-field input[type="file"] {
+  padding: 10px;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.int-submit-field input::placeholder,
+.int-submit-field textarea::placeholder {
+  color: #9ba6b5;
+}
+
+.int-submit-full {
+  grid-column: 1 / -1;
+}
+
+.int-file-name {
+  color: #15803d;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================
+   SUBMISSION FOOTER
+========================================== */
+
+.int-submit-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 13px;
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid #e8edf3;
+}
+
+.int-submit-cancel,
+.int-submit-save {
+  min-width: 110px;
+  height: 38px;
+  padding: 0 15px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.int-submit-cancel {
+  border: 1px solid #ff5050;
+  background: #ffffff;
+  color: #ff4040;
+}
+
+.int-submit-cancel:hover {
+  background: #fff1f1;
+}
+
+.int-submit-save {
+  border: 1px solid #ff790e;
+  background: #ff790e;
+  color: #ffffff;
+}
+
+.int-submit-save:hover {
+  background: #e96800;
+  border-color: #e96800;
+}
+
+.int-submit-save:disabled,
+.int-submit-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   MODAL OVERLAY & CONTAINER
+========================================== */
+
+.int-task-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  overflow-y: auto;
+}
+
+.int-task-modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+  box-sizing: border-box;
+}
+
+.int-task-modal--view {
+  max-width: 720px;
+  padding: 26px 28px 24px;
+}
+
+/* ==========================================
+   MODAL HEADER
+========================================== */
+
+.int-task-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e8edf3;
+}
+
+.int-task-modal-header h3 {
+  margin: 0;
+  color: #24364d;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.int-task-modal-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #52647d;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+/* ==========================================
+   MODAL BODY
+========================================== */
+
+.int-task-modal-body {
+  padding: 24px;
+}
+
+.int-task-modal-body p {
+  margin: 0 0 17px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.int-task-modal-body strong {
+  color: #26364d;
+}
+
+/* ==========================================
+   MODAL FOOTER
+========================================== */
+
+.int-task-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 18px 24px;
+  border-top: 1px solid #e8edf3;
+}
+
+.int-task-modal-footer button {
+  min-width: 100px;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid #ff790e;
+  border-radius: 8px;
+  background: #ff790e;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.int-task-modal-footer button:hover {
+  background: #e96800;
+  border-color: #e96800;
+}
+
+/* ==========================================
+   VIEW TASK MODAL HEADER
+========================================== */
+
+.int-view-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.int-view-modal-icon-box {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff4ea;
+  color: #ff7900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.int-view-modal-title-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.int-view-modal-title-group h3 {
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.int-view-type-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background: #fff4ea;
+  color: #ea580c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.int-view-modal-close {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.int-view-modal-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* ==========================================
+   VIEW TASK METADATA BAR
+========================================== */
+
+.int-view-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.int-view-meta-card {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.int-view-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.int-view-meta-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.int-view-meta-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  word-break: break-word;
+}
+
+.int-view-due-date {
+  color: #ef4444;
+}
+
+/* ==========================================
+   MENTOR DESCRIPTION BOX
+========================================== */
+
+.int-view-desc-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.int-view-desc-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.int-view-desc-heading svg {
+  color: #ea580c;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.int-view-desc-box {
+  padding: 16px 18px;
+  border: 1px solid #f5ebe0;
+  border-radius: 14px;
+  background: #fffcf8;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.65;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.int-view-desc-box p {
+  margin: 0 0 6px;
+}
+
+.int-view-desc-box p:last-child {
+  margin-bottom: 0;
+}
+
+/* ==========================================
+   VIEW TASK MODAL FOOTER
+========================================== */
+
+.int-view-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.int-view-btn-close {
+  min-width: 100px;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.int-view-btn-close:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.int-view-btn-submit {
+  min-width: 100px;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid #2563eb;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.int-view-btn-submit:hover {
+  background: #1d4ed8;
+}
+
+/* ==========================================
+   RESPONSIVE - TABLET
+========================================== */
+
+@media (max-width: 1024px) {
+  .int-submit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .int-task-card {
+    padding: 18px;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE - MOBILE
+========================================== */
+
+@media (max-width: 768px) {
+  .wk-card-container {
+    padding: 12px 0;
+  }
+
+  .int-task-tabs-row {
+    gap: 8px;
+    padding: 8px 2px 18px;
+    margin-bottom: 20px;
+  }
+
+  .int-task-tab-btn {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .int-task-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .int-task-table {
+    min-width: 900px;
+  }
+
+  .int-task-table th {
+    padding: 14px 12px;
+    font-size: 11.5px;
+  }
+
+  .int-task-table td {
+    padding: 14px 12px;
+    font-size: 13px;
+  }
+
+  .int-task-title-cell strong {
+    font-size: 13px;
+  }
+
+  .int-task-title-cell span {
+    font-size: 12px;
+  }
+
+  .int-task-actions {
+    gap: 7px;
+  }
+
+  .int-task-action-btn {
+    height: 34px;
+    min-width: 0;
+    padding: 0 11px;
+    font-size: 12px;
+  }
+
+  .int-submit-page {
+    padding: 5px;
+  }
+
+  .int-submit-page-header h2 {
+    font-size: 19px;
+  }
+
+  .int-mentor-instructions {
+    padding: 15px;
+  }
+
+  .int-mentor-instructions-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .int-mentor-title-info {
+    flex-basis: calc(100% - 60px);
+  }
+
+  .int-mentor-title-info h3 {
+    font-size: 15px;
+  }
+
+  .int-mentor-label {
+    margin-left: 57px;
+  }
+
+  .int-submit-grid {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+
+  .int-submit-full {
+    grid-column: auto;
+  }
+
+  .int-submit-footer {
+    gap: 10px;
+  }
+
+  .int-submit-cancel,
+  .int-submit-save {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .int-view-meta-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .int-task-modal--view {
+    padding: 20px;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE - SMALL MOBILE
+========================================== */
+
+@media (max-width: 480px) {
+  .int-submit-page-header {
+    align-items: flex-start;
+  }
+
+  .int-submit-back-btn {
+    height: 36px;
+    min-width: 0;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .int-mentor-title-info p {
+    font-size: 11px;
+  }
+
+  .int-instruction-description {
+    padding: 13px;
+  }
+
+  .int-instruction-description p {
+    font-size: 13px;
+  }
+
+  .int-submit-field label {
+    font-size: 13px;
+  }
+
+  .int-submit-field input,
+  .int-submit-field textarea {
+    font-size: 13px;
+  }
+
+  .int-task-modal-overlay {
+    padding: 12px;
+  }
+
+  .int-task-modal-header,
+  .int-task-modal-body {
+    padding: 17px;
+  }
 }

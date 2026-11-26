@@ -10,7 +10,7 @@ const Course = require("../Models/courseModel");
 const Category = require("../Models/categoryModel");
 const Intern = require("../Models/internModel");
 const Module = require("../Models/moduleModel");
-
+const TaskSubmission = require("../Models/taskSubmissionModel");
 // Convert FormData array strings into arrays
 const parseArray = (value) => {
   if (!value) return [];
@@ -411,6 +411,161 @@ exports.getTaskDropdowns = async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to fetch dropdown data",
+      error: error.message
+    });
+  }
+};
+
+
+//to display and submit task to intern 
+
+// ======================================
+// GET TASKS ASSIGNED TO LOGGED-IN INTERN
+// ======================================
+exports.getMyTasks = async (req, res) => {
+  try {
+    // Check intern authentication
+    if (req.userType !== "intern") {
+      return res.status(403).json({
+        message: "Only interns can access assigned tasks"
+      });
+    }
+
+    // Get logged-in intern using JWT ID
+    const intern = await Intern.findOne({
+      _id: req.userId,
+      isActive: true,
+      isDeleted: false
+    })
+      .populate("course", "courseName category")
+      .populate("branch", "branchName")
+      .populate("batch", "batchName");
+
+    if (!intern) {
+      return res.status(404).json({
+        message: "Intern not found"
+      });
+    }
+
+    const internId = intern._id;
+    const branchId = intern.branch?._id;
+    const batchId = intern.batch?._id;
+    const courseId = intern.course?._id;
+    const categoryId = intern.course?.category;
+
+    if (!branchId) {
+      return res.status(400).json({
+        message: "Intern branch not found"
+      });
+    }
+
+    // Audience matching conditions
+    const audienceConditions = [
+      // All interns in selected branch
+      {
+        audience: "All interns"
+      },
+
+      // Selected batches
+      ...(batchId
+        ? [{
+            audience: "By batches",
+            batches: batchId
+          }]
+        : []),
+
+      // Selected courses
+      ...(courseId
+        ? [{
+            audience: "By Courses",
+            courses: courseId
+          }]
+        : []),
+
+      // Selected categories
+      ...(categoryId
+        ? [{
+            audience: "By Category",
+            categories: categoryId
+          }]
+        : []),
+
+      // Selected individual intern
+      {
+        audience: "Individual interns",
+        individualInterns: internId
+      }
+    ];
+
+    const tasks = await populateTask(
+      Task.find({
+        isActive: true,
+        isDeleted: false,
+        branch: branchId,
+        $or: audienceConditions
+      }).sort({ createdAt: -1 })
+    );
+
+    return res.status(200).json({
+      message: "Assigned tasks fetched successfully",
+      tasks
+    });
+
+  } catch (error) {
+    console.error("Get Intern Tasks Error:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch assigned tasks",
+      error: error.message
+    });
+  }
+};
+
+
+// ======================================
+// GET SUBMISSIONS OF LOGGED-IN INTERN
+// ======================================
+exports.getMySubmissions = async (req, res) => {
+  try {
+    if (req.userType !== "intern") {
+      return res.status(403).json({
+        message: "Only interns can access their submissions"
+      });
+    }
+
+    const intern = await Intern.findOne({
+      _id: req.userId,
+      isActive: true,
+      isDeleted: false
+    });
+
+    if (!intern) {
+      return res.status(404).json({
+        message: "Intern not found"
+      });
+    }
+
+    const submissions = await TaskSubmission.find({
+      intern: intern._id,
+      isDeleted: false
+    })
+      .populate({
+        path: "task",
+        select: "title taskType module description totalMarks dueDate"
+      })
+      .populate("gradedBy", "fullName name")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      message: "My submissions fetched successfully",
+      submissions
+    });
+
+  } catch (error) {
+    console.error("Get Intern Submissions Error:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch submissions",
       error: error.message
     });
   }

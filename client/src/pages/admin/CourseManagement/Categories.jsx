@@ -1,21 +1,13 @@
-
-import React, { useEffect, useState } from "react";
-import {
-  Eye,
-  Pencil,
-  Trash2,
-  Plus,
-  Download,
-  Search,
-  X,
-  ChevronDown,
-  ArrowLeft,
-} from "lucide-react";
-
-import AdminService from "../../../services/admin-api-services/AdminService";
-import "./Categories.css";
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import './Categories.css';
+import { LuX, LuSearch } from 'react-icons/lu';
+import { HiOutlineArrowDownTray } from 'react-icons/hi2';
+import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import AdminService from '../../../services/admin-api-services/AdminService';
+import { useToast } from '../../../components/common/Toast';
 
 const Categories = () => {
+  const { showToast, ToastContainer } = useToast();
   const {
     createcategory,
     takecategories,
@@ -25,907 +17,726 @@ const Categories = () => {
     updatecategory,
   } = AdminService();
 
-  const [activeTab, setActiveTab] = useState("category");
+  const [activeTab, setActiveTab] = useState('categories'); // 'categories' | 'new-category' | 'edit-category'
+  const [viewingCategory, setViewingCategory] = useState(null);
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Search & Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [branchFilter, setBranchFilter] = useState('All Branches');
+
+  // Form states (Add & Edit)
+  const [formName, setFormName] = useState('');
+  const [formSelectedBranches, setFormSelectedBranches] = useState([]); // Array of { _id, branchName }
+  const [formCourses, setFormCourses] = useState([]); // Array of { _id, courseName }
 
   const [categories, setCategories] = useState([]);
-  const [branches, setBranches] = useState([]);
+  const [availableBranches, setAvailableBranches] = useState([]);
 
-  const [loading, setLoading] = useState(false);
-  const [modalLoading, setModalLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  // Normalize category document from API
+  const normalizeCategory = useCallback((c, branchLookup = []) => {
+    const normalizedBranches = Array.isArray(c.branch)
+      ? c.branch
+          .map((b) => {
+            if (typeof b === 'object' && b !== null) {
+              return { _id: b._id, branchName: b.branchName || 'Branch' };
+            }
+            const found = branchLookup.find(
+              (item) => String(item._id) === String(b)
+            );
+            return found
+              ? { _id: found._id, branchName: found.branchName }
+              : { _id: b, branchName: 'Branch' };
+          })
+          .filter(Boolean)
+      : [];
 
-  const [searchValue, setSearchValue] = useState("");
-  const [filterBranch, setFilterBranch] = useState("");
+    const normalizedCourses = Array.isArray(c.courses)
+      ? c.courses
+          .filter((course) => course && !course.isDeleted)
+          .map((course) =>
+            typeof course === 'object' && course !== null
+              ? { _id: course._id, courseName: course.courseName || 'Course' }
+              : { _id: course, courseName: 'Course' }
+          )
+      : [];
 
-  const [formData, setFormData] = useState({
-    categoryName: "",
-    branch: [],
-  });
+    const createdDate = c.createdAt
+      ? new Date(c.createdAt).toLocaleDateString('en-US')
+      : '';
 
-  const [branchDropdown, setBranchDropdown] = useState(false);
+    return {
+      id: c._id,
+      code: c._id ? c._id.slice(-6) : '',
+      name: c.categoryName || '',
+      branches: normalizedBranches,
+      totalCourses: c.totalCourses ?? normalizedCourses.length,
+      createdAt: createdDate,
+      courses: normalizedCourses,
+    };
+  }, []);
 
-  // VIEW / EDIT MODAL
-  const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState("view");
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
-  // FETCH CATEGORIES
-  const fetchCategories = async () => {
+  // Load categories & branches on mount
+  const fetchInitialData = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
+      const [categoriesRes, branchesRes] = await Promise.allSettled([
+        takecategories(),
+        takebranch(),
+      ]);
 
-      const response = await takecategories();
+      let activeBranches = [];
+      if (branchesRes.status === 'fulfilled') {
+        const rawBranches = Array.isArray(branchesRes.value)
+          ? branchesRes.value
+          : branchesRes.value?.branches || branchesRes.value?.data || [];
+        activeBranches = rawBranches.filter(
+          (b) => b.isActive !== false && b.isDeleted !== true
+        );
+        setAvailableBranches(activeBranches);
+      }
 
-      const data = Array.isArray(response)
-        ? response
-        : response.categories || [];
-
-      setCategories(data);
+      if (categoriesRes.status === 'fulfilled') {
+        const rawCategories = Array.isArray(categoriesRes.value)
+          ? categoriesRes.value
+          : categoriesRes.value?.categories || categoriesRes.value?.data || [];
+        setCategories(
+          rawCategories.map((c) => normalizeCategory(c, activeBranches))
+        );
+      } else {
+        console.error('Failed to load categories:', categoriesRes.reason);
+        showToast('Unable to load categories', 'error');
+      }
     } catch (error) {
-      console.error("Fetch categories:", error);
-      alert("Unable to load categories");
+      console.error('Failed to load categories data:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  // FETCH BRANCHES
-  const fetchBranches = async () => {
-    try {
-      const response = await takebranch();
-
-      const data = Array.isArray(response)
-        ? response
-        : response.branches || [];
-
-      setBranches(
-        data.filter(
-          (branch) =>
-            branch.isActive !== false &&
-            branch.isDeleted !== true
-        )
-      );
-    } catch (error) {
-      console.error("Fetch branches:", error);
-    }
-  };
+  }, [normalizeCategory, showToast]);
 
   useEffect(() => {
-    fetchCategories();
-    fetchBranches();
-  }, []);
+    fetchInitialData();
+  }, [fetchInitialData]);
 
-  // RESET FORM
-  const resetForm = () => {
-    setFormData({
-      categoryName: "",
-      branch: [],
+  const filteredCategories = useMemo(() => {
+    return categories.filter((cat) => {
+      const matchesSearch = cat.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase().trim());
+      const matchesBranch =
+        branchFilter === 'All Branches' ||
+        cat.branches.some((b) => b._id === branchFilter);
+      return matchesSearch && matchesBranch;
     });
+  }, [categories, searchQuery, branchFilter]);
 
-    setBranchDropdown(false);
+  const resetForm = () => {
+    setFormName('');
+    setFormSelectedBranches([]);
+    setFormCourses([]);
+    setEditingCategoryId(null);
   };
 
-  // OPEN NEW CATEGORY
-  const openNewCategory = () => {
+  const handleOpenNewCategory = () => {
     resetForm();
-    setActiveTab("newCategory");
+    setViewingCategory(null);
+    setActiveTab('new-category');
   };
 
-  // INPUT CHANGE
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleOpenEditCategory = async (categoryItem) => {
+    setViewingCategory(null);
+    setEditingCategoryId(categoryItem.id);
+    setFormName(categoryItem.name);
+    setFormSelectedBranches([...categoryItem.branches]);
+    setFormCourses([...(categoryItem.courses || [])]);
+    setActiveTab('edit-category');
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  // GET BRANCH IDS
-  const getBranchIds = (branchList) => {
-    if (!Array.isArray(branchList)) return [];
-
-    return branchList
-      .map((branch) =>
-        typeof branch === "object"
-          ? branch?._id
-          : branch
-      )
-      .filter(Boolean)
-      .map(String);
-  };
-
-  // MULTIPLE BRANCH SELECTION
-  const handleBranchChange = (branchId) => {
-    setFormData((prev) => ({
-      ...prev,
-      branch: prev.branch.includes(branchId)
-        ? prev.branch.filter((id) => id !== branchId)
-        : [...prev.branch, branchId],
-    }));
-  };
-
-  // GET BRANCH NAMES
-  const getBranchNames = (branchList) => {
-    if (!Array.isArray(branchList) || !branchList.length) {
-      return "No Branch";
+    // Fetch latest details to ensure all populated fields
+    try {
+      const res = await takecategorybyid(categoryItem.id);
+      const data = res?.category || res?.data || res;
+      if (data) {
+        const fullCat = normalizeCategory(data, availableBranches);
+        setFormName(fullCat.name);
+        setFormSelectedBranches(fullCat.branches);
+        setFormCourses(fullCat.courses);
+      }
+    } catch (err) {
+      console.error('Failed to fetch full category details:', err);
     }
-
-    return branchList
-      .map((branch) => {
-        if (typeof branch === "object") {
-          return branch.branchName;
-        }
-
-        const found = branches.find(
-          (item) => String(item._id) === String(branch)
-        );
-
-        return found?.branchName || "";
-      })
-      .filter(Boolean)
-      .join(", ");
   };
 
-  // CREATE CATEGORY
+  const handleViewCategory = async (categoryItem) => {
+    setViewingCategory(categoryItem);
+    try {
+      const res = await takecategorybyid(categoryItem.id);
+      const data = res?.category || res?.data || res;
+      if (data) {
+        setViewingCategory(normalizeCategory(data, availableBranches));
+      }
+    } catch (err) {
+      console.error('Failed to fetch category details:', err);
+    }
+  };
+
+  const handleBackToCategories = () => {
+    resetForm();
+    setViewingCategory(null);
+    setActiveTab('categories');
+  };
+
+  const handleAddBranchToForm = (e) => {
+    const selectedId = e.target.value;
+    if (!selectedId) return;
+
+    const alreadySelected = formSelectedBranches.some((b) => b._id === selectedId);
+    if (alreadySelected) return;
+
+    const branchObj = availableBranches.find((b) => b._id === selectedId);
+    if (branchObj) {
+      setFormSelectedBranches((prev) => [
+        ...prev,
+        { _id: branchObj._id, branchName: branchObj.branchName },
+      ]);
+    }
+    e.target.value = '';
+  };
+
+  const handleRemoveBranchFromForm = (branchId) => {
+    setFormSelectedBranches((prev) => prev.filter((b) => b._id !== branchId));
+  };
+
   const handleCreateCategory = async (e) => {
     e.preventDefault();
-
-    if (!formData.categoryName.trim()) {
-      alert("Please enter category name");
+    if (!formName.trim()) {
+      showToast('Please enter category name', 'warning');
+      return;
+    }
+    if (formSelectedBranches.length === 0) {
+      showToast('Please select at least one branch', 'warning');
       return;
     }
 
-    if (formData.branch.length === 0) {
-      alert("Please select at least one branch");
-      return;
-    }
-
+    setSubmitting(true);
     try {
-      setSaving(true);
-
-      const categoryData = {
-        categoryName: formData.categoryName.trim(),
-        branch: formData.branch,
+      const payload = {
+        categoryName: formName.trim().toUpperCase(),
+        branch: formSelectedBranches.map((b) => b._id),
       };
 
-      await createcategory(categoryData);
+      const res = await createcategory(payload);
+      const created = res?.data || res?.category || res;
 
-      alert("Category created successfully");
-
+      setCategories((prev) => [
+        normalizeCategory(created, availableBranches),
+        ...prev,
+      ]);
+      showToast('Category created successfully!', 'success');
       resetForm();
-
-      await fetchCategories();
-
-      setActiveTab("category");
+      setActiveTab('categories');
     } catch (error) {
-      console.error("Create category:", error);
-
-      alert(
-        error.response?.data?.message ||
-        "Unable to create category"
+      console.error('Error creating category:', error);
+      showToast(
+        error?.response?.data?.message || 'Failed to create category',
+        'error'
       );
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   };
 
-  // CANCEL CREATE
-  const handleCancel = () => {
-    resetForm();
-    setActiveTab("category");
-  };
-
-  // OPEN VIEW / EDIT
-  const openCategoryModal = async (id, mode) => {
-    try {
-      setModalLoading(true);
-      setShowModal(true);
-      setModalMode(mode);
-      setSelectedCategory(null);
-
-      const response = await takecategorybyid(id);
-
-      const data = response.category || response;
-
-      setSelectedCategory(data);
-
-      setFormData({
-        categoryName: data.categoryName || "",
-        branch: getBranchIds(data.branch),
-      });
-    } catch (error) {
-      console.error("Category details:", error);
-
-      alert("Unable to load category details");
-      setShowModal(false);
-    } finally {
-      setModalLoading(false);
-    }
-  };
-
-  // CLOSE MODAL
-  const closeModal = () => {
-    setShowModal(false);
-    setSelectedCategory(null);
-    resetForm();
-  };
-
-  // UPDATE CATEGORY
-  const handleUpdateCategory = async (e) => {
+  const handleSaveEditedCategory = async (e) => {
     e.preventDefault();
-
-    if (!formData.categoryName.trim()) {
-      alert("Please enter category name");
+    if (!formName.trim() || formSelectedBranches.length === 0 || !editingCategoryId || submitting)
       return;
-    }
 
-    if (formData.branch.length === 0) {
-      alert("Please select at least one branch");
-      return;
-    }
-
+    setSubmitting(true);
     try {
-      setSaving(true);
-
-      const updatedData = {
-        categoryName: formData.categoryName.trim(),
-        branch: formData.branch,
-
-        courses: (selectedCategory.courses || []).map(
-          (course) =>
-            typeof course === "object"
-              ? course._id
-              : course
-        ),
+      const payload = {
+        categoryName: formName.trim().toUpperCase(),
+        branch: formSelectedBranches.map((b) => b._id),
+        courses: formCourses.map((c) => c._id),
       };
 
-      await updatecategory(
-        selectedCategory._id,
-        updatedData
+      const res = await updatecategory(editingCategoryId, payload);
+      const updated = res?.data || res?.category || res;
+
+      setCategories((prev) =>
+        prev.map((c) =>
+          c.id === editingCategoryId
+            ? normalizeCategory(updated, availableBranches)
+            : c
+        )
       );
-
-      alert("Category updated successfully");
-
-      closeModal();
-
-      await fetchCategories();
+      showToast('Category updated successfully!', 'success');
+      resetForm();
+      setActiveTab('categories');
     } catch (error) {
-      console.error("Update category:", error);
-
-      alert(
-        error.response?.data?.message ||
-        "Unable to update category"
+      console.error('Error updating category:', error);
+      showToast(
+        error?.response?.data?.message || 'Failed to update category',
+        'error'
       );
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   };
 
-  // DELETE CATEGORY
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this category?"
-    );
-
-    if (!confirmDelete) return;
-
+  const handleDeleteCategory = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this category?')) return;
     try {
       await removecategory(id);
-
-      alert("Category deleted successfully");
-
-      await fetchCategories();
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+      if (viewingCategory && viewingCategory.id === id) {
+        setViewingCategory(null);
+      }
+      showToast('Category deleted successfully.', 'success');
     } catch (error) {
-      console.error("Delete category:", error);
-
-      alert(
-        error.response?.data?.message ||
-        "Unable to delete category"
+      console.error('Error deleting category:', error);
+      showToast(
+        error?.response?.data?.message || 'Failed to delete category',
+        'error'
       );
     }
   };
 
-  // COURSE COUNT
-  const getCourseCount = (category) => {
-    return (
-      category.totalCourses ??
-      category.courses?.length ??
-      0
-    );
-  };
-
-  // FILTER
-  const filteredCategories = categories.filter((category) => {
-    const matchesSearch = category.categoryName
-      ?.toLowerCase()
-      .includes(searchValue.toLowerCase());
-
-    const branchIds = getBranchIds(category.branch);
-
-    const matchesBranch =
-      !filterBranch || branchIds.includes(filterBranch);
-
-    return matchesSearch && matchesBranch;
-  });
-
-  // EXPORT CSV
-  const handleExport = () => {
-    if (!filteredCategories.length) {
-      alert("No categories available to export");
+  const handleExportCSV = () => {
+    if (filteredCategories.length === 0) {
+      showToast('No categories to export.', 'warning');
       return;
     }
+    const headers = ['#', 'Category Name', 'Branches', 'Total Courses', 'Created'];
+    const rows = filteredCategories.map((c, idx) => [
+      idx + 1,
+      c.name,
+      c.branches.map((b) => b.branchName).join('; '),
+      c.totalCourses,
+      c.createdAt,
+    ]);
 
-    const rows = [
-      ["Category Name", "Total Courses", "Branches"],
-      ...filteredCategories.map((category) => [
-        category.categoryName,
-        getCourseCount(category),
-        getBranchNames(category.branch),
-      ]),
-    ];
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers, ...rows]
+        .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
 
-    const csvContent = rows
-      .map((row) =>
-        row
-          .map(
-            (value) =>
-              `"${String(value).replace(/"/g, '""')}"`
-          )
-          .join(",")
-      )
-      .join("\n");
-
-    const blob = new Blob([csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "categories.csv";
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', 'categories_list.csv');
+    document.body.appendChild(link);
     link.click();
-
-    URL.revokeObjectURL(url);
-  };
-
-  // BRANCH SELECTOR
-  const renderBranchSelector = () => (
-    <div className="category-branch-selector">
-
-      <button
-        type="button"
-        className="branch-selector-button"
-        onClick={() =>
-          setBranchDropdown((prev) => !prev)
-        }
-      >
-        <span>
-          {formData.branch.length === 0
-            ? "Select Branches"
-            : `${formData.branch.length} Branches Selected`}
-        </span>
-
-        <ChevronDown size={17} />
-      </button>
-
-      {branchDropdown && (
-        <div className="branch-dropdown-menu">
-
-          {branches.length > 0 ? (
-            branches.map((branch) => (
-              <label
-                key={branch._id}
-                className="branch-option"
-              >
-                <input
-                  type="checkbox"
-                  checked={formData.branch.includes(
-                    branch._id
-                  )}
-                  onChange={() =>
-                    handleBranchChange(branch._id)
-                  }
-                />
-
-                <span>{branch.branchName}</span>
-              </label>
-            ))
-          ) : (
-            <p>No branches available</p>
-          )}
-
-        </div>
-      )}
-
-    </div>
-  );
-
-  // COURSES DISPLAY
-  const renderCourses = (courseList) => {
-    const courses = courseList || [];
-
-    if (!courses.length) {
-      return (
-        <div className="no-courses-message">
-          <Plus size={15} />
-          No courses added yet
-        </div>
-      );
-    }
-
-    return (
-      <div className="added-course-list">
-        {courses.map((course, index) => (
-          <span
-            className="added-course-chip"
-            key={
-              typeof course === "object"
-                ? course._id
-                : course || index
-            }
-          >
-            {typeof course === "object"
-              ? course.courseName || course.name
-              : course}
-          </span>
-        ))}
-      </div>
-    );
+    document.body.removeChild(link);
+    showToast('Categories exported to CSV.', 'success');
   };
 
   return (
-    <div className="categories-page">
+    <div className="cat-mgmt-container">
+      <ToastContainer />
 
-      
-      {/* TABS */}
-      <div className="category-topbar">
-
-        <div className="category-tabs">
-
+      {/* Outer Toolbar */}
+      <div className="cat-mgmt-toolbar">
+        <div className="cat-mgmt-tab-group">
           <button
-            className={
-              activeTab === "category" ? "active" : ""
-            }
-            onClick={() => {
-              setActiveTab("category");
-              resetForm();
-              fetchCategories();
-            }}
+            type="button"
+            className={`cat-mgmt-tab-btn ${
+              activeTab === 'categories' ? 'cat-mgmt-tab-btn--active' : ''
+            }`}
+            onClick={handleBackToCategories}
           >
-            Category List
+            Categories List
           </button>
-
           <button
-            className={
-              activeTab === "newCategory" ? "active" : ""
-            }
-            onClick={openNewCategory}
+            type="button"
+            className={`cat-mgmt-tab-btn ${
+              activeTab === 'new-category' || activeTab === 'edit-category'
+                ? 'cat-mgmt-tab-btn--active'
+                : ''
+            }`}
+            onClick={handleOpenNewCategory}
           >
-            New Category
+            {activeTab === 'edit-category' ? 'Edit Category' : 'New Category'}
           </button>
-
         </div>
 
-        {activeTab === "category" && (
-          <button
-            className="category-export-btn"
-            onClick={handleExport}
-          >
-            <Download size={15} />
-            Export
-          </button>
-        )}
-
+        <button
+          type="button"
+          className="cat-mgmt-export-btn"
+          onClick={handleExportCSV}
+          title="Export Categories to CSV"
+        >
+          <HiOutlineArrowDownTray className="cat-mgmt-export-icon" />
+          <span>Export</span>
+        </button>
       </div>
 
-      {/* CATEGORY LIST */}
-      {activeTab === "category" && (
-        <div className="category-list-card">
+      {/* Main White Card Container */}
+      <main className="cat-mgmt-panel">
+        {/* CATEGORIES LIST VIEW */}
+        {activeTab === 'categories' && (
+          <>
+            <div className="cat-mgmt-filter-bar">
+              <div className="cat-mgmt-search-wrapper">
+                <LuSearch className="cat-mgmt-search-icon" />
+                <input
+                  type="text"
+                  className="cat-mgmt-search-input"
+                  placeholder="Search Categories"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
 
-          {/* SEARCH AND BRANCH FILTER */}
-          <div className="category-search-row">
-
-            <div className="category-search-box">
-              <Search size={18} />
-
-              <input
-                type="text"
-                placeholder="Search Categories"
-                value={searchValue}
-                onChange={(e) =>
-                  setSearchValue(e.target.value)
-                }
-              />
-            </div>
-
-            <select
-              value={filterBranch}
-              onChange={(e) =>
-                setFilterBranch(e.target.value)
-              }
-            >
-              <option value="">All Branches</option>
-
-              {branches.map((branch) => (
-                <option
-                  key={branch._id}
-                  value={branch._id}
+              <div className="cat-mgmt-filter-select-wrapper">
+                <select
+                  className="cat-mgmt-filter-select"
+                  value={branchFilter}
+                  onChange={(e) => setBranchFilter(e.target.value)}
                 >
-                  {branch.branchName}
-                </option>
-              ))}
-            </select>
-
-          </div>
-
-          {/* TABLE */}
-          <div className="category-table-wrapper">
+                  <option value="All Branches">All Branches</option>
+                  {availableBranches.map((branch) => (
+                    <option key={branch._id} value={branch._id}>
+                      {branch.branchName}
+                    </option>
+                  ))}
+                </select>
+                <FiChevronDown className="cat-mgmt-select-arrow" />
+              </div>
+            </div>
 
             {loading ? (
-              <div className="category-empty">
-                Loading categories...
+              <div className="cat-mgmt-content-area">
+                <p className="cat-mgmt-empty-message">Loading categories...</p>
               </div>
             ) : filteredCategories.length === 0 ? (
-              <div className="category-empty">
-                No categories found.
-              </div>
-            ) : (
-
-              <table className="category-table">
-
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Category Name</th>
-                    <th>Branch</th>
-                    <th>Total Courses</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredCategories.map(
-                    (category, index) => (
-
-                      <tr key={category._id}>
-
-                        <td>{index + 1}</td>
-
-                        <td>
-                          <div className="category-name-cell">
-
-                            <span className="category-letter">
-                              {category.categoryName
-                                ?.charAt(0)
-                                .toUpperCase()}
-                            </span>
-
-                            <strong>
-                              {category.categoryName}
-                            </strong>
-
-                          </div>
-                        </td>
-
-                        <td>
-                          <div className="category-branch-tags">
-                            {getBranchNames(category.branch)
-                              .split(", ")
-                              .map((name) => (
-                                <span key={name}>
-                                  {name}
-                                </span>
-                              ))}
-                          </div>
-                        </td>
-
-                        <td>
-                          <span className="course-count">
-                            {getCourseCount(category)}
-                          </span>
-                        </td>
-
-                        <td>
-                          {category.createdAt
-                            ? new Date(
-                                category.createdAt
-                              ).toLocaleDateString()
-                            : "-"}
-                        </td>
-
-                        <td>
-                          <div className="category-actions">
-
-                            <button
-                              className="view-action"
-                              onClick={() =>
-                                openCategoryModal(
-                                  category._id,
-                                  "view"
-                                )
-                              }
-                            >
-                              View
-                            </button>
-
-                            <button
-                              className="edit-action"
-                              onClick={() =>
-                                openCategoryModal(
-                                  category._id,
-                                  "edit"
-                                )
-                              }
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              className="delete-action"
-                              onClick={() =>
-                                handleDelete(category._id)
-                              }
-                            >
-                              Delete
-                            </button>
-
-                          </div>
-                        </td>
-
-                      </tr>
-                    )
-                  )}
-                </tbody>
-
-              </table>
-            )}
-
-          </div>
-        </div>
-      )}
-
-      {/* NEW CATEGORY */}
-      {activeTab === "newCategory" && (
-        <form
-          className="new-category-form"
-          onSubmit={handleCreateCategory}
-        >
-
-          <h3>Create New Category</h3>
-
-          <h4>Category Details</h4>
-
-          <div className="category-form-row">
-
-            <div className="category-form-group">
-              <label>
-                Category Name <span>*</span>
-              </label>
-
-              <input
-                type="text"
-                name="categoryName"
-                placeholder="Enter Category Name"
-                value={formData.categoryName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="category-form-group">
-              <label>Total Courses</label>
-
-              <input
-                type="text"
-                value="0"
-                disabled
-              />
-            </div>
-
-            <div className="category-form-group">
-              <label>Branches</label>
-
-              {renderBranchSelector()}
-            </div>
-
-          </div>
-
-          {/* ADDED COURSES */}
-          <div className="added-courses-section">
-
-            <h4>Added Courses</h4>
-
-            <div className="added-courses-box">
-              {renderCourses([])}
-            </div>
-
-          </div>
-
-          {/* BUTTONS */}
-          <div className="category-form-actions">
-
-            <button
-              type="button"
-              className="category-cancel-btn"
-              onClick={handleCancel}
-              disabled={saving}
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              className="category-create-btn"
-              disabled={saving}
-            >
-              {saving ? "Creating..." : "Create Category"}
-            </button>
-
-          </div>
-
-        </form>
-      )}
-
-      {/* FULL PAGE VIEW / EDIT */}
-      {showModal && (
-        <div className="category-modal-overlay">
-
-          <div className="category-modal">
-
-            {/* MODAL HEADER */}
-            <div className="category-modal-header">
-
-              <div>
-                <h3>
-                  {modalMode === "edit"
-                    ? "Edit Category"
-                    : "Category Details"}
-                </h3>
-
-                <p>
-                  Category Management &gt;{" "}
-                  {modalMode === "edit"
-                    ? "edit-category"
-                    : "view-category"}
+              <div className="cat-mgmt-content-area">
+                <p className="cat-mgmt-empty-message">
+                  No categories found. Please add a category or adjust your search filters.
                 </p>
               </div>
+            ) : (
+              <div className="cat-mgmt-table-wrapper">
+                <div className="cat-mgmt-table-header-row">
+                  <div className="cat-mgmt-th">#</div>
+                  <div className="cat-mgmt-th">CATEGORY NAME</div>
+                  <div className="cat-mgmt-th cat-mgmt-th-center">BRANCH</div>
+                  <div className="cat-mgmt-th cat-mgmt-th-center">TOTAL COURSES</div>
+                  <div className="cat-mgmt-th cat-mgmt-th-center">CREATED</div>
+                  <div className="cat-mgmt-th cat-mgmt-th-center">ACTIONS</div>
+                </div>
 
-              <button
-                type="button"
-                className="category-modal-close"
-                onClick={closeModal}
-              >
-                <X size={21} />
-              </button>
+                <div className="cat-mgmt-table-body">
+                  {filteredCategories.map((item, idx) => (
+                    <div key={item.id} className="cat-mgmt-table-row">
+                      <div className="cat-mgmt-td" data-label="#">
+                        {idx + 1}
+                      </div>
 
+                      <div className="cat-mgmt-td" data-label="Category Name">
+                        <div className="cat-mgmt-module-cell">
+                          <span className="cat-mgmt-module-avatar">
+                            {item.name ? item.name.charAt(0).toUpperCase() : 'C'}
+                          </span>
+                          <span className="cat-mgmt-module-name-text">{item.name}</span>
+                        </div>
+                      </div>
+
+                      <div className="cat-mgmt-td cat-mgmt-td-center" data-label="Branch">
+                        <div className="cat-mgmt-course-badges">
+                          {item.branches.length > 0 ? (
+                            item.branches.map((b) => (
+                              <span key={b._id} className="cat-mgmt-course-pill">
+                                {b.branchName}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="cat-mgmt-placeholder-italic">No Branch</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="cat-mgmt-td cat-mgmt-td-center" data-label="Total Courses">
+                        <span className="cat-mgmt-topic-badge">{item.totalCourses}</span>
+                      </div>
+
+                      <div className="cat-mgmt-td cat-mgmt-td-center" data-label="Created">
+                        <span className="cat-mgmt-date-text">{item.createdAt || '-'}</span>
+                      </div>
+
+                      <div className="cat-mgmt-td cat-mgmt-col-actions" data-label="Actions">
+                        <button
+                          type="button"
+                          className="cat-mgmt-text-action cat-mgmt-text-action--view"
+                          onClick={() => handleViewCategory(item)}
+                        >
+                          View
+                        </button>
+                        <button
+                          type="button"
+                          className="cat-mgmt-text-action cat-mgmt-text-action--edit"
+                          onClick={() => handleOpenEditCategory(item)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="cat-mgmt-text-action cat-mgmt-text-action--delete"
+                          onClick={() => handleDeleteCategory(item.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="cat-mgmt-pagination-bar">
+                  <span className="cat-mgmt-pagination-text">1 of 1</span>
+                  <div className="cat-mgmt-pagination-controls">
+                    <button type="button" className="cat-mgmt-page-btn" disabled>
+                      <FiChevronLeft />
+                    </button>
+                    <button type="button" className="cat-mgmt-page-btn" disabled>
+                      <FiChevronRight />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* NEW CATEGORY & EDIT CATEGORY FORM */}
+        {(activeTab === 'new-category' || activeTab === 'edit-category') && (
+          <form
+            className="cat-mgmt-form-layout"
+            onSubmit={
+              activeTab === 'new-category'
+                ? handleCreateCategory
+                : handleSaveEditedCategory
+            }
+          >
+            <div className="cat-mgmt-form-body">
+              <h2 className="cat-mgmt-section-heading">Category Details</h2>
+
+              <div className="cat-mgmt-form-row">
+                <div className="cat-mgmt-input-group">
+                  <label className="cat-mgmt-label">
+                    Category Name<span className="cat-mgmt-required-star">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="cat-mgmt-text-input"
+                    placeholder="Enter Category Name"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="cat-mgmt-input-group">
+                  <label className="cat-mgmt-label">Total Courses</label>
+                  <input
+                    type="text"
+                    className="cat-mgmt-text-input cat-mgmt-text-input--readonly"
+                    value={activeTab === 'edit-category' ? formCourses.length : 0}
+                    readOnly
+                  />
+                </div>
+
+                <div className="cat-mgmt-input-group">
+                  <label className="cat-mgmt-label">
+                    Select Branches<span className="cat-mgmt-required-star">*</span>
+                  </label>
+                  <div className="cat-mgmt-select-wrapper">
+                    <select
+                      className="cat-mgmt-select-input"
+                      value=""
+                      onChange={handleAddBranchToForm}
+                    >
+                      <option value="">-- Add a Branch --</option>
+                      {availableBranches.map((branch) => (
+                        <option
+                          key={branch._id}
+                          value={branch._id}
+                          disabled={formSelectedBranches.some(
+                            (sb) => sb._id === branch._id
+                          )}
+                        >
+                          {branch.branchName}
+                        </option>
+                      ))}
+                    </select>
+                    <FiChevronDown className="cat-mgmt-select-arrow" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Full-width Selected Branches Row */}
+              <div className="cat-mgmt-form-full-row">
+                <div className="cat-mgmt-input-group">
+                  <label className="cat-mgmt-label">
+                    Selected Branches<span className="cat-mgmt-required-star">*</span>
+                  </label>
+                  <div className="cat-mgmt-selected-courses-box">
+                    {formSelectedBranches.length === 0 ? (
+                      <span className="cat-mgmt-placeholder-italic">
+                        No branches selected yet.
+                      </span>
+                    ) : (
+                      formSelectedBranches.map((branch) => (
+                        <span key={branch._id} className="cat-mgmt-course-pill">
+                          {branch.branchName}
+                          <button
+                            type="button"
+                            className="cat-mgmt-pill-remove"
+                            onClick={() =>
+                              handleRemoveBranchFromForm(branch._id)
+                            }
+                            title="Remove branch"
+                          >
+                            <LuX />
+                          </button>
+                        </span>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Added Courses List (Shown in Edit Mode if courses exist) */}
+              {activeTab === 'edit-category' && formCourses.length > 0 && (
+                <div className="cat-mgmt-form-full-row">
+                  <div className="cat-mgmt-input-group">
+                    <label className="cat-mgmt-label">Added Courses</label>
+                    <div className="cat-mgmt-topics-grid">
+                      {formCourses.map((course) => (
+                        <div key={course._id} className="cat-mgmt-topic-chip">
+                          <span>{course.courseName}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* MODAL BODY */}
-            {modalLoading ? (
-              <div className="category-empty">
-                Loading category details...
-              </div>
-            ) : selectedCategory && (
-
-              <form
-                className="category-modal-content"
-                onSubmit={handleUpdateCategory}
+            <div className="cat-mgmt-form-footer">
+              <button
+                type="button"
+                className="cat-mgmt-cancel-btn"
+                onClick={handleBackToCategories}
               >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="cat-mgmt-submit-btn"
+                disabled={submitting}
+              >
+                {submitting
+                  ? 'Saving...'
+                  : activeTab === 'new-category'
+                  ? 'Create Category'
+                  : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        )}
+      </main>
 
-                <div className="category-modal-title">
-                  <h3>
-                    {modalMode === "edit"
-                      ? "Edit Category Details"
-                      : "Category Details"}
-                  </h3>
+      {/* VIEW CATEGORY MODAL */}
+      {viewingCategory && (
+        <div
+          className="cat-mgmt-modal-backdrop"
+          onClick={() => setViewingCategory(null)}
+        >
+          <div
+            className="cat-mgmt-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="cat-mgmt-modal-header">
+              <h2 className="cat-mgmt-modal-title">{viewingCategory.name}</h2>
+              <button
+                type="button"
+                className="cat-mgmt-modal-close-top"
+                onClick={() => setViewingCategory(null)}
+              >
+                <span>&lt; Close</span>
+              </button>
+            </div>
 
-                  <button
-                    type="button"
-                    className="category-back-btn"
-                    onClick={closeModal}
-                  >
-                    <ArrowLeft size={14} />
-                    Back
-                  </button>
-                </div>
+            <div className="cat-mgmt-modal-details-grid">
+              <div className="cat-mgmt-modal-detail-item">
+                <span className="cat-mgmt-modal-detail-label">Category Name:</span>
+                <span>{viewingCategory.name}</span>
+              </div>
 
-                <h4>Category Information</h4>
+              <div className="cat-mgmt-modal-detail-item">
+                <span className="cat-mgmt-modal-detail-label">Total Courses:</span>
+                <span>{viewingCategory.totalCourses}</span>
+              </div>
 
-                <div className="category-form-row">
+              <div className="cat-mgmt-modal-detail-item">
+                <span className="cat-mgmt-modal-detail-label">Branches:</span>
+                <span>
+                  {viewingCategory.branches.length > 0
+                    ? viewingCategory.branches.map((b) => b.branchName).join(', ')
+                    : 'None'}
+                </span>
+              </div>
 
-                  <div className="category-form-group">
-                    <label>Category Name</label>
+              <div className="cat-mgmt-modal-detail-item">
+                <span className="cat-mgmt-modal-detail-label">Created:</span>
+                <span>{viewingCategory.createdAt || '-'}</span>
+              </div>
 
-                    <input
-                      type="text"
-                      name="categoryName"
-                      value={formData.categoryName}
-                      onChange={handleChange}
-                      disabled={modalMode === "view"}
-                      required
-                    />
-                  </div>
+              <div className="cat-mgmt-modal-detail-item">
+                <span className="cat-mgmt-modal-detail-label">ID:</span>
+                <span>{viewingCategory.code}</span>
+              </div>
+            </div>
 
-                  <div className="category-form-group">
-                    <label>Total Courses</label>
-
-                    <input
-                      type="text"
-                      value={getCourseCount(selectedCategory)}
-                      disabled
-                    />
-                  </div>
-
-                  <div className="category-form-group">
-                    <label>Branches</label>
-
-                    {modalMode === "edit" ? (
-                      renderBranchSelector()
-                    ) : (
-                      <div className="category-readonly-branches">
-                        {getBranchNames(
-                          selectedCategory.branch
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                </div>
-
-                {/* ADDED COURSES */}
-                <div className="added-courses-section">
-
-                  <h4>Added Courses</h4>
-
-                  <div className="added-courses-box">
-                    {renderCourses(
-                      selectedCategory.courses
-                    )}
-                  </div>
-
-                  <p className="category-help-text">
-                    Courses can be assigned or changed through
-                    Course Management.
-                  </p>
-
-                </div>
-
-                {/* BUTTONS */}
-                <div className="category-form-actions">
-
-                  <button
-                    type="button"
-                    className="category-cancel-btn"
-                    onClick={closeModal}
-                    disabled={saving}
-                  >
-                    {modalMode === "edit"
-                      ? "Cancel"
-                      : "Close"}
-                  </button>
-
-                  {modalMode === "edit" && (
-                    <button
-                      type="submit"
-                      className="category-create-btn"
-                      disabled={saving}
+            <div className="cat-mgmt-modal-subcard">
+              <h3 className="cat-mgmt-modal-subcard-title">Assigned Courses</h3>
+              {viewingCategory.courses && viewingCategory.courses.length > 0 ? (
+                <div className="cat-mgmt-modal-topics-list">
+                  {viewingCategory.courses.map((course) => (
+                    <span
+                      key={course._id}
+                      className="cat-mgmt-modal-topic-tag"
                     >
-                      {saving ? "Saving..." : "Save Changes"}
-                    </button>
-                  )}
-
+                      {course.courseName}
+                    </span>
+                  ))}
                 </div>
+              ) : (
+                <p className="cat-mgmt-modal-subcard-text">
+                  No courses assigned to this category yet.
+                </p>
+              )}
+            </div>
 
-              </form>
-            )}
-
+            <div className="cat-mgmt-modal-footer">
+              <button
+                type="button"
+                className="cat-mgmt-modal-close-btn"
+                onClick={() => setViewingCategory(null)}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                className="cat-mgmt-modal-edit-btn"
+                onClick={() => handleOpenEditCategory(viewingCategory)}
+              >
+                Edit
+              </button>
+            </div>
           </div>
         </div>
       )}
-
     </div>
   );
 };

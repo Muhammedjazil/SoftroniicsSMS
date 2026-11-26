@@ -24,6 +24,7 @@ const WeeklyCard = () => {
       const u = parsed?.user || parsed;
       return {
         internId: u?._id || u?.id || '',
+        admissionNumber: u?.admissionNumber || '',
         email: u?.email || u?.officialEmail || '',
       };
     } catch {
@@ -48,7 +49,7 @@ const WeeklyCard = () => {
         initial: 'I',
         mode: 'FULL TIME',
         batch: 'BATCH',
-        studentId: userQuery.internId ? `STU-${userQuery.internId.slice(-4).toUpperCase()}` : 'STU-001',
+        studentId: userQuery.admissionNumber || (userQuery.internId ? `STU-${userQuery.internId.slice(-4).toUpperCase()}` : 'STU-001'),
         course: '',
         avgTestScore: 0,
         avgProjectScore: 0,
@@ -94,22 +95,24 @@ const WeeklyCard = () => {
               {isLoading ? 'Loading...' : internData?.name || 'Intern'}
             </h2>
 
-            <div className="wk-card-badges-row">
-              <span className="wk-card-badge wk-card-badge--indigo">
-                {isLoading ? 'FULL TIME' : internData?.mode || 'FULL TIME'}
-              </span>
-              <span className="wk-card-badge wk-card-badge--teal">
-                {isLoading ? 'BATCH' : internData?.batch || 'BATCH'}
-              </span>
-              <span className="wk-card-badge wk-card-badge--slate">
-                {isLoading ? 'STU-001' : internData?.studentId || 'STU-001'}
-              </span>
-              {!isLoading && internData?.course && (
-                <span className="wk-card-badge wk-card-badge--purple">
-                  {internData.course}
+            {!isLoading && (
+              <div className="wk-card-badges-row">
+                <span className="wk-card-badge wk-card-badge--indigo">
+                  {internData?.mode || 'FULL TIME'}
                 </span>
-              )}
-            </div>
+                <span className="wk-card-badge wk-card-badge--teal">
+                  {internData?.batch || 'BATCH'}
+                </span>
+                <span className="wk-card-badge wk-card-badge--slate">
+                  {internData?.studentId || 'STU-001'}
+                </span>
+                {internData?.course && (
+                  <span className="wk-card-badge wk-card-badge--purple">
+                    {internData.course}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </section>
 

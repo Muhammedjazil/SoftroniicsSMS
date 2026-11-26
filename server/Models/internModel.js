@@ -9,7 +9,7 @@ const internSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true },
   internPhoneNumber: { type: String, required: true },
   // admissionNumber: { type: String, required: true },
-  admissionNumber: { type: String},
+  admissionNumber: { type: String, unique: true, sparse: true, immutable: true },
   internWhatsAppNumber: { type: String },
   guardianName: { type: String },
   fatherName: { type: String },

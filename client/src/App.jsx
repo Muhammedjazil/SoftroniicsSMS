@@ -411,8 +411,12 @@ function App() {
           <Route path="/internweekly" element={<InternWeeklySchedule />} />
           <Route path="/internweeklycard" element={<WeeklyCard />} />
           <Route path="/internmonthlycard" element={<Internmonthlycard />} />
-          <Route path="/internmaterial" element={<MaterialList />} />
-          <Route path="/internleave" element={<InternLeaveRequest />} />
+          {/* Aliases for /student/ paths */}
+          <Route path="/student/weekly_schedule" element={<InternWeeklySchedule />} />
+          <Route path="/student/weekly_card" element={<WeeklyCard />} />
+          <Route path="/student/attendance" element={<Internattendance />} />
+          <Route path="/student/task" element={<Intrentask />} />
+          <Route path="/student/notification" element={<Internnotification />} />
         </Route>
 
         {/* FALLBACK */}
