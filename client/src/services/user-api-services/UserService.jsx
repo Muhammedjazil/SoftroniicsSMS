@@ -81,12 +81,75 @@ const UserService = () => {
     }
   };
 
+<<<<<<< HEAD
   // ======== Intern Materials ======== //
   const takematerials = async () => {
     try {
       const response = await axiosPrivate.get(
         "/materialmanagement/intern"
       );
+=======
+  // ======== Intern Attendance ======== //
+  const getMyAttendance = async () => {
+    try {
+      const response = await axiosPrivate.get(
+        "/attendancemanagement/my-attendance"
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Intern Assigned Tasks ========
+  const takealltask = async () => {
+    try {
+      const response = await axiosPrivate.get("/taskmanagement/my-tasks");
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Intern My Submissions ========
+  const takemysubmissions = async () => {
+    try {
+      const response = await axiosPrivate.get(
+        "/taskmanagement/my-submissions"
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======================================
+  // INTERN CREATE TASK SUBMISSION
+  // ======================================
+  const createTaskSubmission = async (formData) => {
+    try {
+      const response = await axiosPrivate.post(
+        "/taskmanagement/submissions",
+        formData
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Intern Monthly Card ======== //
+  const takeMyMonthlyCard = async ({ internId, email } = {}) => {
+    try {
+      const params = {};
+
+      if (internId) params.internId = internId;
+      if (email) params.email = email;
+
+      const response = await axiosPrivate.get("/internmonthlycard", {
+        params,
+      });
+>>>>>>> ffa9b1a4f11605bbbbef34f3e7c5248dc7783f5e
 
       return response.data;
     } catch (error) {
@@ -94,6 +157,7 @@ const UserService = () => {
     }
   };
 
+<<<<<<< HEAD
   // ======== Get Material By ID ======== //
   const takematerialbyid = async (id) => {
     try {
@@ -134,16 +198,26 @@ const takeinternleaverequests = async () => {
     throw error.response?.data || error;
   }
 };
+=======
+>>>>>>> ffa9b1a4f11605bbbbef34f3e7c5248dc7783f5e
   return {
     takeinternweeklyschedule,
     takeinternweeklycard,
     takeallnotification,
     marknotificationread,
     markallnotificationsread,
+<<<<<<< HEAD
     takematerials,
     takematerialbyid,
      applyinternleave,
   takeinternleaverequests,
+=======
+    getMyAttendance,
+    takealltask,
+    takemysubmissions,
+    createTaskSubmission,
+    takeMyMonthlyCard,
+>>>>>>> ffa9b1a4f11605bbbbef34f3e7c5248dc7783f5e
   };
 };
 

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './InternWeeklySchedule.css';
 import { LuUser, LuCalendar, LuDownload, LuBriefcase } from 'react-icons/lu';
 import { FiCalendar } from 'react-icons/fi';
-import UserService from "../../services/user-api-services/UserService"
+import UserService from "../../services/user-api-services/UserService";
+import Loader from "../../components/common/Loader";
 
 const InternWeeklySchedule = () => {
   const { takeinternweeklyschedule } = UserService();
@@ -43,12 +44,24 @@ const InternWeeklySchedule = () => {
 
   const fetchInternSchedule = useCallback(async () => {
     setLoading(true);
+    let isSettled = false;
+    const timeoutId = setTimeout(() => {
+      if (!isSettled) {
+        setLoading(false);
+      }
+    }, 6000);
+
     try {
       const userQuery = getStoredUserQuery();
-      const data = await takeinternweeklyschedule({
-        ...userQuery,
-        startDate: selectedDate,
-      });
+      const data = await Promise.race([
+        takeinternweeklyschedule({
+          ...userQuery,
+          startDate: selectedDate,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timeout')), 6000)
+        ),
+      ]);
 
       if (data?.intern) {
         setInternProfile(data.intern);
@@ -59,6 +72,8 @@ const InternWeeklySchedule = () => {
       console.error('Failed to load intern weekly schedule:', error);
       setWeeklySlots([]);
     } finally {
+      isSettled = true;
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   }, [selectedDate]);
@@ -232,8 +247,8 @@ const InternWeeklySchedule = () => {
             </div>
 
             {loading ? (
-              <div className="int-sched-empty-state">
-                <p className="int-sched-empty-text">Loading weekly schedule...</p>
+              <div className="int-sched-empty-state" style={{ padding: '24px 0' }}>
+                <Loader message="Loading weekly schedule..." minHeight="240px" />
               </div>
             ) : weeklySlots.length === 0 ? (
               <div className="int-sched-empty-state">

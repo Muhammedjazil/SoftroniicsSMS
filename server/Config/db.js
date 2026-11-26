@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "1.1.1.1"]);   //these are newly added
+
 const connectDb = async () => {
   if (mongoose.connection.readyState >= 1) {
     return;
