@@ -22,14 +22,6 @@ import "./Dashboard.css";
 const COURSE_FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80";
 
-const WEEKLY_ACTIVITY = [
-  { day: "Mon", hours: "2.5h", percentage: 50 },
-  { day: "Tue", hours: "1.2h", percentage: 24 },
-  { day: "Wed", hours: "4.0h", percentage: 80 },
-  { day: "Thu", hours: "0.5h", percentage: 10 },
-  { day: "Fri", hours: "3.1h", percentage: 62 },
-];
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const {
@@ -544,18 +536,32 @@ const Dashboard = () => {
             </div>
 
             <div className="dsh-activity-list">
-              {WEEKLY_ACTIVITY.map((act) => (
-                <div key={act.day} className="dsh-activity-row">
-                  <span className="dsh-activity-day">{act.day}</span>
-                  <div className="dsh-activity-track">
-                    <div
-                      className="dsh-activity-fill"
-                      style={{ width: `${act.percentage}%` }}
-                    />
+              {hasWeeklyActivity && weeklyActivity.length > 0 ? (
+                weeklyActivity.map((act) => (
+                  <div key={act.day} className="dsh-activity-row">
+                    <span className="dsh-activity-day">{act.day}</span>
+                    <div className="dsh-activity-track">
+                      <div
+                        className="dsh-activity-fill"
+                        style={{ width: `${act.percentage}%` }}
+                      />
+                    </div>
+                    <span className="dsh-activity-hours">{act.hours}</span>
                   </div>
-                  <span className="dsh-activity-hours">{act.hours}</span>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: "#94a3b8",
+                    textAlign: "center",
+                    padding: "24px 0",
+                    margin: 0,
+                  }}
+                >
+                  No activity this week
+                </p>
+              )}
             </div>
           </div>
 
@@ -563,17 +569,34 @@ const Dashboard = () => {
           <div className="dsh-test-card">
             <div className="dsh-test-header">
               <FiCalendar className="dsh-test-icon" />
-              <span className="dsh-test-badge-title">UPCOMING TEST</span>
+              <span className="dsh-test-badge-title">
+                {upcomingTest ? upcomingTest.badge : "UPCOMING TEST"}
+              </span>
             </div>
 
-            <div className="dsh-test-body">
-              <h4 className="dsh-test-name">Full Stack &amp; React Evaluation</h4>
-              <p className="dsh-test-timing">Friday • 10:00 AM - 12:00 PM</p>
-              <div className="dsh-test-footer">
-                <span className="dsh-test-tag">Batch B1 &amp; B2</span>
-                <span className="dsh-test-tag">Calicut Center</span>
+            {upcomingTest ? (
+              <div className="dsh-test-body">
+                <h4 className="dsh-test-name">{upcomingTest.title}</h4>
+                <p className="dsh-test-timing">{upcomingTest.timing}</p>
+                {(upcomingTest.batchTag || upcomingTest.branchTag) && (
+                  <div className="dsh-test-footer">
+                    {upcomingTest.batchTag && (
+                      <span className="dsh-test-tag">{upcomingTest.batchTag}</span>
+                    )}
+                    {upcomingTest.branchTag && (
+                      <span className="dsh-test-tag">{upcomingTest.branchTag}</span>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
+            ) : (
+              <div className="dsh-test-body">
+                <h4 className="dsh-test-name">No upcoming tests</h4>
+                <p className="dsh-test-timing">
+                  No pending evaluations or tasks scheduled
+                </p>
+              </div>
+            )}
           </div>
         </aside>
       </div>
