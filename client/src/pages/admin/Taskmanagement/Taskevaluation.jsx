@@ -15,6 +15,24 @@ const API_ORIGIN =
   import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
   "http://localhost:7000";
 
+const EMPTY_GRADE_FORM = {
+  taskTitle: "",
+  module: "",
+  status: "Submitted",
+  submittedBy: "",
+  submittedDate: "",
+  dueDate: "",
+  submissionDescription: "",
+  githubRepo: "",
+  liveDemoUrl: "",
+  totalMarks: 0,
+  attachmentName: "",
+  achievedMarks: "",
+  feedback: "",
+  reviewedBy: "",
+  reviewedDate: "",
+};
+
 const Taskevaluation = () => {
   const {
     takeevaluationmodules,
@@ -38,23 +56,7 @@ const Taskevaluation = () => {
 
   const [selectedSubmission, setSelectedSubmission] = useState(null);
 
-  const [gradeForm, setGradeForm] = useState({
-    taskTitle: "",
-    module: "",
-    status: "Submitted",
-    submittedBy: "",
-    submittedDate: "",
-    dueDate: "",
-    submissionDescription: "",
-    githubRepo: "",
-    liveDemoUrl: "",
-    totalMarks: 0,
-    attachmentName: "",
-    achievedMarks: "",
-    feedback: "",
-    reviewedBy: "",
-    reviewedDate: "",
-  });
+  const [gradeForm, setGradeForm] = useState(EMPTY_GRADE_FORM);
 
   // FORMAT DATE
   const formatDate = (date) => {
@@ -150,7 +152,10 @@ const Taskevaluation = () => {
     setSubmissions([]);
     setSearch("");
     setSelectedSubmission(null);
+    setGradeForm(EMPTY_GRADE_FORM);
     setSelectedTaskDetails(null);
+    setActivetab("submissionlist");
+
     try {
       setLoading(true);
 
@@ -179,6 +184,8 @@ const Taskevaluation = () => {
     setSelectedTaskDetails(null);
     setSearch("");
     setSelectedSubmission(null);
+    setGradeForm(EMPTY_GRADE_FORM);
+    setActivetab("submissionlist");
 
     if (!taskId) return;
 
@@ -265,6 +272,13 @@ const Taskevaluation = () => {
     setActivetab("gradesubmission");
   };
 
+  // CANCEL GRADE SUBMISSION
+  const handleCancelGrade = () => {
+    setSelectedSubmission(null);
+    setGradeForm(EMPTY_GRADE_FORM);
+    setActivetab("submissionlist");
+  };
+
   // HANDLE GRADE FORM INPUTS
   const handleGradeFieldChange = (e) => {
     const { name, value } = e.target;
@@ -321,6 +335,7 @@ const Taskevaluation = () => {
 
       setSubmissions(updatedResponse.submissions || []);
       setSelectedSubmission(null);
+      setGradeForm(EMPTY_GRADE_FORM);
 
       alert(response.message || "Intern evaluation saved successfully!");
 
@@ -404,6 +419,8 @@ const Taskevaluation = () => {
     URL.revokeObjectURL(url);
   };
 
+  const hasSelectedSubmission = Boolean(selectedSubmission);
+
   return (
     <div className="tasks-evaluation-page">
       {/* TOP NAVIGATION */}
@@ -421,17 +438,19 @@ const Taskevaluation = () => {
             Submissions List
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActivetab("gradesubmission")}
-            className={
-              activetab === "gradesubmission"
-                ? "tasks-evaluation-tab-active"
-                : "tasks-evaluation-tab"
-            }
-          >
-            Grade Submission
-          </button>
+          {hasSelectedSubmission && (
+            <button
+              type="button"
+              onClick={() => setActivetab("gradesubmission")}
+              className={
+                activetab === "gradesubmission"
+                  ? "tasks-evaluation-tab-active"
+                  : "tasks-evaluation-tab"
+              }
+            >
+              Grade Submission
+            </button>
+          )}
         </div>
 
         {activetab === "submissionlist" && (
@@ -705,7 +724,7 @@ const Taskevaluation = () => {
       {/* GRADE SUBMISSION */}
       {/* ================================= */}
 
-      {activetab === "gradesubmission" && (
+      {activetab === "gradesubmission" && hasSelectedSubmission && (
         <div className="gradesubmission">
           <form
             onSubmit={handleGradeSubmit}
@@ -906,7 +925,7 @@ const Taskevaluation = () => {
               <button
                 type="button"
                 className="gradesubmission-cancel-btn"
-                onClick={() => setActivetab("submissionlist")}
+                onClick={handleCancelGrade}
               >
                 Cancel
               </button>
