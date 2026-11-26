@@ -235,7 +235,8 @@ const Taskevaluation = () => {
       taskTitle: task.title || "",
       module: task.module || "",
       status: submission.status || "Submitted",
-      submittedBy: intern.fullName || "",
+      submittedBy:
+        intern.fullName || intern.name || intern.email || "Unknown Intern",
       submittedDate: formatDate(submission.createdAt),
       dueDate: formatDate(task.dueDate),
       submissionDescription: submission.submissionText || "",
