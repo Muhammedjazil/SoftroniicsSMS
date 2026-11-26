@@ -843,57 +843,64 @@ export const Internmanagement = () => {
               </div>
             ) : (
               <div className="syl-mgmt-table-wrapper">
-                <div
-                  className="syl-mgmt-table-header-row"
-                  style={{ gridTemplateColumns: "50px 1.25fr 2fr 1.5fr 1.1fr 1fr 1fr 1.3fr" }}
-                >
-                  <div className="syl-mgmt-th">#</div>
-                  <div className="syl-mgmt-th">INTERN ID</div>
-                  <div className="syl-mgmt-th">STUDENT NAME</div>
-                  <div className="syl-mgmt-th syl-mgmt-th-center">COURSE</div>
-                  <div className="syl-mgmt-th">BRANCH</div>
-                  <div className="syl-mgmt-th syl-mgmt-th-center">BATCH</div>
-                  <div className="syl-mgmt-th syl-mgmt-th-center">STATUS</div>
-                  <div className="syl-mgmt-th syl-mgmt-th-center">ACTIONS</div>
-                </div>
+                {/* TABLE HEADER */}
+<div
+  className="syl-mgmt-table-header-row"
+  style={{ gridTemplateColumns: "45px 1.2fr 1.45fr 1.85fr 1fr 0.9fr 0.9fr 1.2fr" }}
+>
+  <div className="syl-mgmt-th">#</div>
+  <div className="syl-mgmt-th">INTERN ID</div>
+  <div className="syl-mgmt-th">STUDENT NAME</div>
+  <div className="syl-mgmt-th syl-mgmt-th-center">
+    COURSE
+  </div>
+  <div className="syl-mgmt-th">BRANCH</div>
+  <div className="syl-mgmt-th syl-mgmt-th-center">BATCH</div>
+  <div className="syl-mgmt-th syl-mgmt-th-center">STATUS</div>
+  <div className="syl-mgmt-th syl-mgmt-th-center">ACTIONS</div>
+</div>
 
                 <div className="syl-mgmt-table-body">
                   {currentStudents.map((student, index) => {
                     const initial = (student.fullName || "S").charAt(0).toUpperCase();
 
                     return (
-                      <div
-                        key={student.id}
-                        className="syl-mgmt-table-row"
-                        style={{ gridTemplateColumns: "50px 1.25fr 2fr 1.5fr 1.1fr 1fr 1fr 1.3fr" }}
-                      >
-                        <div className="syl-mgmt-td">{startIndex + index + 1}</div>
+                     <div
+  key={student.id}
+  className="syl-mgmt-table-row"
+  style={{ gridTemplateColumns: "45px 1.2fr 1.45fr 1.85fr 1fr 0.9fr 0.9fr 1.2fr" }}
+>
+  <div className="syl-mgmt-td">{startIndex + index + 1}</div>
 
-                        <div className="syl-mgmt-td" style={{ fontWeight: 600, color: "#374151", fontSize: "13px" }}>
-                          {student.admissionNumber || "-"}
-                        </div>
+  <div className="syl-mgmt-td" style={{ fontWeight: 600, color: "#374151", fontSize: "13px" }}>
+    {student.admissionNumber || "-"}
+  </div>
 
-                        <div className="syl-mgmt-td">
-                          <div className="syl-mgmt-module-cell">
-                            <span className="syl-mgmt-module-avatar">{initial}</span>
-                            <div>
-                              <div className="syl-mgmt-module-name-text">{student.fullName}</div>
-                              <span style={{ fontSize: "12px", color: "#6b7280" }}>
-                                {student.phone || student.email || ""}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+  <div className="syl-mgmt-td">
+    <div className="syl-mgmt-module-cell">
+      <span className="syl-mgmt-module-avatar">{initial}</span>
+      <div>
+        <div className="syl-mgmt-module-name-text">{student.fullName}</div>
+        <span style={{ fontSize: "12px", color: "#6b7280" }}>
+          {student.phone || student.email || ""}
+        </span>
+      </div>
+    </div>
+  </div>
 
-                        <div className="syl-mgmt-td syl-mgmt-td-center">
-                          <span className="syl-mgmt-course-pill">
-                            {student.course || "-"}
-                          </span>
-                        </div>
+  {/* Left-aligned Course cell */}
+  <div
+    className="syl-mgmt-td"
+    style={{ justifyContent: "flex-start", textAlign: "left", paddingRight: "16px" }}
+  >
+    <span className="syl-mgmt-course-pill" style={{ textAlign: "left" }}>
+      {student.course || "-"}
+    </span>
+  </div>
 
-                        <div className="syl-mgmt-td" style={{ color: "#374151", fontWeight: 500, textTransform: "capitalize" }}>
-                          {student.branch || "-"}
-                        </div>
+  <div className="syl-mgmt-td" style={{ color: "#374151", fontWeight: 500, textTransform: "capitalize" }}>
+    {student.branch || "-"}
+  </div>
 
                         <div className="syl-mgmt-td syl-mgmt-td-center">
                           <span
