@@ -1,16 +1,46 @@
+
 const express = require("express");
 const router = express.Router();
 
-const {
-  getLeaveRequests,
-  getLeaveRequestById,
-  createLeaveRequest,
-  deleteLeaveRequest
-} = require("../Controllers/leaveRequestController");
+const leaveRequestController = require("../Controllers/leaveRequestController");
+const { checkAuth: CheckAuth } = require("../Middleware/checkAuth");
 
-router.get("/", getLeaveRequests);
-router.get("/:id", getLeaveRequestById);
-router.post("/", createLeaveRequest);
-router.delete("/:id", deleteLeaveRequest);
+// INTERN ROUTES
+router.post(
+  "/intern/apply",
+  CheckAuth,
+  leaveRequestController.createInternLeaveRequest
+);
+
+router.get(
+  "/intern/my-requests",
+  CheckAuth,
+  leaveRequestController.getMyInternLeaveRequests
+);
+
+// ADMIN ROUTES
+router.get(
+  "/",
+  CheckAuth,
+  leaveRequestController.getLeaveRequests
+);
+
+router.get(
+  "/:id",
+  CheckAuth,
+  leaveRequestController.getLeaveRequestById
+);
+
+router.post(
+  "/",
+  CheckAuth,
+  leaveRequestController.createLeaveRequest
+);
+
+router.delete(
+  "/:id",
+  CheckAuth,
+  leaveRequestController.deleteLeaveRequest
+);
 
 module.exports = router;

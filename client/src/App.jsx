@@ -36,7 +36,6 @@ import Dashboard from "./pages/admin/Dashboard/Dashboard";
 import Categories from "./pages/admin/CourseManagement/Categories";
 import Course from "./pages/admin/CourseManagement/Course";
 
-
 // INTERN PAGES
 import { Internnotification } from "./pages/intern/Internnotification";
 import { Intrentask } from "./pages/intern/Interntask";
@@ -44,7 +43,8 @@ import Internattendance from "./pages/intern/Internattendance";
 import Internmonthlycard from "./pages/intern/Internmonthlycard";
 import InternWeeklySchedule from "./pages/intern/InternWeeklySchedule";
 import WeeklyCard from "./pages/intern/WeeklyCard";
-
+import MaterialList from "./pages/intern/MaterialList";
+import InternLeaveRequest from "./pages/intern/InternLeaveRequest";
 const getStoredAuth = () => {
   try {
     const token = localStorage.getItem("SMStoken");
@@ -144,8 +144,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-       
-        
+
         {/* CATEGORY MANAGEMENT */}
         <Route
           path="/categories"
@@ -161,8 +160,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-       
-        
 
         {/* ADMINISTRATION */}
         <Route
@@ -414,6 +411,8 @@ function App() {
           <Route path="/internweekly" element={<InternWeeklySchedule />} />
           <Route path="/internweeklycard" element={<WeeklyCard />} />
           <Route path="/internmonthlycard" element={<Internmonthlycard />} />
+          <Route path="/internmaterial" element={<MaterialList />} />
+          <Route path="/internleave" element={<InternLeaveRequest />} />
         </Route>
 
         {/* FALLBACK */}
