@@ -4,6 +4,7 @@ import { LuUser } from "react-icons/lu";
 import "./Internmonthlycard.css";
 
 import UserService from "../../services/user-api-services/UserService";
+import Loader from "../../components/common/Loader";
 
 // Get intern details from localStorage
 const getStoredUserQuery = () => {
@@ -143,21 +144,6 @@ const Internmonthlycard = () => {
     };
 
     // =============================================
-    // LOADING
-    // =============================================
-    if (InternmonthlycardLoading) {
-        return (
-            <div className="wk-card-container">
-                <div className="wk-card-body">
-                    <p className="wk-card-table-status">
-                        Loading monthly evaluation card...
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    // =============================================
     // ERROR
     // =============================================
     if (InternmonthlycardError) {
@@ -183,38 +169,44 @@ const Internmonthlycard = () => {
                 <section className="wk-card-identity-card">
 
                     <div className="int-monthly-avatar-square">
-                        {InternmonthlycardStudentData?.initial || (
-                            <LuUser />
+                        {InternmonthlycardLoading ? (
+                            "..."
+                        ) : (
+                            InternmonthlycardStudentData?.initial || <LuUser />
                         )}
                     </div>
 
                     <div className="wk-card-identity-details">
 
                         <h2 className="wk-card-intern-title">
-                            {InternmonthlycardStudentData?.name || "-"}
+                            {InternmonthlycardLoading
+                                ? "Loading..."
+                                : InternmonthlycardStudentData?.name || "-"}
                         </h2>
 
-                        <div className="wk-card-badges-row">
+                        {!InternmonthlycardLoading && (
+                            <div className="wk-card-badges-row">
 
-                            <span className="int-monthly-badge int-monthly-badge--fulltime">
-                                {InternmonthlycardStudentData?.mode || "-"}
-                            </span>
-
-                            <span className="int-monthly-badge int-monthly-badge--batch">
-                                {InternmonthlycardStudentData?.batch || "-"}
-                            </span>
-
-                            <span className="int-monthly-badge int-monthly-badge--id">
-                                {InternmonthlycardStudentData?.studentId || "-"}
-                            </span>
-
-                            {InternmonthlycardStudentData?.course && (
-                                <span className="int-monthly-badge int-monthly-badge--course">
-                                    {InternmonthlycardStudentData.course}
+                                <span className="int-monthly-badge int-monthly-badge--fulltime">
+                                    {InternmonthlycardStudentData?.mode || "-"}
                                 </span>
-                            )}
 
-                        </div>
+                                <span className="int-monthly-badge int-monthly-badge--batch">
+                                    {InternmonthlycardStudentData?.batch || "-"}
+                                </span>
+
+                                <span className="int-monthly-badge int-monthly-badge--id">
+                                    {InternmonthlycardStudentData?.studentId || "-"}
+                                </span>
+
+                                {InternmonthlycardStudentData?.course && (
+                                    <span className="int-monthly-badge int-monthly-badge--course">
+                                        {InternmonthlycardStudentData.course}
+                                    </span>
+                                )}
+
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -359,7 +351,27 @@ const Internmonthlycard = () => {
 
                             <tbody>
 
-                                {InternmonthlycardEvaluationData.length > 0 ? (
+                                {InternmonthlycardLoading ? (
+
+                                    <tr>
+                                        <td
+                                            colSpan={
+                                                InternmonthlycardTableHeadings.length
+                                            }
+                                            style={{
+                                                padding: "32px 0",
+                                                border: "none",
+                                                background: "#fff",
+                                            }}
+                                        >
+                                            <Loader
+                                                message="Loading monthly evaluation card..."
+                                                minHeight="260px"
+                                            />
+                                        </td>
+                                    </tr>
+
+                                ) : InternmonthlycardEvaluationData.length > 0 ? (
 
                                     InternmonthlycardEvaluationData.map(
                                         (item) => (
