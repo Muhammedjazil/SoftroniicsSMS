@@ -50,7 +50,6 @@ const UserService = () => {
       const response = await axiosPrivate.get(
         "/notificationmanagement/my-notifications"
       );
-
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -62,7 +61,6 @@ const UserService = () => {
       const response = await axiosPrivate.patch(
         `/notificationmanagement/my-notifications/${notificationId}/read`
       );
-
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -74,54 +72,11 @@ const UserService = () => {
       const response = await axiosPrivate.patch(
         "/notificationmanagement/my-notifications/read-all"
       );
-
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
     }
   };
-
-  // ======== Intern Materials ======== //
-  const takematerials = async () => {
-    try {
-      const response = await axiosPrivate.get(
-        "/materialmanagement/intern"
-      );
-
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  };
-
-  // ======== Get Material By ID ======== //
-  const takematerialbyid = async (id) => {
-    try {
-      const response = await axiosPrivate.get(
-        `/materialmanagement/${id}`
-      );
-
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  };
-// ================= APPLY INTERN LEAVE ================= //
-
-const applyinternleave = async (leaveData) => {
-  try {
-    const response = await axiosPrivate.post(
-      "/leaverequestmanagement/intern/apply",
-      leaveData
-    );
-
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-};
-
-// ================= GET MY LEAVE REQUESTS ================= //
 
   // ======== Intern Attendance ======== //
   const getMyAttendance = async () => {
@@ -135,17 +90,68 @@ const applyinternleave = async (leaveData) => {
     }
   };
 
-  // ======== Intern Assigned Tasks ========
-  const takealltask = async () => {
+  // ======== Intern Materials ======== //
+  const takematerials = async () => {
     try {
-      const response = await axiosPrivate.get("/taskmanagement/my-tasks");
+      const response = await axiosPrivate.get(
+        "/materialmanagement/intern"
+      );
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
     }
   };
 
-  // ======== Intern My Submissions ========
+  // ======== Get Material By ID ======== //
+  const takematerialbyid = async (id) => {
+    try {
+      const response = await axiosPrivate.get(
+        `/materialmanagement/${id}`
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Apply Intern Leave ======== //
+  const applyinternleave = async (leaveData) => {
+    try {
+      const response = await axiosPrivate.post(
+        "/leaverequestmanagement/intern/apply",
+        leaveData
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Get My Leave Requests ======== //
+  const takeinternleaverequests = async () => {
+    try {
+      const response = await axiosPrivate.get(
+        "/leaverequestmanagement/intern/my-requests"
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Intern Assigned Tasks ======== //
+  const takealltask = async () => {
+    try {
+      const response = await axiosPrivate.get(
+        "/taskmanagement/my-tasks"
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Intern My Submissions ======== //
   const takemysubmissions = async () => {
     try {
       const response = await axiosPrivate.get(
@@ -157,9 +163,7 @@ const applyinternleave = async (leaveData) => {
     }
   };
 
-  // ======================================
-  // INTERN CREATE TASK SUBMISSION
-  // ======================================
+  // ======== Create Task Submission ======== //
   const createTaskSubmission = async (formData) => {
     try {
       const response = await axiosPrivate.post(
@@ -176,20 +180,20 @@ const applyinternleave = async (leaveData) => {
   const takeMyMonthlyCard = async ({ internId, email } = {}) => {
     try {
       const params = {};
-
       if (internId) params.internId = internId;
       if (email) params.email = email;
 
-      const response = await axiosPrivate.get("/internmonthlycard", {
-        params,
-      });
-
+      const response = await axiosPrivate.get(
+        "/internmonthlycard",
+        { params }
+      );
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
     }
   };
 
+  // ======== Return All Services ======== //
   return {
     takeinternweeklyschedule,
     takeinternweeklycard,
@@ -197,6 +201,10 @@ const applyinternleave = async (leaveData) => {
     marknotificationread,
     markallnotificationsread,
     getMyAttendance,
+    takematerials,
+    takematerialbyid,
+    applyinternleave,
+    takeinternleaverequests,
     takealltask,
     takemysubmissions,
     createTaskSubmission,
