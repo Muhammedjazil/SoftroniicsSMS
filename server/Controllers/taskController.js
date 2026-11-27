@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
-const fs = require("fs");
-const path = require("path");
+const { deleteFromCloudinary } = require("../Config/cloudinary");
 
 const Task = require("../Models/taskModel");
 const Branch = require("../Models/branchModel");
@@ -30,16 +29,10 @@ const validateIds = (ids) => {
   return ids.every((id) => mongoose.Types.ObjectId.isValid(id));
 };
 
-// Remove uploaded attachment
+// Remove uploaded attachment from Cloudinary
 const removeAttachment = (attachment) => {
   if (!attachment) return;
-
-  const filename = path.basename(attachment);
-  const filePath = path.join(__dirname, "../uploads/tasks", filename);
-
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
+  deleteFromCloudinary(attachment);
 };
 
 // Populate task details
@@ -115,9 +108,7 @@ exports.createTask = async (req, res) => {
       startDate,
       dueDate,
       description,
-      attachments: req.file
-        ? `/uploads/tasks/${req.file.filename}`
-        : null,
+      attachments: req.file ? req.file.path : null,
       totalMarks: totalMarks || 0,
       status: status || "Pending",
       audience,
@@ -140,7 +131,7 @@ exports.createTask = async (req, res) => {
     });
   } catch (error) {
     if (req.file) {
-      removeAttachment(`/uploads/tasks/${req.file.filename}`);
+      removeAttachment(req.file.path);
     }
 
     console.error("Create Task Error:", error);
@@ -290,7 +281,7 @@ exports.updateTask = async (req, res) => {
     const oldAttachment = task.attachments;
 
     if (req.file) {
-      task.attachments = `/uploads/tasks/${req.file.filename}`;
+      task.attachments = req.file.path;
     }
 
     await task.save();
@@ -310,7 +301,7 @@ exports.updateTask = async (req, res) => {
     });
   } catch (error) {
     if (req.file) {
-      removeAttachment(`/uploads/tasks/${req.file.filename}`);
+      removeAttachment(req.file.path);
     }
 
     console.error("Update Task Error:", error);

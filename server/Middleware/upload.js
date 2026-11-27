@@ -1,41 +1,13 @@
-
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { withCloudinary } = require("../Config/cloudinary");
 
-// Upload folder path
-const uploadPath = path.join(__dirname, "../uploads");
-
-// Create uploads folder if it doesn't exist
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, { recursive: true });
-}
-
-// Storage configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadPath);
-  },
-
-  filename: (req, file, cb) => {
-    const uniqueName =
-      Date.now() + "-" + Math.round(Math.random() * 1E9);
-
-    cb(
-      null,
-      uniqueName + path.extname(file.originalname).toLowerCase()
-    );
-  },
-});
+// Use memory storage so files can be streamed directly to Cloudinary
+const storage = multer.memoryStorage();
 
 // File validation
 const fileFilter = (req, file, cb) => {
   if (file.fieldname === "photo") {
-    const allowedImages = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-    ];
+    const allowedImages = ["image/jpeg", "image/png", "image/webp"];
 
     if (allowedImages.includes(file.mimetype)) {
       return cb(null, true);
@@ -55,13 +27,24 @@ const fileFilter = (req, file, cb) => {
   cb(new Error("Invalid file field"));
 };
 
-// Multer configuration
-const upload = multer({
+const multerUpload = multer({
   storage,
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5 MB
   },
+});
+
+const upload = withCloudinary(multerUpload, (req, file) => {
+  const baseUrl = req.baseUrl || "";
+  if (baseUrl.toLowerCase().includes("intern")) {
+    return file.fieldname === "resume"
+      ? "softroniics/interns/resumes"
+      : "softroniics/interns/photos";
+  }
+  return file.fieldname === "resume"
+    ? "softroniics/staff/resumes"
+    : "softroniics/staff/photos";
 });
 
 module.exports = upload;

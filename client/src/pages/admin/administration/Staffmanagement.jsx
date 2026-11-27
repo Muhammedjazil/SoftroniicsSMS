@@ -1678,11 +1678,7 @@ export const Staffmanagement = () => {
                 {view.photo && (
                   <div className="staffper3">
                     <img
-                      src={
-                        view.photo.startsWith("http")
-                          ? view.photo
-                          : `http://localhost:7000/uploads/${view.photo}`
-                      }
+                      src={view.photo}
                       alt={view.fullname || "Staff"}
                     />
                   </div>

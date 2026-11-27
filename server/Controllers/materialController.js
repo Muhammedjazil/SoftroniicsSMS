@@ -1,7 +1,6 @@
 
 const mongoose = require("mongoose");
-const fs = require("fs");
-const path = require("path");
+const { deleteFromCloudinary } = require("../Config/cloudinary");
 
 const Material = require("../Models/materialModel");
 const Branch = require("../Models/branchModel");
@@ -39,15 +38,10 @@ const validIds = (ids) => {
   return ids.every((id) => mongoose.Types.ObjectId.isValid(id));
 };
 
-// Remove uploaded attachment
+// Remove uploaded attachment from Cloudinary
 const removeAttachment = (filePath) => {
   if (!filePath) return;
-
-  const fullPath = path.join(__dirname, "..", filePath);
-
-  if (fs.existsSync(fullPath)) {
-    fs.unlinkSync(fullPath);
-  }
+  deleteFromCloudinary(filePath);
 };
 
 // Populate material details
@@ -239,7 +233,7 @@ exports.createMaterial = async (req, res) => {
       });
     }
 
-    const attachment = `/uploads/materials/${req.file.filename}`;
+    const attachment = req.file.path;
 
     const assignedInterns = await getAudienceIds({
       audience,
@@ -280,7 +274,7 @@ exports.createMaterial = async (req, res) => {
     console.error("Create material:", error);
 
     if (req.file) {
-      removeAttachment(`/uploads/materials/${req.file.filename}`);
+      removeAttachment(req.file.path);
     }
 
     res.status(500).json({
@@ -467,7 +461,7 @@ exports.updateMaterial = async (req, res) => {
 
     if (req.file) {
       removeAttachment(material.attachments);
-      material.attachments = `/uploads/materials/${req.file.filename}`;
+      material.attachments = req.file.path;
     }
 
     await material.save();

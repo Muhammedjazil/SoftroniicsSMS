@@ -526,7 +526,7 @@ const TasksForm = ({
                             {tasksFormData.attachments
                                 ? (
                                     <a
-                                        href={`http://localhost:7000${tasksFormData.attachments}`}
+                                        href={tasksFormData.attachments}
                                         target="_blank"
                                         rel="noreferrer"
                                     >
