@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs");
 const Staff = require("../Models/staffModel").Staff;
 const Role = require("../Models/roleModel").Staff;
 const Branch = require("../Models/branchModel");
+const { deleteFromCloudinary } = require("../Config/cloudinary");
 
 // Convert FormData array values into JavaScript arrays
 const parseArray = (value) => {
@@ -318,11 +319,13 @@ const updatestaff = async (req, res) => {
 
     // Update photo only if a new photo is uploaded
     if (req.files?.photo?.[0]?.path) {
+      if (staff.photo) await deleteFromCloudinary(staff.photo);
       staff.photo = req.files.photo[0].path;
     }
 
     // Update resume only if a new resume is uploaded
     if (req.files?.resume?.[0]?.path) {
+      if (staff.resume) await deleteFromCloudinary(staff.resume);
       staff.resume = req.files.resume[0].path;
     }
 

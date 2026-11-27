@@ -1,29 +1,7 @@
-
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { withCloudinary } = require("../Config/cloudinary");
 
-const uploadPath = path.join(__dirname, "../uploads/materials");
-
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadPath);
-  },
-
-  filename: (req, file, cb) => {
-    const uniqueName =
-      Date.now() + "-" + Math.round(Math.random() * 1E9);
-
-    cb(
-      null,
-      uniqueName + path.extname(file.originalname).toLowerCase()
-    );
-  },
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
@@ -46,12 +24,17 @@ const fileFilter = (req, file, cb) => {
   cb(null, true);
 };
 
-const materialUpload = multer({
+const multerMaterialUpload = multer({
   storage,
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024,
   },
 });
+
+const materialUpload = withCloudinary(
+  multerMaterialUpload,
+  "softroniics/materials"
+);
 
 module.exports = materialUpload;

@@ -1,6 +1,7 @@
 
 const Intern = require("../Models/internModel");
 const bcrypt = require("bcrypt");
+const { deleteFromCloudinary } = require("../Config/cloudinary");
 
 const generateUniqueInternId = async () => {
   const year = new Date().getFullYear();
@@ -99,14 +100,10 @@ const createIntern = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Uploaded file paths
-    const photo = req.files?.photo?.[0]
-      ? `/uploads/${req.files.photo[0].filename}`
-      : "";
+    // Uploaded Cloudinary URLs
+    const photo = req.files?.photo?.[0]?.path || "";
 
-    const resume = req.files?.resume?.[0]
-      ? `/uploads/${req.files.resume[0].filename}`
-      : "";
+    const resume = req.files?.resume?.[0]?.path || "";
 
     let intern;
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -288,12 +285,14 @@ const updateIntern = async (req, res) => {
     intern.officialEmail = studentEmail;
 
     // Replace files only when new files are uploaded
-    if (req.files?.photo?.[0]) {
-      intern.photo = `/uploads/${req.files.photo[0].filename}`;
+    if (req.files?.photo?.[0]?.path) {
+      if (intern.photo) await deleteFromCloudinary(intern.photo);
+      intern.photo = req.files.photo[0].path;
     }
 
-    if (req.files?.resume?.[0]) {
-      intern.resume = `/uploads/${req.files.resume[0].filename}`;
+    if (req.files?.resume?.[0]?.path) {
+      if (intern.resume) await deleteFromCloudinary(intern.resume);
+      intern.resume = req.files.resume[0].path;
     }
 
     // Change password only if a new password is provided
@@ -329,7 +328,9 @@ const updateIntern = async (req, res) => {
 const removeintern=async(req,res)=>{
     try{
         const {id}=req.params;
-        const intern=await Intern.findByIdAndDelete(id)
+        const intern=await Intern.findByIdAndDelete(id);
+        if (intern?.photo) await deleteFromCloudinary(intern.photo);
+        if (intern?.resume) await deleteFromCloudinary(intern.resume);
         res.json("intern deleted")
     }
     catch(error){

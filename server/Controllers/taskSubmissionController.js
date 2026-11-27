@@ -313,10 +313,8 @@ exports.createTaskSubmission = async (req, res) => {
       });
     }
 
-    // 6. Get uploaded attachment
-    const attachments = req.file
-      ? [`/uploads/tasks/${req.file.filename}`]
-      : [];
+    // 6. Get uploaded Cloudinary attachment
+    const attachments = req.file ? [req.file.path] : [];
 
     // 7. Save submission in MongoDB
     const newSubmission = await TaskSubmission.create({
