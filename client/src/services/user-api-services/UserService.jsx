@@ -50,7 +50,6 @@ const UserService = () => {
       const response = await axiosPrivate.get(
         "/notificationmanagement/my-notifications"
       );
-
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -62,7 +61,6 @@ const UserService = () => {
       const response = await axiosPrivate.patch(
         `/notificationmanagement/my-notifications/${notificationId}/read`
       );
-
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -74,21 +72,61 @@ const UserService = () => {
       const response = await axiosPrivate.patch(
         "/notificationmanagement/my-notifications/read-all"
       );
-
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
     }
   };
 
-<<<<<<< HEAD
   // ======== Intern Materials ======== //
   const takematerials = async () => {
     try {
       const response = await axiosPrivate.get(
         "/materialmanagement/intern"
       );
-=======
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Get Material By ID ======== //
+  const takematerialbyid = async (id) => {
+    try {
+      const response = await axiosPrivate.get(
+        `/materialmanagement/${id}`
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Apply Intern Leave ======== //
+  const applyinternleave = async (leaveData) => {
+    try {
+      const response = await axiosPrivate.post(
+        "/leaverequestmanagement/intern/apply",
+        leaveData
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ======== Get My Leave Requests ======== //
+  const takeinternleaverequests = async () => {
+    try {
+      const response = await axiosPrivate.get(
+        "/leaverequestmanagement/intern/my-requests"
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
   // ======== Intern Attendance ======== //
   const getMyAttendance = async () => {
     try {
@@ -101,17 +139,19 @@ const UserService = () => {
     }
   };
 
-  // ======== Intern Assigned Tasks ========
+  // ======== Intern Assigned Tasks ======== //
   const takealltask = async () => {
     try {
-      const response = await axiosPrivate.get("/taskmanagement/my-tasks");
+      const response = await axiosPrivate.get(
+        "/taskmanagement/my-tasks"
+      );
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
     }
   };
 
-  // ======== Intern My Submissions ========
+  // ======== Intern My Submissions ======== //
   const takemysubmissions = async () => {
     try {
       const response = await axiosPrivate.get(
@@ -123,9 +163,7 @@ const UserService = () => {
     }
   };
 
-  // ======================================
-  // INTERN CREATE TASK SUBMISSION
-  // ======================================
+  // ======== Create Task Submission ======== //
   const createTaskSubmission = async (formData) => {
     try {
       const response = await axiosPrivate.post(
@@ -142,82 +180,34 @@ const UserService = () => {
   const takeMyMonthlyCard = async ({ internId, email } = {}) => {
     try {
       const params = {};
-
       if (internId) params.internId = internId;
       if (email) params.email = email;
 
-      const response = await axiosPrivate.get("/internmonthlycard", {
-        params,
-      });
->>>>>>> ffa9b1a4f11605bbbbef34f3e7c5248dc7783f5e
-
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  };
-
-<<<<<<< HEAD
-  // ======== Get Material By ID ======== //
-  const takematerialbyid = async (id) => {
-    try {
       const response = await axiosPrivate.get(
-        `/materialmanagement/${id}`
+        "/internmonthlycard",
+        { params }
       );
-
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
     }
   };
-// ================= APPLY INTERN LEAVE ================= //
 
-const applyinternleave = async (leaveData) => {
-  try {
-    const response = await axiosPrivate.post(
-      "/leaverequestmanagement/intern/apply",
-      leaveData
-    );
-
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-};
-
-// ================= GET MY LEAVE REQUESTS ================= //
-
-const takeinternleaverequests = async () => {
-  try {
-    const response = await axiosPrivate.get(
-      "/leaverequestmanagement/intern/my-requests"
-    );
-
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-};
-=======
->>>>>>> ffa9b1a4f11605bbbbef34f3e7c5248dc7783f5e
   return {
     takeinternweeklyschedule,
     takeinternweeklycard,
     takeallnotification,
     marknotificationread,
     markallnotificationsread,
-<<<<<<< HEAD
     takematerials,
     takematerialbyid,
-     applyinternleave,
-  takeinternleaverequests,
-=======
+    applyinternleave,
+    takeinternleaverequests,
     getMyAttendance,
     takealltask,
     takemysubmissions,
     createTaskSubmission,
     takeMyMonthlyCard,
->>>>>>> ffa9b1a4f11605bbbbef34f3e7c5248dc7783f5e
   };
 };
 
