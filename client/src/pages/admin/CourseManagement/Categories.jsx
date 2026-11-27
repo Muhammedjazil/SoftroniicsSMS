@@ -4,6 +4,7 @@ import { LuX, LuSearch } from 'react-icons/lu';
 import { HiOutlineArrowDownTray } from 'react-icons/hi2';
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import AdminService from '../../../services/admin-api-services/AdminService';
+import Loader from '../../../components/common/Loader';
 import { useToast } from '../../../components/common/Toast';
 
 const Categories = () => {
@@ -406,9 +407,7 @@ const Categories = () => {
             </div>
 
             {loading ? (
-              <div className="cat-mgmt-content-area">
-                <p className="cat-mgmt-empty-message">Loading categories...</p>
-              </div>
+              <Loader message="Loading categories..." minHeight="320px" />
             ) : filteredCategories.length === 0 ? (
               <div className="cat-mgmt-content-area">
                 <p className="cat-mgmt-empty-message">

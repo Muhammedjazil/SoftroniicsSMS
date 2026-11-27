@@ -20,6 +20,8 @@ import {
 } from "react-icons/md";
 
 import AdminService from "../../../services/admin-api-services/AdminService";
+import Loader from "../../../components/common/Loader";
+import { useToast } from "../../../components/common/Toast";
 import "./Taskmaterial.css";
 
 const AUDIENCE_TYPES = [
@@ -74,6 +76,7 @@ const getFileName = (filePath) => {
 };
 
 const Taskmaterial = () => {
+  const { showToast, ToastContainer } = useToast();
   const {
     takematerials,
     takematerialbyid,
@@ -129,9 +132,10 @@ const Taskmaterial = () => {
         error.response?.data || error
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to fetch materials"
+        "Unable to fetch materials",
+        "error"
       );
     }
   };
@@ -158,9 +162,10 @@ const Taskmaterial = () => {
         error.response?.data || error
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to fetch material dropdown data"
+        "Unable to fetch material dropdown data",
+        "error"
       );
     }
   };
@@ -400,13 +405,13 @@ const Taskmaterial = () => {
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      alert("Only JPG, PNG, WEBP and PDF files are allowed.");
+      showToast("Only JPG, PNG, WEBP and PDF files are allowed.", "error");
       event.target.value = "";
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("File size must be less than 5 MB.");
+      showToast("File size must be less than 5 MB.", "error");
       event.target.value = "";
       return;
     }
@@ -417,7 +422,7 @@ const Taskmaterial = () => {
 
   const handleViewAttachment = (attachment) => {
     if (!attachment) {
-      alert("Attachment is not available.");
+      showToast("Attachment is not available.", "error");
       return;
     }
 
@@ -430,7 +435,7 @@ const Taskmaterial = () => {
 
   const handleDownloadAttachment = async (attachment) => {
     if (!attachment) {
-      alert("Attachment is not available.");
+      showToast("Attachment is not available.", "error");
       return;
     }
 
@@ -509,9 +514,10 @@ const Taskmaterial = () => {
       setMode("view");
     } catch (error) {
       console.error("View Material Error:", error);
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to open material"
+        "Unable to open material",
+        "error"
       );
     }
   };
@@ -531,9 +537,10 @@ const Taskmaterial = () => {
       setMode("edit");
     } catch (error) {
       console.error("Edit Material Error:", error);
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to edit material"
+        "Unable to edit material",
+        "error"
       );
     }
   };
@@ -559,27 +566,27 @@ const Taskmaterial = () => {
 
   const validateForm = () => {
     if (!formData.title.trim()) {
-      alert("Please enter material title.");
+      showToast("Please enter material title.", "error");
       return false;
     }
 
     if (!formData.mentor) {
-      alert("Please select assigned mentor.");
+      showToast("Please select assigned mentor.", "error");
       return false;
     }
 
     if (!formData.attachment && !formData.existingAttachment) {
-      alert("Please upload an attachment.");
+      showToast("Please upload an attachment.", "error");
       return false;
     }
 
     if (!formData.branches.length) {
-      alert("Please select at least one branch.");
+      showToast("Please select at least one branch.", "error");
       return false;
     }
 
     if (!formData.audience) {
-      alert("Please select audience type.");
+      showToast("Please select audience type.", "error");
       return false;
     }
 
@@ -587,7 +594,7 @@ const Taskmaterial = () => {
       formData.audience === "By batches" &&
       !formData.batches.length
     ) {
-      alert("Please select at least one batch.");
+      showToast("Please select at least one batch.", "error");
       return false;
     }
 
@@ -595,7 +602,7 @@ const Taskmaterial = () => {
       formData.audience === "By Category" &&
       !formData.categories.length
     ) {
-      alert("Please select at least one category.");
+      showToast("Please select at least one category.", "error");
       return false;
     }
 
@@ -603,7 +610,7 @@ const Taskmaterial = () => {
       formData.audience === "By Courses" &&
       !formData.courses.length
     ) {
-      alert("Please select at least one course.");
+      showToast("Please select at least one course.", "error");
       return false;
     }
 
@@ -611,7 +618,7 @@ const Taskmaterial = () => {
       formData.audience === "Individual interns" &&
       !formData.individualInterns.length
     ) {
-      alert("Please select at least one intern.");
+      showToast("Please select at least one intern.", "error");
       return false;
     }
 
@@ -653,10 +660,10 @@ const Taskmaterial = () => {
 
       if (mode === "create") {
         await creatematerial(data);
-        alert("Material created successfully.");
+        showToast("Material created successfully.", "success");
       } else if (mode === "edit") {
         await updatematerial(selectedId, data);
-        alert("Material updated successfully.");
+        showToast("Material updated successfully.", "success");
       }
 
       await fetchMaterials();
@@ -669,9 +676,10 @@ const Taskmaterial = () => {
         error.response?.data || error
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to save material"
+        "Unable to save material",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -692,7 +700,7 @@ const Taskmaterial = () => {
     try {
       await removematerial(id);
 
-      alert("Material deleted successfully.");
+      showToast("Material deleted successfully.", "success");
 
       await fetchMaterials();
 
@@ -704,9 +712,10 @@ const Taskmaterial = () => {
         error.response?.data || error
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to delete material"
+        "Unable to delete material",
+        "error"
       );
     }
   };
@@ -787,7 +796,7 @@ const Taskmaterial = () => {
 
   const handleExport = () => {
     if (!filteredMaterials.length) {
-      alert("No materials available to export.");
+      showToast("No materials available to export.", "error");
       return;
     }
 
@@ -1362,6 +1371,7 @@ const Taskmaterial = () => {
 
   return (
     <div className="tasks-material-page syl-mgmt-container">
+      <ToastContainer />
       {(mode === "list" || mode === "create") && (
         <div className="syl-mgmt-toolbar">
           <div className="syl-mgmt-tab-group">
@@ -1470,9 +1480,7 @@ const Taskmaterial = () => {
           </div>
 
           {pageLoading ? (
-            <div className="syl-mgmt-content-area">
-              <p className="syl-mgmt-empty-message">Loading materials...</p>
-            </div>
+            <Loader message="Loading materials..." minHeight="320px" />
           ) : currentMaterials.length ? (
             <div className="syl-mgmt-table-wrapper">
               <table className="notificationtable">

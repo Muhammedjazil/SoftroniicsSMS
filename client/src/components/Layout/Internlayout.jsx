@@ -11,6 +11,11 @@ const internRouteMeta = {
         parentPath: "Student Attendance",
         currentPath: "Attendance Details"
     },
+    "/student/attendance": {
+        title: "Student Attendance",
+        parentPath: "Student Attendance",
+        currentPath: "Attendance Details"
+    },
     "/internweekly": {
         title: "Weekly Schedule",
         parentPath: "Weekly Schedule",
@@ -26,6 +31,11 @@ const internRouteMeta = {
         parentPath: "Weekly Card",
         currentPath: "Performance Details"
     },
+    "/student/weekly_card": {
+        title: "Weekly Evaluation Card",
+        parentPath: "Weekly Card",
+        currentPath: "Performance Details"
+    },
     "/internmonthlycard": {
         title: "Monthly Evaluation Card",
         parentPath: "Monthly Card",
@@ -34,7 +44,12 @@ const internRouteMeta = {
     "/interntask": {
         title: "Task Submission",
         parentPath: "Tasks",
-        currentPath: "Submit & Track"
+        currentPath: "Assigned Tasks"
+    },
+    "/student/task": {
+        title: "Task Submission",
+        parentPath: "Tasks",
+        currentPath: "Assigned Tasks"
     },
     "/internmaterial": {
         title: "Material List",
@@ -43,10 +58,15 @@ const internRouteMeta = {
     },
     "/internleave": {
         title: "Leave Request",
-        parentPath: "Leave Requests ",
-        currentPath: "My Leave Requests "
+        parentPath: "Leave Requests",
+        currentPath: "My Leave Requests"
     },
     "/internnotification": {
+        title: "Notifications",
+        parentPath: "Notifications",
+        currentPath: "Recent Alerts"
+    },
+    "/student/notification": {
         title: "Notifications",
         parentPath: "Notifications",
         currentPath: "Recent Alerts"
@@ -57,6 +77,11 @@ export const Internlayout = ({ children }) => {
     const { pathname } = useLocation();
     const navigate = useNavigate();
     const [isSyncing, setIsSyncing] = useState(true);
+    const [headerOverride, setHeaderOverride] = useState(null);
+
+    useEffect(() => {
+        setHeaderOverride(null);
+    }, [pathname]);
 
     useEffect(() => {
         let isMounted = true;
@@ -104,11 +129,13 @@ export const Internlayout = ({ children }) => {
         };
     }, [navigate]);
 
-    const meta = internRouteMeta[pathname] || {
+    const baseMeta = internRouteMeta[pathname] || {
         title: "Intern Portal",
         parentPath: "Dashboard",
         currentPath: "Overview"
     };
+
+    const meta = headerOverride ? { ...baseMeta, ...headerOverride } : baseMeta;
 
     return (
         <div className="internlayout">
@@ -123,8 +150,9 @@ export const Internlayout = ({ children }) => {
                     title={meta.title}
                     parentPath={meta.parentPath}
                     currentPath={meta.currentPath}
+                    onParentClick={meta.onParentClick}
                 />
-                {!isSyncing && (children || <Outlet />)}
+                {!isSyncing && (children || <Outlet context={{ setHeaderMeta: setHeaderOverride }} />)}
             </div>
         </div>
     );

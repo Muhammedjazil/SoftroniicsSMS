@@ -6,6 +6,7 @@ const InternHeader = ({
     title = "Student Attendance",
     parentPath = "Student Attendance",
     currentPath = "Attendance Details",
+    onParentClick,
     userName,
     userRole = "Intern"
 }) => {
@@ -27,7 +28,24 @@ const InternHeader = ({
             <div className="wk-card-title-group">
                 <h1 className="wk-card-heading">{title}</h1>
                 <nav className="wk-card-breadcrumb" aria-label="Breadcrumb">
-                    <span>{parentPath}</span>
+                    {onParentClick ? (
+                        <button
+                            type="button"
+                            onClick={onParentClick}
+                            style={{
+                                background: "none",
+                                border: "none",
+                                padding: 0,
+                                font: "inherit",
+                                color: "inherit",
+                                cursor: "pointer",
+                            }}
+                        >
+                            {parentPath}
+                        </button>
+                    ) : (
+                        <span>{parentPath}</span>
+                    )}
                     {currentPath && (
                         <>
                             <span className="wk-card-breadcrumb-sep">&gt;</span>

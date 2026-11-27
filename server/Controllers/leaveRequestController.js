@@ -28,6 +28,7 @@ const getLeaveRequests = async (req, res) => {
           ...request,
           intern,
           internName: intern?.fullName || "",
+          email: intern?.email || "",
           admissionNumber: intern?.admissionNumber || "",
           batch: intern?.batch?.batchName || "",
           course: intern?.course?.courseName || "",
@@ -349,12 +350,68 @@ const deleteLeaveRequest = async (req, res) => {
   }
 };
 
+// UPDATE LEAVE REQUEST STATUS (APPROVE / REJECT)
+const updateLeaveRequestStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, rejectionReason } = req.body;
+
+    const normalizedStatus = String(status || "").toUpperCase();
+    if (!["APPROVED", "REJECTED", "PENDING"].includes(normalizedStatus)) {
+      return res.status(400).json({
+        message: "Invalid status. Must be APPROVED, REJECTED, or PENDING.",
+      });
+    }
+
+    const updateData = {
+      status: normalizedStatus,
+      reviewedAt: new Date(),
+    };
+
+    if (req.userId) {
+      updateData.reviewedBy = req.userId;
+      updateData.reviewedByModel = "Staff";
+    }
+
+    if (normalizedStatus === "REJECTED" && rejectionReason) {
+      updateData.rejectionReason = rejectionReason.trim();
+    } else if (normalizedStatus === "APPROVED") {
+      updateData.rejectionReason = "";
+    }
+
+    const updated = await LeaveRequest.findOneAndUpdate(
+      { _id: id, isDeleted: false },
+      { $set: updateData },
+      { new: true }
+    ).populate("branch", "branchName");
+
+    if (!updated) {
+      return res.status(404).json({
+        message: "Leave request not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Leave request ${normalizedStatus.toLowerCase()} successfully`,
+      leaveRequest: updated,
+    });
+  } catch (error) {
+    console.error("Update leave request status error:", error);
+    return res.status(500).json({
+      message: "Error updating leave request status",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getLeaveRequests,
   getLeaveRequestById,
   createLeaveRequest,
   deleteLeaveRequest,
-   
+  updateLeaveRequestStatus,
+
   createInternLeaveRequest,
   getMyInternLeaveRequests,
 };

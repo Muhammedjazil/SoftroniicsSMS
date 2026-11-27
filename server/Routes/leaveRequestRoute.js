@@ -37,6 +37,12 @@ router.post(
   leaveRequestController.createLeaveRequest
 );
 
+router.patch(
+  "/:id/status",
+  CheckAuth,
+  leaveRequestController.updateLeaveRequestStatus
+);
+
 router.delete(
   "/:id",
   CheckAuth,

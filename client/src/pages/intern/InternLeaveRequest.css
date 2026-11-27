@@ -36,28 +36,43 @@
 
 .intern-leave-tabs {
   display: flex;
-  gap: 8px;
-  margin: 18px 0 20px;
+  gap: 10px;
+  margin: 0 0 24px;
 }
 
 .intern-leave-tabs button {
   min-width: 138px;
-  padding: 12px 20px;
-  background: #fff;
-  color: #344054;
-  border: 1px solid #d6dce4;
-  border-radius: 6px;
+  height: 40px;
+  padding: 0 20px;
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.15s ease;
+}
+
+.intern-leave-tabs button:hover:not(.active) {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .intern-leave-tabs button.active {
-  background: #ff7014;
-  border-color: #ff7014;
-  color: #fff;
+  background: #ff790e;
+  border-color: #ff790e;
+  color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #ff790e;
+}
+
+.intern-leave-tabs button.active:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.94);
 }
 
 /* FORM */
@@ -164,28 +179,40 @@
 
 .leave-form-footer button {
   min-width: 110px;
-  padding: 11px 20px;
-  border-radius: 6px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.15s ease;
 }
 
 .leave-cancel-btn {
-  background: #fff;
-  border: 1px solid #d4dce5;
-  color: #344054;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  color: #374151;
+}
+
+.leave-cancel-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .leave-submit-btn {
-  background: #ff7014;
-  border: 1px solid #ff7014;
-  color: #fff;
+  background: #ff790e;
+  border: 1px solid #ff790e;
+  color: #ffffff;
   font-weight: 600;
 }
 
-.leave-submit-btn:hover {
-  background: #ed6208;
+.leave-submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(0.94);
+  box-shadow: 0 4px 10px rgba(255, 121, 14, 0.25);
 }
 
 .leave-form-footer button:disabled {
@@ -328,4 +355,77 @@
     flex: 1;
     padding: 11px 8px;
   }
+}
+
+/* ================= SUCCESS MODAL ================= */
+
+.leave-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.leave-success-modal {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px 28px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+}
+
+.leave-success-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.leave-success-modal-icon {
+  font-size: 24px;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.leave-success-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.leave-success-modal-text {
+  margin: 0 0 22px;
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.leave-success-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.leave-success-modal-ok {
+  min-width: 72px;
+  height: 38px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 8px;
+  background: #15803d;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.leave-success-modal-ok:hover {
+  background: #166534;
 }

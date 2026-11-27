@@ -21,6 +21,8 @@ import {
 } from "react-icons/md";
 
 import AdminService from "../../../services/admin-api-services/AdminService";
+import Loader from "../../../components/common/Loader";
+import { useToast } from "../../../components/common/Toast";
 import "./Tasks.css";
 
 // =====================================================
@@ -964,6 +966,7 @@ const TasksForm = ({
 // =====================================================
 
 const Tasks = () => {
+    const { showToast, ToastContainer } = useToast();
 
     const {
         taketasks,
@@ -1029,9 +1032,10 @@ const Tasks = () => {
                 error.response?.data || error
             );
 
-            alert(
+            showToast(
                 error.response?.data?.message ||
-                "Unable to fetch tasks"
+                "Unable to fetch tasks",
+                "error"
             );
 
         }
@@ -1065,9 +1069,10 @@ const Tasks = () => {
                 error.response?.data || error
             );
 
-            alert(
+            showToast(
                 error.response?.data?.message ||
-                "Unable to fetch dropdown data"
+                "Unable to fetch dropdown data",
+                "error"
             );
 
         }
@@ -1184,7 +1189,7 @@ const Tasks = () => {
                 error.response?.data || error
             );
 
-            alert("Unable to open task");
+            showToast("Unable to open task", "error");
 
         } finally {
 
@@ -1266,17 +1271,17 @@ const Tasks = () => {
             tasksFormData.startDate &&
             tasksFormData.dueDate < tasksFormData.startDate
         ) {
-            alert("Due Date cannot be earlier than Start Date.");
+            showToast("Due Date cannot be earlier than Start Date.", "error");
             return false;
         }
 
         if (!tasksFormData.branch.length) {
-            alert("Please select at least one branch.");
+            showToast("Please select at least one branch.", "error");
             return false;
         }
 
         if (!tasksFormData.audience) {
-            alert("Please select an audience.");
+            showToast("Please select an audience.", "error");
             return false;
         }
 
@@ -1284,7 +1289,7 @@ const Tasks = () => {
             tasksFormData.audience === "By batches" &&
             !tasksFormData.batches.length
         ) {
-            alert("Please select at least one batch.");
+            showToast("Please select at least one batch.", "error");
             return false;
         }
 
@@ -1292,7 +1297,7 @@ const Tasks = () => {
             tasksFormData.audience === "By Courses" &&
             !tasksFormData.courses.length
         ) {
-            alert("Please select at least one course.");
+            showToast("Please select at least one course.", "error");
             return false;
         }
 
@@ -1300,7 +1305,7 @@ const Tasks = () => {
             tasksFormData.audience === "By Category" &&
             !tasksFormData.categories.length
         ) {
-            alert("Please select at least one category.");
+            showToast("Please select at least one category.", "error");
             return false;
         }
 
@@ -1308,7 +1313,7 @@ const Tasks = () => {
             tasksFormData.audience === "Individual interns" &&
             !tasksFormData.individualInterns.length
         ) {
-            alert("Please select at least one intern.");
+            showToast("Please select at least one intern.", "error");
             return false;
         }
 
@@ -1335,13 +1340,13 @@ const Tasks = () => {
 
                 await createtask(formData);
 
-                alert("Task created successfully.");
+                showToast("Task created successfully.", "success");
 
             } else {
 
                 await updatetask(tasksSelectedId, formData);
 
-                alert("Task updated successfully.");
+                showToast("Task updated successfully.", "success");
 
             }
 
@@ -1364,9 +1369,10 @@ const Tasks = () => {
                 error.response?.data || error
             );
 
-            alert(
+            showToast(
                 error.response?.data?.message ||
-                "Unable to save task"
+                "Unable to save task",
+                "error"
             );
 
         } finally {
@@ -1394,7 +1400,7 @@ const Tasks = () => {
 
             await removetask(id);
 
-            alert("Task permanently deleted.");
+            showToast("Task permanently deleted.", "success");
 
             await fetchTasks();
 
@@ -1413,9 +1419,10 @@ const Tasks = () => {
                 error.response?.data || error
             );
 
-            alert(
+            showToast(
                 error.response?.data?.message ||
-                "Unable to delete task"
+                "Unable to delete task",
+                "error"
             );
 
         } finally {
@@ -1564,7 +1571,7 @@ const Tasks = () => {
     const tasksHandleExport = () => {
 
         if (!tasksFilteredList.length) {
-            alert("No tasks available to export.");
+            showToast("No tasks available to export.", "error");
             return;
         }
 
@@ -1669,12 +1676,10 @@ const Tasks = () => {
     // =====================================================
 
     if (pageLoading) {
-
         return (
-            <div className="tasks-page">
-                <div className="tasks-empty-state">
-                    Loading tasks...
-                </div>
+            <div className="tasks-page syl-mgmt-container">
+                <ToastContainer />
+                <Loader message="Loading tasks..." minHeight="360px" />
             </div>
         );
     }
@@ -1682,6 +1687,7 @@ const Tasks = () => {
     return (
 
         <div className="tasks-page syl-mgmt-container">
+            <ToastContainer />
             {/* TOP NAVIGATION / TOOLBAR */}
             {(tasksMode === "list" || tasksMode === "create") && (
                 <div className="syl-mgmt-toolbar">

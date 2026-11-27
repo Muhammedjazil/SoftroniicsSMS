@@ -9,6 +9,8 @@ import {
 } from "react-icons/md";
 
 import AdminService from "../../../services/admin-api-services/AdminService";
+import Loader from "../../../components/common/Loader";
+import { useToast } from "../../../components/common/Toast";
 import "./Taskevaluation.css";
 
 const API_ORIGIN =
@@ -34,6 +36,7 @@ const EMPTY_GRADE_FORM = {
 };
 
 const Taskevaluation = () => {
+  const { showToast, ToastContainer } = useToast();
   const {
     takeevaluationmodules,
     takeevaluationtasks,
@@ -130,10 +133,11 @@ const Taskevaluation = () => {
       } catch (error) {
         console.error("Task Evaluation Initial Load Error:", error);
 
-        alert(
+        showToast(
           error.response?.data?.message ||
             error.message ||
-            "Unable to load evaluation data"
+            "Unable to load evaluation data",
+          "error"
         );
       } finally {
         setLoading(false);
@@ -165,10 +169,11 @@ const Taskevaluation = () => {
     } catch (error) {
       console.error("Fetch Evaluation Tasks Error:", error);
 
-      alert(
+      showToast(
         error.response?.data?.message ||
           error.message ||
-          "Unable to load tasks"
+          "Unable to load tasks",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -294,7 +299,7 @@ const Taskevaluation = () => {
     e.preventDefault();
 
     if (!selectedSubmission?._id) {
-      alert("Please select a submission.");
+      showToast("Please select a submission.", "error");
       return;
     }
 
@@ -302,7 +307,7 @@ const Taskevaluation = () => {
     const totalMarks = Number(gradeForm.totalMarks);
 
     if (!["Submitted", "Graded", "Rejected"].includes(gradeForm.status)) {
-      alert("Please select a valid evaluation status.");
+      showToast("Please select a valid evaluation status.", "error");
       return;
     }
 
@@ -313,7 +318,7 @@ const Taskevaluation = () => {
         marks < 0 ||
         marks > totalMarks)
     ) {
-      alert(`Enter marks between 0 and ${totalMarks}.`);
+      showToast(`Enter marks between 0 and ${totalMarks}.`, "error");
       return;
     }
 
@@ -337,16 +342,17 @@ const Taskevaluation = () => {
       setSelectedSubmission(null);
       setGradeForm(EMPTY_GRADE_FORM);
 
-      alert(response.message || "Intern evaluation saved successfully!");
+      showToast(response.message || "Intern evaluation saved successfully!", "success");
 
       setActivetab("submissionlist");
     } catch (error) {
       console.error("Grade Submission Error:", error);
 
-      alert(
+      showToast(
         error.response?.data?.message ||
           error.message ||
-          "Unable to save evaluation."
+          "Unable to save evaluation.",
+        "error"
       );
     } finally {
       setLoading(false);
@@ -356,7 +362,7 @@ const Taskevaluation = () => {
   // EXPORT CSV
   const handleExport = () => {
     if (!filteredSubmissions.length) {
-      alert("No submissions available to export.");
+      showToast("No submissions available to export.", "error");
       return;
     }
 
@@ -423,6 +429,7 @@ const Taskevaluation = () => {
 
   return (
     <div className="tasks-evaluation-page">
+      <ToastContainer />
       {/* TOP NAVIGATION */}
       <div className="tasks-evaluation-top-navigation">
         <div className="tasks-evaluation-tabs-group">
@@ -576,7 +583,7 @@ const Taskevaluation = () => {
 
               {/* LOADING */}
               {loading ? (
-                <p>Loading submissions...</p>
+                <Loader message="Loading submissions..." minHeight="240px" />
               ) : filteredSubmissions.length > 0 ? (
                 <div className="tasks-evaluation-table-wrapper">
                   <table className="tasks-evaluation-table">
