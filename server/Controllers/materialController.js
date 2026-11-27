@@ -11,6 +11,7 @@ const Category = require("../Models/categoryModel");
 const Course = require("../Models/courseModel");
 const Intern = require("../Models/internModel");
 
+// Allowed audience types
 const allowedAudiences = [
   "All interns",
   "By batches",
@@ -19,6 +20,7 @@ const allowedAudiences = [
   "Individual interns",
 ];
 
+// Convert input into array
 const parseArray = (value) => {
   if (!value) return [];
 
@@ -32,361 +34,333 @@ const parseArray = (value) => {
   }
 };
 
-const validIds = (ids) =>
-  ids.every((id) => mongoose.Types.ObjectId.isValid(id));
+// Validate MongoDB IDs
+const validIds = (ids) => {
+  return ids.every((id) => mongoose.Types.ObjectId.isValid(id));
+};
 
-const removeAttachment = (attachment) => {
-  if (!attachment) return;
+// Remove uploaded attachment
+const removeAttachment = (filePath) => {
+  if (!filePath) return;
 
-  const filename = path.basename(attachment);
-  const filePath = path.join(
-    __dirname,
-    "../uploads/materials",
-    filename
-  );
+  const fullPath = path.join(__dirname, "..", filePath);
 
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
+  if (fs.existsSync(fullPath)) {
+    fs.unlinkSync(fullPath);
   }
 };
 
-const populateMaterial = (query) =>
-  query
-    .populate("mentor", "fullName email")
+// Populate material details
+const populateMaterial = (query) => {
+  return query
+    .populate("mentor", "fullName name email")
     .populate("branch", "branchName")
-    .populate("batches", "batchName branch")
-    .populate("categories", "categoryName branch")
-    .populate("courses", "courseName category")
+    .populate("batches", "batchName")
+    .populate("categories", "categoryName")
+    .populate("courses", "courseName")
     .populate("interns", "fullName email")
     .populate("individualInterns", "fullName email");
+};
 
+// Calculate interns based on audience
 const getAudienceIds = async ({
   audience,
   branch,
   batches,
-  categories,
   courses,
+  categories,
   individualInterns,
 }) => {
-  let interns = [];
+  let internFilter = {
+    branch: { $in: branch },
+    isActive: true,
+    isDeleted: false,
+    role: "Intern",
+  };
 
   if (audience === "All interns") {
-    interns = await Intern.find({
-      branch: { $in: branch },
-      isActive: true,
-      isDeleted: false,
-    }).distinct("_id");
+    return await Intern.find(internFilter).distinct("_id");
   }
 
   if (audience === "By batches") {
-    interns = await Intern.find({
-      batch: { $in: [] },
-      branch: { $in: branch },
-      isActive: true,
-      isDeleted: false,
-    }).distinct("_id");
-
-    // Intern.batch is a String in your schema.
-    // Resolve using the selected Batch documents' batchName values.
-    const selectedBatches = await Batch.find({
-      _id: { $in: batches },
-      branch: { $in: branch },
-      isActive: true,
-      isDeleted: false,
-    }).select("batchName");
-
-    const batchNames = selectedBatches.map((item) => item.batchName);
-
-    interns = await Intern.find({
-      batch: { $in: batchNames },
-      branch: { $in: branch },
-      isActive: true,
-      isDeleted: false,
+    return await Intern.find({
+      ...internFilter,
+      batch: { $in: batches },
     }).distinct("_id");
   }
 
   if (audience === "By Courses") {
-    interns = await Intern.find({
+    return await Intern.find({
+      ...internFilter,
       course: { $in: courses },
-      branch: { $in: branch },
-      isActive: true,
-      isDeleted: false,
     }).distinct("_id");
   }
 
   if (audience === "By Category") {
-    const selectedCourses = await Course.find({
+    const categoryCourses = await Course.find({
       category: { $in: categories },
-      isActive: true,
-      isDeleted: false,
     }).distinct("_id");
 
-    interns = await Intern.find({
-      course: { $in: selectedCourses },
-      branch: { $in: branch },
-      isActive: true,
-      isDeleted: false,
+    return await Intern.find({
+      ...internFilter,
+      course: { $in: categoryCourses },
     }).distinct("_id");
   }
 
   if (audience === "Individual interns") {
-    interns = individualInterns;
+    return await Intern.find({
+      _id: { $in: individualInterns },
+      ...internFilter,
+    }).distinct("_id");
   }
 
-  return interns;
+  return [];
 };
 
-// =====================================================
-// GET MATERIAL DROPDOWNS
-// =====================================================
-
+// Dropdown data
 exports.getMaterialDropdowns = async (req, res) => {
   try {
-    const [
+    const [branches, batches, categories, courses, interns, mentors] =
+      await Promise.all([
+        Branch.find({ isDeleted: false }),
+        Batch.find({ isDeleted: false }),
+        Category.find({ isDeleted: false }),
+        Course.find({ isDeleted: false }),
+        Intern.find({
+          role: "Intern",
+          isActive: true,
+          isDeleted: false,
+        }),
+        Staff.find({ isDeleted: false }),
+      ]);
+
+    res.status(200).json({
+      success: true,
       branches,
-      mentors,
       batches,
       categories,
       courses,
       interns,
-    ] = await Promise.all([
-      Branch.find({
-        isActive: true,
-        isDeleted: false,
-      }).select("branchName"),
-
-      Staff.find({
-        isActive: true,
-        isDeleted: false,
-        isMentor: true,
-        employmentStatus: "Active",
-      }).select("fullName email branch multipleBranches"),
-
-      Batch.find({
-        isActive: true,
-        isDeleted: false,
-        status: "Active",
-      }).select("batchName branch"),
-
-      Category.find({
-        isActive: true,
-        isDeleted: false,
-      }).select("categoryName branch"),
-
-      Course.find({
-        isActive: true,
-        isDeleted: false,
-      }).select("courseName category"),
-
-      Intern.find({
-        isActive: true,
-        isDeleted: false,
-        courseStatus: "Ongoing",
-      }).select("fullName email course branch batch"),
-    ]);
-
-    return res.status(200).json({
-      message: "Material dropdowns fetched successfully",
-      branches,
       mentors,
-      batches,
-      categories,
-      courses,
-      interns,
     });
   } catch (error) {
-    console.error("Material Dropdown Error:", error);
-
-    return res.status(500).json({
-      message: "Failed to fetch material dropdowns",
+    console.error("Get material dropdowns:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch dropdown data",
       error: error.message,
     });
   }
 };
 
-// =====================================================
-// CREATE MATERIAL
-// =====================================================
-
+// Create material
 exports.createMaterial = async (req, res) => {
   try {
     const {
       title,
       mentor,
+      branch,
       audience,
       allowDownload,
     } = req.body;
 
-    const branch = parseArray(req.body.branch);
+    const branches = parseArray(branch);
     const batches = parseArray(req.body.batches);
-    const categories = parseArray(req.body.categories);
     const courses = parseArray(req.body.courses);
+    const categories = parseArray(req.body.categories);
     const individualInterns = parseArray(req.body.individualInterns);
 
-    if (!title?.trim() || !mentor || !audience || !req.file) {
+    if (!title || !mentor || !branches.length || !audience) {
       return res.status(400).json({
-        message: "Title, mentor, audience and attachment are required",
+        success: false,
+        message: "Title, mentor, branch and audience are required",
       });
     }
 
     if (!allowedAudiences.includes(audience)) {
       return res.status(400).json({
+        success: false,
         message: "Invalid audience type",
       });
     }
 
-    if (!branch.length) {
-      return res.status(400).json({
-        message: "Please select at least one branch",
-      });
-    }
-
     const allIds = [
+      ...branches,
       mentor,
-      ...branch,
       ...batches,
-      ...categories,
       ...courses,
+      ...categories,
       ...individualInterns,
     ];
 
     if (!validIds(allIds)) {
       return res.status(400).json({
+        success: false,
         message: "Invalid ID provided",
       });
     }
 
-    if (
-      (audience === "By batches" && !batches.length) ||
-      (audience === "By Category" && !categories.length) ||
-      (audience === "By Courses" && !courses.length) ||
-      (audience === "Individual interns" && !individualInterns.length)
-    ) {
+    if (!req.file) {
       return res.status(400).json({
-        message: "Please select the required audience",
+        success: false,
+        message: "Please upload a material attachment",
       });
     }
 
-    const interns = await getAudienceIds({
+    // Validate required audience selection
+    if (audience === "By batches" && !batches.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select at least one batch",
+      });
+    }
+
+    if (audience === "By Courses" && !courses.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select at least one course",
+      });
+    }
+
+    if (audience === "By Category" && !categories.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select at least one category",
+      });
+    }
+
+    if (
+      audience === "Individual interns" &&
+      !individualInterns.length
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select at least one intern",
+      });
+    }
+
+    const attachment = `/uploads/materials/${req.file.filename}`;
+
+    const assignedInterns = await getAudienceIds({
       audience,
-      branch,
+      branch: branches,
       batches,
-      categories,
       courses,
+      categories,
       individualInterns,
     });
 
     const material = await Material.create({
-      title: title.trim(),
+      title,
       mentor,
-      attachments: `/uploads/materials/${req.file.filename}`,
-      branch,
+      attachments: attachment,
+      branch: branches,
       audience,
-      batches: audience === "By batches" ? batches : [],
-      categories: audience === "By Category" ? categories : [],
-      courses: audience === "By Courses" ? courses : [],
-      interns,
-      individualInterns:
-        audience === "Individual interns" ? individualInterns : [],
-      allowDownload: allowDownload !== "false",
+      batches,
+      courses,
+      categories,
+      individualInterns,
+      interns: assignedInterns,
+      allowDownload:
+        allowDownload === undefined
+          ? true
+          : allowDownload === "true" || allowDownload === true,
     });
 
-    const savedMaterial = await populateMaterial(
+    const result = await populateMaterial(
       Material.findById(material._id)
     );
 
-    return res.status(201).json({
+    res.status(201).json({
+      success: true,
       message: "Material created successfully",
-      material: savedMaterial,
+      material: result,
     });
   } catch (error) {
+    console.error("Create material:", error);
+
     if (req.file) {
       removeAttachment(`/uploads/materials/${req.file.filename}`);
     }
 
-    console.error("Create Material Error:", error);
-
-    return res.status(500).json({
+    res.status(500).json({
+      success: false,
       message: "Failed to create material",
       error: error.message,
     });
   }
 };
 
-// =====================================================
-// GET ALL MATERIALS
-// =====================================================
-
+// Get all materials for admin
 exports.getMaterials = async (req, res) => {
   try {
     const materials = await populateMaterial(
-      Material.find({
-        isDeleted: false,
-      }).sort({ createdAt: -1 })
+      Material.find({ isDeleted: false }).sort({ createdAt: -1 })
     );
 
-    return res.status(200).json({
-      message: "Materials fetched successfully",
+    res.status(200).json({
+      success: true,
+      count: materials.length,
       materials,
     });
   } catch (error) {
-    console.error("Get Materials Error:", error);
+    console.error("Get materials:", error);
 
-    return res.status(500).json({
+    res.status(500).json({
+      success: false,
       message: "Failed to fetch materials",
       error: error.message,
     });
   }
 };
 
-// =====================================================
-// GET MATERIAL BY ID
-// =====================================================
-
+// Get material by ID
 exports.getMaterialById = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
+        success: false,
         message: "Invalid material ID",
       });
     }
 
     const material = await populateMaterial(
-      Material.findOne({ _id: id, isDeleted: false })
+      Material.findOne({
+        _id: req.params.id,
+        isDeleted: false,
+      })
     );
 
     if (!material) {
       return res.status(404).json({
+        success: false,
         message: "Material not found",
       });
     }
 
-    return res.status(200).json({
-      message: "Material fetched successfully",
+    res.status(200).json({
+      success: true,
       material,
     });
   } catch (error) {
-    console.error("Get Material Error:", error);
+    console.error("Get material by ID:", error);
 
-    return res.status(500).json({
+    res.status(500).json({
+      success: false,
       message: "Failed to fetch material",
       error: error.message,
     });
   }
 };
 
-// =====================================================
-// UPDATE MATERIAL
-// =====================================================
-
+// Update material
 exports.updateMaterial = async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
+        success: false,
         message: "Invalid material ID",
       });
     }
@@ -398,6 +372,7 @@ exports.updateMaterial = async (req, res) => {
 
     if (!material) {
       return res.status(404).json({
+        success: false,
         message: "Material not found",
       });
     }
@@ -405,179 +380,210 @@ exports.updateMaterial = async (req, res) => {
     const {
       title,
       mentor,
+      branch,
       audience,
       allowDownload,
     } = req.body;
 
-    const branch = parseArray(req.body.branch);
-    const batches = parseArray(req.body.batches);
-    const categories = parseArray(req.body.categories);
-    const courses = parseArray(req.body.courses);
-    const individualInterns = parseArray(req.body.individualInterns);
+    const branches =
+      branch !== undefined ? parseArray(branch) : material.branch.map(String);
 
-    const nextAudience = audience ?? material.audience;
-    const nextBranch = req.body.branch !== undefined
-      ? branch
-      : material.branch.map((item) => item.toString());
+    const batches =
+      req.body.batches !== undefined
+        ? parseArray(req.body.batches)
+        : material.batches.map(String);
 
-    const nextBatches = req.body.batches !== undefined
-      ? batches
-      : material.batches.map((item) => item.toString());
+    const courses =
+      req.body.courses !== undefined
+        ? parseArray(req.body.courses)
+        : material.courses.map(String);
 
-    const nextCategories = req.body.categories !== undefined
-      ? categories
-      : material.categories.map((item) => item.toString());
+    const categories =
+      req.body.categories !== undefined
+        ? parseArray(req.body.categories)
+        : material.categories.map(String);
 
-    const nextCourses = req.body.courses !== undefined
-      ? courses
-      : material.courses.map((item) => item.toString());
-
-    const nextIndividualInterns =
+    const individualInterns =
       req.body.individualInterns !== undefined
-        ? individualInterns
-        : material.individualInterns.map((item) => item.toString());
+        ? parseArray(req.body.individualInterns)
+        : material.individualInterns.map(String);
 
-    if (!allowedAudiences.includes(nextAudience)) {
+    const updatedAudience = audience || material.audience;
+    const updatedMentor = mentor || material.mentor.toString();
+
+    if (!allowedAudiences.includes(updatedAudience)) {
       return res.status(400).json({
+        success: false,
         message: "Invalid audience type",
       });
     }
 
-    if (!nextBranch.length) {
-      return res.status(400).json({
-        message: "Please select at least one branch",
-      });
-    }
-
     const allIds = [
-      ...nextBranch,
-      ...nextBatches,
-      ...nextCategories,
-      ...nextCourses,
-      ...nextIndividualInterns,
+      ...branches,
+      updatedMentor,
+      ...batches,
+      ...courses,
+      ...categories,
+      ...individualInterns,
     ];
-
-    if (mentor) allIds.push(mentor);
 
     if (!validIds(allIds)) {
       return res.status(400).json({
+        success: false,
         message: "Invalid ID provided",
       });
     }
 
-    if (title !== undefined) material.title = title.trim();
-    if (mentor !== undefined) material.mentor = mentor;
-    if (audience !== undefined) material.audience = audience;
-
-    material.branch = nextBranch;
-    material.batches =
-      nextAudience === "By batches" ? nextBatches : [];
-    material.categories =
-      nextAudience === "By Category" ? nextCategories : [];
-    material.courses =
-      nextAudience === "By Courses" ? nextCourses : [];
-    material.individualInterns =
-      nextAudience === "Individual interns"
-        ? nextIndividualInterns
-        : [];
-
-    if (allowDownload !== undefined) {
-      material.allowDownload = allowDownload !== "false";
-    }
-
-    if (
-      (nextAudience === "By batches" && !nextBatches.length) ||
-      (nextAudience === "By Category" && !nextCategories.length) ||
-      (nextAudience === "By Courses" && !nextCourses.length) ||
-      (nextAudience === "Individual interns" &&
-        !nextIndividualInterns.length)
-    ) {
+    if (!title && !material.title) {
       return res.status(400).json({
-        message: "Please select the required audience",
+        success: false,
+        message: "Title is required",
       });
     }
 
-    material.interns = await getAudienceIds({
-      audience: nextAudience,
-      branch: nextBranch,
-      batches: nextBatches,
-      categories: nextCategories,
-      courses: nextCourses,
-      individualInterns: nextIndividualInterns,
+    const assignedInterns = await getAudienceIds({
+      audience: updatedAudience,
+      branch: branches,
+      batches,
+      courses,
+      categories,
+      individualInterns,
     });
 
-    const oldAttachment = material.attachments;
+    material.title = title || material.title;
+    material.mentor = updatedMentor;
+    material.branch = branches;
+    material.audience = updatedAudience;
+    material.batches = batches;
+    material.courses = courses;
+    material.categories = categories;
+    material.individualInterns = individualInterns;
+    material.interns = assignedInterns;
+
+    if (allowDownload !== undefined) {
+      material.allowDownload =
+        allowDownload === "true" || allowDownload === true;
+    }
 
     if (req.file) {
+      removeAttachment(material.attachments);
       material.attachments = `/uploads/materials/${req.file.filename}`;
     }
 
     await material.save();
 
-    if (req.file && oldAttachment) {
-      removeAttachment(oldAttachment);
-    }
-
-    const updatedMaterial = await populateMaterial(
+    const result = await populateMaterial(
       Material.findById(material._id)
     );
 
-    return res.status(200).json({
+    res.status(200).json({
+      success: true,
       message: "Material updated successfully",
-      material: updatedMaterial,
+      material: result,
     });
   } catch (error) {
-    if (req.file) {
-      removeAttachment(`/uploads/materials/${req.file.filename}`);
-    }
+    console.error("Update material:", error);
 
-    console.error("Update Material Error:", error);
-
-    return res.status(500).json({
+    res.status(500).json({
+      success: false,
       message: "Failed to update material",
       error: error.message,
     });
   }
 };
 
-// =====================================================
-// PERMANENTLY DELETE MATERIAL
-// =====================================================
-
+// Soft delete material
 exports.deleteMaterial = async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
+        success: false,
         message: "Invalid material ID",
       });
     }
 
-    const material = await Material.findById(id);
+    const material = await Material.findOne({
+      _id: id,
+      isDeleted: false,
+    });
 
     if (!material) {
       return res.status(404).json({
+        success: false,
         message: "Material not found",
       });
     }
 
-    const attachment = material.attachments;
+    material.isDeleted = true;
+    material.isActive = false;
+    material.deletedAt = new Date();
 
-    await Material.findByIdAndDelete(id);
+    await material.save();
 
-    if (attachment) {
-      removeAttachment(attachment);
-    }
-
-    return res.status(200).json({
-      message: "Material permanently deleted successfully",
+    res.status(200).json({
+      success: true,
+      message: "Material deleted successfully",
     });
   } catch (error) {
-    console.error("Delete Material Error:", error);
+    console.error("Delete material:", error);
 
-    return res.status(500).json({
+    res.status(500).json({
+      success: false,
       message: "Failed to delete material",
+      error: error.message,
+    });
+  }
+};
+
+// Get materials assigned to logged-in intern
+exports.getInternMaterials = async (req, res) => {
+  try {
+    // CheckAuth middleware should set req.userId
+    const internId = req.userId;
+
+    if (!internId || !mongoose.Types.ObjectId.isValid(internId)) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid intern authentication",
+      });
+    }
+
+    const intern = await Intern.findOne({
+      _id: internId,
+      role: "Intern",
+      isActive: true,
+      isDeleted: false,
+    });
+
+    if (!intern) {
+      return res.status(404).json({
+        success: false,
+        message: "Intern not found",
+      });
+    }
+
+    const materials = await populateMaterial(
+      Material.find({
+        interns: intern._id,
+        branch: intern.branch,
+        isActive: true,
+        isDeleted: false,
+      }).sort({ createdAt: -1 })
+    );
+
+    res.status(200).json({
+      success: true,
+      count: materials.length,
+      materials,
+    });
+  } catch (error) {
+    console.error("Get intern materials:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch intern materials",
       error: error.message,
     });
   }

@@ -39,12 +39,12 @@ const internRouteMeta = {
     "/internmaterial": {
         title: "Material List",
         parentPath: "Materials",
-        currentPath: "Course Resources"
+        currentPath: "Material List"
     },
     "/internleave": {
         title: "Leave Request",
-        parentPath: "Leave",
-        currentPath: "Apply & History"
+        parentPath: "Leave Requests ",
+        currentPath: "My Leave Requests "
     },
     "/internnotification": {
         title: "Notifications",
