@@ -78,6 +78,18 @@ const UserService = () => {
     }
   };
 
+  // ======== Intern Attendance ======== //
+  const getMyAttendance = async () => {
+    try {
+      const response = await axiosPrivate.get(
+        "/attendancemanagement/my-attendance"
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
   // ======== Intern Materials ======== //
   const takematerials = async () => {
     try {
@@ -120,18 +132,6 @@ const UserService = () => {
     try {
       const response = await axiosPrivate.get(
         "/leaverequestmanagement/intern/my-requests"
-      );
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  };
-
-  // ======== Intern Attendance ======== //
-  const getMyAttendance = async () => {
-    try {
-      const response = await axiosPrivate.get(
-        "/attendancemanagement/my-attendance"
       );
       return response.data;
     } catch (error) {
@@ -193,17 +193,18 @@ const UserService = () => {
     }
   };
 
+  // ======== Return All Services ======== //
   return {
     takeinternweeklyschedule,
     takeinternweeklycard,
     takeallnotification,
     marknotificationread,
     markallnotificationsread,
+    getMyAttendance,
     takematerials,
     takematerialbyid,
     applyinternleave,
     takeinternleaverequests,
-    getMyAttendance,
     takealltask,
     takemysubmissions,
     createTaskSubmission,
