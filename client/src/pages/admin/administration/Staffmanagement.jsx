@@ -316,7 +316,7 @@ export const Staffmanagement = () => {
 
   const handleExport = () => {
     if (filteredStaff.length === 0) {
-      alert("No staff available to export");
+      showToast("No staff available to export", "error");
       return;
     }
 
@@ -526,7 +526,7 @@ export const Staffmanagement = () => {
 
     const newRange = getTimeRange(selectedTime.timeSlot);
     if (!newRange) {
-      alert("Invalid timing format. Please check the timing.");
+      showToast("Invalid timing format. Please check the timing.", "error");
       setSelectedTiming("");
       return;
     }
@@ -547,8 +547,9 @@ export const Staffmanagement = () => {
     });
 
     if (hasConflict) {
-      alert(
-        `Time Conflict! ${selectedTime.timeSlot} overlaps with an already selected timing.`
+      showToast(
+        `Time Conflict! ${selectedTime.timeSlot} overlaps with an already selected timing.`,
+        "error"
       );
       setSelectedTiming("");
       return;
@@ -577,22 +578,22 @@ export const Staffmanagement = () => {
     e.preventDefault();
 
     if (editId !== null && !canEditStaff) {
-      alert("You do not have permission to edit staff.");
+      showToast("You do not have permission to edit staff.", "error");
       return;
     }
 
     if (editId === null && !canAddStaff) {
-      alert("You do not have permission to add staff.");
+      showToast("You do not have permission to add staff.", "error");
       return;
     }
 
     if (formData.password !== formData.conformpassword) {
-      alert("Password and Confirm Password do not match!");
+      showToast("Password and Confirm Password do not match!", "error");
       return;
     }
 
     if (!formData.role) {
-      alert("Please select a role");
+      showToast("Please select a role", "error");
       return;
     }
 
@@ -600,12 +601,12 @@ export const Staffmanagement = () => {
       isMentorRoleSelected() &&
       (!formData.department || formData.department === "Office Staff")
     ) {
-      alert("Please select a department for Mentor role");
+      showToast("Please select a department for Mentor role", "error");
       return;
     }
 
     if (formData.mentorRole && formData.mentorTimings.length === 0) {
-      alert("Please select at least one mentor timing");
+      showToast("Please select at least one mentor timing", "error");
       return;
     }
 
@@ -662,10 +663,10 @@ export const Staffmanagement = () => {
 
       if (editId !== null) {
         await updatestaff(editId, data);
-        alert("Staff updated successfully!");
+        showToast("Staff updated successfully!", "success");
       } else {
         await createstaff(data);
-        alert("Staff created successfully!");
+        showToast("Staff created successfully!", "success");
       }
 
       await fetchallstaff();
@@ -675,9 +676,10 @@ export const Staffmanagement = () => {
       setActiveTab("stafflist");
     } catch (error) {
       console.error("Create/Update Staff Error:", error.response?.data || error);
-      alert(
+      showToast(
         error.response?.data?.message ||
-          "Failed to save staff. Please try again."
+          "Failed to save staff. Please try again.",
+        "error"
       );
     } finally {
       setSubmitting(false);
@@ -756,12 +758,12 @@ export const Staffmanagement = () => {
 
     try {
       await staffremove(id);
-      alert("Staff removed successfully!");
+      showToast("Staff removed successfully!", "success");
       setAlldata((prev) => prev.filter((item) => item.id !== id));
       setView(null);
     } catch (error) {
       console.error("Delete Staff Error:", error);
-      alert(error.response?.data?.message || "Failed to delete staff.");
+      showToast(error.response?.data?.message || "Failed to delete staff.", "error");
     }
   };
 

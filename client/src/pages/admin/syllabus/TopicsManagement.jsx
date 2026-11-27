@@ -4,8 +4,11 @@ import { LuUser, LuSearch } from 'react-icons/lu';
 import { HiOutlineArrowDownTray } from 'react-icons/hi2';
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import AdminService from '../../../services/admin-api-services/AdminService'; // Adjust path if needed
+import Loader from '../../../components/common/Loader';
+import { useToast } from '../../../components/common/Toast';
 
 const TopicManagement = () => {
+  const { showToast, ToastContainer } = useToast();
   const {
     taketopics,
     takemodules,
@@ -120,10 +123,11 @@ const TopicManagement = () => {
       const created = res?.data || res;
 
       setTopics((prev) => [normalizeTopic(created, prev.length), ...prev]);
+      showToast('Topic created successfully', 'success');
       handleBackToTopics();
     } catch (error) {
       console.error('Error creating topic:', error);
-      alert(error?.response?.data?.message || 'Failed to create topic');
+      showToast(error?.response?.data?.message || 'Failed to create topic', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -160,10 +164,11 @@ const TopicManagement = () => {
           t.id === editingTopicId ? normalizeTopic(updated, idx) : t
         )
       );
+      showToast('Topic updated successfully', 'success');
       handleBackToTopics();
     } catch (error) {
       console.error('Error updating topic:', error);
-      alert(error?.response?.data?.message || 'Failed to update topic');
+      showToast(error?.response?.data?.message || 'Failed to update topic', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -173,12 +178,13 @@ const TopicManagement = () => {
     try {
       await removetopic(id);
       setTopics((prev) => prev.filter((t) => t.id !== id));
+      showToast('Topic deleted successfully', 'success');
       if (viewingTopic && viewingTopic.id === id) {
         setViewingTopic(null);
       }
     } catch (error) {
       console.error('Error deleting topic:', error);
-      alert(error?.response?.data?.message || 'Failed to delete topic');
+      showToast(error?.response?.data?.message || 'Failed to delete topic', 'error');
     }
   };
 
@@ -208,6 +214,7 @@ const TopicManagement = () => {
 
   return (
     <div className="tpc-mgmt-container">
+      <ToastContainer />
       {/* Header */}
      
 
@@ -279,9 +286,7 @@ const TopicManagement = () => {
             </div>
 
             {loading ? (
-              <div className="tpc-mgmt-content-area">
-                <p className="tpc-mgmt-empty-message">Loading topics...</p>
-              </div>
+              <Loader message="Loading topics..." minHeight="320px" />
             ) : filteredTopics.length === 0 ? (
               <div className="tpc-mgmt-content-area">
                 <p className="tpc-mgmt-empty-message">

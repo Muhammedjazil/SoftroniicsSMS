@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import {
   LuClipboardList,
   LuEye,
@@ -9,8 +10,12 @@ import {
 
 import "./interntask.css";
 import UserService from "../../services/user-api-services/UserService";
+import Loader from "../../components/common/Loader";
+import { useToast } from "../../components/common/Toast";
 
 export const Intrentask = () => {
+  const { setHeaderMeta } = useOutletContext() || {};
+  const { showToast, ToastContainer } = useToast();
   const { takealltask, takemysubmissions, createTaskSubmission } =
     UserService();
 
@@ -19,6 +24,27 @@ export const Intrentask = () => {
   // ==========================================
 
   const [activeTab, setActiveTab] = useState("assigned");
+
+  useEffect(() => {
+    if (!setHeaderMeta) return;
+    const currentPath =
+      activeTab === "submit"
+        ? "Submit Task"
+        : activeTab === "submissions"
+          ? "My Submissions"
+          : "Assigned Tasks";
+
+    setHeaderMeta({
+      title: "Task Submission",
+      parentPath: "Tasks",
+      currentPath,
+      onParentClick: () => {
+        setActiveTab("assigned");
+        setSelectedTask(null);
+        setModalType("");
+      },
+    });
+  }, [activeTab, setHeaderMeta]);
 
   const [alltask, setAlltask] = useState([]);
   const [allsubmissions, setAllsubmissions] = useState([]);
@@ -211,7 +237,7 @@ export const Intrentask = () => {
       const allowedExtensions = /\.(zip|png|pdf)$/i;
 
       if (!allowedExtensions.test(file.name)) {
-        alert("Only ZIP, PNG and PDF files are allowed.");
+        showToast("Only ZIP, PNG and PDF files are allowed.", "error");
         e.target.value = "";
         return;
       }
@@ -238,12 +264,12 @@ export const Intrentask = () => {
     e.preventDefault();
 
     if (!selectedTask?._id) {
-      alert("Task information is missing.");
+      showToast("Task information is missing.", "error");
       return;
     }
 
     if (!submissionData.submissionText.trim()) {
-      alert("Please enter submission description.");
+      showToast("Please enter submission description.", "error");
       return;
     }
 
@@ -266,7 +292,7 @@ export const Intrentask = () => {
 
       const response = await createTaskSubmission(formData);
 
-      alert(response.message || "Task submitted successfully!");
+      showToast(response.message || "Task submitted successfully!", "success");
 
       setSubmissionData({
         submissionText: "",
@@ -284,10 +310,11 @@ export const Intrentask = () => {
     } catch (error) {
       console.error("Submission Error:", error);
 
-      alert(
+      showToast(
         error.message ||
           error.response?.data?.message ||
-          "Task submission failed."
+          "Task submission failed.",
+        "error"
       );
     } finally {
       setSubmitting(false);
@@ -316,6 +343,7 @@ export const Intrentask = () => {
 
   return (
     <div className="wk-card-container">
+      <ToastContainer />
       <div className="wk-card-body">
         {/* ==================================
             TABS
@@ -351,7 +379,7 @@ export const Intrentask = () => {
 
         <div className="int-task-card">
           {loading ? (
-            <div className="int-task-message">Loading task details...</div>
+            <Loader message="Loading task details..." minHeight="280px" />
           ) : error ? (
             <div className="int-task-error">
               <p>{error}</p>

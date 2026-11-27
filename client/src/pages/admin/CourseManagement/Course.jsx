@@ -4,6 +4,7 @@ import { LuSearch, LuX } from 'react-icons/lu';
 import { HiOutlineArrowDownTray, HiOutlineArrowUpTray } from 'react-icons/hi2';
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import AdminService from '../../../services/admin-api-services/AdminService';
+import Loader from '../../../components/common/Loader';
 import { useToast } from '../../../components/common/Toast';
 
 const CourseManagement = () => {
@@ -454,9 +455,7 @@ const CourseManagement = () => {
             </div>
 
             {loading ? (
-              <div className="crs-mgmt-content-area">
-                <p className="crs-mgmt-empty-message">Loading courses...</p>
-              </div>
+              <Loader message="Loading courses..." minHeight="320px" />
             ) : filteredCourses.length === 0 ? (
               <div className="crs-mgmt-content-area">
                 <p className="crs-mgmt-empty-message">

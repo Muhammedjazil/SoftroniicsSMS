@@ -552,6 +552,14 @@ const AdminService = () => {
     return response.data;
   };
 
+  const updateLeaveRequestStatus = async (id, data) => {
+    const response = await axiosPrivate.patch(
+      `/leaverequestmanagement/${id}/status`,
+      data
+    );
+    return response.data;
+  };
+
   
 
   return {
@@ -640,6 +648,7 @@ const AdminService = () => {
     getLeaveRequestById,
     createLeaveRequest,
     deleteLeaveRequest,
+    updateLeaveRequestStatus,
   };
 };
 

@@ -349,7 +349,7 @@ export const Internmanagement = () => {
 
     if (name === "photo") {
       if (!["image/jpeg", "image/png"].includes(file.type)) {
-        alert("Please upload JPG or PNG image only");
+        showToast("Please upload JPG or PNG image only", "error");
         e.target.value = "";
         return;
       }
@@ -357,13 +357,13 @@ export const Internmanagement = () => {
 
     if (name === "resume") {
       if (file.type !== "application/pdf") {
-        alert("Please upload PDF file only");
+        showToast("Please upload PDF file only", "error");
         e.target.value = "";
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        alert("Resume must be less than 5MB");
+        showToast("Resume must be less than 5MB", "error");
         e.target.value = "";
         return;
       }
@@ -409,7 +409,7 @@ export const Internmanagement = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Password and Confirm Password do not match!");
+      showToast("Password and Confirm Password do not match!", "error");
       return;
     }
 
@@ -467,12 +467,12 @@ export const Internmanagement = () => {
         // UPDATE EXISTING INTERN IN DATABASE
         response = await updateintern(editingId, data);
 
-        alert("Student updated successfully!");
+        showToast("Student updated successfully!", "success");
       } else {
         // CREATE NEW INTERN IN DATABASE
         response = await createintern(data);
 
-        alert("Student created successfully!");
+        showToast("Student created successfully!", "success");
       }
 
       // Refresh student list using latest backend data
@@ -486,9 +486,10 @@ export const Internmanagement = () => {
       console.error("Save student error:", error);
       console.error("Backend error:", error.response?.data);
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Unable to save student. Please try again."
+        "Unable to save student. Please try again.",
+        "error"
       );
     }
   };
@@ -566,7 +567,7 @@ export const Internmanagement = () => {
       console.error("Error Response:", error.response?.data);
       console.error("Status:", error.response?.status);
 
-      alert(error.response?.data?.message || error.message);
+      showToast(error.response?.data?.message || error.message, "error");
     } finally {
       setLoading(false);
     }
@@ -668,7 +669,7 @@ export const Internmanagement = () => {
 
   const handleExport = () => {
     if (filteredStudents.length === 0) {
-      alert("No students available to export");
+      showToast("No students available to export", "error");
       return;
     }
 

@@ -1,9 +1,12 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import UserService from "../../services/user-api-services/UserService";
+import Loader from "../../components/common/Loader";
+import { useToast } from "../../components/common/Toast";
 import "./MaterialList.css";
 
 const MaterialList = () => {
+  const { showToast, ToastContainer } = useToast();
   const { takematerials, takematerialbyid } = UserService();
 
   const [materials, setMaterials] = useState([]);
@@ -135,8 +138,9 @@ const MaterialList = () => {
       setSelectedMaterial(response.material);
     } catch (error) {
       console.error("Material details error:", error);
-      alert(
-        error.response?.data?.message || "Unable to load material details"
+      showToast(
+        error.response?.data?.message || "Unable to load material details",
+        "error"
       );
     }
   };
@@ -215,6 +219,7 @@ const MaterialList = () => {
 
   return (
     <div className="material-page">
+      <ToastContainer />
 
       {/* HEADER */}
 
@@ -287,8 +292,8 @@ const MaterialList = () => {
 
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="material-message">
-                    Loading materials...
+                  <td colSpan="7" style={{ padding: "24px 0" }}>
+                    <Loader message="Loading materials..." minHeight="240px" />
                   </td>
                 </tr>
               ) : error ? (

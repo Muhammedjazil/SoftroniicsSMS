@@ -1,122 +1,37 @@
 import React, { useEffect, useMemo, useState } from "react";
 import AdminService from "../../../services/admin-api-services/AdminService";
+import Loader from "../../../components/common/Loader";
+import { useToast } from "../../../components/common/Toast";
 
 import {
-  MdPersonOutline,
   MdSearch,
   MdFileDownload,
   MdOutlineRemoveRedEye,
-  MdDeleteOutline,
+  MdCheck,
+  MdClose,
+  MdChevronLeft,
+  MdChevronRight,
 } from "react-icons/md";
 
 import "./Leaverequest.css";
 
-// =============================================
-// SAMPLE DATA
-// Initially empty to match the new UI.
-// Replace with API response when integrating.
-// =============================================
-
-const leaverequestInitialData = [];
-
 const Leaverequest = () => {
-  const { getLeaveRequests, deleteLeaveRequest } = AdminService();
+  const { getLeaveRequests, updateLeaveRequestStatus } = AdminService();
+  const { showToast, ToastContainer } = useToast();
 
   const [leaverequestLoading, setLeaverequestLoading] = useState(false);
-  // =============================================
-  // STATES
-  // =============================================
-
-  const [leaverequestData, setLeaverequestData] = useState(
-    leaverequestInitialData,
-  );
+  const [statusUpdatingId, setStatusUpdatingId] = useState(null);
+  const [leaverequestData, setLeaverequestData] = useState([]);
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
   const [leaverequestSearch, setLeaverequestSearch] = useState("");
-
   const [leaverequestBranch, setLeaverequestBranch] = useState("All Branches");
-
   const [leaverequestDate, setLeaverequestDate] = useState("");
-
-  const [leaverequestMonth, setLeaverequestMonth] = useState("11");
-
-  const [leaverequestYear, setLeaverequestYear] = useState("2026");
+  const [leaverequestMonth, setLeaverequestMonth] = useState("All");
+  const [leaverequestYear, setLeaverequestYear] = useState("All");
 
   const [leaverequestCurrentPage, setLeaverequestCurrentPage] = useState(1);
-
-  const leaverequestItemsPerPage = 5;
-
-  // =============================================
-  // GET LEAVE REQUESTS
-  // =============================================
-
-  const leaverequestFetchData = async () => {
-    try {
-      setLeaverequestLoading(true);
-
-      const response = await getLeaveRequests();
-
-      console.log("Leave Requests:", response);
-
-      // Support common response formats
-      const requests = Array.isArray(response)
-        ? response
-        : response.requests || response.leaveRequests || response.data || [];
-
-      const formattedData = requests.map((item) => {
-        const intern = item.user || item.intern || {};
-
-        const startDate = item.startDate || item.date;
-        const endDate = item.endDate || item.date;
-
-        return {
-          id: item._id,
-
-          admissionNumber: intern.admissionNumber || "",
-
-          internName: intern.fullName || intern.name || "Unknown",
-
-          batch: intern.batch?.batchName || item.batch?.batchName || "",
-
-          course: intern.course?.courseName || item.course?.courseName || "",
-
-          reason: item.reason || "",
-
-          noOfDays: item.totalDays || 0,
-
-          leaveStartDate: startDate
-            ? new Date(startDate).toISOString().split("T")[0]
-            : "",
-
-          leaveEndDate: endDate
-            ? new Date(endDate).toISOString().split("T")[0]
-            : "",
-
-          status: item.status || "PENDING",
-
-          branch: item.branch?.branchName || "",
-        };
-      });
-
-      setLeaverequestData(formattedData);
-    } catch (error) {
-      console.log(
-        "Leave request fetch error:",
-        error.response?.data || error.message,
-      );
-
-      setLeaverequestData([]);
-    } finally {
-      setLeaverequestLoading(false);
-    }
-  };
-
-  // FETCH WHEN PAGE LOADS
-  useEffect(() => {
-    leaverequestFetchData();
-  }, []);
-  // =============================================
-  // MONTHS
-  // =============================================
+  const itemsPerPage = 5;
 
   const leaverequestMonths = [
     { value: "01", label: "January" },
@@ -134,42 +49,109 @@ const Leaverequest = () => {
   ];
 
   // =============================================
+  // GET LEAVE REQUESTS
+  // =============================================
+  const leaverequestFetchData = async () => {
+    try {
+      setLeaverequestLoading(true);
+      const response = await getLeaveRequests();
+
+      const requests = Array.isArray(response)
+        ? response
+        : response.requests || response.leaveRequests || response.data || [];
+
+      const formattedData = requests.map((item) => {
+        const intern = item.user || item.intern || {};
+        const startDate = item.startDate || item.date;
+        const endDate = item.endDate || item.date;
+
+        return {
+          id: item._id,
+          admissionNumber: intern.admissionNumber || item.admissionNumber || "",
+          internName: intern.fullName || intern.name || item.internName || "Unknown",
+          email: intern.email || item.email || "",
+          batch: intern.batch?.batchName || item.batch?.batchName || item.batch || "",
+          course: intern.course?.courseName || item.course?.courseName || item.course || "",
+          leaveType: item.leaveType || "OTHER",
+          reason: item.reason || "",
+          noOfDays: item.totalDays || item.noOfDays || 0,
+          leaveStartDate: startDate
+            ? new Date(startDate).toISOString().split("T")[0]
+            : "",
+          leaveEndDate: endDate
+            ? new Date(endDate).toISOString().split("T")[0]
+            : "",
+          status: (item.status || "PENDING").toUpperCase(),
+          branch: item.branch?.branchName || item.branchName || intern.branch?.branchName || "",
+        };
+      });
+
+      setLeaverequestData(formattedData);
+    } catch (error) {
+      console.log(
+        "Leave request fetch error:",
+        error.response?.data || error.message
+      );
+      setLeaverequestData([]);
+    } finally {
+      setLeaverequestLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    leaverequestFetchData();
+  }, []);
+
+  // =============================================
+  // DYNAMIC BRANCH & YEAR OPTIONS
+  // =============================================
+  const branchOptions = useMemo(() => {
+    const unique = new Set(
+      leaverequestData
+        .map((item) => item.branch?.trim())
+        .filter(Boolean)
+    );
+    return Array.from(unique);
+  }, [leaverequestData]);
+
+  // =============================================
   // FILTER DATA
   // =============================================
-
   const leaverequestFilteredData = useMemo(() => {
     return leaverequestData.filter((item) => {
-      const searchValue = leaverequestSearch.toLowerCase();
+      const searchValue = leaverequestSearch.toLowerCase().trim();
 
       const searchMatch =
+        !searchValue ||
         item.internName?.toLowerCase().includes(searchValue) ||
+        item.email?.toLowerCase().includes(searchValue) ||
         item.admissionNumber?.toLowerCase().includes(searchValue) ||
         item.batch?.toLowerCase().includes(searchValue) ||
+        item.leaveType?.toLowerCase().includes(searchValue) ||
         item.reason?.toLowerCase().includes(searchValue);
 
       const branchMatch =
         leaverequestBranch === "All Branches" ||
-        item.branch === leaverequestBranch;
+        item.branch?.toLowerCase() === leaverequestBranch.toLowerCase();
 
-      let dateMatch = true;
+      const dateMatch =
+        !leaverequestDate || item.leaveStartDate === leaverequestDate;
 
-      if (leaverequestDate) {
-        dateMatch = item.leaveStartDate === leaverequestDate;
-      }
+      const monthMatch =
+        leaverequestMonth === "All" ||
+        item.leaveStartDate?.split("-")[1] === leaverequestMonth;
 
-      let monthMatch = true;
+      const yearMatch =
+        leaverequestYear === "All" ||
+        item.leaveStartDate?.split("-")[0] === leaverequestYear;
 
-      if (leaverequestMonth !== "All") {
-        monthMatch = item.leaveStartDate?.split("-")[1] === leaverequestMonth;
-      }
-
-      let yearMatch = true;
-
-      if (leaverequestYear !== "All") {
-        yearMatch = item.leaveStartDate?.split("-")[0] === leaverequestYear;
-      }
-
-      return searchMatch && branchMatch && dateMatch && monthMatch && yearMatch;
+      return (
+        searchMatch &&
+        branchMatch &&
+        dateMatch &&
+        monthMatch &&
+        yearMatch
+      );
     });
   }, [
     leaverequestData,
@@ -183,104 +165,97 @@ const Leaverequest = () => {
   // =============================================
   // PAGINATION
   // =============================================
-
-  const leaverequestTotalPages = Math.ceil(
-    leaverequestFilteredData.length / leaverequestItemsPerPage,
+  const totalResults = leaverequestFilteredData.length;
+  const leaverequestTotalPages = Math.max(
+    1,
+    Math.ceil(totalResults / itemsPerPage)
   );
-
-  const leaverequestStartIndex =
-    (leaverequestCurrentPage - 1) * leaverequestItemsPerPage;
-
+  const leaverequestStartIndex = (leaverequestCurrentPage - 1) * itemsPerPage;
   const leaverequestCurrentData = leaverequestFilteredData.slice(
     leaverequestStartIndex,
-    leaverequestStartIndex + leaverequestItemsPerPage,
+    leaverequestStartIndex + itemsPerPage
+  );
+  const showingFrom = totalResults === 0 ? 0 : leaverequestStartIndex + 1;
+  const showingTo = Math.min(
+    leaverequestStartIndex + itemsPerPage,
+    totalResults
   );
 
   // =============================================
-  // DELETE REQUEST
+  // APPROVE / REJECT REQUEST
   // =============================================
-
-  // =============================================
-// DELETE REQUEST
-// =============================================
-
-const leaverequestHandleDelete = async (id) => {
-
-    const confirmDelete = window.confirm(
-        "Are you sure you want to delete this leave request?"
-    );
-
-    if (!confirmDelete) return;
-
+  const handleStatusChange = async (id, newStatus) => {
     try {
-        await deleteLeaveRequest(id);
+      setStatusUpdatingId(id);
+      await updateLeaveRequestStatus(id, { status: newStatus });
 
-        setLeaverequestData(previous =>
-            previous.filter(item => item.id !== id)
-        );
+      setLeaverequestData((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, status: newStatus } : item
+        )
+      );
 
-        alert("Leave request deleted successfully");
+      setSelectedRequest((prev) =>
+        prev && prev.id === id ? { ...prev, status: newStatus } : prev
+      );
 
+      showToast(
+        `Leave request ${newStatus.toLowerCase()} successfully`,
+        "success"
+      );
     } catch (error) {
-        console.log(
-            "Delete leave request error:",
-            error.response?.data || error.message
-        );
-
-        alert("Failed to delete leave request");
+      console.error("Update leave status error:", error);
+      showToast(
+        error.response?.data?.message || "Failed to update leave status",
+        "error"
+      );
+    } finally {
+      setStatusUpdatingId(null);
     }
-};
-  // =============================================
-  // VIEW REQUEST
-  // =============================================
-
-  const leaverequestHandleView = (item) => {
-    console.log("Selected Leave Request:", item);
-
-    // Add navigation or open the details component here.
   };
 
   // =============================================
   // EXPORT CSV
   // =============================================
-
   const leaverequestHandleExport = () => {
     if (leaverequestFilteredData.length === 0) {
-      alert("No leave requests available to export.");
+      showToast("No leave requests available to export.", "error");
       return;
     }
 
     const leaverequestHeaders = [
       "Admission Number",
       "Intern Name",
+      "Email",
       "Batch",
-      "Course",
+      "Branch",
+      "Leave Type",
       "Reason",
-      "Number of Days",
+      "No of Days",
       "Leave Start Date",
       "Leave End Date",
       "Status",
-      "Branch",
     ];
 
     const leaverequestRows = leaverequestFilteredData.map((item) => [
       item.admissionNumber,
       item.internName,
+      item.email,
       item.batch,
-      item.course,
+      item.branch,
+      item.leaveType,
       item.reason,
       item.noOfDays,
       item.leaveStartDate,
       item.leaveEndDate,
       item.status,
-      item.branch,
     ]);
 
     const leaverequestCSV = [leaverequestHeaders, ...leaverequestRows]
       .map((row) =>
         row
           .map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`)
-          .join(","),
+          .join(",")
       )
       .join("\n");
 
@@ -289,64 +264,48 @@ const leaverequestHandleDelete = async (id) => {
     });
 
     const leaverequestURL = URL.createObjectURL(leaverequestBlob);
-
     const leaverequestLink = document.createElement("a");
-
     leaverequestLink.href = leaverequestURL;
     leaverequestLink.download = "Leave_Requests.csv";
-
     document.body.appendChild(leaverequestLink);
     leaverequestLink.click();
     document.body.removeChild(leaverequestLink);
-
     URL.revokeObjectURL(leaverequestURL);
   };
 
   // =============================================
   // FORMAT DATE
   // =============================================
-
   const leaverequestFormatDate = (date) => {
     if (!date) return "-";
-
     const [year, month, day] = date.split("-");
-
     return `${day}/${month}/${year}`;
   };
 
-  // =============================================
-  // RESET PAGINATION WHEN FILTER CHANGES
-  // =============================================
+  const formatLeaveDateRange = (item) => {
+    if (!item?.leaveStartDate) return "-";
+    if (
+      item.leaveEndDate &&
+      item.leaveEndDate !== item.leaveStartDate
+    ) {
+      return `${leaverequestFormatDate(item.leaveStartDate)} - ${leaverequestFormatDate(item.leaveEndDate)}`;
+    }
+    return leaverequestFormatDate(item.leaveStartDate);
+  };
 
   const leaverequestResetPage = () => {
     setLeaverequestCurrentPage(1);
   };
 
-  // =============================================
-  // JSX
-  // =============================================
-
   return (
     <div className="leaverequest-page">
-      {/* =================================
-                HEADER
-            ================================= */}
-
-      {/* =================================
-                MAIN CONTENT
-            ================================= */}
+      <ToastContainer />
 
       <div className="leaverequest-main-card">
-        {/* =================================
-                    FILTER SECTION
-                ================================= */}
-
+        {/* FILTER SECTION */}
         <div className="leaverequest-filter-section">
-          {/* SEARCH */}
-
           <div className="leaverequest-search-box">
             <MdSearch />
-
             <input
               id="leaverequest-search"
               type="text"
@@ -359,8 +318,6 @@ const leaverequestHandleDelete = async (id) => {
             />
           </div>
 
-          {/* BRANCH FILTER */}
-
           <select
             id="leaverequest-branch"
             value={leaverequestBranch}
@@ -370,12 +327,12 @@ const leaverequestHandleDelete = async (id) => {
             }}
           >
             <option value="All Branches">All Branches</option>
-            <option value="Calicut">Calicut</option>
-            <option value="Kochi">Kochi</option>
-            <option value="Palakkad">Palakkad</option>
+            {branchOptions.map((branch) => (
+              <option key={branch} value={branch}>
+                {branch}
+              </option>
+            ))}
           </select>
-
-          {/* DATE FILTER */}
 
           <input
             id="leaverequest-date"
@@ -389,8 +346,6 @@ const leaverequestHandleDelete = async (id) => {
             aria-label="Filter by leave date"
           />
 
-          {/* MONTH FILTER */}
-
           <select
             id="leaverequest-month"
             value={leaverequestMonth}
@@ -399,16 +354,13 @@ const leaverequestHandleDelete = async (id) => {
               leaverequestResetPage();
             }}
           >
+            <option value="All">All Months</option>
             {leaverequestMonths.map((month) => (
               <option key={month.value} value={month.value}>
                 {month.label}
               </option>
             ))}
-
-            <option value="All">All Months</option>
           </select>
-
-          {/* YEAR FILTER */}
 
           <select
             id="leaverequest-year"
@@ -418,14 +370,12 @@ const leaverequestHandleDelete = async (id) => {
               leaverequestResetPage();
             }}
           >
+            <option value="All">All Years</option>
             <option value="2025">2025</option>
             <option value="2026">2026</option>
             <option value="2027">2027</option>
             <option value="2028">2028</option>
-            <option value="All">All Years</option>
           </select>
-
-          {/* EXPORT */}
 
           <button
             type="button"
@@ -437,122 +387,308 @@ const leaverequestHandleDelete = async (id) => {
           </button>
         </div>
 
-        {/* =================================
-                    TABLE / EMPTY STATE
-                ================================= */}
-
-        {leaverequestCurrentData.length > 0 ? (
+        {/* TABLE / LOADING / EMPTY STATE */}
+        {leaverequestLoading ? (
+          <Loader message="Loading leave requests..." minHeight="280px" />
+        ) : leaverequestCurrentData.length > 0 ? (
           <>
             <div className="leaverequest-table-wrapper">
               <table className="leaverequest-table">
                 <thead>
                   <tr>
-                    <th>Intern Name</th>
-                    <th>Batch</th>
-                    <th>Reason</th>
-                    <th>No of Days</th>
-                    <th>Leave Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>NAME</th>
+                    <th>BATCH</th>
+                    <th>LEAVE TYPE</th>
+                    <th className="lr-th-center">DAYS</th>
+                    <th>LEAVE DATE</th>
+                    <th className="lr-th-center">STATUS</th>
+                    <th className="lr-th-center">ACTIONS</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {leaverequestCurrentData.map((item) => (
-                    <tr key={item.id}>
-                      <td>{item.internName}</td>
+                  {leaverequestCurrentData.map((item) => {
+                    const initial = (item.internName || "U")
+                      .charAt(0)
+                      .toUpperCase();
+                    const isUpdating = statusUpdatingId === item.id;
 
-                      <td className="leaverequest-batch-cell">{item.batch}</td>
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="lr-name-cell">
+                            <span className="lr-avatar">{initial}</span>
+                            <div className="lr-name-meta">
+                              <span className="lr-intern-name">
+                                {item.internName}
+                              </span>
+                              <span className="lr-intern-email">
+                                {item.email || "-"}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
 
-                      <td>{item.reason}</td>
+                        <td className="leaverequest-batch-cell">
+                          {item.batch || "-"}
+                        </td>
 
-                      <td>{item.noOfDays}</td>
+                        <td className="lr-leave-type">
+                          {item.leaveType || "-"}
+                        </td>
 
-                      <td className="leaverequest-date-cell">
-                        {leaverequestFormatDate(item.leaveStartDate)}
+                        <td className="lr-days-cell">{item.noOfDays}</td>
 
-                        {item.leaveEndDate !== item.leaveStartDate && (
-                          <>
-                            {" || "}
-                            {leaverequestFormatDate(item.leaveEndDate)}
-                          </>
-                        )}
-                      </td>
+                        <td className="lr-date-cell">
+                          {formatLeaveDateRange(item)}
+                        </td>
 
-                      <td>
-                        <span
-                          className={`leaverequest-status leaverequest-status-${item.status?.toLowerCase()}`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-
-                      <td>
-                        <div className="leaverequest-actions">
-                          <button
-                            type="button"
-                            title="View"
-                            onClick={() => leaverequestHandleView(item)}
+                        <td className="lr-td-center">
+                          <span
+                            className={`leaverequest-status leaverequest-status-${item.status?.toLowerCase()}`}
                           >
-                            <MdOutlineRemoveRedEye />
-                          </button>
+                            {item.status}
+                          </span>
+                        </td>
 
-                          <button
-                            type="button"
-                            title="Delete"
-                            className="leaverequest-delete-btn"
-                            onClick={() => leaverequestHandleDelete(item.id)}
-                          >
-                            <MdDeleteOutline />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        <td>
+                          <div className="lr-actions-row">
+                            <button
+                              type="button"
+                              className="lr-action-btn lr-action-view"
+                              onClick={() => setSelectedRequest(item)}
+                            >
+                              <MdOutlineRemoveRedEye />
+                              <span>View</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              className="lr-action-btn lr-action-approve"
+                              disabled={
+                                isUpdating || item.status === "APPROVED"
+                              }
+                              onClick={() =>
+                                handleStatusChange(item.id, "APPROVED")
+                              }
+                            >
+                              <MdCheck />
+                              <span>Approve</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              className="lr-action-btn lr-action-reject"
+                              disabled={
+                                isUpdating || item.status === "REJECTED"
+                              }
+                              onClick={() =>
+                                handleStatusChange(item.id, "REJECTED")
+                              }
+                            >
+                              <MdClose />
+                              <span>Reject</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
-            {/* PAGINATION */}
-
-            <div className="leaverequest-pagination">
-              <span>
-                {leaverequestCurrentPage} of {leaverequestTotalPages}
+            {/* FOOTER PAGINATION */}
+            <div className="lr-footer-bar">
+              <span className="lr-results-text">
+                Showing {showingFrom} to {showingTo} of {totalResults} results
               </span>
 
-              <button
-                type="button"
-                disabled={leaverequestCurrentPage === 1}
-                onClick={() =>
-                  setLeaverequestCurrentPage((previous) =>
-                    Math.max(1, previous - 1),
-                  )
-                }
-              >
-                ‹
-              </button>
+              <div className="lr-pagination-controls">
+                <button
+                  type="button"
+                  className="lr-nav-btn"
+                  disabled={leaverequestCurrentPage === 1}
+                  onClick={() =>
+                    setLeaverequestCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                >
+                  <MdChevronLeft />
+                  <span>Previous</span>
+                </button>
 
-              <button
-                type="button"
-                disabled={leaverequestCurrentPage >= leaverequestTotalPages}
-                onClick={() =>
-                  setLeaverequestCurrentPage((previous) =>
-                    Math.min(leaverequestTotalPages, previous + 1),
-                  )
-                }
-              >
-                ›
-              </button>
+                <span className="lr-page-indicator">
+                  Page {leaverequestCurrentPage} of {leaverequestTotalPages}
+                </span>
+
+                <button
+                  type="button"
+                  className="lr-nav-btn"
+                  disabled={leaverequestCurrentPage >= leaverequestTotalPages}
+                  onClick={() =>
+                    setLeaverequestCurrentPage((prev) =>
+                      Math.min(leaverequestTotalPages, prev + 1)
+                    )
+                  }
+                >
+                  <span>Next</span>
+                  <MdChevronRight />
+                </button>
+              </div>
             </div>
           </>
         ) : (
-          /* EMPTY STATE */
-
           <div className="leaverequest-empty-state">
             <p>No leave requests found matching filters.</p>
           </div>
         )}
       </div>
+
+      {/* VIEW DETAILS MODAL */}
+      {selectedRequest && (
+        <div
+          className="lr-modal-overlay"
+          onClick={() => setSelectedRequest(null)}
+        >
+          <div
+            className="lr-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="lr-modal-header">
+              <h2>Leave Request: {selectedRequest.internName}</h2>
+
+              <button
+                type="button"
+                className="leaverequest-back-btn"
+                onClick={() => setSelectedRequest(null)}
+              >
+                <MdChevronLeft />
+                <span>Back</span>
+              </button>
+            </div>
+
+            <div className="lr-modal-section">
+              <h3 className="lr-section-title">Applicant Details</h3>
+
+              <div className="lr-detail-grid">
+                <div className="lr-detail-item">
+                  <span className="lr-detail-label">Name:</span>
+                  <span className="lr-detail-value">
+                    {selectedRequest.internName || "-"}
+                  </span>
+                </div>
+
+                <div className="lr-detail-item">
+                  <span className="lr-detail-label">Email:</span>
+                  <span className="lr-detail-value">
+                    {selectedRequest.email || "-"}
+                  </span>
+                </div>
+
+                <div className="lr-detail-item">
+                  <span className="lr-detail-label">Batch:</span>
+                  <span className="lr-detail-value">
+                    {selectedRequest.batch || "-"}
+                  </span>
+                </div>
+
+                <div className="lr-detail-item">
+                  <span className="lr-detail-label">Branch:</span>
+                  <span className="lr-detail-value" style={{ textTransform: "lowercase" }}>
+                    {selectedRequest.branch || "-"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="lr-modal-section">
+              <h3 className="lr-section-title">Leave Details</h3>
+
+              <div className="lr-detail-grid">
+                <div className="lr-detail-item">
+                  <span className="lr-detail-label">Leave Type:</span>
+                  <span className="lr-detail-value">
+                    {selectedRequest.leaveType || "-"}
+                  </span>
+                </div>
+
+                <div className="lr-detail-item">
+                  <span className="lr-detail-label">Duration:</span>
+                  <span className="lr-detail-value">
+                    {selectedRequest.noOfDays}{" "}
+                    {selectedRequest.noOfDays === 1 ? "Day" : "Days"}
+                  </span>
+                </div>
+
+                <div className="lr-detail-item">
+                  <span className="lr-detail-label">Date:</span>
+                  <span className="lr-detail-value">
+                    {formatLeaveDateRange(selectedRequest)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="lr-reason-block">
+                <span className="lr-detail-label">Reason:</span>
+                <div className="lr-reason-box">
+                  {selectedRequest.reason || "-"}
+                </div>
+              </div>
+            </div>
+
+            <div className="lr-modal-section">
+              <h3 className="lr-section-title">Approval &amp; Review</h3>
+
+              <div className="lr-detail-item">
+                <span className="lr-detail-label">Status:</span>
+                <span
+                  className={`leaverequest-status leaverequest-status-${selectedRequest.status?.toLowerCase()}`}
+                >
+                  {selectedRequest.status}
+                </span>
+              </div>
+            </div>
+
+            <div className="lr-modal-footer">
+              <button
+                type="button"
+                className="lr-modal-btn lr-modal-btn-approve"
+                disabled={
+                  statusUpdatingId === selectedRequest.id ||
+                  selectedRequest.status === "APPROVED"
+                }
+                onClick={() =>
+                  handleStatusChange(selectedRequest.id, "APPROVED")
+                }
+              >
+                Approve
+              </button>
+
+              <button
+                type="button"
+                className="lr-modal-btn lr-modal-btn-reject"
+                disabled={
+                  statusUpdatingId === selectedRequest.id ||
+                  selectedRequest.status === "REJECTED"
+                }
+                onClick={() =>
+                  handleStatusChange(selectedRequest.id, "REJECTED")
+                }
+              >
+                Reject
+              </button>
+
+              <button
+                type="button"
+                className="lr-modal-btn lr-modal-btn-print"
+                onClick={() => window.print()}
+              >
+                Print
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

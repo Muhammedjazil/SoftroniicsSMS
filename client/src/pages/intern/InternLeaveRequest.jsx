@@ -1,11 +1,29 @@
 import React, { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
+import { FiCheckCircle } from "react-icons/fi";
 import UserService from "../../services/user-api-services/UserService";
+import Loader from "../../components/common/Loader";
 import "./InternLeaveRequest.css";
 
 const InternLeaveRequest = () => {
+  const { setHeaderMeta } = useOutletContext() || {};
   const { applyinternleave, takeinternleaverequests } = UserService();
 
   const [activeTab, setActiveTab] = useState("requests");
+
+  useEffect(() => {
+    if (!setHeaderMeta) return;
+    setHeaderMeta({
+      title: "Leave Request",
+      parentPath: "Leave Requests",
+      currentPath: activeTab === "apply" ? "Apply Leave" : "My Leave Requests",
+      onParentClick: () => {
+        setActiveTab("requests");
+        setError("");
+        setSuccess("");
+      },
+    });
+  }, [activeTab, setHeaderMeta]);
 
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,13 +147,13 @@ const InternLeaveRequest = () => {
         reason: formData.reason.trim(),
       });
 
-      setSuccess(response.message || "Leave request submitted successfully.");
+      const successMessage =
+        response.message || "Leave request submitted successfully.";
 
       resetForm();
-
       await fetchLeaveRequests();
-
       setActiveTab("requests");
+      setSuccess(successMessage);
     } catch (error) {
       console.error("Leave submission error:", error);
 
@@ -199,10 +217,6 @@ const InternLeaveRequest = () => {
         </button>
       </div>
 
-      {/* SUCCESS MESSAGE */}
-
-      {success && <div className="leave-success-message">{success}</div>}
-
       {/* ERROR MESSAGE */}
 
       {error && <div className="leave-error-message">{error}</div>}
@@ -212,7 +226,7 @@ const InternLeaveRequest = () => {
       {activeTab === "requests" && (
         <div className="intern-leave-content">
           {loading ? (
-            <div className="leave-empty-message">Loading leave requests...</div>
+            <Loader message="Loading leave requests..." minHeight="240px" />
           ) : leaveRequests.length === 0 ? (
             <div className="leave-empty-message">No leave requests found.</div>
           ) : (
@@ -431,6 +445,36 @@ const InternLeaveRequest = () => {
             </button>
           </div>
         </form>
+      )}
+
+      {/* ================= SUCCESS MODAL ================= */}
+      {success && (
+        <div
+          className="leave-modal-overlay"
+          onClick={() => setSuccess("")}
+        >
+          <div
+            className="leave-success-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="leave-success-modal-header">
+              <FiCheckCircle className="leave-success-modal-icon" />
+              <h3>Success</h3>
+            </div>
+
+            <p className="leave-success-modal-text">{success}</p>
+
+            <div className="leave-success-modal-footer">
+              <button
+                type="button"
+                className="leave-success-modal-ok"
+                onClick={() => setSuccess("")}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

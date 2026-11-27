@@ -6,9 +6,12 @@ import {
   MdVisibility
 } from "react-icons/md";
 import AdminService from "../../../services/admin-api-services/AdminService";
+import Loader from "../../../components/common/Loader";
+import { useToast } from "../../../components/common/Toast";
 import "./Attendancestudent.css";
 
 const Attendancestudent = () => {
+  const { showToast, ToastContainer } = useToast();
   const {
     takebranch,
     takebatches,
@@ -413,7 +416,7 @@ const Attendancestudent = () => {
 
   const attendanceStudentHandleCreate = async () => {
     if (!attendanceStudentBranch) {
-      alert("Please select a branch");
+      showToast("Please select a branch", "error");
       return;
     }
 
@@ -437,7 +440,7 @@ const Attendancestudent = () => {
         }))
       );
 
-      alert("Daily attendance initialized. You can adjust statuses and click 'Save Attendance'.");
+      showToast("Daily attendance initialized. You can adjust statuses and click 'Save Attendance'.", "success");
     } catch (error) {
       console.error(
         "Create attendance error:",
@@ -462,7 +465,7 @@ const Attendancestudent = () => {
 
   const attendanceStudentHandleSave = async () => {
     if (attendanceStudentStudents.length === 0) {
-      alert("No students available to mark attendance");
+      showToast("No students available to mark attendance", "error");
       return;
     }
 
@@ -471,7 +474,7 @@ const Attendancestudent = () => {
     );
 
     if (unmarkedStudents.length > 0) {
-      alert("Please mark attendance for all students (Present or Absent)");
+      showToast("Please mark attendance for all students (Present or Absent)", "error");
       return;
     }
 
@@ -502,7 +505,7 @@ const Attendancestudent = () => {
         }))
       );
 
-      alert("Attendance saved successfully");
+      showToast("Attendance saved successfully", "success");
 
       attendanceStudentFetchStudents();
     } catch (error) {
@@ -511,9 +514,10 @@ const Attendancestudent = () => {
         error.response?.data || error.message
       );
 
-      alert(
+      showToast(
         error.response?.data?.message ||
-          "Failed to save attendance"
+          "Failed to save attendance",
+        "error"
       );
     } finally {
       setAttendanceStudentSaving(false);
@@ -526,7 +530,7 @@ const Attendancestudent = () => {
 
   const attendanceStudentHandleViewCard = (student) => {
     console.log("Selected student:", student);
-    alert(`Intern: ${student.name}`);
+    showToast(`Intern: ${student.name}`, "info");
   };
 
   // ============================================
@@ -535,7 +539,7 @@ const Attendancestudent = () => {
 
   const attendanceStudentHandleExport = () => {
     if (attendanceStudentFilteredReports.length === 0) {
-      alert("No attendance records available to export");
+      showToast("No attendance records available to export", "error");
       return;
     }
 
@@ -548,6 +552,7 @@ const Attendancestudent = () => {
 
   return (
     <div className="attendance-student-page">
+      <ToastContainer />
       <div className="attendance-student-main">
 
         {/* TOP NAVIGATION */}
@@ -731,8 +736,8 @@ const Attendancestudent = () => {
                   <tbody>
                     {attendanceStudentLoading ? (
                       <tr>
-                        <td colSpan="6" className="attendance-student-empty">
-                          Loading students...
+                        <td colSpan="6" style={{ padding: "24px 0" }}>
+                          <Loader message="Loading students..." minHeight="220px" />
                         </td>
                       </tr>
                     ) : attendanceStudentStudents.length > 0 ? (
@@ -932,9 +937,7 @@ const Attendancestudent = () => {
 
             <div className="attendance-student-report-results">
               {attendanceStudentReportLoading ? (
-                <div className="attendance-student-no-records">
-                  <h4>Loading attendance reports...</h4>
-                </div>
+                <Loader message="Loading attendance reports..." minHeight="240px" />
               ) : attendanceStudentFilteredReports.length === 0 ? (
                 <div className="attendance-student-no-records">
                   <h4>

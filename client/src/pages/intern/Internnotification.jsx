@@ -2,11 +2,16 @@ import React, { useEffect, useState } from "react";
 import { LuUser, LuSearch, LuRotateCw, LuBell } from "react-icons/lu";
 import "./Internnotification.css";
 import UserService from "../../services/user-api-services/UserService";
+import Loader from "../../components/common/Loader";
+import { useToast } from "../../components/common/Toast";
+
 export const Internnotification = () => {
+  const { showToast, ToastContainer } = useToast();
   const {takeallnotification}=UserService()
   const [activeTab, setActiveTab] = useState("All");
   const [search, setSearch] = useState("");
   const [notifications,setNotification] = useState([]);
+  const [loading, setLoading] = useState(true);
  
   // Notification categories
   const tabs = [
@@ -55,10 +60,12 @@ export const Internnotification = () => {
   const handleRefresh = () => {
     setSearch("");
     setActiveTab("All");
+    fetchnotification();
   };
 
 const fetchnotification = async () => {
   try {
+    setLoading(true);
     const response = await takeallnotification();
 
     console.log("Notification API response:", response);
@@ -67,6 +74,9 @@ const fetchnotification = async () => {
   } catch (error) {
     console.error("Error fetching notifications:", error);
     setNotification([]);
+    showToast("Failed to load notifications", "error");
+  } finally {
+    setLoading(false);
   }
 };
   useEffect(()=>{
@@ -75,7 +85,7 @@ const fetchnotification = async () => {
 
   return (
     <div className="wk-card-container">
-    
+      <ToastContainer />
       {/* Main Content Body */}
       <div className="wk-card-body">
         {/* Filter and Search Bar */}
@@ -139,7 +149,9 @@ const fetchnotification = async () => {
 
         {/* Content Card */}
         <div className="int-notif-card">
-          {filteredNotifications.length > 0 ? (
+          {loading ? (
+            <Loader message="Loading notifications..." minHeight="260px" />
+          ) : filteredNotifications.length > 0 ? (
             <div className="int-notif-list">
               {filteredNotifications.map((item) => (
                 <div className="int-notif-item" key={item._id || item.id}>

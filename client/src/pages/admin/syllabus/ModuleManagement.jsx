@@ -4,8 +4,11 @@ import { LuUser, LuX, LuSearch } from 'react-icons/lu';
 import { HiOutlineArrowDownTray, HiOutlineArrowUpTray } from 'react-icons/hi2';
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import AdminService from '../../../services/admin-api-services/AdminService'; // Adjust path if needed
+import Loader from '../../../components/common/Loader';
+import { useToast } from '../../../components/common/Toast';
 
 const SyllabusManagement = () => {
+  const { showToast, ToastContainer } = useToast();
   const {
     takemodules,
     takecoursesformodules,
@@ -186,11 +189,12 @@ const SyllabusManagement = () => {
       const created = res?.data || res;
 
       setModules((prev) => [normalizeModule(created), ...prev]);
+      showToast('Module created successfully', 'success');
       resetForm();
       setActiveTab('modules');
     } catch (error) {
       console.error('Error creating module:', error);
-      alert(error?.response?.data?.message || 'Failed to create module');
+      showToast(error?.response?.data?.message || 'Failed to create module', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -216,11 +220,12 @@ const SyllabusManagement = () => {
       setModules((prev) =>
         prev.map((m) => (m.id === editingModuleId ? normalizeModule(updated) : m))
       );
+      showToast('Module updated successfully', 'success');
       resetForm();
       setActiveTab('modules');
     } catch (error) {
       console.error('Error updating module:', error);
-      alert(error?.response?.data?.message || 'Failed to update module');
+      showToast(error?.response?.data?.message || 'Failed to update module', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -230,12 +235,13 @@ const SyllabusManagement = () => {
     try {
       await removemodule(id);
       setModules((prev) => prev.filter((m) => m.id !== id));
+      showToast('Module deleted successfully', 'success');
       if (viewingModule && viewingModule.id === id) {
         setViewingModule(null);
       }
     } catch (error) {
       console.error('Error deleting module:', error);
-      alert(error?.response?.data?.message || 'Failed to delete module');
+      showToast(error?.response?.data?.message || 'Failed to delete module', 'error');
     }
   };
 
@@ -266,6 +272,7 @@ const SyllabusManagement = () => {
 
   return (
     <div className="syl-mgmt-container">
+      <ToastContainer />
       
 
       {/* Outer Toolbar */}
@@ -336,9 +343,7 @@ const SyllabusManagement = () => {
             </div>
 
             {loading ? (
-              <div className="syl-mgmt-content-area">
-                <p className="syl-mgmt-empty-message">Loading modules...</p>
-              </div>
+              <Loader message="Loading modules..." minHeight="320px" />
             ) : filteredModules.length === 0 ? (
               <div className="syl-mgmt-content-area">
                 <p className="syl-mgmt-empty-message">
